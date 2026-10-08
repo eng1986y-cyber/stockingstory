@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>관리자 - 상품 등록</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <h1><a href="index.html">🛍️ 심플몰</a> - 관리자</h1>
+  </header>
+
+  <main>
+    <h2 style="margin-bottom:16px;">상품 등록</h2>
+
+    <form id="product-form">
+      <input name="name" placeholder="상품명" required>
+      <input name="price" type="number" placeholder="가격 (숫자만)" required>
+      <textarea name="description" placeholder="상품 설명"></textarea>
+      <input name="main_image" placeholder="메인 이미지 URL (필수)" required>
+      <textarea name="detail_images" placeholder="상세 이미지 URL (한 줄에 하나씩)"></textarea>
+      <button type="submit">등록하기</button>
+    </form>
+
+    <p id="msg" style="margin-top:12px; font-weight:600;"></p>
+
+    <!-- 상품 목록 미리보기 (등록된 것들) -->
+    <h2 style="margin:32px 0 16px;">등록된 상품</h2>
+    <div id="admin-list" class="grid">로딩중...</div>
+  </main>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Supabase 설정 (index.html과 동일하게) -->
+  <script>
+    const SUPABASE_URL = 'https://xxxxx.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
+
+    const { createClient } = supabase;
+    const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  </script>
+
+  <!-- 등록 / 목록 / 삭제 로직 -->
+  <script>
+    const form = document.getElementById('product-form');
+    const msg = document.getElementById('msg');
+    const listEl = document.getElementById('admin-list');
+
+    // 상품 등록
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const detail_images = form.detail_images.value
+        .split('\n')
+        .map(s => s.trim())
+        .filter(Boolean);
+
+      msg.textContent = '등록 중...';
+
+      const { error } = await db.from('products').insert({
+        name: form.name.value.trim(),
+        price: Number(form.price.value),
+        description: form.description.value.trim(),
+        main_image: form.main_image.value.trim(),
+        detail_images,
+      });
+
+      if (error) {
+        msg.style.color = 'crimson';
+        msg.textContent = '❌ ' + error.message;
+      } else {
+        msg.style.color = 'green';
+        msg.textContent = '✅ 등록 완료!';
+        form.reset();
+        loadAdminList();
+      }
+    });
+
+    // 등록된 상품 목록 불러오기
+    async function loadAdminList() {
+      const { data, error } = await db
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        listEl.innerHTML = '<p>불러오기 실패</p>';
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        listEl.innerHTML = '<p>등록된 상품이 없습니다.</p>';
+        return;
+      }
+
+      listEl.innerHTML = data.map(p => `
+        <div class="card">
+          <a href="product.html?id=${p.id}">
+            <img src="${p.main_image}" alt="${p.name}" loading="lazy">
+          </a>
+          <div class="card-body">
+            <h3>${p.name}</h3>
+            <p class="price">${Number(p.price).toLocaleString()}원</p>
+            <button class="del-btn" data-id="${p.id}"
+              style="margin-top:8px; width:100%; padding:8px; background:#e53935; color:#fff; border:0; border-radius:6px; cursor:pointer;">
+              삭제
+            </button>
+          </div>
+        </div>
+      `).join('');
+
+      // 삭제 버튼 이벤트 연결
+      listEl.querySelectorAll('.del-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('정말 삭제할까요?')) return;
+          const id = btn.dataset.id;
+          const { error } = await db.from('products').delete().eq('id', id);
+          if (error) {
+            alert('삭제 실패: ' + error.message);
+          } else {
+            loadAdminList();
+          }
+        });
+      });
+    }
+
+    loadAdminList();
+  </script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>심플 쇼핑몰</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <h1><a href="index.html">🛍️ 심플몰</a></h1>
+  </header>
+
+  <main>
+    <div id="product-list" class="grid">로딩중...</div>
+  </main>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Supabase 설정 (여기 URL/KEY 수정) -->
+  <script>
+    const SUPABASE_URL = 'https://xxxxx.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
+
+    const { createClient } = supabase;
+    const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  </script>
+
+  <!-- 상품 목록 로직 -->
+  <script>
+    async function loadProducts() {
+      const list = document.getElementById('product-list');
+
+      const { data, error } = await db
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error(error);
+        list.innerHTML = '<p>상품을 불러올 수 없습니다.</p>';
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        list.innerHTML = '<p>등록된 상품이 없습니다.</p>';
+        return;
+      }
+
+      list.innerHTML = data.map(p => `
+        <a class="card" href="product.html?id=${p.id}">
+          <img src="${p.main_image}" alt="${p.name}" loading="lazy">
+          <div class="card-body">
+            <h3>${p.name}</h3>
+            <p class="price">${Number(p.price).toLocaleString()}원</p>
+          </div>
+        </a>
+      `).join('');
+    }
+
+    loadProducts();
+  </script>
+</body>
+</html>
