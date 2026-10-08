@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>상품 상세 - 심플몰</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <h1><a href="index.html">🛍️ 심플몰</a></h1>
+  </header>
+
+  <main id="product-detail">로딩중...</main>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Supabase 설정 (분리된 파일) -->
+  <script src="js/supabase.js"></script>
+
+  <!-- 상세 로직 -->
+  <script>
+    const params = new URLSearchParams(location.search);
+    const id = params.get('id');
+
+    async function loadProduct() {
+      const detailEl = document.getElementById('product-detail');
+
+      if (!id) {
+        detailEl.innerHTML = '<p>상품 ID가 없습니다.</p>';
+        return;
+      }
+
+      const { data, error } = await db
+        .from('products')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error || !data) {
+        detailEl.innerHTML = '<p>상품이 없습니다.</p>';
+        return;
+      }
+
+      const detailImgs = (data.detail_images || [])
+        .map(url => `<img src="${url}" alt="상세" loading="lazy">`)
+        .join('');
+
+      detailEl.innerHTML = `
+        <div class="detail-wrap">
+          <img class="main-img" src="${data.main_image}" alt="${data.name}">
+          <div class="info">
+            <h2>${data.name}</h2>
+            <p class="price">${Number(data.price).toLocaleString()}원</p>
+            <p class="desc">${data.description || ''}</p>
+            <button class="buy-btn">구매하기</button>
+          </div>
+        </div>
+        <div class="detail-images">${detailImgs}</div>
+      `;
+    }
+
+    loadProduct();
+  </script>
+</body>
+</html>

@@ -18,14 +18,8 @@
   <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Supabase 설정 (여기 URL/KEY 수정) -->
-  <script>
-    const SUPABASE_URL = 'https://xxxxx.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
-
-    const { createClient } = supabase;
-    const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  </script>
+  <!-- Supabase 설정 (분리된 파일) -->
+  <script src="js/supabase.js"></script>
 
   <!-- 상품 목록 로직 -->
   <script>
