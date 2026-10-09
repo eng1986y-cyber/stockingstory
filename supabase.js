@@ -5,3 +5,5 @@ const supabaseClient = supabase.createClient(
   supabaseUrl,
   supabaseKey
 );
+
+const db = supabaseClient;
