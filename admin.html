@@ -1,124 +1,6144 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>관리자 - 상품 등록</title>
-  <link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta charset="UTF-8">
+<title>관리자 페이지</title>
+
+<style>
+
+.ad-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:10px;
+}
+
+.ad-title{
+  font-size:20px;
+  font-weight:bold;
+}
+
+.add-btn{
+  height:32px;
+  padding:0 14px;
+  background:#4CAF50;
+  border-radius:6px;
+}
+
+.add-btn:hover{
+  background:#3da444;
+}
+
+.admin-buttons button{
+  width:100px;
+}
+
+#boardAdminList{
+  max-height:800px;
+  overflow:auto;
+}
+
+.board-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:40px;
+  margin-bottom:60px;
+  align-items:flex-start;
+}
+
+html,body{
+  height:100%;
+}
+
+body.login-mode{
+  overflow:hidden;
+}
+
+body{
+  margin:0;
+  padding:20px;
+  font-family:Arial;
+  background:#f5f5f5;
+}
+
+h2{
+  margin-top:0;
+}
+
+input{
+  width:99.8%;
+  height:36px;
+  margin-bottom:6px;
+  padding:0 8px;
+  box-sizing:border-box;
+}
+
+button{
+  height:36px;
+  padding:0 12px;
+  border:none;
+  background:#87CEEB;
+  color:#fff;
+  cursor:pointer;
+  border-radius:6px;
+}
+
+button:hover{ background:#6bbfe0; }
+
+.section{
+  margin:40px 0;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:10px;
+}
+
+.card{
+  background:#fff;
+  padding:10px;
+  border:1px solid #ddd;
+  border-radius:8px;
+  cursor:grab;
+  position:relative;
+}
+
+/* 게시판 카드 간격 */
+#boardAdminList .card{
+  margin-bottom:10px;
+}
+
+#boardAdminList{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.delete-btn{
+  position:absolute;
+  top:6px;
+  right:6px;
+  background:#ff5c5c;
+  height:24px;
+  font-size:12px;
+}
+
+
+
+.admin-container{
+  width:1400px;
+  margin:0 auto;
+}
+
+@media (max-width:1400px){
+  .admin-container{
+    width:100%;
+    padding:0 20px;
+  }
+}
+
+.top-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+}
+
+/* =========================
+   게시판 관리
+========================= */
+
+.board-box{
+  background:white;
+  border:1px solid #ddd;
+  border-radius:8px;
+  padding:15px;
+  height:650px;
+  min-height:650px;
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+/* 게시판 내용 제목 + 검색창 */
+.board-list-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-shrink:0;
+  margin-bottom:10px;
+}
+
+.board-list-header strong{
+  font-size:16px;
+  white-space:nowrap;
+}
+
+/* 게시판 검색창 */
+#boardSearch{
+  flex:1;
+  width:auto;
+  height:36px;
+  margin:0;
+  padding:0 10px;
+  box-sizing:border-box;
+  border:1px solid #ddd;
+  border-radius:6px;
+  outline:none;
+  background:#fff;
+}
+
+#boardSearch:focus{
+  border-color:#87CEEB;
+}
+
+/* 게시글 내용 영역 */
+.board-content{
+  flex:1;
+  min-height:0;
+  overflow:hidden;
+}
+
+/* 게시글 목록 */
+#boardAdminList{
+  height:100%;
+  max-height:none;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+/* 게시글 카드 */
+#boardAdminList .card{
+  margin-bottom:0;
+  flex-shrink:0;
+}
+
+/* 게시판 페이지 버튼 */
+.board-pagination{
+  height:36px;
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  margin-top:10px;
+}
+
+.board-pagination button{
+  background:white;
+  color:#333;
+  border:1px solid #ddd;
+  margin:0;
+}
+
+.board-pagination button.active{
+  background:#333;
+  color:#fff;
+  border-color:#333;
+}
+
+.board-box input,
+.board-box textarea{
+  width:100%;
+  box-sizing:border-box;
+}
+
+.edit-btn{
+  position:absolute;
+  top:6px;
+  right:60px;
+  height:24px;
+  font-size:12px;
+  background:#4CAF50;
+}
+
+/* 게시판 페이지 버튼 */
+#boardPagination button{
+  background:white;
+  color:#333;
+  border:1px solid #ddd;
+  margin:0 3px;
+}
+
+/* 현재 페이지 */
+#boardPagination button.active{
+  background:#87CEEB;
+  color:white;
+}
+
+.admin-buttons{
+  position:fixed;
+  left:50%;
+  margin-left:720px;   /* 사이트폭(1400px) 기준 오른쪽 */
+  top:50%;
+  transform:translateY(-50%);
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  z-index:999;
+}
+
+.top-btn{
+  height:40px;
+  background:#e5e5e5;
+  color:#333;
+}
+
+.admin-main{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+
+.admin-scroll{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  margin-top:15px;
+}
+
+#boardPagination{
+  margin-top:10px;
+  margin-bottom:40px;
+  text-align:center;
+}
+
+.board-box:last-child{
+  margin-bottom:40px;
+}
+
+#visitStats{
+  display:flex;
+  flex-wrap:nowrap;
+  overflow:hidden;
+  white-space:nowrap;
+}
+
+#visitStats div::after{
+  content:"|";
+  margin:0 10px;
+}
+
+#visitStats div:last-child::after{
+  content:"";
+}
+
+.search-with-logo{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.search-logo{
+  height:36px;
+  width:auto;
+  border-radius:6px;
+}
+
+.search-with-logo input[type="text"]{
+  flex:1;
+  margin-bottom:0;
+}
+
+#siteDescriptionInput{
+  margin:0;
+  resize:vertical;
+}
+
+textarea{
+  width:99.8%;
+  margin-bottom:6px;
+  padding:8px;
+  box-sizing:border-box;
+  font-family:Arial;
+}
+
+/* 관리자 정방형 슬라이드 */
+
+.admin-square-slider{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.admin-square-wrapper{
+  overflow:hidden;
+  width:100%;
+}
+
+#squareAdmin{
+  display:flex;
+  transition:transform .35s ease;
+  will-change:transform;
+}
+
+/* 한 페이지 */
+
+.square-page{
+  min-width:100%;
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:10px;
+  box-sizing:border-box;
+}
+
+/* 카드 높이 */
+
+.square-page .card{
+  min-height:210px;
+}
+
+/* 버튼 */
+
+.simple-slide-btn{
+  width:34px;
+  height:34px;
+  background:#e5e5e5;
+  color:#333;
+  border:none;
+  border-radius:6px;
+  font-size:14px;
+  flex-shrink:0;
+}
+
+.simple-slide-btn:hover{
+  background:#d5d5d5;
+}
+
+/* 태블릿 */
+
+@media (max-width:1200px){
+
+  .square-page{
+    grid-template-columns:repeat(4,1fr);
+  }
+
+}
+
+/* 모바일 */
+
+@media (max-width:768px){
+
+  .square-page{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+}
+
+/* =========================
+   주문서 관리
+========================= */
+
+.order-summary-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+/* =========================
+   주문서 검색
+========================= */
+
+.order-search-box{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:15px 0;
+  width:100%;
+  box-sizing:border-box;
+}
+
+.order-search-box input{
+  flex:1;
+  min-width:0;
+  height:42px;
+  padding:0 14px;
+  box-sizing:border-box;
+  border:1px solid #ccc;
+  border-radius:6px;
+  font-size:14px;
+  outline:none;
+  margin:0;
+}
+
+.order-search-box button{
+  flex:0 0 90px;
+  width:90px;
+  height:42px;
+  margin:0;
+  padding:0;
+  border:none;
+  border-radius:6px;
+  background:#87CEEB;
+  color:#fff;
+  cursor:pointer;
+  font-size:14px;
+  font-weight:600;
+  line-height:42px;
+  white-space:nowrap;
+  box-sizing:border-box;
+  vertical-align:middle;
+}
+
+.order-search-box input:focus{
+  border-color:#87CEEB;
+  box-shadow:0 0 0 2px rgba(135,206,235,.2);
+}
+
+.order-search-box button:hover{
+  background:#6bbfe0;
+}
+
+.order-search-result-text{
+  margin:0 0 10px;
+  font-size:13px;
+  color:#666;
+}
+
+
+/* =========================
+   모바일
+========================= */
+
+@media(max-width:768px){
+
+  .order-search-box{
+    display:flex;
+    flex-direction:row;
+    align-items:center;
+    gap:6px;
+  }
+
+  .order-search-box input{
+    flex:1 1 auto;
+    width:auto;
+    min-width:0;
+    height:42px;
+  }
+
+  .order-search-box button{
+    flex:0 0 72px;
+    width:72px;
+    height:42px;
+    padding:0;
+    font-size:13px;
+  }
+
+}
+
+.order-summary-item{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  background:#fff;
+  border:1px solid #ddd;
+  border-radius:8px;
+  padding:10px 12px;
+}
+
+.order-summary-text{
+  flex:1;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.order-detail-btn{
+  flex-shrink:0;
+  background:#87CEEB;
+  color:#fff;
+}
+
+/* =========================
+   주문 상세 팝업
+========================= */
+
+.order-detail-modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.35);
+  z-index:10000;
+
+  padding:20px;
+
+  box-sizing:border-box;
+
+  align-items:center;
+  justify-content:center;
+
+  overflow:hidden;
+}
+
+
+/* 팝업창 */
+
+.order-detail-box{
+
+  width:min(1200px, calc(100vw - 40px));
+
+  height:auto;
+
+  max-height:calc(100vh - 40px);
+
+  background:#fff;
+
+  border-radius:12px;
+
+  padding:20px 24px;
+
+  position:relative;
+
+  box-sizing:border-box;
+
+  overflow:hidden;
+
+}
+
+
+/* 제목 */
+
+.order-detail-box h2{
+
+  margin:0 0 15px;
+
+  font-size:22px;
+
+}
+
+
+/* 주문 상세 테이블 */
+
+.order-detail-table{
+
+  width:100%;
+
+  border-collapse:collapse;
+
+  table-layout:fixed;
+
+  margin-top:0;
+
+}
+
+
+/* 테이블 */
+
+.order-detail-table th,
+.order-detail-table td{
+
+  border-bottom:1px solid #eee;
+
+  padding:8px 10px;
+
+  text-align:left;
+
+  vertical-align:middle;
+
+  box-sizing:border-box;
+
+}
+
+
+/* 왼쪽 제목 */
+
+.order-detail-table th{
+
+  width:120px;
+
+  background:#fafafa;
+
+  font-size:13px;
+
+  white-space:nowrap;
+
+}
+
+
+/* 오른쪽 내용 */
+
+.order-detail-table td{
+
+  width:auto;
+
+}
+
+
+/* 입력창 */
+
+.order-detail-table input{
+
+  width:100% !important;
+
+  height:34px !important;
+
+  margin:0 !important;
+
+  box-sizing:border-box !important;
+
+}
+
+
+/* 텍스트영역 */
+
+.order-detail-table textarea{
+
+  width:100% !important;
+
+  min-height:70px !important;
+
+  max-height:70px;
+
+  margin:0 !important;
+
+  box-sizing:border-box !important;
+
+  resize:none;
+
+}
+
+
+/* 닫기 버튼 */
+
+.order-detail-close{
+
+  position:absolute;
+
+  right:15px;
+
+  top:12px;
+
+  width:34px;
+
+  height:34px;
+
+  padding:0;
+
+  background:#eee;
+
+  color:#333;
+
+  border-radius:6px;
+
+}
+
+
+/* =========================
+   2열 입력 영역
+========================= */
+
+.order-customer-grid{
+
+  display:grid;
+
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+
+  gap:8px 12px;
+
+  width:100%;
+
+}
+
+
+.order-input-group{
+
+  width:100%;
+
+  min-width:0;
+
+}
+
+
+.order-input-group label{
+
+  display:block;
+
+  font-size:12px;
+
+  font-weight:bold;
+
+  margin-bottom:4px;
+
+}
+
+
+/* 우편번호 + 배송주소 */
+
+.order-address-grid{
+
+  display:grid;
+
+  grid-template-columns:130px minmax(0, 1fr);
+
+  gap:12px;
+
+  width:100%;
+
+}
+
+
+/* 주문 상태 */
+
+.order-status-select{
+
+  height:34px;
+
+  min-width:180px;
+
+}
+
+
+/* 저장 버튼 */
+
+.order-status-save-btn{
+
+  height:36px;
+
+}
+
+.order-status-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  width:100%;
+}
+
+/* =========================
+   태블릿 자동 크기 조절
+   모바일은 제외
+========================= */
+@media(min-width:769px) and (max-width:1100px){
+
+  .order-detail-modal{
+    padding:20px;
+    box-sizing:border-box;
+  }
+
+  .order-detail-box{
+    width:min(94vw, 900px);
+    max-width:900px;
+    box-sizing:border-box;
+    padding:20px;
+    margin:auto;
+  }
+
+  .order-detail-table{
+    width:100%;
+    table-layout:fixed;
+  }
+
+  .order-detail-table th{
+    width:110px;
+    box-sizing:border-box;
+  }
+
+  .order-detail-table td{
+    width:auto;
+    min-width:0;
+    box-sizing:border-box;
+  }
+
+  .order-detail-table input,
+  .order-detail-table textarea,
+  .order-detail-table select{
+    max-width:100%;
+    box-sizing:border-box;
+  }
+
+  .order-customer-grid{
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    width:100%;
+  }
+
+  .order-address-grid{
+    grid-template-columns:110px minmax(0, 1fr);
+    width:100%;
+  }
+
+  .order-input-group{
+    min-width:0;
+  }
+}
+
+/* =========================
+   모바일
+========================= */
+
+@media(max-width:768px){
+
+  .order-detail-modal{
+
+    padding:10px;
+
+    overflow-y:auto;
+
+    align-items:flex-start;
+
+  }
+
+  .order-detail-box{
+
+    width:100%;
+
+    max-height:none;
+
+    padding:18px 12px;
+
+    overflow:visible;
+
+  }
+
+  .order-detail-table th{
+
+    width:85px;
+
+    font-size:12px;
+
+  }
+
+  .order-customer-grid{
+
+    grid-template-columns:1fr;
+
+  }
+
+  .order-address-grid{
+
+    grid-template-columns:100px minmax(0, 1fr);
+
+  }
+
+}
+
+/* 닫기 버튼 */
+
+.order-detail-close{
+  position:absolute;
+  right:15px;
+  top:12px;
+
+  background:#eee;
+  color:#333;
+}
+
+
+/* 주문 상세 테이블 */
+
+.order-detail-table{
+
+  width:100%;
+
+  border-collapse:collapse;
+
+  margin-top:15px;
+
+  table-layout:fixed;
+
+}
+
+
+.order-detail-table th,
+.order-detail-table td{
+
+  border-bottom:1px solid #eee;
+
+  padding:10px;
+
+  text-align:left;
+
+  vertical-align:top;
+
+  word-break:break-word;
+
+  overflow-wrap:anywhere;
+
+}
+
+
+.order-detail-table th{
+
+  width:140px;
+
+  background:#fafafa;
+
+}
+
+
+.order-detail-table td{
+
+  width:auto;
+
+}
+
+.order-detail-table{width:100%;border-collapse:collapse;margin-top:15px;}
+.order-detail-table th,.order-detail-table td{border-bottom:1px solid #eee;padding:10px;text-align:left;vertical-align:top;word-break:break-all;}
+.order-detail-table th{width:140px;background:#fafafa;}
+.order-status-select{height:36px;min-width:180px;padding:0 10px;border:1px solid #ccc;border-radius:6px;background:#fff;}
+
+.order-status-save-btn{
+  margin-left:0;
+  height:36px;
+  padding:0 14px;
+  border:0;
+  border-radius:6px;
+  background:#87CEEB;
+  color:#fff;
+  cursor:pointer;
+}
+
+.order-status-save-btn:hover{
+  opacity:.9;
+}
+
+@media(max-width:768px){
+  .order-status-select{
+    min-width:140px;
+    max-width:100%;
+  }
+
+  .order-status-save-btn{
+    margin-left:0;
+    padding:0 10px;
+  }
+}
+
+/* =========================
+   주문서 페이지네이션
+========================= */
+
+.order-pagination{
+
+  display:flex;
+
+  justify-content:center;
+
+  align-items:center;
+
+  gap:8px;
+
+  margin-top:20px;
+
+  flex-wrap:wrap;
+
+}
+
+.order-page-btn{
+
+  background:none;
+
+  border:none;
+
+  color:#000;
+
+  font-size:16px;
+
+  cursor:pointer;
+
+  padding:5px;
+
+}
+
+.order-list-fixed{
+
+  min-height:370px;
+
+}
+
+.order-delete-btn{
+
+  padding:8px 14px;
+
+  border:1px solid #ddd;
+
+  background:#fff;
+
+  color:#000;
+
+  cursor:pointer;
+
+  border-radius:4px;
+
+}
+
+/* =========================
+   주문서 관리 목록 테이블
+========================= */
+
+.order-table-wrap{
+  width:100%;
+  min-height:370px;
+  background:#fff;
+  border:1px solid #ddd;
+  border-radius:8px;
+  overflow:hidden;
+}
+
+.order-admin-table{
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+  table-layout:fixed;
+}
+
+.order-admin-table th{
+  background:#f5f5f5;
+  color:#111;
+  font-size:12px;
+  font-weight:bold;
+  padding:10px 5px;
+  border-bottom:1px solid #ddd;
+  text-align:center;
+  white-space:normal;
+  word-break:keep-all;
+}
+
+.order-admin-table td{
+  padding:8px 5px;
+  border-bottom:1px solid #eee;
+  text-align:center;
+  font-size:12px;
+  color:#111;
+  vertical-align:middle;
+  word-break:break-word;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.order-admin-table td{
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.order-admin-table tr:last-child td{
+  border-bottom:none;
+}
+
+.order-admin-table tr:hover{
+  background:#fafafa;
+}
+
+.order-address-cell{
+  text-align:left !important;
+}
+
+.order-email-cell{
+  font-size:12px;
+}
+
+.order-customs-cell{
+  font-size:12px;
+}
+
+.order-address-detail-cell{
+  font-size:12px;
+}
+
+.order-product-link-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height:30px;
+  padding:0 7px;
+  background:#fff;
+  color:#111;
+  border:1px solid #333;
+  border-radius:4px;
+  text-decoration:none;
+  white-space:nowrap;
+  cursor:pointer;
+  font-size:11px;
+}
+
+.order-product-link-btn:hover{
+  background:#f5f5f5;
+  color:#111;
+}
+
+/* 주문 상세보기 버튼 */
+.order-detail-btn{
+  background:#fff;
+  color:#111;
+  border:1px solid #333;
+  border-radius:5px;
+}
+
+/* 삭제 버튼 */
+.order-delete-btn{
+  background:#fff;
+  color:#111;
+  border:1px solid #333;
+}
+
+/* 주문자 정보 2열 정렬 */
+
+.order-customer-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:12px;
+  width:100%;
+}
+
+.order-input-group{
+  width:100%;
+  min-width:0;
+  box-sizing:border-box;
+}
+
+.order-input-group label{
+  display:block;
+  font-size:13px;
+  font-weight:bold;
+  margin-bottom:6px;
+}
+
+.order-input-group input{
+  display:block;
+  width:100% !important;
+  height:36px !important;
+  margin:0 !important;
+  box-sizing:border-box !important;
+}
+
+/* 우편번호 + 배송주소 */
+
+.order-address-grid{
+  display:grid;
+  grid-template-columns:140px minmax(0, 1fr);
+  gap:12px;
+  width:100%;
+}
+
+.order-address-grid .order-input-group{
+  width:100%;
+  min-width:0;
+}
+
+.order-address-grid input{
+  display:block;
+  width:100% !important;
+  height:36px !important;
+  margin:0 !important;
+  box-sizing:border-box !important;
+}
+
+/* ========================================
+   구매대행 추천 태그 관리
+======================================== */
+
+.purchase-tag-admin-form{
+
+  display:grid;
+
+  grid-template-columns:
+  1fr
+  2fr
+  120px;
+
+  gap:10px;
+
+  margin-bottom:15px;
+
+}
+
+
+.purchase-tag-admin-form input{
+
+  width:100%;
+
+  height:40px;
+
+  margin:0;
+
+  box-sizing:border-box;
+
+}
+
+
+.purchase-tag-admin-form button{
+
+  width:100%;
+
+  height:40px;
+
+  margin:0;
+
+}
+
+
+/* 태그 목록 */
+
+.purchase-tag-admin-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+
+  /* 5개 태그가 모두 보이도록 충분한 높이 */
+  height:390px;
+  min-height:390px;
+  box-sizing:border-box;
+
+  overflow:visible;
+}
+
+/* 태그 한줄 */
+
+.purchase-tag-admin-item{
+
+  display:grid;
+
+  grid-template-columns:
+  150px
+  1fr
+  80px
+  80px;
+
+  gap:10px;
+
+  align-items:center;
+
+  padding:12px;
+
+  background:#fff;
+
+  border:1px solid #ddd;
+
+  border-radius:8px;
+
+}
+
+
+/* 태그명 */
+
+.purchase-tag-admin-name{
+
+  font-weight:bold;
+
+  color:#111;
+
+}
+
+
+/* 링크 */
+
+.purchase-tag-admin-link{
+
+  font-size:13px;
+
+  color:#666;
+
+  overflow:hidden;
+
+  text-overflow:ellipsis;
+
+  white-space:nowrap;
+
+}
+
+
+/* 수정 버튼 */
+
+.purchase-tag-edit-btn{
+
+  background:#fff;
+
+  color:#111;
+
+  border:1px solid #333;
+
+}
+
+
+/* 삭제 버튼 */
+
+.purchase-tag-delete-btn{
+
+  background:#fff;
+
+  color:#111;
+
+  border:1px solid #333;
+
+}
+
+
+/* 모바일 */
+
+@media(max-width:768px){
+
+  .purchase-tag-admin-form{
+
+    grid-template-columns:1fr;
+
+  }
+
+
+  .purchase-tag-admin-item{
+
+    grid-template-columns:
+    1fr
+    auto
+    auto;
+
+  }
+
+
+  .purchase-tag-admin-link{
+
+    grid-column:1 / -1;
+
+  }
+
+}
+
+/* ========================================
+   구매대행 태그 페이지
+======================================== */
+
+.purchase-tag-pagination{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:6px;
+
+  margin-top:20px;
+
+  height:34px;
+  min-height:34px;
+  box-sizing:border-box;
+}
+
+.purchase-tag-pagination button{
+
+  min-width:34px;
+
+  height:34px;
+
+  padding:0 10px;
+
+  background:#fff;
+
+  color:#111;
+
+  border:1px solid #ddd;
+
+  border-radius:5px;
+
+  cursor:pointer;
+
+}
+
+
+.purchase-tag-pagination button:hover{
+
+  border-color:#333;
+
+}
+
+
+.purchase-tag-pagination button.active{
+
+  background:#333;
+
+  color:#fff;
+
+  border-color:#333;
+
+}
+
+</style>
+
 </head>
+
 <body>
-  <header>
-    <h1><a href="index.html">🛍️ 심플몰</a> - 관리자</h1>
-  </header>
 
-  <main>
-    <h2 style="margin-bottom:16px;">상품 등록</h2>
+<div id="loginPage" style="
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100vh;
+background:#f5f5f5;
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:9999;
+">
 
-    <form id="product-form">
-      <input name="name" placeholder="상품명" required>
-      <input name="price" type="number" placeholder="가격 (숫자만)" required>
-      <textarea name="description" placeholder="상품 설명"></textarea>
-      <input name="main_image" placeholder="메인 이미지 URL (필수)" required>
-      <textarea name="detail_images" placeholder="상세 이미지 URL (한 줄에 하나씩)"></textarea>
-      <button type="submit">등록하기</button>
-    </form>
+<div style="
+width:320px;
+background:white;
+padding:30px;
+border-radius:10px;
+box-shadow:0 10px 30px rgba(0,0,0,0.1);
+">
 
-    <p id="msg" style="margin-top:12px; font-weight:600;"></p>
+<h2 style="text-align:center;margin-bottom:20px;">
+관리자 로그인
+</h2>
 
-    <h2 style="margin:32px 0 16px;">등록된 상품</h2>
-    <div id="admin-list" class="grid">로딩중...</div>
-  </main>
+<input id="loginEmail" placeholder="이메일">
+<input id="loginPassword" type="password" placeholder="비밀번호">
 
-  <!-- Supabase CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<button onclick="adminLogin()" style="width:100%;margin-top:10px;">
+로그인
+</button>
 
-  <!-- Supabase 설정 (분리된 파일) -->
-  <script src="js/supabase.js"></script>
+</div>
+</div>
 
-  <!-- 등록 / 목록 / 삭제 로직 -->
-  <script>
-    const form = document.getElementById('product-form');
-    const msg = document.getElementById('msg');
-    const listEl = document.getElementById('admin-list');
+<div class="admin-container" id="adminPage" style="display:none;">
 
-    // 상품 등록
-    form.addEventListener('submit', async (e) => {
+<h1 style="text-align:center;">관리자 페이지</h1>
+
+<div class="section">
+<div class="ad-header">
+<div class="ad-title">방문자 통계</div>
+</div>
+
+<div class="grid">
+
+<div class="card" style="grid-column: span 3;">
+<div style="font-size:12px;color:#888;">오늘 방문자</div>
+<div id="todayVisit" style="font-size:22px;font-weight:bold;">0</div>
+</div>
+
+<div class="card" style="grid-column: span 3;">
+<div style="font-size:12px;color:#888;">전체 방문자</div>
+<div id="totalVisit" style="font-size:22px;font-weight:bold;">0</div>
+</div>
+
+<div class="card" style="grid-column: span 6;">
+<canvas id="visitChart" height="80"></canvas>
+</div>
+
+</div>
+</div>
+
+<div class="top-grid">
+
+<div class="section">
+<div class="ad-header">
+<div class="ad-title">상단 배너 / 로고</div>
+</div>
+
+<div class="grid">
+<div class="card" style="grid-column: span 6;">
+
+<input id="bannerImg" placeholder="배너 이미지 URL">
+
+<div style="display:flex;align-items:center;gap:6px;margin-top:5px;">
+
+  <input type="file"
+         accept="image/*"
+         onchange="uploadBannerImage(this)">
+
+  <button onclick="deleteBannerImage()"
+          style="background:#ff5c5c;margin:0;white-space:nowrap;">
+    배너 삭제
+  </button>
+
+</div>
+
+<input id="bannerLink"
+       placeholder="배너 클릭 링크">
+
+<hr style="margin:15px 0;">
+
+<div style="font-weight:bold;margin-bottom:5px;">
+사이트 로고
+</div>
+
+<input id="searchLogoInput" placeholder="로고 URL">
+
+<div style="display:flex;align-items:center;gap:6px;margin-top:5px;">
+
+  <input type="file"
+         accept="image/*"
+         onchange="uploadSearchLogo(this)">
+
+  <button onclick="deleteSearchLogo()"
+          style="background:#ff5c5c;margin:0;white-space:nowrap;">
+    로고 삭제
+  </button>
+
+</div>
+
+<img id="searchLogoPreview"
+     style="height:40px;margin-top:5px;">
+
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="ad-header">
+<div class="ad-title">소유자 정보 관리</div>
+</div>
+
+<div class="grid">
+<div class="card" style="grid-column: span 6;">
+
+<input id="ownerNameInput" placeholder="소유자 이름">
+<input id="ownerInstagram" placeholder="인스타그램 URL">
+<input id="ownerYoutube" placeholder="유튜브 URL">
+<input id="ownerBlog" placeholder="블로그 URL">
+
+<hr style="margin:15px 0;">
+
+<div style="font-weight:bold;margin-bottom:5px;">
+구글 애드센스
+</div>
+
+<textarea id="adsenseCode"
+placeholder="구글 애드센스 광고 코드 입력"
+style="height:123px; resize:none;"></textarea>
+
+</div>
+</div>
+</div>
+
+</div>
+
+<!-- ================== 구매대행 태그 관리 ================== -->
+
+<div class="section">
+
+  <div class="ad-header">
+
+  <div class="ad-title">
+    구매대행 추천 태그 관리
+  </div>
+
+</div>
+
+
+  <!-- 태그 추가 / 수정 -->
+
+  <div class="purchase-tag-admin-form">
+
+    <input
+      id="purchaseTagTitle"
+      type="text"
+      placeholder="태그명 입력 예: 원피스">
+
+
+    <input
+      id="purchaseTagLink"
+      type="url"
+      placeholder="연결할 상품 또는 사이트 링크">
+
+
+    <button
+      id="purchaseTagSaveBtn"
+      onclick="savePurchaseTag()">
+
+      태그 추가
+
+    </button>
+
+  </div>
+
+
+  <!-- 등록된 태그 목록 -->
+
+  <div
+    class="purchase-tag-admin-list"
+    id="purchaseTagAdminList">
+
+  </div>
+
+  <div
+  id="purchaseTagPagination"
+  class="purchase-tag-pagination">
+
+</div>
+
+</div>
+
+<!-- ================== 주문서 관리 ================== -->
+<div class="section">
+
+  <div class="ad-header">
+    <div class="ad-title">주문서 관리</div>
+  </div>
+
+
+  <!-- 주문 검색 -->
+  <div class="order-search-box">
+
+    <input
+      type="text"
+      id="orderSearchInput"
+      placeholder="주문번호 / 받는사람 이름 / 송장번호 검색"
+      autocomplete="off"
+    >
+
+    <button
+      type="button"
+      onclick="searchOrders()">
+      검색
+    </button>
+
+    <button
+      type="button"
+      onclick="resetOrderSearch()">
+      전체보기
+    </button>
+
+  </div>
+
+
+  <div
+    id="orderSearchResultText"
+    class="order-search-result-text">
+  </div>
+
+
+  <div
+    class="order-summary-list"
+    id="orderAdminList">
+  </div>
+
+</div>
+
+<div id="orderDetailModal" class="order-detail-modal">
+  <div class="order-detail-box">
+    <button class="order-detail-close" onclick="closeOrderDetail()">✕</button>
+    <h2>주문 상세내역</h2>
+    <div id="orderDetailContent"></div>
+  </div>
+</div>
+
+<!-- ================== 이미지 광고 ================== -->
+
+<div class="section">
+
+<div class="ad-header">
+<div class="ad-title">추천광고 관리 ( 400x210px )</div>
+<button class="add-btn" onclick="addImageAd()">+ 추가</button>
+</div>
+
+<div class="grid" id="imageAdmin"></div>
+
+</div>
+
+<!-- ================== 텍스트 광고 ================== -->
+
+<div class="section">
+
+<div class="ad-header">
+<div class="ad-title">추천사이트 관리</div>
+<button class="add-btn" onclick="addTextAd()">+ 추가</button>
+</div>
+
+<div class="grid" id="textAdmin"></div>
+
+</div>
+
+<!-- ================== 정방형 광고 ================== -->
+
+<div class="section">
+
+<div class="ad-header">
+<div class="ad-title">추천상품 관리 ( 400x400px )</div>
+<button class="add-btn" onclick="addSquareAd()">+ 추가</button>
+</div>
+
+<div class="admin-square-slider">
+
+<button class="simple-slide-btn"
+onclick="slideAdminSquare(-1)">
+◀
+</button>
+
+<div class="admin-square-wrapper">
+  <div id="squareAdmin"></div>
+</div>
+
+<button class="simple-slide-btn"
+onclick="slideAdminSquare(1)">
+▶
+</button>
+
+</div>
+
+<!-- ================== SNS 영상 광고 ================== -->
+
+<div class="section">
+
+<div class="ad-header">
+<div class="ad-title">SNS 추천영상 관리 ( 400x500px )</div>
+<button class="add-btn" onclick="addSnsVideo()">+ 추가</button>
+</div>
+
+<div class="grid" id="snsVideoAdmin"></div>
+
+</div>
+
+<!-- ================== 게시판 관리 ================== -->
+
+<div class="section board-section">
+<h2>게시판 관리</h2>
+
+<div class="board-grid">
+
+<!-- 왼쪽 : 글 작성 -->
+<div class="board-box">
+
+<select id="boardCategory" style="height:36px;margin-bottom:6px;width:100%;">
+<option value="소식">소식</option>
+<option value="공지">공지</option>
+<option value="이벤트">이벤트</option>
+<option value="중앙동">중앙동</option>
+<option value="남촌동">남촌동</option>
+<option value="신장동">신장동</option>
+<option value="세마동">세마동</option>
+<option value="초평동">초평동</option>
+<option value="대원동">대원동</option>
+<option value="불편신고">불편신고</option>
+</select>
+
+<input id="boardTitle" placeholder="글 제목">
+
+<textarea id="boardContent"
+placeholder="글 내용"
+style="width:100%; height:460px; margin-bottom:10px; padding:10px;"></textarea>
+
+<button onclick="addBoardPost()">글 추가</button>
+
+</div>
+
+<!-- 오른쪽 : 게시글 목록 -->
+<div class="board-box">
+
+  <div class="board-list-header">
+    <strong>게시판 내용</strong>
+
+    <input
+      type="text"
+      id="boardSearch"
+      placeholder="제목 또는 내용 검색"
+      oninput="searchBoardPosts()"
+    >
+  </div>
+
+  <div class="board-content">
+
+    <div id="boardAdminList"></div>
+
+  </div>
+
+  <div
+    id="boardPagination"
+    class="board-pagination">
+  </div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="admin-buttons">
+
+<div class="admin-main">
+
+<button class="save-btn" onclick="saveAll()">저장하기</button>
+
+<button onclick="adminLogout()" style="background:#ff5c5c;">
+로그아웃
+</button>
+
+</div>
+
+<div class="admin-scroll">
+
+<button class="top-btn" onclick="scrollToTop()">🔝</button>
+
+<button class="top-btn" onclick="scrollToBottom()">🔻</button>
+
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+
+<script>
+
+const imageAdmin=document.getElementById("imageAdmin");
+const textAdmin=document.getElementById("textAdmin");
+const squareAdmin=document.getElementById("squareAdmin");
+const snsVideoAdmin=document.getElementById("snsVideoAdmin");
+
+const bannerImg=document.getElementById("bannerImg");
+const bannerLink=document.getElementById("bannerLink");
+
+const ownerNameInput=document.getElementById("ownerNameInput");
+const ownerInstagram=document.getElementById("ownerInstagram");
+const ownerYoutube=document.getElementById("ownerYoutube");
+const ownerBlog=document.getElementById("ownerBlog");
+
+let dragItem=null;
+let deletedAdIds = new Set();
+
+/* ========================================
+   구매대행 추천 태그 관리
+======================================== */
+
+let purchaseTagData = [];
+
+let editingPurchaseTagId = null;
+
+
+/* 현재 페이지 */
+
+let currentPurchaseTagPage = 1;
+
+
+/* 페이지당 표시 개수 */
+
+const purchaseTagsPerPage = 5;
+
+
+/* 최대 페이지 번호 표시 */
+
+const maxPurchaseTagPages = 10;
+
+async function adminLogin(){
+
+  const email = document.getElementById("loginEmail").value;
+  const password = document.getElementById("loginPassword").value;
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if(error){
+    alert("로그인 실패: " + error.message);
+    return;
+  }
+
+  document.getElementById("loginPage").style.display="none";
+  document.getElementById("adminPage").style.display="block";
+
+  document.body.classList.remove("login-mode");
+
+  try{
+    await loadData();
+    await loadBoardData();
+    await loadVisitStats();
+    await loadOrders();
+    await loadPurchaseTags();
+  }catch(e){
+    console.error("로그인 후 로딩 에러:", e);
+  }
+}
+
+/* ================= 공통 카드 생성 ================= */
+
+function createCard(innerHTML, id=null){
+
+  const div=document.createElement("div");
+
+  div.className="card";
+
+  div.draggable=true;
+
+  /* 기존 DB 광고의 ID 보관 */
+  if(id !== null && id !== undefined){
+    div.dataset.id = id;
+  }
+
+  div.innerHTML=`
+    <button
+      class="delete-btn"
+      onclick="deleteAd(this)">
+      삭제
+    </button>
+
+    ${innerHTML}
+  `;
+
+  div.addEventListener(
+    "dragstart",
+    ()=>{
+      dragItem=div;
+    }
+  );
+
+  div.addEventListener(
+    "dragover",
+    e=>{
       e.preventDefault();
+    }
+  );
 
-      const detail_images = form.detail_images.value
-        .split('\n')
-        .map(s => s.trim())
-        .filter(Boolean);
+  div.addEventListener(
+    "drop",
+    function(){
 
-      msg.textContent = '등록 중...';
+      if(dragItem!==div){
 
-      const { error } = await db.from('products').insert({
-        name: form.name.value.trim(),
-        price: Number(form.price.value),
-        description: form.description.value.trim(),
-        main_image: form.main_image.value.trim(),
-        detail_images,
-      });
+        div.parentNode.insertBefore(
+          dragItem,
+          div.nextSibling
+        );
 
-      if (error) {
-        msg.style.color = 'crimson';
-        msg.textContent = '❌ ' + error.message;
-      } else {
-        msg.style.color = 'green';
-        msg.textContent = '✅ 등록 완료!';
-        form.reset();
-        loadAdminList();
       }
+
+    }
+  );
+
+  return div;
+}
+
+/* ================= 추가 ================= */
+
+function addImageAd(
+  main="",
+  img="",
+  link="",
+  video="",
+  id=null
+){
+
+  imageAdmin.appendChild(
+
+    createCard(`
+
+      <input
+        value="${main}"
+        placeholder="메인 명칭">
+
+      <input
+        value="${img}"
+        placeholder="이미지 URL">
+
+      <input
+        type="file"
+        accept="image/*"
+        onchange="uploadImage(this)">
+
+      <input
+        value="${link}"
+        placeholder="클릭 링크">
+
+      <input
+        value="${video}"
+        placeholder="영상 링크">
+
+    `, id)
+
+  );
+
+}
+
+function addTextAd(
+  title="",
+  link="",
+  fallback1="",
+  fallback2="",
+  id=null
+){
+
+  textAdmin.appendChild(
+
+    createCard(`
+
+      <input
+        value="${title}"
+        placeholder="추천사이트 이름">
+
+      <input
+        value="${link}"
+        placeholder="기본 주소">
+
+      <input
+        value="${fallback1}"
+        placeholder="예비 주소 1">
+
+      <input
+        value="${fallback2}"
+        placeholder="예비 주소 2">
+
+    `, id)
+
+  );
+
+}
+
+function addSquareAd(
+  main="",
+  img="",
+  link="",
+  price="",
+  detail="",
+  id=null
+){
+
+  const card = createCard(`
+
+      <input
+        value="${main}"
+        placeholder="메인 명칭">
+
+      <input
+        value="${img}"
+        placeholder="이미지 URL">
+
+      <input
+        type="file"
+        accept="image/*"
+        onchange="uploadImage(this)">
+
+      <input
+        value="${link}"
+        placeholder="클릭 링크">
+
+      <input
+        value="${price}"
+        placeholder="상품가격"
+        inputmode="decimal">
+
+      <input
+        value="${detail}"
+        placeholder="상품상세 이미지 링크">
+
+    `, id);
+
+  const oldCards =
+    [...squareAdmin.querySelectorAll(".card")];
+
+  const allCards =
+    [card, ...oldCards];
+
+  rebuildSquarePages(allCards);
+
+}
+
+function rebuildSquarePages(cards = null){
+
+  if(!cards){
+    cards = [...squareAdmin.querySelectorAll(".card")];
+  }
+
+  squareAdmin.innerHTML = "";
+
+  const pageSize = 18;
+
+  for(let i=0; i<cards.length; i+=pageSize){
+
+    const page = document.createElement("div");
+    page.className = "square-page";
+
+    cards.slice(i, i+pageSize).forEach(card=>{
+      page.appendChild(card);
     });
 
-    // 등록된 상품 목록 불러오기
-    async function loadAdminList() {
-      const { data, error } = await db
-        .from('products')
-        .select('*')
-        .order('created_at', { ascending: false });
+    squareAdmin.appendChild(page);
 
-      if (error) {
-        listEl.innerHTML = '<p>불러오기 실패</p>';
-        return;
+  }
+
+  adminSquarePage = 0;
+
+  squareAdmin.style.transform = "translateX(0)";
+}
+
+function addSnsVideo(
+  title="",
+  thumb="",
+  video="",
+  link="",
+  id=null
+){
+
+  snsVideoAdmin.appendChild(
+
+    createCard(`
+
+      <input
+        value="${title}"
+        placeholder="영상 제목">
+
+      <input
+        value="${thumb}"
+        placeholder="썸네일 이미지 URL">
+
+      <input
+        type="file"
+        accept="image/*"
+        onchange="uploadImage(this)">
+
+      <input
+        value="${video}"
+        placeholder="영상 링크">
+
+      <input
+        value="${link}"
+        placeholder="클릭 링크">
+
+    `, id)
+
+  );
+
+}
+
+/* ================= 불러오기 ================= */
+
+async function loadData(){
+
+imageAdmin.innerHTML="";
+textAdmin.innerHTML="";
+squareAdmin.innerHTML="";
+snsVideoAdmin.innerHTML="";
+
+const { data: ads } = await supabaseClient
+  .from("ads")
+  .select("*")
+  .order("sort",{ascending:true});
+
+const squareCards = [];
+
+ads.forEach(ad=>{
+
+  if(ad.type==="image"){
+    addImageAd(
+    ad.main_title,
+    ad.image_url,
+    ad.link_url,
+    ad.video_url,
+    ad.id
+  );
+  }
+
+  if(ad.type==="text"){
+  addTextAd(
+  ad.title,
+  ad.link_url,
+  ad.fallback_url_1,
+  ad.fallback_url_2,
+  ad.id
+);
+}
+
+if(ad.type==="square"){
+
+const card = createCard(`
+    <input value="${ad.main_title || ""}" placeholder="메인 명칭">
+
+    <input value="${ad.image_url || ""}" placeholder="이미지 URL">
+
+    <input type="file" accept="image/*"
+      onchange="uploadImage(this)">
+
+    <input value="${ad.link_url || ""}" placeholder="클릭 링크">
+
+    <input
+      value="${ad.product_price || ""}"
+      placeholder="상품가격"
+      inputmode="decimal">
+
+    <input value="${ad.detail_url || ""}" placeholder="상품상세 이미지 링크">
+  `, ad.id);
+
+  squareCards.push(card);
+
+}
+
+if(ad.type==="sns"){
+  addSnsVideo(
+  ad.title,
+  ad.image_url,
+  ad.video_url,
+  ad.link_url,
+  ad.id
+);
+}
+
+});
+
+/* 정방형광고 한번만 생성 */
+rebuildSquarePages(squareCards);
+
+const { data: settings } = await supabaseClient
+  .from("site_settings")
+  .select("*")
+  .limit(1);
+
+if(settings && settings.length>0){
+
+  const s=settings[0];
+
+  bannerImg.value=s.banner_img||"";
+  bannerLink.value=s.banner_link||"";
+
+  ownerNameInput.value=s.owner_name||"";
+  ownerInstagram.value=s.owner_instagram||"";
+  ownerYoutube.value=s.owner_youtube||"";
+  ownerBlog.value=s.owner_blog||"";
+
+  const logoInput = document.getElementById("searchLogoInput");
+  if(logoInput) logoInput.value = s.search_logo || "";
+
+  const logoPreview = document.getElementById("searchLogoPreview");
+  if(logoPreview) logoPreview.src = s.search_logo || "";
+
+  const adsense = document.getElementById("adsenseCode");
+  if(adsense) adsense.value = s.adsense_code || "";
+
+}
+}
+
+async function saveAll(){
+
+  try{
+
+    /* =====================================================
+       1. 화면에서 모든 광고 카드 수집
+    ===================================================== */
+
+    const imageCards =
+      [...imageAdmin.querySelectorAll(".card")];
+
+    const textCards =
+      [...textAdmin.querySelectorAll(".card")];
+
+    const squareCards =
+      [...squareAdmin.querySelectorAll(".card")];
+
+    const snsCards =
+      [...snsVideoAdmin.querySelectorAll(".card")];
+
+
+    /* =====================================================
+       2. 먼저 입력값 검사
+       ※ 여기서는 DB를 아직 건드리지 않음
+    ===================================================== */
+
+    for(const card of imageCards){
+
+      const i =
+        card.querySelectorAll("input");
+
+      const imageUrl =
+        i[1].value.trim();
+
+      const videoUrl =
+        i[4].value.trim();
+
+      if(imageUrl && videoUrl){
+
+        if(
+          !/^https?:\/\//i.test(videoUrl)
+        ){
+
+          alert(
+            "이미지 광고의 영상 링크가 올바르지 않습니다.\n\n" +
+            "http:// 또는 https:// 주소를 입력해주세요."
+          );
+
+          return;
+        }
+
       }
 
-      if (!data || data.length === 0) {
-        listEl.innerHTML = '<p>등록된 상품이 없습니다.</p>';
-        return;
-      }
-
-      listEl.innerHTML = data.map(p => `
-        <div class="card">
-          <a href="product.html?id=${p.id}">
-            <img src="${p.main_image}" alt="${p.name}" loading="lazy">
-          </a>
-          <div class="card-body">
-            <h3>${p.name}</h3>
-            <p class="price">${Number(p.price).toLocaleString()}원</p>
-            <button class="del-btn" data-id="${p.id}"
-              style="margin-top:8px; width:100%; padding:8px; background:#e53935; color:#fff; border:0; border-radius:6px; cursor:pointer;">
-              삭제
-            </button>
-          </div>
-        </div>
-      `).join('');
-
-      listEl.querySelectorAll('.del-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          if (!confirm('정말 삭제할까요?')) return;
-          const id = btn.dataset.id;
-          const { error } = await db.from('products').delete().eq('id', id);
-          if (error) {
-            alert('삭제 실패: ' + error.message);
-          } else {
-            loadAdminList();
-          }
-        });
-      });
     }
 
-    loadAdminList();
-  </script>
+
+    for(const card of snsCards){
+
+      const i =
+        card.querySelectorAll("input");
+
+      const thumbUrl =
+        i[1].value.trim();
+
+      const videoUrl =
+        i[3].value.trim();
+
+      if(thumbUrl && videoUrl){
+
+        if(
+          !/^https?:\/\//i.test(videoUrl)
+        ){
+
+          alert(
+            "추천영상의 영상 링크가 올바르지 않습니다.\n\n" +
+            "http:// 또는 https:// 주소를 입력해주세요."
+          );
+
+          return;
+        }
+
+      }
+
+    }
+
+
+    /* =====================================================
+       3. 삭제된 기존 광고만 DELETE
+    ===================================================== */
+
+    for(const id of deletedAdIds){
+
+      const { data: deletedAd, error } =
+        await supabaseClient
+          .from("ads")
+          .delete()
+          .eq("id", id)
+          .select()
+          .maybeSingle();
+
+      if(error){
+
+        console.error(
+          "광고 삭제 오류:",
+          error
+        );
+
+        alert(
+          "광고 삭제에 실패했습니다.\n\n" +
+          error.message
+        );
+
+        return;
+      }
+
+    }
+
+
+    /* =====================================================
+       4. 이미지 광고
+       기존 ID → UPDATE
+       ID 없음 → INSERT
+    ===================================================== */
+
+    for(
+      const [index, card]
+      of imageCards.entries()
+    ){
+
+      const i =
+        card.querySelectorAll("input");
+
+      const main =
+        i[0].value.trim();
+
+      const imageUrl =
+        i[1].value.trim();
+
+      const link =
+        i[3].value.trim();
+
+      const video =
+        i[4].value.trim();
+
+      if(!imageUrl){
+        continue;
+      }
+
+      const payload = {
+
+        type: "image",
+
+        main_title: main,
+
+        image_url: imageUrl,
+
+        link_url: link,
+
+        video_url: video,
+
+        sort: index
+
+      };
+
+      const id =
+        card.dataset.id;
+
+
+      let result;
+
+
+      if(id){
+
+        result =
+          await supabaseClient
+            .from("ads")
+            .update(payload)
+            .eq("id", Number(id));
+
+      }else{
+
+        result =
+          await supabaseClient
+            .from("ads")
+            .insert([payload]);
+
+      }
+
+
+      if(result.error){
+
+        console.error(
+          "이미지 광고 저장 오류:",
+          result.error
+        );
+
+        alert(
+          "이미지 광고 저장 실패:\n\n" +
+          result.error.message
+        );
+
+        return;
+      }
+
+    }
+
+
+    /* =====================================================
+       5. 텍스트 광고
+    ===================================================== */
+
+    for(
+      const [index, card]
+      of textCards.entries()
+    ){
+
+      const i =
+        card.querySelectorAll("input");
+
+      const title =
+        i[0].value.trim();
+
+      if(!title){
+        continue;
+      }
+
+      const payload = {
+
+        type: "text",
+
+        title: title,
+
+        link_url:
+          i[1].value.trim(),
+
+        fallback_url_1:
+          i[2].value.trim(),
+
+        fallback_url_2:
+          i[3].value.trim(),
+
+        sort: index
+
+      };
+
+      const id =
+        card.dataset.id;
+
+
+      let result;
+
+
+      if(id){
+
+        result =
+          await supabaseClient
+            .from("ads")
+            .update(payload)
+            .eq("id", Number(id));
+
+      }else{
+
+        result =
+          await supabaseClient
+            .from("ads")
+            .insert([payload]);
+
+      }
+
+
+      if(result.error){
+
+        console.error(
+          "텍스트 광고 저장 오류:",
+          result.error
+        );
+
+        alert(
+          "텍스트 광고 저장 실패:\n\n" +
+          result.error.message
+        );
+
+        return;
+      }
+
+    }
+
+
+    /* =====================================================
+       6. 정방형 광고
+    ===================================================== */
+
+    for(
+      const [index, card]
+      of squareCards.entries()
+    ){
+
+      const i =
+        card.querySelectorAll("input");
+
+      const imageUrl =
+        i[1].value.trim();
+
+      if(!imageUrl){
+        continue;
+      }
+
+      const payload = {
+
+        type: "square",
+
+        main_title:
+          i[0].value.trim(),
+
+        image_url:
+          imageUrl,
+
+        link_url:
+          i[3].value.trim(),
+
+        product_price:
+          i[4].value.trim(),
+
+        detail_url:
+          i[5].value.trim(),
+
+        sort: index
+
+      };
+
+      const id =
+        card.dataset.id;
+
+
+      let result;
+
+
+      if(id){
+
+        result =
+          await supabaseClient
+            .from("ads")
+            .update(payload)
+            .eq("id", Number(id));
+
+      }else{
+
+        result =
+          await supabaseClient
+            .from("ads")
+            .insert([payload]);
+
+      }
+
+
+      if(result.error){
+
+        console.error(
+          "추천상품 저장 오류:",
+          result.error
+        );
+
+        alert(
+          "추천상품 저장 실패:\n\n" +
+          result.error.message
+        );
+
+        return;
+      }
+
+    }
+
+
+    /* =====================================================
+       7. SNS 영상 광고
+    ===================================================== */
+
+    for(
+      const [index, card]
+      of snsCards.entries()
+    ){
+
+      const i =
+        card.querySelectorAll("input");
+
+      const thumb =
+        i[1].value.trim();
+
+      if(!thumb){
+        continue;
+      }
+
+      const payload = {
+
+        type: "sns",
+
+        title:
+          i[0].value.trim(),
+
+        image_url:
+          thumb,
+
+        video_url:
+          i[3].value.trim(),
+
+        link_url:
+          i[4].value.trim(),
+
+        sort: index
+
+      };
+
+      const id =
+        card.dataset.id;
+
+
+      let result;
+
+
+      if(id){
+
+        result =
+          await supabaseClient
+            .from("ads")
+            .update(payload)
+            .eq("id", Number(id));
+
+      }else{
+
+        result =
+          await supabaseClient
+            .from("ads")
+            .insert([payload]);
+
+      }
+
+
+      if(result.error){
+
+        console.error(
+          "추천영상 저장 오류:",
+          result.error
+        );
+
+        alert(
+          "추천영상 저장 실패:\n\n" +
+          result.error.message
+        );
+
+        return;
+      }
+
+    }
+
+
+    /* =====================================================
+       8. 삭제 목록 초기화
+    ===================================================== */
+
+    deletedAdIds.clear();
+
+
+    /* =====================================================
+       9. 사이트 설정 저장
+       기존 기능 그대로 유지
+    ===================================================== */
+
+    const payload = {
+
+      banner_img:
+        bannerImg.value.trim(),
+
+      banner_link:
+        bannerLink.value.trim(),
+
+      owner_name:
+        ownerNameInput.value.trim(),
+
+      owner_instagram:
+        ownerInstagram.value.trim(),
+
+      owner_youtube:
+        ownerYoutube.value.trim(),
+
+      owner_blog:
+        ownerBlog.value.trim(),
+
+      search_logo:
+        document
+          .getElementById("searchLogoInput")
+          .value
+          .trim(),
+
+      adsense_code:
+        document
+          .getElementById("adsenseCode")
+          .value
+          .trim()
+
+    };
+
+
+    const {
+      error: settingsError
+    } =
+      await supabaseClient
+        .from("site_settings")
+        .upsert(
+          {
+            id: 1,
+            ...payload
+          },
+          {
+            onConflict: "id"
+          }
+        );
+
+
+    if(settingsError){
+
+      console.error(
+        "사이트 설정 저장 오류:",
+        settingsError
+      );
+
+      alert(
+        "사이트 설정 저장 실패:\n\n" +
+        settingsError.message
+      );
+
+      return;
+    }
+
+
+    /* =====================================================
+       10. 다시 DB에서 광고를 불러와 ID 동기화
+    ===================================================== */
+
+    await loadData();
+
+
+    alert(
+      "저장 완료 ✅\n\n" +
+      "변경된 광고만 저장되었습니다."
+    );
+
+
+  }catch(error){
+
+    console.error(
+      "전체 저장 오류:",
+      error
+    );
+
+    alert(
+      "저장 중 예상하지 못한 오류가 발생했습니다.\n\n" +
+      error.message
+    );
+
+  }
+
+}
+
+/* ================= 주문서 관리 ================= */
+let orderData = [];
+let allOrderData = [];
+
+let currentOrderId = null;
+
+let currentOrderPage = 1;
+
+const ordersPerPage = 5;
+
+const maxOrderPages = 10;
+
+function escapeOrderHTML(v){
+  return String(v ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+async function loadOrders(){
+
+  const list =
+    document.getElementById("orderAdminList");
+
+  if(!list) return;
+
+
+  const {data,error} =
+    await supabaseClient
+      .from("orders")
+      .select("*")
+      .order("id",{ascending:false});
+
+
+  if(error){
+
+    console.error(
+      "주문서 불러오기 오류:",
+      error
+    );
+
+    list.innerHTML =
+      '<div class="card">주문서를 불러오지 못했습니다.</div>';
+
+    return;
+
+  }
+
+
+  allOrderData = data || [];
+  orderData = [...allOrderData];
+
+
+  if(!orderData.length){
+
+    list.innerHTML =
+      '<div class="card">접수된 주문서가 없습니다.</div>';
+
+    return;
+
+  }
+
+
+  renderOrderPage();
+
+}
+
+/* =========================
+   주문서 검색
+   주문번호 / 받는사람 / 송장번호
+========================= */
+
+function searchOrders(){
+
+  const input =
+    document.getElementById(
+      "orderSearchInput"
+    );
+
+  const resultText =
+    document.getElementById(
+      "orderSearchResultText"
+    );
+
+
+  if(!input){
+    return;
+  }
+
+
+  const keyword =
+    input.value
+      .trim()
+      .toLowerCase();
+
+
+  /* 검색어가 없으면 전체보기 */
+
+  if(!keyword){
+
+    resetOrderSearch();
+
+    return;
+
+  }
+
+
+  orderData =
+    allOrderData.filter(order => {
+
+      const orderNumber =
+        String(
+          order.order_number || ""
+        ).toLowerCase();
+
+
+      const receiverName =
+        String(
+          order.receiver_name || ""
+        ).toLowerCase();
+
+
+      const trackingNumber =
+        String(
+          order.tracking_number || ""
+        ).toLowerCase();
+
+
+      return (
+
+        orderNumber.includes(keyword) ||
+
+        receiverName.includes(keyword) ||
+
+        trackingNumber.includes(keyword)
+
+      );
+
+    });
+
+
+  currentOrderPage = 1;
+
+
+  if(resultText){
+
+    resultText.textContent =
+      `검색 결과: ${orderData.length}건`;
+
+  }
+
+
+  renderOrderPage();
+
+}
+
+
+/* =========================
+   주문서 전체보기
+========================= */
+
+function resetOrderSearch(){
+
+  const input =
+    document.getElementById(
+      "orderSearchInput"
+    );
+
+  const resultText =
+    document.getElementById(
+      "orderSearchResultText"
+    );
+
+
+  if(input){
+
+    input.value = "";
+
+  }
+
+
+  orderData =
+    [...allOrderData];
+
+
+  currentOrderPage = 1;
+
+
+  if(resultText){
+
+    resultText.textContent = "";
+
+  }
+
+
+  renderOrderPage();
+
+}
+
+document.addEventListener(
+  "keydown",
+  function(e){
+
+    const input =
+      document.getElementById(
+        "orderSearchInput"
+      );
+
+
+    if(
+      input &&
+      document.activeElement === input &&
+      e.key === "Enter"
+    ){
+
+      e.preventDefault();
+
+      searchOrders();
+
+    }
+
+  }
+);
+
+function renderOrderPage(){
+
+  const list =
+    document.getElementById("orderAdminList");
+
+
+  const totalPages =
+    Math.min(
+      Math.ceil(
+        orderData.length /
+        ordersPerPage
+      ),
+      maxOrderPages
+    );
+
+
+  if(currentOrderPage > totalPages){
+    currentOrderPage = totalPages;
+  }
+
+
+  const startIndex =
+    (currentOrderPage - 1) *
+    ordersPerPage;
+
+
+  const endIndex =
+    startIndex +
+    ordersPerPage;
+
+
+  const pageOrders =
+    orderData.slice(
+      startIndex,
+      endIndex
+    );
+
+
+  list.innerHTML = `
+
+    <div class="order-table-wrap">
+
+      <table class="order-admin-table">
+
+        <thead>
+
+          <tr>
+
+            <th>주문번호</th>
+
+            <th>받는사람 이름</th>
+
+            <th>연락처</th>
+
+            <th>이메일</th>
+
+            <th>개인통관고유번호</th>
+
+            <th>배송주소</th>
+
+            <th>상세주소</th>
+
+            <th>택배사</th>
+
+            <th>송장번호</th>
+
+            <th>상품링크</th>
+
+            <th>상세</th>
+
+            <th>삭제</th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          ${pageOrders.map((o,i)=>{
+
+            const realIndex =
+              startIndex + i;
+
+
+            const productUrl =
+              o.product_url || "";
+
+
+            return `
+
+              <tr>
+
+                <!-- 주문번호 -->
+                <td>
+                  ${escapeOrderHTML(
+                    o.order_number || "-"
+                  )}
+                </td>
+
+
+                <!-- 받는사람 이름 -->
+                <td>
+                  ${escapeOrderHTML(
+                    o.receiver_name || "-"
+                  )}
+                </td>
+
+
+                <!-- 연락처 -->
+                <td>
+                  ${escapeOrderHTML(
+                    o.receiver_phone || "-"
+                  )}
+                </td>
+
+
+                <!-- 이메일 -->
+                <td class="order-email-cell">
+                  ${escapeOrderHTML(
+                    o.customer_email || "-"
+                  )}
+                </td>
+
+
+                <!-- 개인통관고유번호 -->
+                <td class="order-customs-cell">
+                  ${escapeOrderHTML(
+                    o.customs_number || "-"
+                  )}
+                </td>
+
+
+                <!-- 배송주소 -->
+                <td class="order-address-cell">
+                  ${escapeOrderHTML(
+                    o.address || "-"
+                  )}
+                </td>
+
+
+                <!-- 상세주소 -->
+                <td class="order-address-detail-cell">
+                  ${escapeOrderHTML(
+                    o.address_detail || "-"
+                  )}
+                </td>
+
+
+                <!-- 택배사 -->
+                <td>
+                  ${escapeOrderHTML(
+                    o.courier_company || "-"
+                  )}
+                </td>
+
+
+                <!-- 송장번호 -->
+                <td>
+                  ${escapeOrderHTML(
+                    o.tracking_number || "-"
+                  )}
+                </td>
+
+
+                <!-- 상품링크 -->
+                <td>
+
+                  ${
+                    productUrl
+                    ?
+                    `
+                    <a
+                      href="${escapeOrderHTML(productUrl)}"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="order-product-link-btn">
+
+                      상품 바로가기
+
+                    </a>
+                    `
+                    :
+                    "-"
+                  }
+
+                </td>
+
+
+                <!-- 상세보기 -->
+                <td>
+
+                  <button
+                    class="order-detail-btn"
+                    onclick="openOrderDetail(${realIndex})">
+
+                    상세보기
+
+                  </button>
+
+                </td>
+
+
+                <!-- 삭제 -->
+                <td>
+
+                  <button
+                    class="order-delete-btn"
+                    onclick="deleteOrder(${realIndex})">
+
+                    삭제
+
+                  </button>
+
+                </td>
+
+              </tr>
+
+            `;
+
+          }).join("")}
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    ${renderOrderPagination(totalPages)}
+
+  `;
+
+}
+
+function renderOrderPagination(totalPages){
+
+  if(totalPages <= 1){
+
+    return "";
+
+  }
+
+
+  let html =
+
+    `
+    <div class="order-pagination">
+    `;
+
+
+  for(
+
+    let page = 1;
+
+    page <= totalPages;
+
+    page++
+
+  ){
+
+    html += `
+
+      <button
+
+        class="order-page-btn
+        ${
+          page === currentOrderPage
+            ? "active"
+            : ""
+        }"
+
+        onclick="changeOrderPage(${page})">
+
+        ${page}
+
+      </button>
+
+    `;
+
+  }
+
+
+  html +=
+
+    `
+    </div>
+    `;
+
+
+  return html;
+
+}
+
+function changeOrderPage(page){
+
+  currentOrderPage = page;
+
+  renderOrderPage();
+
+}
+
+function openOrderDetail(index){
+
+  const o = orderData[index];
+
+  if(!o) return;
+
+  currentOrderId = o.id;
+
+  const statusOptions = [
+    "주문접수",
+    "상품확인중",
+    "견적안내",
+    "결제대기",
+    "결제완료",
+    "해외배송중",
+    "국내배송중",
+    "배송완료",
+    "주문취소"
+  ];
+
+  const currentStatus = o.status || "주문접수";
+
+
+  function inputField(id, value="", type="text", placeholder=""){
+    return `
+      <input
+        type="${type}"
+        id="${id}"
+        value="${escapeOrderHTML(value || "")}"
+        placeholder="${placeholder}">
+    `;
+  }
+
+
+  function textareaField(id, value="", placeholder=""){
+    return `
+      <textarea
+        id="${id}"
+        placeholder="${placeholder}"
+        style="
+          width:100%;
+          min-height:100px;
+          box-sizing:border-box;
+          resize:vertical;
+        "
+      >${escapeOrderHTML(value || "")}</textarea>
+    `;
+  }
+
+
+  document.getElementById("orderDetailContent").innerHTML = `
+
+    <table class="order-detail-table">
+
+
+      <!-- 주문상태 -->
+
+      <tr>
+
+        <th>주문상태</th>
+
+        <td>
+  <div class="order-status-row">
+
+    <select
+      id="editOrderStatus"
+      class="order-status-select">
+
+      ${statusOptions.map(status => `
+        <option
+          value="${escapeOrderHTML(status)}"
+          ${status === currentStatus ? "selected" : ""}>
+          ${escapeOrderHTML(status)}
+        </option>
+      `).join("")}
+
+    </select>
+
+    <button
+      type="button"
+      class="order-status-save-btn"
+      onclick="updateOrderDetail()">
+      주문정보 저장
+    </button>
+
+  </div>
+</td>
+
+      </tr>
+
+
+      <!-- 주문번호 -->
+
+      <tr>
+
+        <th>주문번호</th>
+
+        <td>
+
+          ${inputField(
+            "editOrderNumber",
+            o.order_number,
+            "text",
+            "주문번호"
+          )}
+
+        </td>
+
+      </tr>
+
+<!-- 주문자 정보 -->
+
+<tr>
+
+  <th>
+    주문자 정보
+  </th>
+
+  <td>
+
+    <div class="order-customer-grid">
+
+      <div class="order-input-group">
+
+        <label>주문자 이름</label>
+
+        ${inputField(
+          "editCustomerName",
+          o.customer_name,
+          "text",
+          "주문자 이름"
+        )}
+
+      </div>
+
+
+      <div class="order-input-group">
+
+        <label>주문자 연락처</label>
+
+        ${inputField(
+          "editCustomerPhone",
+          o.customer_phone,
+          "text",
+          "연락처"
+        )}
+
+      </div>
+
+
+      <div class="order-input-group">
+
+        <label>이메일</label>
+
+        ${inputField(
+          "editCustomerEmail",
+          o.customer_email,
+          "email",
+          "이메일"
+        )}
+
+      </div>
+
+
+      <div class="order-input-group">
+
+        <label>개인통관고유번호</label>
+
+        ${inputField(
+          "editCustomsNumber",
+          o.customs_number,
+          "text",
+          "개인통관고유번호"
+        )}
+
+      </div>
+
+    </div>
+
+  </td>
+
+</tr>
+ 
+      <!-- 상품명 -->
+
+      <tr>
+
+        <th>상품명</th>
+
+        <td>
+
+          ${inputField(
+            "editProductName",
+            o.product_name,
+            "text",
+            "상품명"
+          )}
+
+        </td>
+
+      </tr>
+
+
+      <!-- 상품 URL -->
+
+      <tr>
+
+        <th>상품 URL</th>
+
+        <td>
+
+          ${inputField(
+            "editProductUrl",
+            o.product_url,
+            "text",
+            "상품 URL"
+          )}
+
+        </td>
+
+      </tr>
+
+
+      <!-- 옵션 -->
+
+      <tr>
+
+        <th>옵션</th>
+
+        <td>
+
+          ${inputField(
+            "editProductOption",
+            o.product_option,
+            "text",
+            "옵션"
+          )}
+
+        </td>
+
+      </tr>
+
+<!-- 색상 + 사이즈 -->
+
+<tr>
+
+  <th>상품 정보</th>
+
+  <td>
+
+    <div class="order-customer-grid">
+
+      <!-- 색상 -->
+
+      <div class="order-input-group">
+
+        <label>색상</label>
+
+        ${inputField(
+          "editProductColor",
+          o.product_color,
+          "text",
+          "색상"
+        )}
+
+      </div>
+
+
+      <!-- 사이즈 -->
+
+      <div class="order-input-group">
+
+        <label>사이즈</label>
+
+        ${inputField(
+          "editProductSize",
+          o.product_size,
+          "text",
+          "사이즈"
+        )}
+
+      </div>
+
+    </div>
+
+  </td>
+
+</tr>
+
+
+<!-- 수량 + 상품 가격 -->
+
+<tr>
+
+  <th>수량 / 가격</th>
+
+  <td>
+
+    <div class="order-customer-grid">
+
+      <!-- 수량 -->
+
+      <div class="order-input-group">
+
+        <label>수량</label>
+
+        ${inputField(
+          "editQuantity",
+          o.quantity,
+          "number",
+          "수량"
+        )}
+
+      </div>
+
+
+      <!-- 상품 가격 -->
+
+      <div class="order-input-group">
+
+        <label>상품 가격</label>
+
+        ${inputField(
+          "editProductPrice",
+          o.product_price,
+          "text",
+          "상품 가격"
+        )}
+
+      </div>
+
+    </div>
+
+  </td>
+
+</tr>
+
+      <!-- 요청사항 -->
+
+      <tr>
+
+        <th>요청사항</th>
+
+        <td>
+
+          ${textareaField(
+            "editRequestContent",
+            o.request_content,
+            "요청사항"
+          )}
+
+        </td>
+
+      </tr>
+
+
+<!-- 받는 사람 정보 -->
+
+<tr>
+
+  <th>
+    받는 사람 정보
+  </th>
+
+  <td>
+
+    <div class="order-customer-grid">
+
+      <!-- 받는 사람 -->
+
+      <div class="order-input-group">
+
+        <label>받는 사람</label>
+
+        ${inputField(
+          "editReceiverName",
+          o.receiver_name,
+          "text",
+          "받는 사람 이름"
+        )}
+
+      </div>
+
+
+      <!-- 받는 사람 연락처 -->
+
+      <div class="order-input-group">
+
+        <label>받는 사람 연락처</label>
+
+        ${inputField(
+          "editReceiverPhone",
+          o.receiver_phone,
+          "text",
+          "받는 사람 연락처"
+        )}
+
+      </div>
+
+    </div>
+
+  </td>
+
+</tr>
+
+
+<!-- 배송 주소 -->
+
+<tr>
+
+  <th>
+    배송 주소
+  </th>
+
+  <td>
+
+    <div class="order-address-grid">
+
+      <!-- 우편번호 -->
+
+      <div class="order-input-group">
+
+        <label>우편번호</label>
+
+        ${inputField(
+          "editZipcode",
+          o.zipcode,
+          "text",
+          "우편번호"
+        )}
+
+      </div>
+
+
+      <!-- 배송주소 -->
+
+      <div class="order-input-group">
+
+        <label>배송주소</label>
+
+        ${inputField(
+          "editAddress",
+          o.address,
+          "text",
+          "배송 주소"
+        )}
+
+      </div>
+
+    </div>
+
+  </td>
+
+</tr>
+
+      <!-- 상세 주소 -->
+
+      <tr>
+
+        <th>상세 주소</th>
+
+        <td>
+
+          ${inputField(
+            "editAddressDetail",
+            o.address_detail,
+            "text",
+            "상세 주소"
+          )}
+
+        </td>
+
+      </tr>
+
+
+<!-- 배송정보 -->
+
+<tr>
+
+  <th>
+    배송정보
+  </th>
+
+  <td>
+
+    <div class="order-customer-grid">
+
+      <!-- 택배사 -->
+
+      <div class="order-input-group">
+
+        <label>택배사</label>
+
+        ${inputField(
+          "editCourierCompany",
+          o.courier_company,
+          "text",
+          "택배사"
+        )}
+
+      </div>
+
+
+      <!-- 택배송장번호 -->
+
+      <div class="order-input-group">
+
+        <label>택배송장번호</label>
+
+        ${inputField(
+          "editTrackingNumber",
+          o.tracking_number,
+          "text",
+          "송장번호"
+        )}
+
+      </div>
+
+    </div>
+
+  </td>
+
+</tr>
+
+    </table>
+
+  `;
+
+
+  document
+    .getElementById("orderDetailModal")
+    .style.display = "flex";
+
+}
+
+async function updateOrderDetail(){
+
+  if(!currentOrderId){
+
+    alert("주문을 먼저 선택해주세요.");
+
+    return;
+
+  }
+
+
+  const getValue = (id) => {
+
+    const el =
+      document.getElementById(id);
+
+    return el
+      ? el.value.trim()
+      : "";
+
+  };
+
+
+  const updateData = {
+
+
+    /* 주문상태 */
+
+    status:
+      getValue("editOrderStatus"),
+
+
+    /* 주문자 정보 */
+
+    order_number:
+      getValue("editOrderNumber"),
+
+    customer_name:
+      getValue("editCustomerName"),
+
+    customer_phone:
+      getValue("editCustomerPhone"),
+
+    customer_email:
+      getValue("editCustomerEmail"),
+
+    customs_number:
+      getValue("editCustomsNumber"),
+
+
+    /* 상품 정보 */
+
+    product_name:
+      getValue("editProductName"),
+
+    product_url:
+      getValue("editProductUrl"),
+
+    product_option:
+      getValue("editProductOption"),
+
+    product_color:
+      getValue("editProductColor"),
+
+    product_size:
+      getValue("editProductSize"),
+
+    quantity:
+      getValue("editQuantity"),
+
+    product_price:
+      getValue("editProductPrice"),
+
+    request_content:
+      getValue("editRequestContent"),
+
+
+    /* 배송받는 사람 */
+
+    receiver_name:
+      getValue("editReceiverName"),
+
+    receiver_phone:
+      getValue("editReceiverPhone"),
+
+    zipcode:
+      getValue("editZipcode"),
+
+    address:
+      getValue("editAddress"),
+
+    address_detail:
+      getValue("editAddressDetail"),
+
+
+    /* 배송정보 */
+
+    courier_company:
+      getValue("editCourierCompany"),
+
+    tracking_number:
+      getValue("editTrackingNumber")
+
+  };
+
+
+  const saveButton =
+    document.querySelector(
+      "#orderDetailContent .order-status-save-btn"
+    );
+
+
+  if(saveButton){
+
+    saveButton.disabled = true;
+
+    saveButton.textContent =
+      "저장중...";
+
+  }
+
+
+  try{
+
+
+    const { data, error } =
+      await supabaseClient
+        .from("orders")
+        .update(updateData)
+        .eq("id", currentOrderId)
+        .select();
+
+
+    if(error){
+
+      console.error(
+        "주문 상세내역 저장 오류:",
+        error
+      );
+
+
+      alert(
+        "주문 상세내역 저장에 실패했습니다.\n\n" +
+        error.message
+      );
+
+
+      return;
+
+    }
+
+
+    if(
+      !data ||
+      data.length === 0
+    ){
+
+      alert(
+        "주문정보가 변경되지 않았습니다.\n\n" +
+        "Supabase RLS 권한을 확인해주세요."
+      );
+
+
+      return;
+
+    }
+
+
+    alert(
+      "주문 상세내역이 저장되었습니다. ✅"
+    );
+
+
+    await loadOrders();
+
+
+    closeOrderDetail();
+
+
+  }catch(err){
+
+
+    console.error(
+      "주문 상세내역 저장 시스템 오류:",
+      err
+    );
+
+
+    alert(
+      "주문 상세내역 저장 중 오류가 발생했습니다."
+    );
+
+
+  }finally{
+
+
+    if(saveButton){
+
+      saveButton.disabled = false;
+
+      saveButton.textContent =
+        "주문 상세내역 저장";
+
+    }
+
+  }
+
+}
+
+async function deleteOrder(index){
+
+  const order = orderData[index];
+
+  if(!order){
+
+    alert("삭제할 주문을 찾을 수 없습니다.");
+
+    return;
+
+  }
+
+
+  const confirmDelete =
+    confirm(
+
+      "정말 이 주문서를 삭제하시겠습니까?\n\n" +
+      "주문번호: " +
+      order.order_number +
+      "\n\n삭제하면 복구할 수 없습니다."
+
+    );
+
+
+  if(!confirmDelete){
+
+    return;
+
+  }
+
+
+  const { error } =
+    await supabaseClient
+      .from("orders")
+      .delete()
+      .eq("id", order.id);
+
+
+  if(error){
+
+    console.error(
+      "주문 삭제 오류:",
+      error
+    );
+
+
+    alert(
+      "주문 삭제에 실패했습니다.\n\n" +
+      error.message
+    );
+
+
+    return;
+
+  }
+
+
+  alert(
+    "주문서가 삭제되었습니다."
+  );
+
+
+  await loadOrders();
+
+
+  const totalPages =
+    Math.ceil(
+      orderData.length /
+      ordersPerPage
+    );
+
+
+  if(
+    currentOrderPage > totalPages &&
+    totalPages > 0
+  ){
+
+    currentOrderPage =
+      totalPages;
+
+  }
+
+
+  renderOrderPage();
+
+}
+
+async function updateOrderStatus(){
+
+  if(!currentOrderId){
+
+    alert("주문을 먼저 선택해주세요.");
+
+    return;
+
+  }
+
+
+  const select =
+    document.getElementById("orderStatusSelect");
+
+
+  if(!select){
+
+    alert("주문상태 선택창을 찾을 수 없습니다.");
+
+    return;
+
+  }
+
+
+  const status = select.value;
+
+
+  if(!status){
+
+    alert("주문상태를 선택해주세요.");
+
+    return;
+
+  }
+
+
+  const saveButton =
+    document.querySelector(".order-status-save-btn");
+
+
+  if(saveButton){
+
+    saveButton.disabled = true;
+
+    saveButton.textContent = "저장중...";
+
+  }
+
+
+  try{
+
+
+    console.log(
+      "주문상태 저장 시작",
+      currentOrderId,
+      status
+    );
+
+
+    const { data, error } =
+      await supabaseClient
+        .from("orders")
+        .update({
+          status: status
+        })
+        .eq("id", currentOrderId)
+        .select();
+
+
+    if(error){
+
+      console.error(
+        "주문상태 저장 오류:",
+        error
+      );
+
+
+      alert(
+        "주문상태 저장에 실패했습니다.\n\n" +
+        error.message
+      );
+
+
+      return;
+
+    }
+
+
+    if(!data || data.length === 0){
+
+      alert(
+        "주문상태가 변경되지 않았습니다.\n\n" +
+        "Supabase RLS 권한을 확인해주세요."
+      );
+
+
+      return;
+
+    }
+
+
+    console.log(
+      "주문상태 저장 완료:",
+      data
+    );
+
+
+    alert(
+      "주문상태가 저장되었습니다. ✅"
+    );
+
+
+    await loadOrders();
+
+
+    closeOrderDetail();
+
+
+  }catch(err){
+
+    console.error(
+      "주문상태 저장 시스템 오류:",
+      err
+    );
+
+
+    alert(
+      "주문상태 저장 중 오류가 발생했습니다."
+    );
+
+
+  }finally{
+
+
+    if(saveButton){
+
+      saveButton.disabled = false;
+
+      saveButton.textContent =
+        "주문상태 저장";
+
+    }
+
+  }
+
+}
+
+async function updateDeliveryInfo(){
+
+  if(!currentOrderId){
+
+    alert("주문을 먼저 선택해주세요.");
+
+    return;
+
+  }
+
+
+  const courierCompany =
+    document
+      .getElementById("courierCompany")
+      .value
+      .trim();
+
+
+  const trackingNumber =
+    document
+      .getElementById("trackingNumber")
+      .value
+      .trim();
+
+
+  if(!courierCompany){
+
+    alert("택배사를 입력해주세요.");
+
+    document
+      .getElementById("courierCompany")
+      .focus();
+
+    return;
+
+  }
+
+
+  if(!trackingNumber){
+
+    alert("택배송장번호를 입력해주세요.");
+
+    document
+      .getElementById("trackingNumber")
+      .focus();
+
+    return;
+
+  }
+
+
+  const { error } =
+    await supabaseClient
+      .from("orders")
+      .update({
+
+        courier_company:
+          courierCompany,
+
+        tracking_number:
+          trackingNumber
+
+      })
+      .eq(
+        "id",
+        currentOrderId
+      );
+
+
+  if(error){
+
+    console.error(
+      "배송정보 저장 오류:",
+      error
+    );
+
+
+    alert(
+      "배송정보 저장에 실패했습니다.\n\n" +
+      error.message
+    );
+
+
+    return;
+
+  }
+
+
+  alert(
+    "배송정보가 저장되었습니다."
+  );
+
+
+  await loadOrders();
+
+}
+
+function closeOrderDetail(){
+
+  currentOrderId = null;
+
+  document.getElementById("orderDetailModal").style.display="none";
+}
+
+document.addEventListener("click",e=>{
+  const modal=document.getElementById("orderDetailModal");
+  if(e.target===modal) closeOrderDetail();
+});
+
+async function init(){
+
+  const { data } = await supabaseClient.auth.getSession();
+
+  if(data.session){
+
+    document.getElementById("loginPage").style.display="none";
+    document.getElementById("adminPage").style.display="block";
+
+    document.body.classList.remove("login-mode");
+
+    await loadData();
+    await loadBoardData();
+    await loadVisitStats();
+    await loadOrders();
+    await loadPurchaseTags();
+
+  }
+
+}
+
+/* ========================================
+   구매대행 추천 태그 불러오기
+======================================== */
+
+async function loadPurchaseTags(){
+
+  const list =
+    document.getElementById(
+      "purchaseTagAdminList"
+    );
+
+  if(!list) return;
+
+
+  const { data, error } =
+    await supabaseClient
+      .from("purchase_tags")
+      .select("*")
+      .order("sort",{ascending:true})
+      .order("id",{ascending:true});
+
+
+  if(error){
+
+    console.error(
+      "구매대행 태그 불러오기 오류:",
+      error
+    );
+
+
+    list.innerHTML =
+      '<div class="card">태그를 불러오지 못했습니다.</div>';
+
+
+    return;
+
+  }
+
+
+  purchaseTagData = data || [];
+
+
+  /* 현재 페이지가 전체 페이지보다 크면 조정 */
+
+  const totalPages =
+    Math.ceil(
+      purchaseTagData.length /
+      purchaseTagsPerPage
+    );
+
+
+  if(
+    currentPurchaseTagPage >
+    totalPages
+  ){
+
+    currentPurchaseTagPage =
+      Math.max(
+        1,
+        totalPages
+      );
+
+  }
+
+
+  renderPurchaseTags();
+
+}
+
+
+/* ========================================
+   구매대행 태그 목록 출력
+======================================== */
+
+function renderPurchaseTags(){
+
+  const list =
+    document.getElementById(
+      "purchaseTagAdminList"
+    );
+
+
+  const pagination =
+    document.getElementById(
+      "purchaseTagPagination"
+    );
+
+
+  if(!list) return;
+
+
+  list.innerHTML = "";
+
+
+  if(pagination){
+
+    pagination.innerHTML = "";
+
+  }
+
+
+  /* 태그가 없을 경우 */
+
+  if(!purchaseTagData.length){
+
+    list.innerHTML = `
+
+      <div
+      class="card"
+      style="
+        text-align:center;
+        color:#888;
+        padding:20px;
+      ">
+
+        등록된 태그가 없습니다.
+
+      </div>
+
+    `;
+
+
+    return;
+
+  }
+
+
+  /* 전체 페이지 */
+
+  const totalPages =
+    Math.ceil(
+
+      purchaseTagData.length /
+
+      purchaseTagsPerPage
+
+    );
+
+
+  /* 최대 10페이지까지만 */
+
+  const displayPages =
+    Math.min(
+
+      totalPages,
+
+      maxPurchaseTagPages
+
+    );
+
+
+  /* 시작 위치 */
+
+  const startIndex =
+
+    (
+      currentPurchaseTagPage - 1
+    )
+
+    *
+
+    purchaseTagsPerPage;
+
+
+  /* 끝 위치 */
+
+  const endIndex =
+
+    startIndex +
+
+    purchaseTagsPerPage;
+
+
+  /* 현재 페이지 데이터 */
+
+  const pageTags =
+
+    purchaseTagData.slice(
+
+      startIndex,
+
+      endIndex
+
+    );
+
+
+  /* 태그 출력 */
+
+  pageTags.forEach(tag=>{
+
+
+    const item =
+      document.createElement("div");
+
+
+    item.className =
+      "purchase-tag-admin-item";
+
+
+    item.innerHTML = `
+
+      <div
+      class="purchase-tag-admin-name">
+
+        #${escapePurchaseTagHTML(
+          tag.title
+        )}
+
+      </div>
+
+
+      <div
+      class="purchase-tag-admin-link"
+      title="${escapePurchaseTagHTML(
+        tag.link_url
+      )}">
+
+        ${escapePurchaseTagHTML(
+          tag.link_url
+        )}
+
+      </div>
+
+
+      <button
+      class="purchase-tag-edit-btn"
+      onclick="editPurchaseTag(
+        ${tag.id}
+      )">
+
+        수정
+
+      </button>
+
+
+      <button
+      class="purchase-tag-delete-btn"
+      onclick="deletePurchaseTag(
+        ${tag.id}
+      )">
+
+        삭제
+
+      </button>
+
+    `;
+
+
+    list.appendChild(item);
+
+
+  });
+
+
+  /* =========================
+     페이지네이션 생성
+  ========================= */
+
+  if(
+
+    pagination &&
+
+    totalPages > 1
+
+  ){
+
+
+    /* 이전 버튼 */
+
+    if(
+
+      currentPurchaseTagPage > 1
+
+    ){
+
+
+      const prev =
+        document.createElement(
+          "button"
+        );
+
+
+      prev.textContent =
+        "◀";
+
+
+      prev.onclick = ()=>{
+
+        currentPurchaseTagPage--;
+
+
+        renderPurchaseTags();
+
+      };
+
+
+      pagination.appendChild(
+        prev
+      );
+
+    }
+
+
+    /* 페이지 번호 */
+
+    for(
+
+      let page = 1;
+
+      page <= displayPages;
+
+      page++
+
+    ){
+
+
+      const btn =
+        document.createElement(
+          "button"
+        );
+
+
+      btn.textContent =
+        page;
+
+
+      /* 현재 페이지 */
+
+      if(
+
+        page ===
+        currentPurchaseTagPage
+
+      ){
+
+        btn.classList.add(
+          "active"
+        );
+
+      }
+
+
+      btn.onclick = ()=>{
+
+        currentPurchaseTagPage =
+          page;
+
+
+        renderPurchaseTags();
+
+      };
+
+
+      pagination.appendChild(
+        btn
+      );
+
+    }
+
+
+    /* 다음 버튼 */
+
+    if(
+
+      currentPurchaseTagPage <
+      totalPages
+
+    ){
+
+
+      const next =
+        document.createElement(
+          "button"
+        );
+
+
+      next.textContent =
+        "▶";
+
+
+      next.onclick = ()=>{
+
+        currentPurchaseTagPage++;
+
+
+        renderPurchaseTags();
+
+      };
+
+
+      pagination.appendChild(
+        next
+      );
+
+    }
+
+  }
+
+}
+
+
+/* ========================================
+   HTML 보안 처리
+======================================== */
+
+function escapePurchaseTagHTML(value){
+
+  return String(value ?? "")
+
+    .replace(/&/g,"&amp;")
+
+    .replace(/</g,"&lt;")
+
+    .replace(/>/g,"&gt;")
+
+    .replace(/"/g,"&quot;")
+
+    .replace(/'/g,"&#039;");
+
+}
+
+
+/* ========================================
+   새 태그 추가 버튼
+======================================== */
+
+function addPurchaseTag(){
+
+  editingPurchaseTagId = null;
+
+
+  document.getElementById(
+    "purchaseTagTitle"
+  ).value = "";
+
+
+  document.getElementById(
+    "purchaseTagLink"
+  ).value = "";
+
+
+  document.getElementById(
+    "purchaseTagSaveBtn"
+  ).textContent = "태그 추가";
+
+
+  document.getElementById(
+    "purchaseTagTitle"
+  ).focus();
+
+}
+
+
+/* ========================================
+   태그 저장
+======================================== */
+
+async function savePurchaseTag(){
+
+  const title =
+    document.getElementById(
+      "purchaseTagTitle"
+    )
+    .value
+    .trim();
+
+
+  const linkUrl =
+    document.getElementById(
+      "purchaseTagLink"
+    )
+    .value
+    .trim();
+
+
+  if(!title){
+
+    alert(
+      "태그명을 입력해주세요."
+    );
+
+    return;
+
+  }
+
+
+  if(!linkUrl){
+
+    alert(
+      "연결할 링크를 입력해주세요."
+    );
+
+    return;
+
+  }
+
+
+  let error;
+
+
+  /* 수정 */
+
+  if(editingPurchaseTagId){
+
+    const result =
+      await supabaseClient
+        .from("purchase_tags")
+        .update({
+
+          title:title,
+
+          link_url:linkUrl
+
+        })
+        .eq(
+          "id",
+          editingPurchaseTagId
+        );
+
+
+    error =
+      result.error;
+
+  }
+
+
+  /* 새로 추가 */
+
+  else{
+
+    const nextSort =
+      purchaseTagData.length;
+
+
+    const result =
+      await supabaseClient
+        .from("purchase_tags")
+        .insert({
+
+          title:title,
+
+          link_url:linkUrl,
+
+          sort:nextSort
+
+        });
+
+
+    error =
+      result.error;
+
+  }
+
+
+  if(error){
+
+    console.error(
+      "구매대행 태그 저장 오류:",
+      error
+    );
+
+
+    alert(
+      "태그 저장에 실패했습니다.\n\n" +
+      error.message
+    );
+
+    return;
+
+  }
+
+
+  alert(
+    editingPurchaseTagId
+      ? "태그가 수정되었습니다."
+      : "태그가 추가되었습니다."
+  );
+
+
+  editingPurchaseTagId = null;
+
+
+  document.getElementById(
+    "purchaseTagTitle"
+  ).value = "";
+
+
+  document.getElementById(
+    "purchaseTagLink"
+  ).value = "";
+
+
+  document.getElementById(
+    "purchaseTagSaveBtn"
+  ).textContent = "태그 추가";
+
+
+  await loadPurchaseTags();
+
+}
+
+
+/* ========================================
+   태그 수정
+======================================== */
+
+function editPurchaseTag(id){
+
+  const tag =
+    purchaseTagData.find(
+      item =>
+        item.id === id
+    );
+
+
+  if(!tag) return;
+
+
+  editingPurchaseTagId =
+    id;
+
+
+  document.getElementById(
+    "purchaseTagTitle"
+  ).value =
+    tag.title || "";
+
+
+  document.getElementById(
+    "purchaseTagLink"
+  ).value =
+    tag.link_url || "";
+
+
+  document.getElementById(
+    "purchaseTagSaveBtn"
+  ).textContent =
+    "태그 수정";
+
+
+  document.getElementById(
+    "purchaseTagTitle"
+  ).focus();
+
+
+  window.scrollTo({
+
+    top:
+      document.getElementById(
+        "purchaseTagTitle"
+      )
+      .getBoundingClientRect()
+      .top +
+
+      window.scrollY -
+
+      100,
+
+    behavior:"smooth"
+
+  });
+
+}
+
+
+/* ========================================
+   태그 삭제
+======================================== */
+
+async function deletePurchaseTag(id){
+
+  const tag =
+    purchaseTagData.find(
+      item =>
+        item.id === id
+    );
+
+
+  if(!tag) return;
+
+
+  const ok =
+    confirm(
+
+      `#${tag.title} 태그를 삭제하시겠습니까?`
+
+    );
+
+
+  if(!ok) return;
+
+
+  const { error } =
+    await supabaseClient
+
+      .from("purchase_tags")
+
+      .delete()
+
+      .eq(
+        "id",
+        id
+      );
+
+
+  if(error){
+
+    console.error(
+      "구매대행 태그 삭제 오류:",
+      error
+    );
+
+
+    alert(
+      "태그 삭제에 실패했습니다.\n\n" +
+      error.message
+    );
+
+    return;
+
+  }
+
+
+  alert(
+    "태그가 삭제되었습니다."
+  );
+
+
+  if(
+    editingPurchaseTagId === id
+  ){
+
+    addPurchaseTag();
+
+  }
+
+
+  await loadPurchaseTags();
+
+}
+
+init();
+
+const boardAdminList = document.getElementById("boardAdminList");
+const boardPagination = document.getElementById("boardPagination");
+
+let boardData = [];
+let currentPage = 1;
+let editingPostId = null;
+
+const rowsPerPage = 5;
+const maxPageButtons = 10;
+
+let boardSearchKeyword = "";
+
+/* 게시판 데이터 불러오기 */
+
+async function loadBoardData(){
+
+  const { data } = await supabaseClient
+    .from("board_posts")
+    .select("*")
+    .order("id",{ascending:false});
+
+  boardData = data || [];
+  currentPage = 1;
+
+  renderBoard();
+}
+
+/* 게시판 출력 */
+
+function escapeHTML(str){
+
+  if(!str) return "";
+
+  return str
+   .replace(/&/g,"&amp;")
+   .replace(/</g,"&lt;")
+   .replace(/>/g,"&gt;");
+
+}
+
+function renderBoard(){
+
+  boardAdminList.innerHTML="";
+
+  const keyword =
+    boardSearchKeyword.trim().toLowerCase();
+
+  const filteredData =
+    keyword
+      ? boardData.filter(post => {
+
+          const category =
+            String(post.category || "").toLowerCase();
+
+          const title =
+            String(post.title || "").toLowerCase();
+
+          const content =
+            String(post.content || "").toLowerCase();
+
+          return (
+            category.includes(keyword) ||
+            title.includes(keyword) ||
+            content.includes(keyword)
+          );
+
+        })
+      : boardData;
+
+
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(
+        filteredData.length /
+        rowsPerPage
+      )
+    );
+
+
+  if(currentPage > totalPages){
+    currentPage = totalPages;
+  }
+
+
+  const start =
+    (currentPage - 1) *
+    rowsPerPage;
+
+  const end =
+    start +
+    rowsPerPage;
+
+
+  const pageItems =
+    filteredData.slice(
+      start,
+      end
+    );
+
+
+  if(pageItems.length === 0){
+
+    boardAdminList.innerHTML = `
+      <div
+        style="
+          text-align:center;
+          color:#888;
+          padding:30px 10px;
+        "
+      >
+        검색된 게시글이 없습니다.
+      </div>
+    `;
+
+  }else{
+
+    pageItems.forEach(post=>{
+
+      const div =
+        document.createElement("div");
+
+      div.className="card";
+
+      div.innerHTML=`
+
+        <button
+          class="delete-btn"
+          onclick="deleteBoardPost(${post.id})">
+          삭제
+        </button>
+
+        <button
+          class="edit-btn"
+          onclick="editBoardPost(${post.id})">
+          수정
+        </button>
+
+        <div
+          style="
+            font-size:12px;
+            color:#888;
+            margin-bottom:4px;
+          "
+        >
+          [${escapeHTML(
+            post.category || "일반"
+          )}]
+        </div>
+
+        <strong>
+          ${escapeHTML(
+            post.title
+          )}
+        </strong>
+
+      `;
+
+      boardAdminList.appendChild(div);
+
+    });
+
+  }
+
+
+  renderPagination(
+    totalPages
+  );
+
+}
+
+function searchBoardPosts(){
+
+  const searchInput =
+    document.getElementById(
+      "boardSearch"
+    );
+
+  boardSearchKeyword =
+    searchInput
+      ? searchInput.value
+      : "";
+
+  currentPage = 1;
+
+  renderBoard();
+
+}
+
+/* 페이지 버튼 */
+
+function renderPagination(){
+
+  boardPagination.innerHTML="";
+
+  const keyword =
+    boardSearchKeyword
+      .trim()
+      .toLowerCase();
+
+
+  const filteredData =
+    keyword
+      ? boardData.filter(post => {
+
+          const category =
+            String(
+              post.category || ""
+            ).toLowerCase();
+
+          const title =
+            String(
+              post.title || ""
+            ).toLowerCase();
+
+          const content =
+            String(
+              post.content || ""
+            ).toLowerCase();
+
+          return (
+            category.includes(keyword) ||
+            title.includes(keyword) ||
+            content.includes(keyword)
+          );
+
+        })
+      : boardData;
+
+
+  const totalPages =
+    Math.ceil(
+      filteredData.length /
+      rowsPerPage
+    );
+
+
+  if(totalPages <= 1){
+    return;
+  }
+
+
+  let startPage =
+    Math.floor(
+      (currentPage - 1) /
+      maxPageButtons
+    ) *
+    maxPageButtons +
+    1;
+
+
+  let endPage =
+    Math.min(
+      startPage +
+      maxPageButtons -
+      1,
+      totalPages
+    );
+
+
+  if(currentPage > 1){
+
+    const prev =
+      document.createElement(
+        "button"
+      );
+
+    prev.textContent="◀";
+
+    prev.onclick=()=>{
+
+      currentPage--;
+
+      renderBoard();
+
+    };
+
+    boardPagination.appendChild(
+      prev
+    );
+
+  }
+
+
+  for(
+    let i=startPage;
+    i<=endPage;
+    i++
+  ){
+
+    const btn =
+      document.createElement(
+        "button"
+      );
+
+    btn.textContent=i;
+
+
+    if(i === currentPage){
+
+      btn.classList.add(
+        "active"
+      );
+
+    }
+
+
+    btn.onclick=()=>{
+
+      currentPage=i;
+
+      renderBoard();
+
+    };
+
+
+    boardPagination.appendChild(
+      btn
+    );
+
+  }
+
+
+  if(
+    currentPage <
+    totalPages
+  ){
+
+    const next =
+      document.createElement(
+        "button"
+      );
+
+    next.textContent="▶";
+
+
+    next.onclick=()=>{
+
+      currentPage++;
+
+      renderBoard();
+
+    };
+
+
+    boardPagination.appendChild(
+      next
+    );
+
+  }
+
+}
+
+/* 글 추가 */
+
+async function addBoardPost(){
+
+  const title=document.getElementById("boardTitle").value.trim();
+  const content=document.getElementById("boardContent").value.trim();
+  const category=document.getElementById("boardCategory").value;
+
+  if(!title || !content){
+    alert("제목과 내용을 입력하세요");
+    return;
+  }
+
+  if(editingPostId){
+
+    await supabaseClient
+      .from("board_posts")
+      .update({
+  category:category,
+  title:title,
+  content:content
+})
+      .eq("id",editingPostId);
+
+    editingPostId=null;
+
+  }else{
+
+await supabaseClient.from("board_posts").insert([{
+  category:category,
+  title:title,
+  content:content
+}]);
+
+  }
+
+  document.getElementById("boardTitle").value="";
+  document.getElementById("boardContent").value="";
+  document.getElementById("boardCategory").value="소식";
+
+  loadBoardData();
+
+document.querySelector("button[onclick='addBoardPost()']").textContent="글 추가";
+
+}
+
+/* 글 삭제 */
+
+async function deleteBoardPost(id){
+
+  await supabaseClient
+  .from("board_posts")
+  .delete()
+  .eq("id",id);
+
+  loadBoardData();
+
+}
+
+async function adminLogout(){
+
+  await supabaseClient.auth.signOut();
+
+  document.getElementById("loginPage").style.display="flex";
+  document.getElementById("adminPage").style.display="none";
+
+  document.body.classList.add("login-mode");
+
+}
+
+async function uploadImage(input){
+
+  const file = input.files[0];
+  if(!file) return;
+
+const safeName = file.name.replace(/\s+/g,"_");
+const fileName = crypto.randomUUID()+"_"+safeName;
+
+  const { data, error } = await supabaseClient
+    .storage
+    .from("yb365")
+    .upload(fileName, file);
+
+  if(error){
+    alert("업로드 실패");
+    return;
+  }
+
+  const { data: urlData } = supabaseClient
+    .storage
+    .from("yb365")
+    .getPublicUrl(fileName);
+
+  const imageUrl = urlData.publicUrl;
+
+  const urlInput = input.parentElement.querySelectorAll("input")[1];
+  urlInput.value = imageUrl;
+
+  alert("업로드 완료 ✅");
+}
+
+async function uploadBannerImage(input){
+
+  const file = input.files[0];
+  if(!file) return;
+
+  const fileName = "banner_"+crypto.randomUUID()+"_"+file.name;
+
+  const { data, error } = await supabaseClient
+    .storage
+    .from("yb365")
+    .upload(fileName, file);
+
+  if(error){
+    alert("배너 업로드 실패");
+    return;
+  }
+
+  const { data: urlData } = supabaseClient
+    .storage
+    .from("yb365")
+    .getPublicUrl(fileName);
+
+  const imageUrl = urlData.publicUrl;
+
+  document.getElementById("bannerImg").value = imageUrl;
+
+  alert("배너 업로드 완료 ✅");
+}
+
+async function deleteAd(btn){
+
+  const card = btn.parentElement;
+
+  const adId =
+    card.dataset.id;
+
+  /* 기존 DB 광고라면 삭제 예정 ID에 기록 */
+  if(adId){
+
+    deletedAdIds.add(
+      Number(adId)
+    );
+
+  }
+
+  /*
+    화면에서는 즉시 제거
+    실제 DB 삭제는 saveAll()에서 처리
+  */
+
+  card.remove();
+
+  rebuildSquarePages();
+
+}
+
+function editBoardPost(id){
+
+  const post = boardData.find(p => p.id === id);
+
+  if(!post) return;
+
+  document.getElementById("boardTitle").value = post.title;
+  document.getElementById("boardContent").value = post.content;
+  document.getElementById("boardCategory").value = post.category || "일반";
+
+  editingPostId = id;
+
+  document.querySelector("#boardTitle").scrollIntoView({
+    behavior:"smooth"
+  });
+
+document.querySelector("button[onclick='addBoardPost()']").textContent="수정 저장";
+
+}
+
+function scrollToTop(){
+
+  window.scrollTo({
+    top:0,
+    behavior:"smooth"
+  });
+
+}
+
+function scrollToBottom(){
+
+  window.scrollTo({
+    top:document.body.scrollHeight,
+    behavior:"smooth"
+  });
+
+}
+
+async function deleteBannerImage(){
+
+  const imageUrl = bannerImg.value.trim();
+
+  if(!imageUrl){
+    alert("삭제할 배너가 없습니다.");
+    return;
+  }
+
+  const confirmDelete =
+    confirm("배너 이미지를 삭제하시겠습니까?\n\nSupabase Storage에서도 삭제됩니다.");
+
+  if(!confirmDelete) return;
+
+
+  /* =========================
+     Supabase Storage 파일 삭제
+  ========================= */
+
+  const storageBase =
+    "/storage/v1/object/public/yb365/";
+
+  if(imageUrl.includes(storageBase)){
+
+    const filePath =
+      decodeURIComponent(
+        imageUrl.split(storageBase)[1]
+      );
+
+    const { error: storageError } =
+      await supabaseClient
+        .storage
+        .from("yb365")
+        .remove([filePath]);
+
+    if(storageError){
+
+      console.error(
+        "배너 Storage 삭제 오류:",
+        storageError
+      );
+
+      alert(
+        "배너 파일 삭제 실패:\n" +
+        storageError.message
+      );
+
+      return;
+    }
+  }
+
+
+  /* =========================
+     site_settings에서도 삭제
+  ========================= */
+
+  const { error: dbError } =
+    await supabaseClient
+      .from("site_settings")
+      .update({
+        banner_img: "",
+        banner_link: ""
+      })
+      .eq("id", 1);
+
+  if(dbError){
+
+    console.error(
+      "배너 설정 삭제 오류:",
+      dbError
+    );
+
+    alert(
+      "배너 설정 삭제 실패:\n" +
+      dbError.message
+    );
+
+    return;
+  }
+
+
+  /* 화면에서도 삭제 */
+
+  bannerImg.value = "";
+  bannerLink.value = "";
+
+  const bannerFile =
+    document.querySelector(
+      'input[type="file"][onchange="uploadBannerImage(this)"]'
+    );
+
+  if(bannerFile){
+    bannerFile.value = "";
+  }
+
+
+  alert("배너 삭제 완료 ✅");
+}
+
+async function deleteSearchLogo(){
+
+  const logoInput =
+    document.getElementById("searchLogoInput");
+
+  const logoPreview =
+    document.getElementById("searchLogoPreview");
+
+  const imageUrl =
+    logoInput ? logoInput.value.trim() : "";
+
+
+  if(!imageUrl){
+
+    alert("삭제할 로고가 없습니다.");
+
+    return;
+  }
+
+
+  const confirmDelete =
+    confirm(
+      "사이트 로고를 삭제하시겠습니까?\n\n" +
+      "Supabase Storage에서도 삭제됩니다."
+    );
+
+  if(!confirmDelete) return;
+
+
+  /* =========================
+     Supabase Storage 파일 삭제
+  ========================= */
+
+  const storageBase =
+    "/storage/v1/object/public/yb365/";
+
+  if(imageUrl.includes(storageBase)){
+
+    const filePath =
+      decodeURIComponent(
+        imageUrl.split(storageBase)[1]
+      );
+
+    const { error: storageError } =
+      await supabaseClient
+        .storage
+        .from("yb365")
+        .remove([filePath]);
+
+    if(storageError){
+
+      console.error(
+        "로고 Storage 삭제 오류:",
+        storageError
+      );
+
+      alert(
+        "로고 파일 삭제 실패:\n" +
+        storageError.message
+      );
+
+      return;
+    }
+  }
+
+
+  /* =========================
+     site_settings에서도 삭제
+  ========================= */
+
+  const { error: dbError } =
+    await supabaseClient
+      .from("site_settings")
+      .update({
+        search_logo: ""
+      })
+      .eq("id", 1);
+
+  if(dbError){
+
+    console.error(
+      "로고 설정 삭제 오류:",
+      dbError
+    );
+
+    alert(
+      "로고 설정 삭제 실패:\n" +
+      dbError.message
+    );
+
+    return;
+  }
+
+
+  /* =========================
+     화면에서도 삭제
+  ========================= */
+
+  if(logoInput){
+    logoInput.value = "";
+  }
+
+  if(logoPreview){
+    logoPreview.src = "";
+  }
+
+
+  const logoFile =
+    document.querySelector(
+      'input[type="file"][onchange="uploadSearchLogo(this)"]'
+    );
+
+  if(logoFile){
+    logoFile.value = "";
+  }
+
+
+  alert("사이트 로고 삭제 완료 ✅");
+}
+
+async function uploadSearchLogo(input){
+
+  const file = input.files[0];
+  if(!file) return;
+
+  const fileName = "search_logo_"+crypto.randomUUID()+"_"+file.name;
+
+const { data, error } = await supabaseClient
+.storage
+.from("yb365")
+.upload(fileName, file);
+
+  if(error){
+    alert("로고 업로드 실패");
+    return;
+  }
+
+  const { data: urlData } = supabaseClient
+    .storage
+    .from("yb365")
+    .getPublicUrl(fileName);
+
+  const imageUrl = urlData.publicUrl;
+
+  document.getElementById("searchLogoPreview").src = imageUrl;
+  document.getElementById("searchLogoInput").value = imageUrl;
+
+  alert("로고 업로드 완료 ✅");
+}
+
+async function loadVisitStats(){
+
+  const today = new Date();
+  const startDate = new Date();
+  startDate.setDate(today.getDate() - 29);   // 오늘 포함 최근 30일
+
+  const start = startDate.toISOString().split("T")[0];
+  const todayStr = today.toISOString().split("T")[0];
+
+  const { data } = await supabaseClient
+    .from("site_visits")
+    .select("*")
+    .gte("date", start)
+    .lte("date", todayStr)
+    .order("date", { ascending: false });
+
+  if(!data) return;
+
+  let total = 0;
+  let todayCount = 0;
+
+  const labels = [];
+  const counts = [];
+
+  data.forEach(row => {
+
+    total += row.count;
+
+    if(row.date === todayStr){
+      todayCount = row.count;
+    }
+
+    labels.push(row.date.slice(5)); // MM-DD
+    counts.push(row.count);
+
+  });
+
+  document.getElementById("todayVisit").textContent = todayCount;
+  document.getElementById("totalVisit").textContent = total;
+
+  const ctx = document.getElementById("visitChart");
+
+  if(window.visitChartInstance){
+    window.visitChartInstance.destroy();
+  }
+
+  window.visitChartInstance = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: labels,
+      datasets: [{
+        data: counts,
+        tension: 0.3,
+        fill: true
+      }]
+    },
+    options: {
+      plugins:{ legend:{ display:false }},
+      scales:{ y:{ display:false }}
+    }
+  });
+}
+
+loadVisitStats();
+
+let adminSquarePage = 0;
+
+function slideAdminSquare(direction){
+
+  const wrapper =
+    document.querySelector(".admin-square-wrapper");
+
+  const pageWidth = wrapper.clientWidth;
+
+  const totalPages =
+    squareAdmin.querySelectorAll(".square-page").length;
+
+  adminSquarePage += direction;
+
+  if(adminSquarePage < 0){
+    adminSquarePage = 0;
+  }
+
+  if(adminSquarePage >= totalPages){
+    adminSquarePage = totalPages - 1;
+  }
+
+  squareAdmin.style.transform =
+    `translateX(-${adminSquarePage * pageWidth}px)`;
+
+}
+
+function validateYoutube(input){
+
+  const value = input.value.trim();
+
+  if(
+    value &&
+    !value.includes("youtube.com") &&
+    !value.includes("youtu.be")
+  ){
+    input.style.border = "2px solid red";
+  }else{
+    input.style.border = "";
+  }
+
+}
+
+</script>
+
 </body>
 </html>
