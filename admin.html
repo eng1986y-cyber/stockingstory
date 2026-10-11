@@ -101,10 +101,16 @@
           <div class="card-body">
             <h3>${p.name}</h3>
             <p class="price">${Number(p.price).toLocaleString()}원</p>
-            <button class="del-btn" data-id="${p.id}"
-              style="margin-top:8px; width:100%; padding:8px; background:#e53935; color:#fff; border:0; border-radius:6px; cursor:pointer;">
-              삭제
-            </button>
+            <div style="display:flex; gap:6px; margin-top:8px;">
+  <a href="edit.html?id=${p.id}"
+    style="flex:1; text-align:center; padding:8px; background:#1976d2; color:#fff; border-radius:6px; text-decoration:none; font-size:13px;">
+    수정
+  </a>
+  <button class="del-btn" data-id="${p.id}"
+    style="flex:1; padding:8px; background:#e53935; color:#fff; border:0; border-radius:6px; cursor:pointer; font-size:13px;">
+    삭제
+  </button>
+</div>
           </div>
         </div>
       `).join('');
