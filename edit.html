@@ -51,7 +51,10 @@
     const params = new URLSearchParams(location.search);
     const id = params.get('id');
 
-    // 기존 상품 정보 불러와서 폼에 채우기
+    const parseList = (str) =>
+      (str || '').split(',').map(s => s.trim()).filter(Boolean);
+
+    // ===== 기존 상품 정보 불러오기 =====
     async function loadProduct() {
       if (!id) {
         msg.textContent = '❌ 상품 ID가 없습니다.';
@@ -60,10 +63,8 @@
       }
 
       const { data, error } = await db
-        .from('products')
-        .select('*')
-        .eq('id', id)
-        .single();
+        .from('products').select('*')
+        .eq('id', id).single();
 
       if (error || !data) {
         msg.textContent = '❌ 상품을 불러올 수 없습니다.';
@@ -81,14 +82,12 @@
       form.extra_options.value = (data.extra_options || []).join(',');
     }
 
-    // 수정 저장
+    // ===== 수정 저장 =====
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const detail_images = form.detail_images.value
-        .split('\n')
-        .map(s => s.trim())
-        .filter(Boolean);
+        .split('\n').map(s => s.trim()).filter(Boolean);
 
       msg.textContent = '수정 중...';
       msg.style.color = '#222';
@@ -101,6 +100,9 @@
           description: form.description.value.trim(),
           main_image: form.main_image.value.trim(),
           detail_images,
+          colors: parseList(form.colors.value),
+          sizes: parseList(form.sizes.value),
+          extra_options: parseList(form.extra_options.value),
         })
         .eq('id', id);
 
@@ -109,24 +111,10 @@
         msg.textContent = '❌ ' + error.message;
       } else {
         msg.style.color = 'green';
-        msg.textContent = '✅ 수정 완료! 3초 후 관리자 페이지로 이동...';
-        setTimeout(() => location.href = 'admin.html', 1500);
+        msg.textContent = '✅ 수정 완료! 잠시 후 관리자 페이지로 이동...';
+        setTimeout(() => location.href = 'admin.html', 1000);
       }
     });
-
-const parseList = (str) =>
-  str.split(',').map(s => s.trim()).filter(Boolean);
-
-const { error } = await db.from('products').update({
-  name: form.name.value.trim(),
-  price: Number(form.price.value),
-  description: form.description.value.trim(),
-  main_image: form.main_image.value.trim(),
-  detail_images,
-  colors: parseList(form.colors.value),
-  sizes: parseList(form.sizes.value),
-  extra_options: parseList(form.extra_options.value),
-}).eq('id', id);
 
     loadProduct();
   </script>
