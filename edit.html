@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>상품 수정 - 심플몰</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1><a href="index.html">🛍️ 심플몰</a> - 상품 수정</h1>
+  </header>
+
+  <main>
+    <h2 style="margin-bottom:16px;">상품 수정</h2>
+
+    <form id="edit-form">
+      <input name="name" placeholder="상품명" required>
+      <input name="price" type="number" placeholder="가격 (숫자만)" required>
+      <textarea name="description" placeholder="상품 설명"></textarea>
+      <input name="main_image" placeholder="메인 이미지 URL (필수)" required>
+      <textarea name="detail_images" placeholder="상세 이미지 URL (한 줄에 하나씩)"></textarea>
+      <div style="display:flex; gap:8px;">
+        <button type="submit" style="flex:1;">수정 완료</button>
+        <a href="admin.html"
+          style="flex:1; text-align:center; padding:12px; background:#999; color:#fff; border-radius:6px; text-decoration:none;">
+          취소
+        </a>
+      </div>
+    </form>
+
+    <p id="msg" style="margin-top:12px; font-weight:600;"></p>
+  </main>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    const db = supabase.createClient(
+      "https://alpdhgcipjeekzrpxlbh.supabase.co",
+      "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya"
+    );
+  </script>
+
+  <script>
+    const form = document.getElementById('edit-form');
+    const msg = document.getElementById('msg');
+    const params = new URLSearchParams(location.search);
+    const id = params.get('id');
+
+    // 기존 상품 정보 불러와서 폼에 채우기
+    async function loadProduct() {
+      if (!id) {
+        msg.textContent = '❌ 상품 ID가 없습니다.';
+        msg.style.color = 'crimson';
+        return;
+      }
+
+      const { data, error } = await db
+        .from('products')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error || !data) {
+        msg.textContent = '❌ 상품을 불러올 수 없습니다.';
+        msg.style.color = 'crimson';
+        return;
+      }
+
+      form.name.value = data.name;
+      form.price.value = data.price;
+      form.description.value = data.description || '';
+      form.main_image.value = data.main_image;
+      form.detail_images.value = (data.detail_images || []).join('\n');
+    }
+
+    // 수정 저장
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const detail_images = form.detail_images.value
+        .split('\n')
+        .map(s => s.trim())
+        .filter(Boolean);
+
+      msg.textContent = '수정 중...';
+      msg.style.color = '#222';
+
+      const { error } = await db
+        .from('products')
+        .update({
+          name: form.name.value.trim(),
+          price: Number(form.price.value),
+          description: form.description.value.trim(),
+          main_image: form.main_image.value.trim(),
+          detail_images,
+        })
+        .eq('id', id);
+
+      if (error) {
+        msg.style.color = 'crimson';
+        msg.textContent = '❌ ' + error.message;
+      } else {
+        msg.style.color = 'green';
+        msg.textContent = '✅ 수정 완료! 3초 후 관리자 페이지로 이동...';
+        setTimeout(() => location.href = 'admin.html', 1500);
+      }
+    });
+
+    loadProduct();
+  </script>
+</body>
+</html>
