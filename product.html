@@ -27,6 +27,13 @@
     const params = new URLSearchParams(location.search);
     const id = params.get('id');
 
+function getMemberField(key) {
+  try {
+    const m = JSON.parse(localStorage.getItem('member') || '{}');
+    return m[key] || '';
+  } catch { return ''; }
+}
+
     // ===== 상품 상세 로드 =====
     async function loadProduct() {
       const detailEl = document.getElementById('product-detail');
@@ -128,9 +135,11 @@
             <hr style="border:0; border-top:1px solid #eee; margin:8px 0;">
 
             <input name="customer_name" placeholder="주문자 이름" required
-              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-            <input name="customer_phone" placeholder="연락처 (010-0000-0000)" required
-              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+  value="${getMemberField('name')}"
+  style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+<input name="customer_phone" placeholder="연락처 (010-0000-0000)" required
+  value="${getMemberField('phone')}"
+  style="padding:10px; border:1px solid #ddd; border-radius:6px;">
             <input name="depositor_name" placeholder="입금자명 (실제 입금할 이름)" required
               style="padding:10px; border:1px solid #ddd; border-radius:6px;">
             <textarea name="memo" placeholder="요청사항 (선택)"

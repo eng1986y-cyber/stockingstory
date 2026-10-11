@@ -60,6 +60,9 @@
     </div>
   </main>
 
+<h2 style="margin:32px 0 16px;">회원 목록</h2>
+<div id="member-list" style="display:grid; gap:8px;">로딩중...</div>
+
   <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -75,6 +78,23 @@
     const adminScreen = document.getElementById('admin-screen');
     const loginForm = document.getElementById('login-form');
     const loginMsg = document.getElementById('login-msg');
+
+async function loadMembers() {
+  const el = document.getElementById('member-list');
+  const { data, error } = await db
+    .from('members').select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) { el.innerHTML = '<p>불러오기 실패</p>'; return; }
+  if (!data || data.length === 0) { el.innerHTML = '<p>회원이 없습니다.</p>'; return; }
+
+  el.innerHTML = data.map(m => `
+    <div style="background:#fff; padding:10px 14px; border-radius:6px; font-size:14px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+      <div><b>${m.name}</b> · ${m.phone}</div>
+      <div style="color:#888;">${m.email}</div>
+    </div>
+  `).join('');
+}
 
     // ===== 세션 확인 =====
     async function checkSession() {
@@ -97,6 +117,7 @@
       // 관리자 UI 초기화
       loadAdminList();
       loadOrders();
+      loadMembers();
     }
 
     // ===== 로그인 =====

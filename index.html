@@ -7,9 +7,14 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1><a href="index.html">🛍️ 심플몰</a></h1>
-  </header>
+<header style="display:flex; justify-content:space-between; align-items:center;">
+  <h1><a href="index.html">🛍️ 심플몰</a></h1>
+  <div id="header-member" style="font-size:14px;">
+    <a href="signup.html" style="padding:8px 14px; background:#03c75a; color:#fff; border-radius:6px; text-decoration:none;">
+      회원가입
+    </a>
+  </div>
+</header>
 
   <main>
     <div id="product-list" class="grid">로딩중...</div>
@@ -59,6 +64,26 @@
     }
 
     loadProducts();
+
+// 회원 상태 표시
+(function() {
+  const el = document.getElementById('header-member');
+  const member = localStorage.getItem('member');
+  if (member) {
+    const m = JSON.parse(member);
+    el.innerHTML = `
+      <span style="color:#555;">안녕하세요, <b>${m.name}</b>님</span>
+      <button id="logout-member"
+        style="margin-left:8px; padding:6px 12px; background:#eee; border:0; border-radius:6px; cursor:pointer; font-size:13px;">
+        로그아웃
+      </button>
+    `;
+    document.getElementById('logout-member').onclick = () => {
+      localStorage.removeItem('member');
+      location.reload();
+    };
+  }
+})();
   </script>
 </body>
 </html>
