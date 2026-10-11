@@ -12,27 +12,44 @@
   </header>
 
   <main>
-    <h2 style="margin-bottom:16px;">상품 수정</h2>
+    <!-- 로그인 안 됨 -->
+    <div id="login-screen" style="display:none; max-width:360px; margin:60px auto;">
+      <h2 style="margin-bottom:16px;">관리자 로그인</h2>
+      <form id="login-form" style="display:grid; gap:10px; background:#fff; padding:20px; border-radius:8px;">
+        <input name="email" type="email" placeholder="이메일" required
+          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <input name="password" type="password" placeholder="비밀번호" required
+          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <button type="submit"
+          style="padding:12px; background:#222; color:#fff; border:0; border-radius:6px; cursor:pointer;">
+          로그인
+        </button>
+      </form>
+      <p id="login-msg" style="margin-top:12px; font-weight:600;"></p>
+    </div>
 
-    <form id="edit-form">
-      <input name="name" placeholder="상품명" required>
-      <input name="price" type="number" placeholder="가격 (숫자만)" required>
-      <textarea name="description" placeholder="상품 설명"></textarea>
-      <input name="main_image" placeholder="메인 이미지 URL (필수)" required>
-      <textarea name="detail_images" placeholder="상세 이미지 URL (한 줄에 하나씩)"></textarea>
-      <input name="colors" placeholder="색상 (쉼표로 구분)">
-      <input name="sizes" placeholder="사이즈 (쉼표로 구분)">
-      <input name="extra_options" placeholder="추가옵션 (쉼표로 구분)">
-      <div style="display:flex; gap:8px;">
-        <button type="submit" style="flex:1;">수정 완료</button>
-        <a href="admin.html"
-          style="flex:1; text-align:center; padding:12px; background:#999; color:#fff; border-radius:6px; text-decoration:none;">
-          취소
-        </a>
-      </div>
-    </form>
-
-    <p id="msg" style="margin-top:12px; font-weight:600;"></p>
+    <!-- 로그인 됨 -->
+    <div id="edit-screen" style="display:none;">
+      <h2 style="margin-bottom:16px;">상품 수정</h2>
+      <form id="edit-form">
+        <input name="name" placeholder="상품명" required>
+        <input name="price" type="number" placeholder="가격 (숫자만)" required>
+        <textarea name="description" placeholder="상품 설명"></textarea>
+        <input name="main_image" placeholder="메인 이미지 URL (필수)" required>
+        <textarea name="detail_images" placeholder="상세 이미지 URL (한 줄에 하나씩)"></textarea>
+        <input name="colors" placeholder="색상 (쉼표로 구분)">
+        <input name="sizes" placeholder="사이즈 (쉼표로 구분)">
+        <input name="extra_options" placeholder="추가옵션 (쉼표로 구분)">
+        <div style="display:flex; gap:8px;">
+          <button type="submit" style="flex:1;">수정 완료</button>
+          <a href="admin.html"
+            style="flex:1; text-align:center; padding:12px; background:#999; color:#fff; border-radius:6px; text-decoration:none;">
+            취소
+          </a>
+        </div>
+      </form>
+      <p id="msg" style="margin-top:12px; font-weight:600;"></p>
+    </div>
   </main>
 
   <!-- Supabase CDN -->
@@ -46,6 +63,11 @@
   </script>
 
   <script>
+    const loginScreen = document.getElementById('login-screen');
+    const editScreen = document.getElementById('edit-screen');
+    const loginForm = document.getElementById('login-form');
+    const loginMsg = document.getElementById('login-msg');
+
     const form = document.getElementById('edit-form');
     const msg = document.getElementById('msg');
     const params = new URLSearchParams(location.search);
@@ -53,6 +75,38 @@
 
     const parseList = (str) =>
       (str || '').split(',').map(s => s.trim()).filter(Boolean);
+
+    // ===== 세션 확인 =====
+    async function checkSession() {
+      const { data: { session } } = await db.auth.getSession();
+      if (session) {
+        loginScreen.style.display = 'none';
+        editScreen.style.display = 'block';
+        loadProduct();
+      } else {
+        loginScreen.style.display = 'block';
+        editScreen.style.display = 'none';
+      }
+    }
+
+    // ===== 로그인 =====
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      loginMsg.textContent = '로그인 중...';
+      loginMsg.style.color = '#222';
+
+      const { error } = await db.auth.signInWithPassword({
+        email: loginForm.email.value.trim(),
+        password: loginForm.password.value,
+      });
+
+      if (error) {
+        loginMsg.style.color = 'crimson';
+        loginMsg.textContent = '❌ ' + error.message;
+      } else {
+        checkSession();
+      }
+    });
 
     // ===== 기존 상품 정보 불러오기 =====
     async function loadProduct() {
@@ -116,7 +170,7 @@
       }
     });
 
-    loadProduct();
+    checkSession();
   </script>
 </body>
 </html>

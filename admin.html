@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>관리자 - 상품 등록</title>
+  <title>관리자 - 심플몰</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,33 +12,57 @@
   </header>
 
   <main>
-    <h2 style="margin-bottom:16px;">상품 등록</h2>
+    <!-- 로그인 안 된 상태 -->
+    <div id="login-screen" style="display:none; max-width:360px; margin:60px auto;">
+      <h2 style="margin-bottom:16px;">관리자 로그인</h2>
+      <form id="login-form" style="display:grid; gap:10px; background:#fff; padding:20px; border-radius:8px;">
+        <input name="email" type="email" placeholder="이메일" required
+          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <input name="password" type="password" placeholder="비밀번호" required
+          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <button type="submit"
+          style="padding:12px; background:#222; color:#fff; border:0; border-radius:6px; cursor:pointer;">
+          로그인
+        </button>
+      </form>
+      <p id="login-msg" style="margin-top:12px; font-weight:600;"></p>
+    </div>
 
-    <form id="product-form">
-      <input name="name" placeholder="상품명" required>
-      <input name="price" type="number" placeholder="가격 (숫자만)" required>
-      <textarea name="description" placeholder="상품 설명"></textarea>
-      <input name="main_image" placeholder="메인 이미지 URL (필수)" required>
-      <textarea name="detail_images" placeholder="상세 이미지 URL (한 줄에 하나씩)"></textarea>
-      <input name="colors" placeholder="색상 (쉼표로 구분: 빨강,파랑,검정)">
-      <input name="sizes" placeholder="사이즈 (쉼표로 구분: S,M,L,XL)">
-      <input name="extra_options" placeholder="추가옵션 (쉼표로 구분: 각인,포장)">
-      <button type="submit">등록하기</button>
-    </form>
+    <!-- 로그인 된 상태 -->
+    <div id="admin-screen" style="display:none;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h2>상품 등록</h2>
+        <button id="logout-btn"
+          style="padding:8px 14px; background:#999; color:#fff; border:0; border-radius:6px; cursor:pointer; font-size:13px;">
+          로그아웃
+        </button>
+      </div>
 
-    <p id="msg" style="margin-top:12px; font-weight:600;"></p>
+      <form id="product-form">
+        <input name="name" placeholder="상품명" required>
+        <input name="price" type="number" placeholder="가격 (숫자만)" required>
+        <textarea name="description" placeholder="상품 설명"></textarea>
+        <input name="main_image" placeholder="메인 이미지 URL (필수)" required>
+        <textarea name="detail_images" placeholder="상세 이미지 URL (한 줄에 하나씩)"></textarea>
+        <input name="colors" placeholder="색상 (쉼표로 구분: 빨강,파랑,검정)">
+        <input name="sizes" placeholder="사이즈 (쉼표로 구분: S,M,L,XL)">
+        <input name="extra_options" placeholder="추가옵션 (쉼표로 구분: 각인,포장)">
+        <button type="submit">등록하기</button>
+      </form>
 
-    <h2 style="margin:32px 0 16px;">등록된 상품</h2>
-    <div id="admin-list" class="grid">로딩중...</div>
+      <p id="msg" style="margin-top:12px; font-weight:600;"></p>
 
-    <h2 style="margin:32px 0 16px;">주문 목록</h2>
-    <div id="order-list" style="display:grid; gap:12px;">로딩중...</div>
+      <h2 style="margin:32px 0 16px;">등록된 상품</h2>
+      <div id="admin-list" class="grid">로딩중...</div>
+
+      <h2 style="margin:32px 0 16px;">주문 목록</h2>
+      <div id="order-list" style="display:grid; gap:12px;">로딩중...</div>
+    </div>
   </main>
 
   <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Supabase 설정 -->
   <script>
     const db = supabase.createClient(
       "https://alpdhgcipjeekzrpxlbh.supabase.co",
@@ -47,6 +71,61 @@
   </script>
 
   <script>
+    const loginScreen = document.getElementById('login-screen');
+    const adminScreen = document.getElementById('admin-screen');
+    const loginForm = document.getElementById('login-form');
+    const loginMsg = document.getElementById('login-msg');
+
+    // ===== 세션 확인 =====
+    async function checkSession() {
+      const { data: { session } } = await db.auth.getSession();
+      if (session) {
+        showAdmin();
+      } else {
+        showLogin();
+      }
+    }
+
+    function showLogin() {
+      loginScreen.style.display = 'block';
+      adminScreen.style.display = 'none';
+    }
+
+    function showAdmin() {
+      loginScreen.style.display = 'none';
+      adminScreen.style.display = 'block';
+      // 관리자 UI 초기화
+      loadAdminList();
+      loadOrders();
+    }
+
+    // ===== 로그인 =====
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      loginMsg.textContent = '로그인 중...';
+      loginMsg.style.color = '#222';
+
+      const email = loginForm.email.value.trim();
+      const password = loginForm.password.value;
+
+      const { error } = await db.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        loginMsg.style.color = 'crimson';
+        loginMsg.textContent = '❌ ' + error.message;
+      } else {
+        loginMsg.textContent = '';
+        showAdmin();
+      }
+    });
+
+    // ===== 로그아웃 =====
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await db.auth.signOut();
+      showLogin();
+    });
+
+    // ===== 이하 상품/주문 로직 (로그인 후에만 실행됨) =====
     const form = document.getElementById('product-form');
     const msg = document.getElementById('msg');
     const listEl = document.getElementById('admin-list');
@@ -54,7 +133,6 @@
     const parseList = (str) =>
       (str || '').split(',').map(s => s.trim()).filter(Boolean);
 
-    // ===== 상품 등록 =====
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -86,7 +164,6 @@
       }
     });
 
-    // ===== 등록된 상품 목록 =====
     async function loadAdminList() {
       const { data, error } = await db
         .from('products').select('*')
@@ -128,9 +205,7 @@
         });
       });
     }
-    loadAdminList();
 
-    // ===== 주문 목록 =====
     async function loadOrders() {
       const el = document.getElementById('order-list');
       const { data, error } = await db
@@ -191,7 +266,8 @@
       return { '입금대기':'#ff9800', '입금완료':'#03c75a', '배송중':'#1976d2', '완료':'#555', '취소':'#e53935' }[s] || '#ccc';
     }
 
-    loadOrders();
+    // ===== 시작 =====
+    checkSession();
   </script>
 </body>
 </html>
