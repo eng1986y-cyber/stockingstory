@@ -20,6 +20,9 @@
       <textarea name="description" placeholder="상품 설명"></textarea>
       <input name="main_image" placeholder="메인 이미지 URL (필수)" required>
       <textarea name="detail_images" placeholder="상세 이미지 URL (한 줄에 하나씩)"></textarea>
+      <input name="colors" placeholder="색상 (쉼표로 구분: 빨강,파랑,검정)">
+      <input name="sizes" placeholder="사이즈 (쉼표로 구분: S,M,L,XL)">
+      <input name="extra_options" placeholder="추가옵션 (쉼표로 구분: 각인,포장)">
       <button type="submit">등록하기</button>
     </form>
 
@@ -61,13 +64,19 @@
 
       msg.textContent = '등록 중...';
 
-      const { error } = await db.from('products').insert({
-        name: form.name.value.trim(),
-        price: Number(form.price.value),
-        description: form.description.value.trim(),
-        main_image: form.main_image.value.trim(),
-        detail_images,
-      });
+      const parseList = (str) =>
+  str.split(',').map(s => s.trim()).filter(Boolean);
+
+const { error } = await db.from('products').insert({
+  name: form.name.value.trim(),
+  price: Number(form.price.value),
+  description: form.description.value.trim(),
+  main_image: form.main_image.value.trim(),
+  detail_images,
+  colors: parseList(form.colors.value),
+  sizes: parseList(form.sizes.value),
+  extra_options: parseList(form.extra_options.value),
+});
 
       if (error) {
         msg.style.color = 'crimson';
@@ -171,6 +180,10 @@ async function loadOrders() {
       </div>
     </div>
   `).join('');
+
+${o.selected_color ? `색상: <b>${o.selected_color}</b><br>` : ''}
+${o.selected_size ? `사이즈: <b>${o.selected_size}</b><br>` : ''}
+${(o.selected_extras && o.selected_extras.length) ? `추가옵션: <b>${o.selected_extras.join(', ')}</b><br>` : ''}
 
   // 상태 변경
   el.querySelectorAll('.status-select').forEach(sel => {
