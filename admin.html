@@ -176,9 +176,9 @@
 
       listEl.innerHTML = data.map(p => `
         <div class="card">
-          <a href="product.html?id=${p.id}">
-            <img src="${p.main_image}" alt="${p.name}" loading="lazy">
-          </a>
+          <a href="product.html?id=${p.id}" target="_blank" rel="noopener">
+  <img src="${p.main_image}" alt="${p.name}" loading="lazy">
+</a>
           <div class="card-body">
             <h3>${p.name}</h3>
             <p class="price">${Number(p.price).toLocaleString()}원</p>
