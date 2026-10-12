@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>회원가입 - 심플몰</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -32,7 +32,6 @@
     </div>
   </main>
 
-  <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const db = supabase.createClient(
@@ -44,6 +43,16 @@
   <script>
     const form = document.getElementById('signup-form');
     const msg = document.getElementById('msg');
+
+    function formatPhone(input) {
+      const num = input.value.replace(/[^0-9]/g, '').slice(0, 11);
+      if (num.length < 4) input.value = num;
+      else if (num.length < 7) input.value = num.slice(0,3) + '-' + num.slice(3);
+      else if (num.length < 11) input.value = num.slice(0,3) + '-' + num.slice(3,6) + '-' + num.slice(6);
+      else input.value = num.slice(0,3) + '-' + num.slice(3,7) + '-' + num.slice(7);
+    }
+
+    form.phone.addEventListener('input', (e) => formatPhone(e.target));
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -58,7 +67,6 @@
       const { error } = await db.from('members').insert({ name, phone, email });
 
       if (error) {
-        // 이미 가입된 이메일인 경우
         if (error.message.includes('duplicate')) {
           msg.style.color = 'crimson';
           msg.textContent = '❌ 이미 가입된 이메일입니다.';
@@ -69,7 +77,6 @@
         return;
       }
 
-      // 가입 성공 → 정보 로컬에 저장 (주문 시 자동 채우기 용)
       localStorage.setItem('member', JSON.stringify({ name, phone, email }));
 
       msg.style.color = 'green';

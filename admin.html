@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>관리자 - 심플몰</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -63,7 +63,6 @@
     </div>
   </main>
 
-  <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
@@ -79,7 +78,6 @@
     const loginForm = document.getElementById('login-form');
     const loginMsg = document.getElementById('login-msg');
 
-    // ===== 세션 확인 =====
     async function checkSession() {
       const { data: { session } } = await db.auth.getSession();
       if (session) showAdmin();
@@ -99,7 +97,6 @@
       loadMembers();
     }
 
-    // ===== 로그인 =====
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       loginMsg.textContent = '로그인 중...';
@@ -119,13 +116,11 @@
       }
     });
 
-    // ===== 로그아웃 =====
     document.getElementById('logout-btn').addEventListener('click', async () => {
       await db.auth.signOut();
       showLogin();
     });
 
-    // ===== 상품 등록 =====
     const form = document.getElementById('product-form');
     const msg = document.getElementById('msg');
     const listEl = document.getElementById('admin-list');
@@ -164,7 +159,6 @@
       }
     });
 
-    // ===== 상품 목록 =====
     async function loadAdminList() {
       const { data, error } = await db
         .from('products').select('*')
@@ -207,7 +201,6 @@
       });
     }
 
-    // ===== 주문 목록 =====
     let currentOrders = [];
 
     async function loadOrders() {
@@ -283,13 +276,12 @@
       return { '입금대기':'#ff9800', '입금완료':'#03c75a', '배송중':'#1976d2', '완료':'#555', '취소':'#e53935' }[s] || '#ccc';
     }
 
-    // ===== 주문 수정 모달 =====
     function showOrderEditModal(o) {
       const modal = document.createElement('div');
-      modal.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:1000;`;
+      modal.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:1000; padding:10px;`;
       modal.innerHTML = `
-        <div style="background:#fff; padding:24px; border-radius:10px; width:90%; max-width:440px; max-height:90vh; overflow-y:auto;">
-          <h2 style="margin-bottom:16px;">주문 수정 (ID: ${o.id})</h2>
+        <div style="background:#fff; padding:20px; border-radius:10px; width:100%; max-width:440px; max-height:90vh; overflow-y:auto;">
+          <h2 style="margin-bottom:16px; font-size:18px;">주문 수정 (ID: ${o.id})</h2>
           <form id="order-edit-form" style="display:grid; gap:10px;">
             <label style="font-size:13px; font-weight:600;">상품명</label>
             <input name="product_name" value="${o.product_name}" required
@@ -386,7 +378,6 @@
       });
     }
 
-    // ===== 회원 목록 =====
     async function loadMembers() {
       const el = document.getElementById('member-list');
       const { data, error } = await db
@@ -404,7 +395,6 @@
       `).join('');
     }
 
-    // ===== 시작 =====
     checkSession();
   </script>
 </body>

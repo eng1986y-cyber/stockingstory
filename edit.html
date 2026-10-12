@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>상품 수정 - 심플몰</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -12,7 +12,6 @@
   </header>
 
   <main>
-    <!-- 로그인 안 됨 -->
     <div id="login-screen" style="display:none; max-width:360px; margin:60px auto;">
       <h2 style="margin-bottom:16px;">관리자 로그인</h2>
       <form id="login-form" style="display:grid; gap:10px; background:#fff; padding:20px; border-radius:8px;">
@@ -28,7 +27,6 @@
       <p id="login-msg" style="margin-top:12px; font-weight:600;"></p>
     </div>
 
-    <!-- 로그인 됨 -->
     <div id="edit-screen" style="display:none;">
       <h2 style="margin-bottom:16px;">상품 수정</h2>
       <form id="edit-form">
@@ -52,7 +50,6 @@
     </div>
   </main>
 
-  <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
@@ -76,7 +73,6 @@
     const parseList = (str) =>
       (str || '').split(',').map(s => s.trim()).filter(Boolean);
 
-    // ===== 세션 확인 =====
     async function checkSession() {
       const { data: { session } } = await db.auth.getSession();
       if (session) {
@@ -89,7 +85,6 @@
       }
     }
 
-    // ===== 로그인 =====
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       loginMsg.textContent = '로그인 중...';
@@ -108,7 +103,6 @@
       }
     });
 
-    // ===== 기존 상품 정보 불러오기 =====
     async function loadProduct() {
       if (!id) {
         msg.textContent = '❌ 상품 ID가 없습니다.';
@@ -136,7 +130,6 @@
       form.extra_options.value = (data.extra_options || []).join(',');
     }
 
-    // ===== 수정 저장 =====
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 

@@ -2,13 +2,13 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>주문 조회 - 심플몰</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header style="display:flex; justify-content:space-between; align-items:center;">
-    <h1><a href="index.html">🛍️ 심플몰</a> - 주문 조회</h1>
+    <h1><a href="index.html">🛍️ 심플몰</a></h1>
     <a href="index.html" style="padding:8px 14px; background:#eee; border-radius:6px; text-decoration:none; color:#222; font-size:14px;">
       홈으로
     </a>
@@ -49,11 +49,20 @@
     const searchBtn = document.getElementById('search-btn');
     const resultEl = document.getElementById('orders-result');
 
-    // 회원이면 연락처 자동 입력
     try {
       const m = JSON.parse(localStorage.getItem('member') || '{}');
       if (m.phone) phoneInput.value = m.phone;
     } catch {}
+
+    function formatPhone(input) {
+      const num = input.value.replace(/[^0-9]/g, '').slice(0, 11);
+      if (num.length < 4) input.value = num;
+      else if (num.length < 7) input.value = num.slice(0,3) + '-' + num.slice(3);
+      else if (num.length < 11) input.value = num.slice(0,3) + '-' + num.slice(3,6) + '-' + num.slice(6);
+      else input.value = num.slice(0,3) + '-' + num.slice(3,7) + '-' + num.slice(7);
+    }
+
+    phoneInput.addEventListener('input', (e) => formatPhone(e.target));
 
     function statusColor(s) {
       return { '입금대기':'#ff9800', '입금완료':'#03c75a', '배송중':'#1976d2', '완료':'#555', '취소':'#e53935' }[s] || '#ccc';
@@ -102,7 +111,6 @@
       if (e.key === 'Enter') searchOrders();
     });
 
-    // 페이지 열리면 자동 조회 (연락처 있으면)
     if (phoneInput.value) searchOrders();
   </script>
 </body>

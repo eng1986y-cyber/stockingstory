@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>상품 상세 - 심플몰</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -11,7 +11,7 @@
     <h1><a href="index.html">🛍️ 심플몰</a></h1>
     <div style="display:flex; gap:8px; font-size:14px;">
       <a href="cart.html" style="padding:8px 14px; background:#1976d2; color:#fff; border-radius:6px; text-decoration:none;">
-        🛒 장바구니 <span id="cart-count" style="background:#fff; color:#1976d2; border-radius:10px; padding:0 6px; font-size:12px;">0</span>
+        🛒 <span id="cart-count">0</span>
       </a>
       <a href="index.html" style="padding:8px 14px; background:#eee; color:#222; border-radius:6px; text-decoration:none;">
         홈
@@ -40,7 +40,6 @@
       } catch { return ''; }
     }
 
-    // 장바구니 개수 표시
     function updateCartCount() {
       const cart = JSON.parse(localStorage.getItem('cart') || '[]');
       const el = document.getElementById('cart-count');
@@ -48,7 +47,15 @@
     }
     updateCartCount();
 
-    // ===== 상품 상세 로드 =====
+    // 연락처 자동 하이픈
+    function formatPhone(input) {
+      const num = input.value.replace(/[^0-9]/g, '').slice(0, 11);
+      if (num.length < 4) input.value = num;
+      else if (num.length < 7) input.value = num.slice(0,3) + '-' + num.slice(3);
+      else if (num.length < 11) input.value = num.slice(0,3) + '-' + num.slice(3,6) + '-' + num.slice(6);
+      else input.value = num.slice(0,3) + '-' + num.slice(3,7) + '-' + num.slice(7);
+    }
+
     async function loadProduct() {
       const detailEl = document.getElementById('product-detail');
       if (!id) { detailEl.innerHTML = '<p>상품 ID가 없습니다.</p>'; return; }
@@ -74,11 +81,11 @@
             <p class="price">${Number(data.price).toLocaleString()}원</p>
             <p class="desc">${data.description || ''}</p>
             <div style="display:flex; gap:8px; margin-top:16px;">
-              <button class="buy-btn" id="cart-btn"
+              <button id="cart-btn"
                 style="flex:1; padding:12px; background:#1976d2; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">
-                🛒 장바구니 담기
+                🛒 장바구니
               </button>
-              <button class="buy-btn" id="buy-btn"
+              <button id="buy-btn"
                 style="flex:1; padding:12px; background:#03c75a; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">
                 바로 구매
               </button>
@@ -89,21 +96,18 @@
       `;
 
       document.getElementById('buy-btn').addEventListener('click', () => {
-        showOrderModal([{ product: data, quantity: 1, color: null, size: null, extras: [] }], 'single');
+        showOrderModal(data, 'single');
       });
-
       document.getElementById('cart-btn').addEventListener('click', () => {
-        showOrderModal([{ product: data, quantity: 1, color: null, size: null, extras: [] }], 'cart');
+        showOrderModal(data, 'cart');
       });
     }
 
-    // ===== 옵션 선택 모달 =====
-    // mode: 'single' = 바로 구매, 'cart' = 장바구니 담기
-    function showOrderModal(items, mode) {
-      const p = items[0].product;
+    function showOrderModal(p, mode) {
       const colors = p.colors || [];
       const sizes = p.sizes || [];
       const extras = p.extra_options || [];
+      const isCart = mode === 'cart';
 
       const colorHtml = colors.length ? `
         <label style="font-size:13px; font-weight:600;">색상</label>
@@ -134,13 +138,11 @@
         </div>
       ` : '';
 
-      const isCart = mode === 'cart';
-
       const modal = document.createElement('div');
-      modal.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:1000;`;
+      modal.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:1000; padding:10px;`;
       modal.innerHTML = `
-        <div style="background:#fff; padding:24px; border-radius:10px; width:90%; max-width:420px; max-height:90vh; overflow-y:auto;">
-          <h2 style="margin-bottom:16px;">${isCart ? '옵션 선택 (장바구니)' : '주문 정보 입력'}</h2>
+        <div style="background:#fff; padding:20px; border-radius:10px; width:100%; max-width:420px; max-height:90vh; overflow-y:auto;">
+          <h2 style="margin-bottom:16px; font-size:18px;">${isCart ? '옵션 선택' : '주문 정보 입력'}</h2>
           <p style="margin-bottom:12px; font-size:14px; color:#555;">
             <b>${p.name}</b><br>${Number(p.price).toLocaleString()}원
           </p>
@@ -157,7 +159,7 @@
               <hr style="border:0; border-top:1px solid #eee; margin:8px 0;">
               <input name="customer_name" placeholder="주문자 이름" required value="${getMemberField('name')}"
                 style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-              <input name="customer_phone" placeholder="연락처" required value="${getMemberField('phone')}"
+              <input name="customer_phone" placeholder="연락처 (010-0000-0000)" required value="${getMemberField('phone')}"
                 style="padding:10px; border:1px solid #ddd; border-radius:6px;">
               <input name="depositor_name" placeholder="입금자명" required
                 style="padding:10px; border:1px solid #ddd; border-radius:6px;">
@@ -189,6 +191,10 @@
       qtyInput.addEventListener('input', updateTotal);
       updateTotal();
 
+      // 연락처 자동 하이픈
+      const phoneInput = modal.querySelector('[name="customer_phone"]');
+      if (phoneInput) phoneInput.addEventListener('input', (e) => formatPhone(e.target));
+
       modal.querySelector('#close-modal').onclick = () => modal.remove();
 
       modal.querySelector('#order-form').addEventListener('submit', async (ev) => {
@@ -205,7 +211,6 @@
         const selectedColor = f.selected_color ? f.selected_color.value : null;
         const selectedSize  = f.selected_size  ? f.selected_size.value  : null;
 
-        // ===== 장바구니 모드 =====
         if (isCart) {
           const cart = JSON.parse(localStorage.getItem('cart') || '[]');
           cart.push({
@@ -225,7 +230,6 @@
           return;
         }
 
-        // ===== 바로 구매 모드 =====
         const { error } = await db.from('orders').insert({
           product_id: p.id,
           product_name: p.name,
