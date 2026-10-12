@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>주문 조회 - 심플몰</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header style="display:flex; justify-content:space-between; align-items:center;">
+    <h1><a href="index.html">🛍️ 심플몰</a> - 주문 조회</h1>
+    <a href="index.html" style="padding:8px 14px; background:#eee; border-radius:6px; text-decoration:none; color:#222; font-size:14px;">
+      홈으로
+    </a>
+  </header>
+
+  <main>
+    <div style="max-width:640px; margin:0 auto;">
+      <h2 style="margin-bottom:16px;">주문 내역</h2>
+
+      <div id="search-box" style="background:#fff; padding:16px; border-radius:8px; margin-bottom:20px;">
+        <p style="font-size:13px; color:#666; margin-bottom:8px;">
+          주문 시 입력한 <b>연락처</b>로 조회합니다.
+        </p>
+        <div style="display:flex; gap:8px;">
+          <input id="phone-input" placeholder="010-0000-0000"
+            style="flex:1; padding:10px; border:1px solid #ddd; border-radius:6px;">
+          <button id="search-btn"
+            style="padding:10px 20px; background:#03c75a; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">
+            조회
+          </button>
+        </div>
+      </div>
+
+      <div id="orders-result"></div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const db = supabase.createClient(
+      "https://alpdhgcipjeekzrpxlbh.supabase.co",
+      "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya"
+    );
+  </script>
+
+  <script>
+    const phoneInput = document.getElementById('phone-input');
+    const searchBtn = document.getElementById('search-btn');
+    const resultEl = document.getElementById('orders-result');
+
+    // 회원이면 연락처 자동 입력
+    try {
+      const m = JSON.parse(localStorage.getItem('member') || '{}');
+      if (m.phone) phoneInput.value = m.phone;
+    } catch {}
+
+    function statusColor(s) {
+      return { '입금대기':'#ff9800', '입금완료':'#03c75a', '배송중':'#1976d2', '완료':'#555', '취소':'#e53935' }[s] || '#ccc';
+    }
+
+    async function searchOrders() {
+      const phone = phoneInput.value.trim();
+      if (!phone) { alert('연락처를 입력해주세요.'); return; }
+
+      resultEl.innerHTML = '<p style="text-align:center; padding:20px;">조회 중...</p>';
+
+      const { data, error } = await db
+        .from('orders').select('*')
+        .eq('customer_phone', phone)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        resultEl.innerHTML = '<p>조회 실패: ' + error.message + '</p>';
+        return;
+      }
+      if (!data || data.length === 0) {
+        resultEl.innerHTML = '<p style="text-align:center; padding:20px; color:#888;">주문 내역이 없습니다.</p>';
+        return;
+      }
+
+      resultEl.innerHTML = data.map(o => `
+        <div style="background:#fff; padding:14px; border-radius:8px; margin-bottom:10px; border-left:4px solid ${statusColor(o.status)};">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:6px;">
+            <span style="background:${statusColor(o.status)}; color:#fff; padding:3px 10px; border-radius:12px; font-size:12px; font-weight:600;">
+              ${o.status}
+            </span>
+            <span style="color:#888; font-size:12px;">${new Date(o.created_at).toLocaleString('ko-KR')}</span>
+          </div>
+          <div style="font-size:14px; line-height:1.7;">
+            <b>${o.product_name}</b> × ${o.quantity} = <b style="color:#e53935;">${o.total_price.toLocaleString()}원</b><br>
+            ${o.selected_color ? `색상: ${o.selected_color} · ` : ''}${o.selected_size ? `사이즈: ${o.selected_size}` : ''}
+            ${o.selected_extras?.length ? `<br>추가옵션: ${o.selected_extras.join(', ')}` : ''}
+            <br><span style="color:#888; font-size:13px;">입금자명: ${o.depositor_name}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    searchBtn.addEventListener('click', searchOrders);
+    phoneInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') searchOrders();
+    });
+
+    // 페이지 열리면 자동 조회 (연락처 있으면)
+    if (phoneInput.value) searchOrders();
+  </script>
+</body>
+</html>

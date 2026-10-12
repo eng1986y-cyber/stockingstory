@@ -57,11 +57,11 @@
 
       <h2 style="margin:32px 0 16px;">주문 목록</h2>
       <div id="order-list" style="display:grid; gap:12px;">로딩중...</div>
+
+      <h2 style="margin:32px 0 16px;">회원 목록</h2>
+      <div id="member-list" style="display:grid; gap:8px;">로딩중...</div>
     </div>
   </main>
-
-<h2 style="margin:32px 0 16px;">회원 목록</h2>
-<div id="member-list" style="display:grid; gap:8px;">로딩중...</div>
 
   <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -79,31 +79,11 @@
     const loginForm = document.getElementById('login-form');
     const loginMsg = document.getElementById('login-msg');
 
-async function loadMembers() {
-  const el = document.getElementById('member-list');
-  const { data, error } = await db
-    .from('members').select('*')
-    .order('created_at', { ascending: false });
-
-  if (error) { el.innerHTML = '<p>불러오기 실패</p>'; return; }
-  if (!data || data.length === 0) { el.innerHTML = '<p>회원이 없습니다.</p>'; return; }
-
-  el.innerHTML = data.map(m => `
-    <div style="background:#fff; padding:10px 14px; border-radius:6px; font-size:14px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
-      <div><b>${m.name}</b> · ${m.phone}</div>
-      <div style="color:#888;">${m.email}</div>
-    </div>
-  `).join('');
-}
-
     // ===== 세션 확인 =====
     async function checkSession() {
       const { data: { session } } = await db.auth.getSession();
-      if (session) {
-        showAdmin();
-      } else {
-        showLogin();
-      }
+      if (session) showAdmin();
+      else showLogin();
     }
 
     function showLogin() {
@@ -114,7 +94,6 @@ async function loadMembers() {
     function showAdmin() {
       loginScreen.style.display = 'none';
       adminScreen.style.display = 'block';
-      // 관리자 UI 초기화
       loadAdminList();
       loadOrders();
       loadMembers();
@@ -126,10 +105,10 @@ async function loadMembers() {
       loginMsg.textContent = '로그인 중...';
       loginMsg.style.color = '#222';
 
-      const email = loginForm.email.value.trim();
-      const password = loginForm.password.value;
-
-      const { error } = await db.auth.signInWithPassword({ email, password });
+      const { error } = await db.auth.signInWithPassword({
+        email: loginForm.email.value.trim(),
+        password: loginForm.password.value,
+      });
 
       if (error) {
         loginMsg.style.color = 'crimson';
@@ -146,7 +125,7 @@ async function loadMembers() {
       showLogin();
     });
 
-    // ===== 이하 상품/주문 로직 (로그인 후에만 실행됨) =====
+    // ===== 상품 등록 =====
     const form = document.getElementById('product-form');
     const msg = document.getElementById('msg');
     const listEl = document.getElementById('admin-list');
@@ -185,6 +164,7 @@ async function loadMembers() {
       }
     });
 
+    // ===== 상품 목록 =====
     async function loadAdminList() {
       const { data, error } = await db
         .from('products').select('*')
@@ -198,8 +178,8 @@ async function loadMembers() {
       listEl.innerHTML = data.map(p => `
         <div class="card">
           <a href="product.html?id=${p.id}" target="_blank" rel="noopener">
-  <img src="${p.main_image}" alt="${p.name}" loading="lazy">
-</a>
+            <img src="${p.main_image}" alt="${p.name}" loading="lazy">
+          </a>
           <div class="card-body">
             <h3>${p.name}</h3>
             <p class="price">${Number(p.price).toLocaleString()}원</p>
@@ -227,6 +207,7 @@ async function loadMembers() {
       });
     }
 
+    // ===== 주문 목록 =====
     async function loadOrders() {
       const el = document.getElementById('order-list');
       const { data, error } = await db
@@ -285,6 +266,24 @@ async function loadMembers() {
 
     function statusColor(s) {
       return { '입금대기':'#ff9800', '입금완료':'#03c75a', '배송중':'#1976d2', '완료':'#555', '취소':'#e53935' }[s] || '#ccc';
+    }
+
+    // ===== 회원 목록 =====
+    async function loadMembers() {
+      const el = document.getElementById('member-list');
+      const { data, error } = await db
+        .from('members').select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) { el.innerHTML = '<p>불러오기 실패</p>'; return; }
+      if (!data || data.length === 0) { el.innerHTML = '<p>회원이 없습니다.</p>'; return; }
+
+      el.innerHTML = data.map(m => `
+        <div style="background:#fff; padding:10px 14px; border-radius:6px; font-size:14px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+          <div><b>${m.name}</b> · ${m.phone}</div>
+          <div style="color:#888;">${m.email}</div>
+        </div>
+      `).join('');
     }
 
     // ===== 시작 =====

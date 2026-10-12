@@ -7,15 +7,21 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
+  <header style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
     <h1><a href="index.html">🛍️ 심플몰</a></h1>
+    <div style="display:flex; gap:8px; font-size:14px;">
+      <a href="cart.html" style="padding:8px 14px; background:#1976d2; color:#fff; border-radius:6px; text-decoration:none;">
+        🛒 장바구니 <span id="cart-count" style="background:#fff; color:#1976d2; border-radius:10px; padding:0 6px; font-size:12px;">0</span>
+      </a>
+      <a href="index.html" style="padding:8px 14px; background:#eee; color:#222; border-radius:6px; text-decoration:none;">
+        홈
+      </a>
+    </div>
   </header>
 
   <main id="product-detail">로딩중...</main>
 
-  <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <script>
     const db = supabase.createClient(
       "https://alpdhgcipjeekzrpxlbh.supabase.co",
@@ -27,21 +33,25 @@
     const params = new URLSearchParams(location.search);
     const id = params.get('id');
 
-function getMemberField(key) {
-  try {
-    const m = JSON.parse(localStorage.getItem('member') || '{}');
-    return m[key] || '';
-  } catch { return ''; }
-}
+    function getMemberField(key) {
+      try {
+        const m = JSON.parse(localStorage.getItem('member') || '{}');
+        return m[key] || '';
+      } catch { return ''; }
+    }
+
+    // 장바구니 개수 표시
+    function updateCartCount() {
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const el = document.getElementById('cart-count');
+      if (el) el.textContent = cart.length;
+    }
+    updateCartCount();
 
     // ===== 상품 상세 로드 =====
     async function loadProduct() {
       const detailEl = document.getElementById('product-detail');
-
-      if (!id) {
-        detailEl.innerHTML = '<p>상품 ID가 없습니다.</p>';
-        return;
-      }
+      if (!id) { detailEl.innerHTML = '<p>상품 ID가 없습니다.</p>'; return; }
 
       const { data, error } = await db
         .from('products').select('*')
@@ -63,20 +73,34 @@ function getMemberField(key) {
             <h2>${data.name}</h2>
             <p class="price">${Number(data.price).toLocaleString()}원</p>
             <p class="desc">${data.description || ''}</p>
-            <button class="buy-btn" id="buy-btn">구매하기</button>
+            <div style="display:flex; gap:8px; margin-top:16px;">
+              <button class="buy-btn" id="cart-btn"
+                style="flex:1; padding:12px; background:#1976d2; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">
+                🛒 장바구니 담기
+              </button>
+              <button class="buy-btn" id="buy-btn"
+                style="flex:1; padding:12px; background:#03c75a; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">
+                바로 구매
+              </button>
+            </div>
           </div>
         </div>
         <div class="detail-images">${detailImgs}</div>
       `;
 
-      // 구매하기 버튼 이벤트
       document.getElementById('buy-btn').addEventListener('click', () => {
-        showOrderModal(data);
+        showOrderModal([{ product: data, quantity: 1, color: null, size: null, extras: [] }], 'single');
+      });
+
+      document.getElementById('cart-btn').addEventListener('click', () => {
+        showOrderModal([{ product: data, quantity: 1, color: null, size: null, extras: [] }], 'cart');
       });
     }
 
-    // ===== 주문 모달 =====
-    function showOrderModal(p) {
+    // ===== 옵션 선택 모달 =====
+    // mode: 'single' = 바로 구매, 'cart' = 장바구니 담기
+    function showOrderModal(items, mode) {
+      const p = items[0].product;
       const colors = p.colors || [];
       const sizes = p.sizes || [];
       const extras = p.extra_options || [];
@@ -104,22 +128,19 @@ function getMemberField(key) {
         <div style="display:grid; gap:6px; padding:8px; border:1px solid #ddd; border-radius:6px;">
           ${extras.map((x, i) => `
             <label style="font-size:14px; display:flex; align-items:center; gap:6px; cursor:pointer;">
-              <input type="checkbox" name="extra_${i}" value="${x}">
-              ${x}
+              <input type="checkbox" name="extra_${i}" value="${x}"> ${x}
             </label>
           `).join('')}
         </div>
       ` : '';
 
+      const isCart = mode === 'cart';
+
       const modal = document.createElement('div');
-      modal.id = 'order-modal';
-      modal.style.cssText = `
-        position:fixed; inset:0; background:rgba(0,0,0,.5);
-        display:flex; align-items:center; justify-content:center; z-index:1000;
-      `;
+      modal.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:1000;`;
       modal.innerHTML = `
         <div style="background:#fff; padding:24px; border-radius:10px; width:90%; max-width:420px; max-height:90vh; overflow-y:auto;">
-          <h2 style="margin-bottom:16px;">주문 정보 입력</h2>
+          <h2 style="margin-bottom:16px;">${isCart ? '옵션 선택 (장바구니)' : '주문 정보 입력'}</h2>
           <p style="margin-bottom:12px; font-size:14px; color:#555;">
             <b>${p.name}</b><br>${Number(p.price).toLocaleString()}원
           </p>
@@ -132,24 +153,23 @@ function getMemberField(key) {
             <input name="quantity" type="number" min="1" value="1" required
               style="padding:10px; border:1px solid #ddd; border-radius:6px;">
 
-            <hr style="border:0; border-top:1px solid #eee; margin:8px 0;">
-
-            <input name="customer_name" placeholder="주문자 이름" required
-  value="${getMemberField('name')}"
-  style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-<input name="customer_phone" placeholder="연락처 (010-0000-0000)" required
-  value="${getMemberField('phone')}"
-  style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-            <input name="depositor_name" placeholder="입금자명 (실제 입금할 이름)" required
-              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-            <textarea name="memo" placeholder="요청사항 (선택)"
-              style="padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
+            ${isCart ? '' : `
+              <hr style="border:0; border-top:1px solid #eee; margin:8px 0;">
+              <input name="customer_name" placeholder="주문자 이름" required value="${getMemberField('name')}"
+                style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+              <input name="customer_phone" placeholder="연락처" required value="${getMemberField('phone')}"
+                style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+              <input name="depositor_name" placeholder="입금자명" required
+                style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+              <textarea name="memo" placeholder="요청사항 (선택)"
+                style="padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
+            `}
 
             <div id="total-preview" style="text-align:right; font-size:15px; font-weight:600; color:#e53935;"></div>
 
             <button type="submit"
-              style="padding:12px; background:#03c75a; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">
-              주문 완료 (무통장입금)
+              style="padding:12px; background:${isCart ? '#1976d2' : '#03c75a'}; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">
+              ${isCart ? '장바구니 담기' : '주문 완료 (무통장입금)'}
             </button>
             <button type="button" id="close-modal"
               style="padding:10px; background:#eee; border:0; border-radius:6px; cursor:pointer;">
@@ -160,7 +180,6 @@ function getMemberField(key) {
       `;
       document.body.appendChild(modal);
 
-      // 합계 표시
       const totalPreview = modal.querySelector('#total-preview');
       const qtyInput = modal.querySelector('[name="quantity"]');
       const updateTotal = () => {
@@ -170,10 +189,9 @@ function getMemberField(key) {
       qtyInput.addEventListener('input', updateTotal);
       updateTotal();
 
-      document.getElementById('close-modal').onclick = () => modal.remove();
+      modal.querySelector('#close-modal').onclick = () => modal.remove();
 
-      // 주문 제출
-      document.getElementById('order-form').addEventListener('submit', async (ev) => {
+      modal.querySelector('#order-form').addEventListener('submit', async (ev) => {
         ev.preventDefault();
         const f = ev.target;
         const qty = Number(f.quantity.value);
@@ -184,6 +202,30 @@ function getMemberField(key) {
           .filter(cb => cb && cb.checked)
           .map(cb => cb.value);
 
+        const selectedColor = f.selected_color ? f.selected_color.value : null;
+        const selectedSize  = f.selected_size  ? f.selected_size.value  : null;
+
+        // ===== 장바구니 모드 =====
+        if (isCart) {
+          const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+          cart.push({
+            product_id: p.id,
+            product_name: p.name,
+            product_price: p.price,
+            main_image: p.main_image,
+            quantity: qty,
+            selected_color: selectedColor,
+            selected_size: selectedSize,
+            selected_extras: selectedExtras,
+          });
+          localStorage.setItem('cart', JSON.stringify(cart));
+          updateCartCount();
+          alert('✅ 장바구니에 담았습니다!');
+          modal.remove();
+          return;
+        }
+
+        // ===== 바로 구매 모드 =====
         const { error } = await db.from('orders').insert({
           product_id: p.id,
           product_name: p.name,
@@ -194,16 +236,16 @@ function getMemberField(key) {
           customer_phone: f.customer_phone.value.trim(),
           depositor_name: f.depositor_name.value.trim(),
           memo: f.memo.value.trim(),
-          selected_color: f.selected_color ? f.selected_color.value : null,
-          selected_size: f.selected_size ? f.selected_size.value : null,
+          selected_color: selectedColor,
+          selected_size: selectedSize,
           selected_extras: selectedExtras,
         });
 
         if (error) { alert('❌ 주문 실패: ' + error.message); return; }
 
         const optLines = [
-          f.selected_color?.value && `색상: ${f.selected_color.value}`,
-          f.selected_size?.value && `사이즈: ${f.selected_size.value}`,
+          selectedColor && `색상: ${selectedColor}`,
+          selectedSize && `사이즈: ${selectedSize}`,
           selectedExtras.length && `추가옵션: ${selectedExtras.join(', ')}`,
           `수량: ${qty}개`,
         ].filter(Boolean).join('<br>');
@@ -211,9 +253,7 @@ function getMemberField(key) {
         modal.querySelector('div').innerHTML = `
           <h2 style="margin-bottom:16px; color:#03c75a;">✅ 주문 접수 완료</h2>
           <div style="background:#f8f8f8; padding:16px; border-radius:8px; margin-bottom:16px; line-height:1.7; font-size:14px;">
-            <b>주문 내역</b><br>
-            ${p.name}<br>
-            ${optLines}
+            <b>주문 내역</b><br>${p.name}<br>${optLines}
             <hr style="border:0; border-top:1px solid #ddd; margin:8px 0;">
             <b>입금 계좌 안내</b><br>
             은행: <b>○○은행</b><br>

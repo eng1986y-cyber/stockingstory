@@ -7,83 +7,86 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header style="display:flex; justify-content:space-between; align-items:center;">
+<header style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
   <h1><a href="index.html">🛍️ 심플몰</a></h1>
-  <div id="header-member" style="font-size:14px;">
-    <a href="signup.html" style="padding:8px 14px; background:#03c75a; color:#fff; border-radius:6px; text-decoration:none;">
+  <div id="header-member" style="font-size:14px; display:flex; align-items:center; gap:8px;">
+    <a href="cart.html" style="padding:8px 14px; background:#1976d2; color:#fff; border-radius:6px; text-decoration:none;">
+      🛒 장바구니 <span id="cart-count" style="background:#fff; color:#1976d2; border-radius:10px; padding:0 6px; font-size:12px; margin-left:2px;">0</span>
+    </a>
+    <a href="orders.html" style="padding:8px 14px; background:#555; color:#fff; border-radius:6px; text-decoration:none;">
+      📦 주문조회
+    </a>
+    <a href="signup.html" id="signup-btn" style="padding:8px 14px; background:#03c75a; color:#fff; border-radius:6px; text-decoration:none;">
       회원가입
     </a>
   </div>
 </header>
 
-  <main>
-    <div id="product-list" class="grid">로딩중...</div>
-  </main>
+<main>
+  <div id="product-list" class="grid">로딩중...</div>
+</main>
 
-  <!-- Supabase CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <!-- Supabase 설정 (분리된 파일) -->
-  <script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
   const db = supabase.createClient(
     "https://alpdhgcipjeekzrpxlbh.supabase.co",
     "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya"
   );
 </script>
 
-  <!-- 상품 목록 로직 -->
-  <script>
-    async function loadProducts() {
-      const list = document.getElementById('product-list');
+<script>
+  async function loadProducts() {
+    const list = document.getElementById('product-list');
+    const { data, error } = await db
+      .from('products').select('*')
+      .order('created_at', { ascending: false });
 
-      const { data, error } = await db
-        .from('products')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error(error);
-        list.innerHTML = '<p>상품을 불러올 수 없습니다.</p>';
-        return;
-      }
-
-      if (!data || data.length === 0) {
-        list.innerHTML = '<p>등록된 상품이 없습니다.</p>';
-        return;
-      }
-
-      list.innerHTML = data.map(p => `
-        <a class="card" href="product.html?id=${p.id}">
-          <img src="${p.main_image}" alt="${p.name}" loading="lazy">
-          <div class="card-body">
-            <h3>${p.name}</h3>
-            <p class="price">${Number(p.price).toLocaleString()}원</p>
-          </div>
-        </a>
-      `).join('');
+    if (error) {
+      list.innerHTML = '<p>상품을 불러올 수 없습니다.</p>';
+      return;
+    }
+    if (!data || data.length === 0) {
+      list.innerHTML = '<p>등록된 상품이 없습니다.</p>';
+      return;
     }
 
-    loadProducts();
-
-// 회원 상태 표시
-(function() {
-  const el = document.getElementById('header-member');
-  const member = localStorage.getItem('member');
-  if (member) {
-    const m = JSON.parse(member);
-    el.innerHTML = `
-      <span style="color:#555;">안녕하세요, <b>${m.name}</b>님</span>
-      <button id="logout-member"
-        style="margin-left:8px; padding:6px 12px; background:#eee; border:0; border-radius:6px; cursor:pointer; font-size:13px;">
-        로그아웃
-      </button>
-    `;
-    document.getElementById('logout-member').onclick = () => {
-      localStorage.removeItem('member');
-      location.reload();
-    };
+    list.innerHTML = data.map(p => `
+      <a class="card" href="product.html?id=${p.id}">
+        <img src="${p.main_image}" alt="${p.name}" loading="lazy">
+        <div class="card-body">
+          <h3>${p.name}</h3>
+          <p class="price">${Number(p.price).toLocaleString()}원</p>
+        </div>
+      </a>
+    `).join('');
   }
-})();
-  </script>
+  loadProducts();
+
+  // ===== 회원 상태 + 장바구니 개수 표시 =====
+  (function() {
+    const el = document.getElementById('header-member');
+    const signupBtn = document.getElementById('signup-btn');
+    const member = localStorage.getItem('member');
+
+    if (member) {
+      const m = JSON.parse(member);
+      signupBtn.outerHTML = `
+        <span style="color:#555; font-size:13px;">안녕하세요, <b>${m.name}</b>님</span>
+        <button id="logout-member"
+          style="padding:6px 12px; background:#eee; border:0; border-radius:6px; cursor:pointer; font-size:13px;">
+          로그아웃
+        </button>
+      `;
+      document.getElementById('logout-member').onclick = () => {
+        localStorage.removeItem('member');
+        location.reload();
+      };
+    }
+
+    // 장바구니 개수
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    document.getElementById('cart-count').textContent = cart.length;
+  })();
+</script>
 </body>
 </html>
