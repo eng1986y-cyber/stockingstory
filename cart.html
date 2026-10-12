@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>장바구니 - 심플몰</title>
   <link rel="stylesheet" href="style.css">
+  <script src="js/common.js" defer></script>
 </head>
 <body>
   <header style="display:flex; justify-content:space-between; align-items:center;">
@@ -39,14 +40,6 @@
         const m = JSON.parse(localStorage.getItem('member') || '{}');
         return m[key] || '';
       } catch { return ''; }
-    }
-
-    function formatPhone(input) {
-      const num = input.value.replace(/[^0-9]/g, '').slice(0, 11);
-      if (num.length < 4) input.value = num;
-      else if (num.length < 7) input.value = num.slice(0,3) + '-' + num.slice(3);
-      else if (num.length < 11) input.value = num.slice(0,3) + '-' + num.slice(3,6) + '-' + num.slice(6);
-      else input.value = num.slice(0,3) + '-' + num.slice(3,7) + '-' + num.slice(7);
     }
 
     function render() {
@@ -128,7 +121,7 @@
           <form id="checkout-form" style="display:grid; gap:10px;">
             <input name="customer_name" placeholder="주문자 이름" required value="${getMemberField('name')}"
               style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-            <input name="customer_phone" placeholder="연락처 (010-0000-0000)" required value="${getMemberField('phone')}"
+            <input name="customer_phone" type="tel" inputmode="numeric" placeholder="연락처 (010-0000-0000)" required value="${getMemberField('phone')}"
               style="padding:10px; border:1px solid #ddd; border-radius:6px;">
             <input name="depositor_name" placeholder="입금자명" required
               style="padding:10px; border:1px solid #ddd; border-radius:6px;">
@@ -147,10 +140,6 @@
         </div>
       `;
       document.body.appendChild(modal);
-
-      // 연락처 자동 하이픈
-      const phoneInput = modal.querySelector('[name="customer_phone"]');
-      if (phoneInput) phoneInput.addEventListener('input', (e) => formatPhone(e.target));
 
       modal.querySelector('#close-modal').onclick = () => modal.remove();
 

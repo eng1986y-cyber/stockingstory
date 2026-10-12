@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>관리자 - 심플몰</title>
   <link rel="stylesheet" href="style.css">
+  <script src="js/common.js" defer></script>
 </head>
 <body>
   <header>
@@ -12,7 +13,6 @@
   </header>
 
   <main>
-    <!-- 로그인 안 된 상태 -->
     <div id="login-screen" style="display:none; max-width:360px; margin:60px auto;">
       <h2 style="margin-bottom:16px;">관리자 로그인</h2>
       <form id="login-form" style="display:grid; gap:10px; background:#fff; padding:20px; border-radius:8px;">
@@ -28,7 +28,6 @@
       <p id="login-msg" style="margin-top:12px; font-weight:600;"></p>
     </div>
 
-    <!-- 로그인 된 상태 -->
     <div id="admin-screen" style="display:none;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
         <h2>상품 등록</h2>
@@ -300,7 +299,7 @@
               style="padding:10px; border:1px solid #ddd; border-radius:6px;">
 
             <label style="font-size:13px; font-weight:600;">연락처</label>
-            <input name="customer_phone" value="${o.customer_phone}" required
+            <input name="customer_phone" type="tel" inputmode="numeric" value="${o.customer_phone}" required
               style="padding:10px; border:1px solid #ddd; border-radius:6px;">
 
             <label style="font-size:13px; font-weight:600;">입금자명</label>

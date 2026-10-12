@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>회원가입 - 심플몰</title>
   <link rel="stylesheet" href="style.css">
+  <script src="js/common.js" defer></script>
 </head>
 <body>
   <header>
@@ -18,7 +19,7 @@
       <form id="signup-form" style="display:grid; gap:10px; background:#fff; padding:24px; border-radius:8px;">
         <input name="name" placeholder="이름" required
           style="padding:12px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
-        <input name="phone" placeholder="연락처 (010-0000-0000)" required
+        <input name="phone" type="tel" inputmode="numeric" placeholder="연락처 (010-0000-0000)" required
           style="padding:12px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
         <input name="email" type="email" placeholder="이메일" required
           style="padding:12px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
@@ -43,16 +44,6 @@
   <script>
     const form = document.getElementById('signup-form');
     const msg = document.getElementById('msg');
-
-    function formatPhone(input) {
-      const num = input.value.replace(/[^0-9]/g, '').slice(0, 11);
-      if (num.length < 4) input.value = num;
-      else if (num.length < 7) input.value = num.slice(0,3) + '-' + num.slice(3);
-      else if (num.length < 11) input.value = num.slice(0,3) + '-' + num.slice(3,6) + '-' + num.slice(6);
-      else input.value = num.slice(0,3) + '-' + num.slice(3,7) + '-' + num.slice(7);
-    }
-
-    form.phone.addEventListener('input', (e) => formatPhone(e.target));
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
