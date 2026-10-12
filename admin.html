@@ -208,6 +208,8 @@
     }
 
     // ===== 주문 목록 =====
+    let currentOrders = [];
+
     async function loadOrders() {
       const el = document.getElementById('order-list');
       const { data, error } = await db
@@ -216,6 +218,8 @@
 
       if (error) { el.innerHTML = '<p>불러오기 실패: ' + error.message + '</p>'; return; }
       if (!data || data.length === 0) { el.innerHTML = '<p>주문이 없습니다.</p>'; return; }
+
+      currentOrders = data;
 
       el.innerHTML = data.map(o => `
         <div style="background:#fff; padding:14px; border-radius:8px; border-left:4px solid ${statusColor(o.status)};">
@@ -237,6 +241,10 @@
                   `<option ${s === o.status ? 'selected' : ''}>${s}</option>`
                 ).join('')}
               </select>
+              <button class="order-edit" data-id="${o.id}"
+                style="padding:6px; background:#1976d2; color:#fff; border:0; border-radius:6px; cursor:pointer; font-size:12px;">
+                수정
+              </button>
               <button class="order-del" data-id="${o.id}"
                 style="padding:6px; background:#e53935; color:#fff; border:0; border-radius:6px; cursor:pointer; font-size:12px;">
                 삭제
@@ -254,6 +262,13 @@
         });
       });
 
+      el.querySelectorAll('.order-edit').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const order = currentOrders.find(x => String(x.id) === String(btn.dataset.id));
+          if (order) showOrderEditModal(order);
+        });
+      });
+
       el.querySelectorAll('.order-del').forEach(btn => {
         btn.addEventListener('click', async () => {
           if (!confirm('주문을 삭제할까요?')) return;
@@ -266,6 +281,109 @@
 
     function statusColor(s) {
       return { '입금대기':'#ff9800', '입금완료':'#03c75a', '배송중':'#1976d2', '완료':'#555', '취소':'#e53935' }[s] || '#ccc';
+    }
+
+    // ===== 주문 수정 모달 =====
+    function showOrderEditModal(o) {
+      const modal = document.createElement('div');
+      modal.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:1000;`;
+      modal.innerHTML = `
+        <div style="background:#fff; padding:24px; border-radius:10px; width:90%; max-width:440px; max-height:90vh; overflow-y:auto;">
+          <h2 style="margin-bottom:16px;">주문 수정 (ID: ${o.id})</h2>
+          <form id="order-edit-form" style="display:grid; gap:10px;">
+            <label style="font-size:13px; font-weight:600;">상품명</label>
+            <input name="product_name" value="${o.product_name}" required
+              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+
+            <label style="font-size:13px; font-weight:600;">상품 가격</label>
+            <input name="product_price" type="number" value="${o.product_price}" required
+              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+
+            <label style="font-size:13px; font-weight:600;">수량</label>
+            <input name="quantity" type="number" min="1" value="${o.quantity}" required
+              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+
+            <label style="font-size:13px; font-weight:600;">주문자 이름</label>
+            <input name="customer_name" value="${o.customer_name}" required
+              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+
+            <label style="font-size:13px; font-weight:600;">연락처</label>
+            <input name="customer_phone" value="${o.customer_phone}" required
+              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+
+            <label style="font-size:13px; font-weight:600;">입금자명</label>
+            <input name="depositor_name" value="${o.depositor_name}" required
+              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+
+            <label style="font-size:13px; font-weight:600;">색상</label>
+            <input name="selected_color" value="${o.selected_color || ''}"
+              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+
+            <label style="font-size:13px; font-weight:600;">사이즈</label>
+            <input name="selected_size" value="${o.selected_size || ''}"
+              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+
+            <label style="font-size:13px; font-weight:600;">추가옵션 (쉼표 구분)</label>
+            <input name="selected_extras" value="${(o.selected_extras || []).join(',')}"
+              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+
+            <label style="font-size:13px; font-weight:600;">요청사항</label>
+            <textarea name="memo"
+              style="padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;">${o.memo || ''}</textarea>
+
+            <label style="font-size:13px; font-weight:600;">상태</label>
+            <select name="status"
+              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+              ${['입금대기','입금완료','배송중','완료','취소'].map(s =>
+                `<option ${s === o.status ? 'selected' : ''}>${s}</option>`
+              ).join('')}
+            </select>
+
+            <div style="display:flex; gap:8px; margin-top:8px;">
+              <button type="submit"
+                style="flex:1; padding:12px; background:#1976d2; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">
+                저장
+              </button>
+              <button type="button" id="cancel-edit"
+                style="flex:1; padding:12px; background:#eee; border:0; border-radius:6px; cursor:pointer;">
+                취소
+              </button>
+            </div>
+          </form>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      modal.querySelector('#cancel-edit').onclick = () => modal.remove();
+
+      modal.querySelector('#order-edit-form').addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        const f = ev.target;
+        const qty = Number(f.quantity.value);
+        const price = Number(f.product_price.value);
+
+        const extrasArr = f.selected_extras.value
+          .split(',').map(s => s.trim()).filter(Boolean);
+
+        const { error } = await db.from('orders').update({
+          product_name: f.product_name.value.trim(),
+          product_price: price,
+          quantity: qty,
+          total_price: price * qty,
+          customer_name: f.customer_name.value.trim(),
+          customer_phone: f.customer_phone.value.trim(),
+          depositor_name: f.depositor_name.value.trim(),
+          selected_color: f.selected_color.value.trim() || null,
+          selected_size: f.selected_size.value.trim() || null,
+          selected_extras: extrasArr,
+          memo: f.memo.value.trim(),
+          status: f.status.value,
+        }).eq('id', o.id);
+
+        if (error) { alert('❌ 수정 실패: ' + error.message); return; }
+        modal.remove();
+        loadOrders();
+      });
     }
 
     // ===== 회원 목록 =====
