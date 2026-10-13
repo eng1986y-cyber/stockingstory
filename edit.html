@@ -39,6 +39,7 @@
         <input name="colors" placeholder="색상 (쉼표로 구분)">
         <input name="sizes" placeholder="사이즈 (쉼표로 구분)">
         <input name="extra_options" placeholder="추가옵션 (쉼표로 구분)">
+        <input name="shipping_fee" type="number" min="0" placeholder="배송비 (0이면 무료)">
         <div style="display:flex; gap:8px;">
           <button type="submit" style="flex:1;">수정 완료</button>
           <a href="admin.html"
@@ -129,6 +130,7 @@
       form.colors.value = (data.colors || []).join(',');
       form.sizes.value = (data.sizes || []).join(',');
       form.extra_options.value = (data.extra_options || []).join(',');
+      form.shipping_fee.value = data.shipping_fee || 0;
     }
 
     form.addEventListener('submit', async (e) => {
@@ -151,6 +153,7 @@
           colors: parseList(form.colors.value),
           sizes: parseList(form.sizes.value),
           extra_options: parseList(form.extra_options.value),
+          shipping_fee: Number(form.shipping_fee.value) || 0,
         })
         .eq('id', id);
 

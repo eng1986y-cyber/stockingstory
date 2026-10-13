@@ -46,6 +46,7 @@
         <input name="colors" placeholder="색상 (쉼표로 구분: 빨강,파랑,검정)">
         <input name="sizes" placeholder="사이즈 (쉼표로 구분: S,M,L,XL)">
         <input name="extra_options" placeholder="추가옵션 (쉼표로 구분: 각인,포장)">
+        <input name="shipping_fee" type="number" min="0" value="0" placeholder="배송비 (0이면 무료)">
         <button type="submit">등록하기</button>
       </form>
 
@@ -137,15 +138,16 @@
       msg.style.color = '#222';
 
       const { error } = await db.from('products').insert({
-        name: form.name.value.trim(),
-        price: Number(form.price.value),
-        description: form.description.value.trim(),
-        main_image: form.main_image.value.trim(),
-        detail_images,
-        colors: parseList(form.colors.value),
-        sizes: parseList(form.sizes.value),
-        extra_options: parseList(form.extra_options.value),
-      });
+      name: form.name.value.trim(),
+      price: Number(form.price.value),
+      description: form.description.value.trim(),
+      main_image: form.main_image.value.trim(),
+      detail_images,
+      colors: parseList(form.colors.value),
+      sizes: parseList(form.sizes.value),
+      extra_options: parseList(form.extra_options.value),
+      shipping_fee: Number(form.shipping_fee.value) || 0,
+    });
 
       if (error) {
         msg.style.color = 'crimson';
@@ -218,6 +220,7 @@
           <div style="display:flex; justify-content:space-between; align-items:start; gap:10px; flex-wrap:wrap;">
             <div style="font-size:14px; line-height:1.7;">
               <b>${o.product_name}</b> × ${o.quantity} = <b>${o.total_price.toLocaleString()}원</b><br>
+              ${o.shipping_fee > 0 ? `배송비: ${o.shipping_fee.toLocaleString()}원<br>` : ''}
               주문자: ${o.customer_name} (${o.customer_phone})<br>
               입금자명: <b>${o.depositor_name}</b><br>
               ${o.selected_color ? `색상: <b>${o.selected_color}</b><br>` : ''}
