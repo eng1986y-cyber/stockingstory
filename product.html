@@ -120,15 +120,13 @@
       ` : '';
 
       const extrasHtml = extras.length ? `
-        <label style="font-size:13px; font-weight:600;">추가옵션</label>
-        <div style="display:grid; gap:6px; padding:8px; border:1px solid #ddd; border-radius:6px;">
-          ${extras.map((x, i) => `
-            <label style="font-size:14px; display:flex; align-items:center; gap:6px; cursor:pointer;">
-              <input type="checkbox" name="extra_${i}" value="${x}"> ${x}
-            </label>
-          `).join('')}
-        </div>
-      ` : '';
+  <label style="font-size:13px; font-weight:600;">추가옵션</label>
+  <select name="selected_extra"
+    style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+    <option value="">선택 안 함</option>
+    ${extras.map(x => `<option>${x}</option>`).join('')}
+  </select>
+` : '';
 
       const modal = document.createElement('div');
       modal.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:1000; padding:10px;`;
@@ -191,10 +189,8 @@
         const qty = Number(f.quantity.value);
         const total = p.price * qty;
 
-        const selectedExtras = extras
-          .map((_, i) => f[`extra_${i}`])
-          .filter(cb => cb && cb.checked)
-          .map(cb => cb.value);
+        const selectedExtra = f.selected_extra ? f.selected_extra.value : '';
+        const selectedExtras = selectedExtra ? [selectedExtra] : [];
 
         const selectedColor = f.selected_color ? f.selected_color.value : null;
         const selectedSize  = f.selected_size  ? f.selected_size.value  : null;
