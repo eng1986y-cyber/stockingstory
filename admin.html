@@ -37,17 +37,33 @@
         </button>
       </div>
 
-      <form id="product-form">
-        <input name="name" placeholder="상품명" required>
-        <input name="price" type="number" placeholder="가격 (숫자만)" required>
-        <textarea name="description" placeholder="상품 설명"></textarea>
-        <input name="main_image" placeholder="메인 이미지 URL (필수)" required>
-        <textarea name="detail_images" placeholder="상세 이미지 URL (한 줄에 하나씩)"></textarea>
-        <input name="colors" placeholder="색상 (쉼표로 구분: 빨강,파랑,검정)">
-        <input name="sizes" placeholder="사이즈 (쉼표로 구분: S,M,L,XL)">
-        <input name="extra_options" placeholder="추가옵션 (쉼표로 구분: 각인,포장)">
-        <input name="shipping_fee" type="number" min="0" value="0" placeholder="배송비 (0이면 무료)">
-        <button type="submit">등록하기</button>
+      <form id="product-form"
+        style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:10px; background:#fff; padding:16px; border-radius:8px; max-width:none;">
+
+        <input name="name" placeholder="상품명" required
+          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <input name="price" type="number" placeholder="가격 (숫자만)" required
+          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <input name="main_image" placeholder="메인 이미지 URL (필수)" required
+          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <input name="colors" placeholder="색상 (쉼표: 빨강,파랑,검정)"
+          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <input name="sizes" placeholder="사이즈 (쉼표: S,M,L,XL)"
+          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <input name="extra_options" placeholder="추가옵션 (쉼표: 각인,포장)"
+          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <input name="shipping_fee" type="number" min="0" value="0" placeholder="배송비 (0이면 무료)"
+          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+
+        <textarea name="description" placeholder="상품 설명"
+          style="grid-column: 1 / -1; padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
+        <textarea name="detail_images" placeholder="상세 이미지 URL (한 줄에 하나씩)"
+          style="grid-column: 1 / -1; padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
+
+        <button type="submit"
+          style="grid-column: 1 / -1; padding:12px; background:#222; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">
+          등록하기
+        </button>
       </form>
 
       <p id="msg" style="margin-top:12px; font-weight:600;"></p>
