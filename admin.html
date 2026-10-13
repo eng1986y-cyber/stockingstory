@@ -53,7 +53,7 @@
       <p id="msg" style="margin-top:12px; font-weight:600;"></p>
 
       <h2 style="margin:32px 0 16px;">등록된 상품</h2>
-      <div id="admin-list" class="grid">로딩중...</div>
+      <div id="admin-list" style="display:grid; gap:10px;">로딩중...</div>
 
       <h2 style="margin:32px 0 16px;">주문 목록</h2>
       <div id="order-list" style="display:grid; gap:10px;">로딩중...</div>
@@ -160,6 +160,7 @@
       }
     });
 
+    // ===== 상품 목록 (1줄 요약 + 클릭 펼침) =====
     async function loadAdminList() {
       const { data, error } = await db
         .from('products').select('*')
@@ -171,23 +172,50 @@
       }
 
       listEl.innerHTML = data.map(p => `
-        <div class="card">
-          <a href="product.html?id=${p.id}" target="_blank" rel="noopener">
-            <img src="${p.main_image}" alt="${p.name}" loading="lazy">
-          </a>
-          <div class="card-body">
-            <h3>${p.name}</h3>
-            <p class="price">${Number(p.price).toLocaleString()}원</p>
-            <p style="font-size:12px; color:#888; margin-top:2px;">
-              ${p.shipping_fee > 0 ? '배송비 ' + p.shipping_fee.toLocaleString() + '원' : '무료배송'}
-            </p>
-            <div style="display:flex; gap:6px; margin-top:8px;">
+        <div class="product-row"
+          style="background:#fff; border-radius:8px; border-left:4px solid #1976d2; overflow:hidden;">
+          <div class="product-summary"
+            style="padding:12px 14px; display:flex; align-items:center; gap:12px; cursor:pointer;">
+            <img src="${p.main_image}" alt="${p.name}"
+              style="width:44px; height:44px; object-fit:cover; border-radius:6px; flex-shrink:0;">
+            <div style="flex:1; min-width:0; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              <span style="font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px;">
+                ${p.name}
+              </span>
+              <span style="font-size:13px; color:#e53935; font-weight:700; white-space:nowrap;">
+                ${Number(p.price).toLocaleString()}원
+              </span>
+              <span style="font-size:12px; color:#888; white-space:nowrap;">
+                ${p.shipping_fee > 0 ? '배송비 ' + p.shipping_fee.toLocaleString() + '원' : '무료배송'}
+              </span>
+            </div>
+            <span class="product-arrow" style="color:#888; font-size:12px; transition:transform .2s;">▼</span>
+          </div>
+
+          <div class="product-detail" style="display:none; padding:0 14px 14px; font-size:13px; line-height:1.8; color:#333; border-top:1px solid #eee;">
+            <div style="padding-top:10px;">
+              ${p.description ? `<div><span style="color:#888;">설명:</span> ${p.description}</div>` : ''}
+              ${(p.colors && p.colors.length) ? `<div><span style="color:#888;">색상:</span> ${p.colors.join(', ')}</div>` : ''}
+              ${(p.sizes && p.sizes.length) ? `<div><span style="color:#888;">사이즈:</span> ${p.sizes.join(', ')}</div>` : ''}
+              ${(p.extra_options && p.extra_options.length) ? `<div><span style="color:#888;">추가옵션:</span> ${p.extra_options.join(', ')}</div>` : ''}
+              <div><span style="color:#888;">배송비:</span> ${p.shipping_fee > 0 ? p.shipping_fee.toLocaleString() + '원' : '무료'}</div>
+              ${(p.detail_images && p.detail_images.length) ? `<div><span style="color:#888;">상세이미지:</span> ${p.detail_images.length}개</div>` : ''}
+              <div style="color:#888; font-size:12px; margin-top:4px;">
+                등록일: ${new Date(p.created_at).toLocaleString('ko-KR')}
+              </div>
+            </div>
+
+            <div style="display:flex; gap:6px; margin-top:12px; flex-wrap:wrap;">
+              <a href="product.html?id=${p.id}" target="_blank" rel="noopener"
+                style="flex:1; min-width:80px; text-align:center; padding:8px; background:#555; color:#fff; border-radius:6px; text-decoration:none; font-size:13px;">
+                보기
+              </a>
               <a href="edit.html?id=${p.id}"
-                style="flex:1; text-align:center; padding:8px; background:#1976d2; color:#fff; border-radius:6px; text-decoration:none; font-size:13px;">
+                style="flex:1; min-width:80px; text-align:center; padding:8px; background:#1976d2; color:#fff; border-radius:6px; text-decoration:none; font-size:13px;">
                 수정
               </a>
               <button class="del-btn" data-id="${p.id}"
-                style="flex:1; padding:8px; background:#e53935; color:#fff; border:0; border-radius:6px; cursor:pointer; font-size:13px;">
+                style="flex:1; min-width:80px; padding:8px; background:#e53935; color:#fff; border:0; border-radius:6px; cursor:pointer; font-size:13px;">
                 삭제
               </button>
             </div>
@@ -195,8 +223,23 @@
         </div>
       `).join('');
 
+      listEl.querySelectorAll('.product-summary').forEach(sum => {
+        sum.addEventListener('click', () => {
+          const detail = sum.nextElementSibling;
+          const arrow = sum.querySelector('.product-arrow');
+          if (detail.style.display === 'none') {
+            detail.style.display = 'block';
+            arrow.style.transform = 'rotate(180deg)';
+          } else {
+            detail.style.display = 'none';
+            arrow.style.transform = 'rotate(0deg)';
+          }
+        });
+      });
+
       listEl.querySelectorAll('.del-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
           if (!confirm('정말 삭제할까요?')) return;
           const { error } = await db.from('products').delete().eq('id', btn.dataset.id);
           if (error) alert('삭제 실패: ' + error.message);
@@ -205,6 +248,7 @@
       });
     }
 
+    // ===== 주문 목록 (1줄 요약 + 클릭 펼침) =====
     let currentOrders = [];
 
     async function loadOrders() {
@@ -230,7 +274,7 @@
               <span style="font-size:14px; white-space:nowrap;">
                 <b>${o.customer_name}</b>
               </span>
-              <span style="font-size:13px; color:#555; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+              <span style="font-size:13px; color:#555; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px;">
                 ${o.product_name} × ${o.quantity}
               </span>
               <span style="font-size:14px; font-weight:700; color:#e53935; white-space:nowrap;">
@@ -321,6 +365,7 @@
       return { '입금대기':'#ff9800', '입금완료':'#03c75a', '배송중':'#1976d2', '완료':'#555', '취소':'#e53935' }[s] || '#ccc';
     }
 
+    // ===== 주문 수정 모달 =====
     function showOrderEditModal(o) {
       const modal = document.createElement('div');
       modal.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:1000; padding:10px;`;
@@ -429,6 +474,7 @@
       });
     }
 
+    // ===== 회원 목록 =====
     async function loadMembers() {
       const el = document.getElementById('member-list');
       const { data, error } = await db
