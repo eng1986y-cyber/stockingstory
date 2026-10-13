@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>장바구니 - 심플몰</title>
   <link rel="stylesheet" href="style.css">
-  <script src="js/common.js" defer></script>
+  <script src="common.js" defer></script>
 </head>
 <body>
   <header style="display:flex; justify-content:space-between; align-items:center;">
@@ -71,25 +71,26 @@
         </div>
       `).join('');
 
-      const total = cart.reduce((s, it) => s + it.product_price * it.quantity, 0);
       const subTotal = cart.reduce((s, it) => s + it.product_price * it.quantity, 0);
-      const shippingTotal = cart.reduce((s, it) => s + (Number(it.shipping_fee) || 0), 0);
+      // 묶음배송: 상품별 배송비 중 최댓값 1회만
+      const shippingTotal = Math.max(...cart.map(it => Number(it.shipping_fee) || 0));
       const total = subTotal + shippingTotal;
+
       summaryEl.style.display = 'block';
       summaryEl.innerHTML = `
-  <div style="background:#fff; padding:20px; border-radius:8px; text-align:right; font-size:14px; line-height:1.8;">
-    <div>상품 합계: <b>${subTotal.toLocaleString()}원</b></div>
-    <div>배송비: <b>${shippingTotal > 0 ? shippingTotal.toLocaleString() + '원' : '무료'}</b></div>
-    <hr style="border:0; border-top:1px solid #eee; margin:12px 0;">
-    <p style="font-size:18px; margin-bottom:16px;">
-      총 합계: <b style="color:#e53935; font-size:22px;">${total.toLocaleString()}원</b>
-    </p>
-    <button id="checkout-btn"
-      style="padding:14px 28px; background:#03c75a; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600; font-size:15px;">
-      전체 주문하기 (무통장입금)
-    </button>
-  </div>
-`;
+        <div style="background:#fff; padding:20px; border-radius:8px; text-align:right; font-size:14px; line-height:1.8;">
+          <div>상품 합계: <b>${subTotal.toLocaleString()}원</b></div>
+          <div>배송비: <b>${shippingTotal > 0 ? shippingTotal.toLocaleString() + '원 (묶음배송)' : '무료'}</b></div>
+          <hr style="border:0; border-top:1px solid #eee; margin:12px 0;">
+          <p style="font-size:18px; margin-bottom:16px;">
+            총 합계: <b style="color:#e53935; font-size:22px;">${total.toLocaleString()}원</b>
+          </p>
+          <button id="checkout-btn"
+            style="padding:14px 28px; background:#03c75a; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600; font-size:15px;">
+            전체 주문하기 (무통장입금)
+          </button>
+        </div>
+      `;
 
       listEl.querySelectorAll('.qty-input').forEach(inp => {
         inp.addEventListener('change', () => {
@@ -114,7 +115,9 @@
     }
 
     function showCheckoutModal(cart) {
-      const total = cart.reduce((s, it) => s + it.product_price * it.quantity + (Number(it.shipping_fee) || 0), 0);
+      const subTotal = cart.reduce((s, it) => s + it.product_price * it.quantity, 0);
+      const maxShipping = Math.max(...cart.map(it => Number(it.shipping_fee) || 0));
+      const total = subTotal + maxShipping;
 
       const modal = document.createElement('div');
       modal.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:1000; padding:10px;`;
@@ -123,6 +126,7 @@
           <h2 style="margin-bottom:16px; font-size:18px;">주문 정보 입력</h2>
           <p style="margin-bottom:12px; font-size:14px; color:#555;">
             총 <b>${cart.length}개</b> 상품 · <b>${total.toLocaleString()}원</b>
+            ${maxShipping > 0 ? `<br><span style="font-size:12px; color:#888;">(배송비 ${maxShipping.toLocaleString()}원 포함, 묶음배송)</span>` : ''}
           </p>
           <form id="checkout-form" style="display:grid; gap:10px;">
             <input name="customer_name" placeholder="주문자 이름" required value="${getMemberField('name')}"
@@ -153,21 +157,27 @@
         ev.preventDefault();
         const f = ev.target;
 
-        const rows = cart.map(it => ({
-        product_id: it.product_id,
-        product_name: it.product_name,
-        product_price: it.product_price,
-        quantity: it.quantity,
-        total_price: it.product_price * it.quantity + (Number(it.shipping_fee) || 0),
-        customer_name: f.customer_name.value.trim(),
-        customer_phone: f.customer_phone.value.trim(),
-        depositor_name: f.depositor_name.value.trim(),
-        memo: f.memo.value.trim(),
-       selected_color: it.selected_color,
-       selected_size: it.selected_size,
-        selected_extras: it.selected_extras,
-        shipping_fee: it.shipping_fee || 0,
-      }));
+        const groupId = 'g_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+
+        // 묶음배송: 배송비는 첫 상품 행에만 포함
+        const rows = cart.map((it, idx) => ({
+          product_id: it.product_id,
+          product_name: it.product_name,
+          product_price: it.product_price,
+          quantity: it.quantity,
+          total_price: idx === 0
+            ? it.product_price * it.quantity + maxShipping
+            : it.product_price * it.quantity,
+          customer_name: f.customer_name.value.trim(),
+          customer_phone: f.customer_phone.value.trim(),
+          depositor_name: f.depositor_name.value.trim(),
+          memo: f.memo.value.trim(),
+          selected_color: it.selected_color,
+          selected_size: it.selected_size,
+          selected_extras: it.selected_extras,
+          shipping_fee: idx === 0 ? maxShipping : 0,
+          group_id: groupId,
+        }));
 
         const { error } = await db.from('orders').insert(rows);
         if (error) { alert('❌ 주문 실패: ' + error.message); return; }
@@ -177,6 +187,10 @@
         modal.querySelector('div').innerHTML = `
           <h2 style="margin-bottom:16px; color:#03c75a;">✅ 주문 접수 완료</h2>
           <div style="background:#f8f8f8; padding:16px; border-radius:8px; margin-bottom:16px; line-height:1.7; font-size:14px;">
+            상품 합계: ${subTotal.toLocaleString()}원<br>
+            배송비: ${maxShipping > 0 ? maxShipping.toLocaleString() + '원 (묶음배송)' : '무료'}<br>
+            <b>총액: ${total.toLocaleString()}원</b>
+            <hr style="border:0; border-top:1px solid #ddd; margin:8px 0;">
             <b>입금 계좌 안내</b><br>
             은행: <b>○○은행</b><br>
             계좌: <b>123-456-789012</b><br>

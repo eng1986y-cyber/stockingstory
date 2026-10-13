@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>상품 상세 - 심플몰</title>
   <link rel="stylesheet" href="style.css">
-  <script src="js/common.js" defer></script>
+  <script src="common.js" defer></script>
 </head>
 <body>
   <header style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
@@ -65,12 +65,18 @@
         .map(url => `<img src="${url}" alt="상세" loading="lazy">`)
         .join('');
 
+      const shipping = Number(data.shipping_fee) || 0;
+      const shippingLabel = shipping > 0
+        ? `<span style="color:#888; font-size:13px;">배송비 ${shipping.toLocaleString()}원</span>`
+        : `<span style="color:#03c75a; font-size:13px;">무료배송</span>`;
+
       detailEl.innerHTML = `
         <div class="detail-wrap">
           <img class="main-img" src="${data.main_image}" alt="${data.name}">
           <div class="info">
             <h2>${data.name}</h2>
             <p class="price">${Number(data.price).toLocaleString()}원</p>
+            <p style="margin:6px 0;">${shippingLabel}</p>
             <p class="desc">${data.description || ''}</p>
             <div style="display:flex; gap:8px; margin-top:16px;">
               <button id="cart-btn"
@@ -96,187 +102,191 @@
     }
 
     function showOrderModal(p, mode) {
-  const colors = p.colors || [];
-  const sizes = p.sizes || [];
-  const extras = p.extra_options || [];
-  const shipping = Number(p.shipping_fee) || 0;
-  const isCart = mode === 'cart';
+      const colors = p.colors || [];
+      const sizes = p.sizes || [];
+      const extras = p.extra_options || [];
+      const shipping = Number(p.shipping_fee) || 0;
+      const isCart = mode === 'cart';
 
-  const colorHtml = colors.length ? `
-    <label style="font-size:13px; font-weight:600;">색상</label>
-    <select name="selected_color" required
-      style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-      <option value="">색상 선택</option>
-      ${colors.map(c => `<option>${c}</option>`).join('')}
-    </select>
-  ` : '';
-
-  const sizeHtml = sizes.length ? `
-    <label style="font-size:13px; font-weight:600;">사이즈</label>
-    <select name="selected_size" required
-      style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-      <option value="">사이즈 선택</option>
-      ${sizes.map(s => `<option>${s}</option>`).join('')}
-    </select>
-  ` : '';
-
-  // 추가옵션: 드롭다운 (단일 선택)
-  const extrasHtml = extras.length ? `
-    <label style="font-size:13px; font-weight:600;">추가옵션</label>
-    <select name="selected_extra"
-      style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-      <option value="">선택 안 함</option>
-      ${extras.map(x => `<option>${x}</option>`).join('')}
-    </select>
-  ` : '';
-
-  const modal = document.createElement('div');
-  modal.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:1000; padding:10px;`;
-  modal.innerHTML = `
-    <div style="background:#fff; padding:20px; border-radius:10px; width:100%; max-width:420px; max-height:90vh; overflow-y:auto;">
-      <h2 style="margin-bottom:16px; font-size:18px;">${isCart ? '옵션 선택' : '주문 정보 입력'}</h2>
-      <p style="margin-bottom:12px; font-size:14px; color:#555;">
-        <b>${p.name}</b><br>${Number(p.price).toLocaleString()}원
-        ${shipping > 0 ? `<br><span style="color:#888; font-size:13px;">배송비 ${shipping.toLocaleString()}원</span>` : `<br><span style="color:#03c75a; font-size:13px;">무료배송</span>`}
-      </p>
-      <form id="order-form" style="display:grid; gap:10px;">
-        ${colorHtml}
-        ${sizeHtml}
-        ${extrasHtml}
-
-        <label style="font-size:13px; font-weight:600;">수량</label>
-        <input name="quantity" type="number" min="1" value="1" required
+      const colorHtml = colors.length ? `
+        <label style="font-size:13px; font-weight:600;">색상</label>
+        <select name="selected_color" required
           style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+          <option value="">색상 선택</option>
+          ${colors.map(c => `<option>${c}</option>`).join('')}
+        </select>
+      ` : '';
 
-        ${isCart ? '' : `
-          <hr style="border:0; border-top:1px solid #eee; margin:8px 0;">
-          <input name="customer_name" placeholder="주문자 이름" required value="${getMemberField('name')}"
-            style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-          <input name="customer_phone" type="tel" inputmode="numeric" placeholder="연락처 (010-0000-0000)" required value="${getMemberField('phone')}"
-            style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-          <input name="depositor_name" placeholder="입금자명" required
-            style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-          <textarea name="memo" placeholder="요청사항 (선택)"
-            style="padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
-        `}
+      const sizeHtml = sizes.length ? `
+        <label style="font-size:13px; font-weight:600;">사이즈</label>
+        <select name="selected_size" required
+          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+          <option value="">사이즈 선택</option>
+          ${sizes.map(s => `<option>${s}</option>`).join('')}
+        </select>
+      ` : '';
 
-        <div id="total-preview" style="text-align:right; font-size:15px; font-weight:600; color:#e53935;"></div>
+      const extrasHtml = extras.length ? `
+        <label style="font-size:13px; font-weight:600;">추가옵션</label>
+        <select name="selected_extra"
+          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+          <option value="">선택 안 함</option>
+          ${extras.map(x => `<option>${x}</option>`).join('')}
+        </select>
+      ` : '';
 
-        <button type="submit"
-          style="padding:12px; background:${isCart ? '#1976d2' : '#03c75a'}; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">
-          ${isCart ? '장바구니 담기' : '주문 완료 (무통장입금)'}
-        </button>
-        <button type="button" id="close-modal"
-          style="padding:10px; background:#eee; border:0; border-radius:6px; cursor:pointer;">
-          취소
-        </button>
-      </form>
-    </div>
-  `;
-  document.body.appendChild(modal);
+      const modal = document.createElement('div');
+      modal.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:1000; padding:10px;`;
+      modal.innerHTML = `
+        <div style="background:#fff; padding:20px; border-radius:10px; width:100%; max-width:420px; max-height:90vh; overflow-y:auto;">
+          <h2 style="margin-bottom:16px; font-size:18px;">${isCart ? '옵션 선택' : '주문 정보 입력'}</h2>
+          <p style="margin-bottom:12px; font-size:14px; color:#555;">
+            <b>${p.name}</b><br>${Number(p.price).toLocaleString()}원
+            ${shipping > 0 
+              ? `<br><span style="color:#888; font-size:13px;">배송비 ${shipping.toLocaleString()}원</span>` 
+              : `<br><span style="color:#03c75a; font-size:13px;">무료배송</span>`}
+          </p>
+          <form id="order-form" style="display:grid; gap:10px;">
+            ${colorHtml}
+            ${sizeHtml}
+            ${extrasHtml}
 
-  const totalPreview = modal.querySelector('#total-preview');
-  const qtyInput = modal.querySelector('[name="quantity"]');
-  const updateTotal = () => {
-    const q = Number(qtyInput.value) || 1;
-    const sub = p.price * q;
-    const sum = sub + shipping;
-    totalPreview.innerHTML = `
-      상품: ${sub.toLocaleString()}원<br>
-      배송비: ${shipping > 0 ? shipping.toLocaleString() + '원' : '무료'}<br>
-      <span style="font-size:17px;">합계: ${sum.toLocaleString()}원</span>
-    `;
-  };
-  qtyInput.addEventListener('input', updateTotal);
-  updateTotal();
+            <label style="font-size:13px; font-weight:600;">수량</label>
+            <input name="quantity" type="number" min="1" value="1" required
+              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
 
-  modal.querySelector('#close-modal').onclick = () => modal.remove();
+            ${isCart ? '' : `
+              <hr style="border:0; border-top:1px solid #eee; margin:8px 0;">
+              <input name="customer_name" placeholder="주문자 이름" required value="${getMemberField('name')}"
+                style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+              <input name="customer_phone" type="tel" inputmode="numeric" placeholder="연락처 (010-0000-0000)" required value="${getMemberField('phone')}"
+                style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+              <input name="depositor_name" placeholder="입금자명" required
+                style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+              <textarea name="memo" placeholder="요청사항 (선택)"
+                style="padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
+            `}
 
-  modal.querySelector('#order-form').addEventListener('submit', async (ev) => {
-    ev.preventDefault();
-    const f = ev.target;
-    const qty = Number(f.quantity.value);
-    const subTotal = p.price * qty;
-    const total = subTotal + shipping;
+            <div id="total-preview" style="text-align:right; font-size:14px; font-weight:600; color:#e53935; line-height:1.6;"></div>
 
-    // 추가옵션: 드롭다운 (단일) → 배열로 변환
-    const selectedExtra = f.selected_extra ? f.selected_extra.value : '';
-    const selectedExtras = selectedExtra ? [selectedExtra] : [];
+            <button type="submit"
+              style="padding:12px; background:${isCart ? '#1976d2' : '#03c75a'}; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">
+              ${isCart ? '장바구니 담기' : '주문 완료 (무통장입금)'}
+            </button>
+            <button type="button" id="close-modal"
+              style="padding:10px; background:#eee; border:0; border-radius:6px; cursor:pointer;">
+              취소
+            </button>
+          </form>
+        </div>
+      `;
+      document.body.appendChild(modal);
 
-    const selectedColor = f.selected_color ? f.selected_color.value : null;
-    const selectedSize  = f.selected_size  ? f.selected_size.value  : null;
+      const totalPreview = modal.querySelector('#total-preview');
+      const qtyInput = modal.querySelector('[name="quantity"]');
+      const updateTotal = () => {
+        const q = Number(qtyInput.value) || 1;
+        const sub = p.price * q;
+        const sum = sub + shipping;
+        totalPreview.innerHTML = `
+          상품: ${sub.toLocaleString()}원<br>
+          배송비: ${shipping > 0 ? shipping.toLocaleString() + '원' : '무료'}<br>
+          <span style="font-size:17px; color:#e53935;">합계: ${sum.toLocaleString()}원</span>
+        `;
+      };
+      qtyInput.addEventListener('input', updateTotal);
+      updateTotal();
 
-    if (isCart) {
-      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-      cart.push({
-        product_id: p.id,
-        product_name: p.name,
-        product_price: p.price,
-        main_image: p.main_image,
-        quantity: qty,
-        selected_color: selectedColor,
-        selected_size: selectedSize,
-        selected_extras: selectedExtras,
-        shipping_fee: shipping,
+      modal.querySelector('#close-modal').onclick = () => modal.remove();
+
+      modal.querySelector('#order-form').addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        const f = ev.target;
+        const qty = Number(f.quantity.value);
+        const subTotal = p.price * qty;
+        const total = subTotal + shipping;
+
+        const selectedExtra = f.selected_extra ? f.selected_extra.value : '';
+        const selectedExtras = selectedExtra ? [selectedExtra] : [];
+
+        const selectedColor = f.selected_color ? f.selected_color.value : null;
+        const selectedSize  = f.selected_size  ? f.selected_size.value  : null;
+
+        if (isCart) {
+          const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+          cart.push({
+            product_id: p.id,
+            product_name: p.name,
+            product_price: p.price,
+            main_image: p.main_image,
+            quantity: qty,
+            selected_color: selectedColor,
+            selected_size: selectedSize,
+            selected_extras: selectedExtras,
+            shipping_fee: shipping,
+          });
+          localStorage.setItem('cart', JSON.stringify(cart));
+          updateCartCount();
+          alert('✅ 장바구니에 담았습니다!');
+          modal.remove();
+          return;
+        }
+
+        const groupId = 'g_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+
+        const { error } = await db.from('orders').insert({
+          product_id: p.id,
+          product_name: p.name,
+          product_price: p.price,
+          quantity: qty,
+          total_price: total,
+          customer_name: f.customer_name.value.trim(),
+          customer_phone: f.customer_phone.value.trim(),
+          depositor_name: f.depositor_name.value.trim(),
+          memo: f.memo.value.trim(),
+          selected_color: selectedColor,
+          selected_size: selectedSize,
+          selected_extras: selectedExtras,
+          shipping_fee: shipping,
+          group_id: groupId,
+        });
+
+        if (error) { alert('❌ 주문 실패: ' + error.message); return; }
+
+        const optLines = [
+          selectedColor && `색상: ${selectedColor}`,
+          selectedSize && `사이즈: ${selectedSize}`,
+          selectedExtras.length && `추가옵션: ${selectedExtras.join(', ')}`,
+          `수량: ${qty}개`,
+        ].filter(Boolean).join('<br>');
+
+        modal.querySelector('div').innerHTML = `
+          <h2 style="margin-bottom:16px; color:#03c75a;">✅ 주문 접수 완료</h2>
+          <div style="background:#f8f8f8; padding:16px; border-radius:8px; margin-bottom:16px; line-height:1.7; font-size:14px;">
+            <b>주문 내역</b><br>${p.name}<br>${optLines}
+            <hr style="border:0; border-top:1px solid #ddd; margin:8px 0;">
+            상품: ${subTotal.toLocaleString()}원<br>
+            배송비: ${shipping > 0 ? shipping.toLocaleString() + '원' : '무료'}<br>
+            <b>총액: ${total.toLocaleString()}원</b>
+            <hr style="border:0; border-top:1px solid #ddd; margin:8px 0;">
+            <b>입금 계좌 안내</b><br>
+            은행: <b>○○은행</b><br>
+            계좌: <b>123-456-789012</b><br>
+            예금주: <b>홍길동</b><br>
+            입금액: <b>${total.toLocaleString()}원</b><br>
+            입금자명: <b>${f.depositor_name.value}</b>
+          </div>
+          <p style="font-size:13px; color:#666; margin-bottom:16px;">
+            위 계좌로 입금해주시면 확인 후 배송 준비됩니다.
+          </p>
+          <button onclick="location.href='index.html'"
+            style="width:100%; padding:12px; background:#222; color:#fff; border:0; border-radius:6px; cursor:pointer;">
+            메인으로
+          </button>
+        `;
       });
-      localStorage.setItem('cart', JSON.stringify(cart));
-      updateCartCount();
-      alert('✅ 장바구니에 담았습니다!');
-      modal.remove();
-      return;
     }
 
-    const { error } = await db.from('orders').insert({
-      product_id: p.id,
-      product_name: p.name,
-      product_price: p.price,
-      quantity: qty,
-      total_price: total,
-      customer_name: f.customer_name.value.trim(),
-      customer_phone: f.customer_phone.value.trim(),
-      depositor_name: f.depositor_name.value.trim(),
-      memo: f.memo.value.trim(),
-      selected_color: selectedColor,
-      selected_size: selectedSize,
-      selected_extras: selectedExtras,
-      shipping_fee: shipping,
-    });
-
-    if (error) { alert('❌ 주문 실패: ' + error.message); return; }
-
-    const optLines = [
-      selectedColor && `색상: ${selectedColor}`,
-      selectedSize && `사이즈: ${selectedSize}`,
-      selectedExtras.length && `추가옵션: ${selectedExtras.join(', ')}`,
-      `수량: ${qty}개`,
-    ].filter(Boolean).join('<br>');
-
-    modal.querySelector('div').innerHTML = `
-      <h2 style="margin-bottom:16px; color:#03c75a;">✅ 주문 접수 완료</h2>
-      <div style="background:#f8f8f8; padding:16px; border-radius:8px; margin-bottom:16px; line-height:1.7; font-size:14px;">
-        <b>주문 내역</b><br>${p.name}<br>${optLines}
-        <hr style="border:0; border-top:1px solid #ddd; margin:8px 0;">
-        상품: ${subTotal.toLocaleString()}원<br>
-        배송비: ${shipping > 0 ? shipping.toLocaleString() + '원' : '무료'}<br>
-        <b>총액: ${total.toLocaleString()}원</b>
-        <hr style="border:0; border-top:1px solid #ddd; margin:8px 0;">
-        <b>입금 계좌 안내</b><br>
-        은행: <b>○○은행</b><br>
-        계좌: <b>123-456-789012</b><br>
-        예금주: <b>홍길동</b><br>
-        입금액: <b>${total.toLocaleString()}원</b><br>
-        입금자명: <b>${f.depositor_name.value}</b>
-      </div>
-      <p style="font-size:13px; color:#666; margin-bottom:16px;">
-        위 계좌로 입금해주시면 확인 후 배송 준비됩니다.
-      </p>
-      <button onclick="location.href='index.html'"
-        style="width:100%; padding:12px; background:#222; color:#fff; border:0; border-radius:6px; cursor:pointer;">
-        메인으로
-      </button>
-    `;
-  });
-}
     loadProduct();
   </script>
 </body>
