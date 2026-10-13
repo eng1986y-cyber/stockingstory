@@ -69,7 +69,8 @@
       <p id="msg" style="margin-top:12px; font-weight:600;"></p>
 
       <h2 style="margin:32px 0 16px;">등록된 상품</h2>
-      <div id="admin-list" style="display:grid; gap:10px;">로딩중...</div>
+      <div id="admin-list" style="display:grid; grid-template-columns: repeat(2, 1fr); gap:10px;">로딩중...</div>
+      <div id="admin-pagination" style="display:flex; justify-content:center; align-items:center; gap:6px; margin-top:16px; flex-wrap:wrap;"></div>
 
       <h2 style="margin:32px 0 16px;">주문 목록</h2>
       <div id="order-list" style="display:grid; gap:10px;">로딩중...</div>
@@ -176,7 +177,12 @@
       }
     });
 
-    // ===== 상품 목록 (1줄 요약 + 클릭 펼침) =====
+    // ===== 상품 목록 (2열 + 페이지네이션) =====
+    let allProducts = [];
+    let currentPage = 1;
+    const PER_PAGE = 10;
+    const MAX_PAGES = 5;
+
     async function loadAdminList() {
       const { data, error } = await db
         .from('products').select('*')
@@ -184,54 +190,59 @@
 
       if (error) { listEl.innerHTML = '<p>불러오기 실패</p>'; return; }
       if (!data || data.length === 0) {
-        listEl.innerHTML = '<p>등록된 상품이 없습니다.</p>'; return;
+        listEl.innerHTML = '<p>등록된 상품이 없습니다.</p>';
+        document.getElementById('admin-pagination').innerHTML = '';
+        return;
       }
 
-      listEl.innerHTML = data.map(p => `
-        <div class="product-row"
-          style="background:#fff; border-radius:8px; border-left:4px solid #1976d2; overflow:hidden;">
+      allProducts = data;
+      currentPage = 1;
+      renderProducts();
+    }
+
+    function renderProducts() {
+      const totalPages = Math.min(Math.ceil(allProducts.length / PER_PAGE), MAX_PAGES);
+      const start = (currentPage - 1) * PER_PAGE;
+      const pageItems = allProducts.slice(start, start + PER_PAGE);
+
+      listEl.innerHTML = pageItems.map(p => `
+        <div style="background:#fff; border-radius:8px; border-left:4px solid #1976d2; overflow:hidden;">
           <div class="product-summary"
-            style="padding:12px 14px; display:flex; align-items:center; gap:12px; cursor:pointer;">
+            style="padding:8px; display:flex; align-items:center; gap:8px; cursor:pointer;">
             <img src="${p.main_image}" alt="${p.name}"
-              style="width:44px; height:44px; object-fit:cover; border-radius:6px; flex-shrink:0;">
-            <div style="flex:1; min-width:0; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-              <span style="font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px;">
+              style="width:36px; height:36px; object-fit:cover; border-radius:6px; flex-shrink:0;">
+            <div style="flex:1; min-width:0; font-size:12px; line-height:1.3;">
+              <div style="font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                 ${p.name}
-              </span>
-              <span style="font-size:13px; color:#e53935; font-weight:700; white-space:nowrap;">
+              </div>
+              <div style="color:#e53935; font-weight:700;">
                 ${Number(p.price).toLocaleString()}원
-              </span>
-              <span style="font-size:12px; color:#888; white-space:nowrap;">
-                ${p.shipping_fee > 0 ? '배송비 ' + p.shipping_fee.toLocaleString() + '원' : '무료배송'}
-              </span>
+              </div>
             </div>
-            <span class="product-arrow" style="color:#888; font-size:12px; transition:transform .2s;">▼</span>
+            <span class="product-arrow" style="color:#888; font-size:11px; transition:transform .2s;">▼</span>
           </div>
 
-          <div class="product-detail" style="display:none; padding:0 14px 14px; font-size:13px; line-height:1.8; color:#333; border-top:1px solid #eee;">
-            <div style="padding-top:10px;">
+          <div class="product-detail"
+            style="display:none; padding:0 10px 10px; font-size:12px; line-height:1.7; color:#333; border-top:1px solid #eee;">
+            <div style="padding-top:8px;">
               ${p.description ? `<div><span style="color:#888;">설명:</span> ${p.description}</div>` : ''}
               ${(p.colors && p.colors.length) ? `<div><span style="color:#888;">색상:</span> ${p.colors.join(', ')}</div>` : ''}
               ${(p.sizes && p.sizes.length) ? `<div><span style="color:#888;">사이즈:</span> ${p.sizes.join(', ')}</div>` : ''}
-              ${(p.extra_options && p.extra_options.length) ? `<div><span style="color:#888;">추가옵션:</span> ${p.extra_options.join(', ')}</div>` : ''}
-              <div><span style="color:#888;">배송비:</span> ${p.shipping_fee > 0 ? p.shipping_fee.toLocaleString() + '원' : '무료'}</div>
-              ${(p.detail_images && p.detail_images.length) ? `<div><span style="color:#888;">상세이미지:</span> ${p.detail_images.length}개</div>` : ''}
-              <div style="color:#888; font-size:12px; margin-top:4px;">
-                등록일: ${new Date(p.created_at).toLocaleString('ko-KR')}
-              </div>
+              ${(p.extra_options && p.extra_options.length) ? `<div><span style="color:#888;">추가:</span> ${p.extra_options.join(', ')}</div>` : ''}
+              <div><span style="color:#888;">배송:</span> ${p.shipping_fee > 0 ? p.shipping_fee.toLocaleString() + '원' : '무료'}</div>
             </div>
 
-            <div style="display:flex; gap:6px; margin-top:12px; flex-wrap:wrap;">
+            <div style="display:flex; gap:4px; margin-top:8px; flex-wrap:wrap;">
               <a href="product.html?id=${p.id}" target="_blank" rel="noopener"
-                style="flex:1; min-width:80px; text-align:center; padding:8px; background:#555; color:#fff; border-radius:6px; text-decoration:none; font-size:13px;">
+                style="flex:1; text-align:center; padding:6px; background:#555; color:#fff; border-radius:4px; text-decoration:none; font-size:11px;">
                 보기
               </a>
               <a href="edit.html?id=${p.id}"
-                style="flex:1; min-width:80px; text-align:center; padding:8px; background:#1976d2; color:#fff; border-radius:6px; text-decoration:none; font-size:13px;">
+                style="flex:1; text-align:center; padding:6px; background:#1976d2; color:#fff; border-radius:4px; text-decoration:none; font-size:11px;">
                 수정
               </a>
               <button class="del-btn" data-id="${p.id}"
-                style="flex:1; min-width:80px; padding:8px; background:#e53935; color:#fff; border:0; border-radius:6px; cursor:pointer; font-size:13px;">
+                style="flex:1; padding:6px; background:#e53935; color:#fff; border:0; border-radius:4px; cursor:pointer; font-size:11px;">
                 삭제
               </button>
             </div>
@@ -260,6 +271,59 @@
           const { error } = await db.from('products').delete().eq('id', btn.dataset.id);
           if (error) alert('삭제 실패: ' + error.message);
           else loadAdminList();
+        });
+      });
+
+      renderPagination(totalPages);
+    }
+
+    function renderPagination(totalPages) {
+      const el = document.getElementById('admin-pagination');
+      if (totalPages <= 1) { el.innerHTML = ''; return; }
+
+      let html = '';
+
+      html += `
+        <button class="page-nav" data-page="${currentPage - 1}"
+          ${currentPage === 1 ? 'disabled' : ''}
+          style="padding:6px 12px; border:1px solid #ddd; border-radius:6px; background:${currentPage === 1 ? '#f5f5f5' : '#fff'}; color:${currentPage === 1 ? '#bbb' : '#222'}; cursor:${currentPage === 1 ? 'default' : 'pointer'}; font-size:13px;">
+          이전
+        </button>
+      `;
+
+      for (let i = 1; i <= totalPages; i++) {
+        html += `
+          <button class="page-num" data-page="${i}"
+            style="padding:6px 12px; border:1px solid ${i === currentPage ? '#1976d2' : '#ddd'}; border-radius:6px; background:${i === currentPage ? '#1976d2' : '#fff'}; color:${i === currentPage ? '#fff' : '#222'}; cursor:pointer; font-size:13px; font-weight:${i === currentPage ? '700' : '400'};">
+            ${i}
+          </button>
+        `;
+      }
+
+      html += `
+        <button class="page-nav" data-page="${currentPage + 1}"
+          ${currentPage === totalPages ? 'disabled' : ''}
+          style="padding:6px 12px; border:1px solid #ddd; border-radius:6px; background:${currentPage === totalPages ? '#f5f5f5' : '#fff'}; color:${currentPage === totalPages ? '#bbb' : '#222'}; cursor:${currentPage === totalPages ? 'default' : 'pointer'}; font-size:13px;">
+          다음
+        </button>
+      `;
+
+      el.innerHTML = html;
+
+      el.querySelectorAll('.page-num').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentPage = Number(btn.dataset.page);
+          renderProducts();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      });
+
+      el.querySelectorAll('.page-nav').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (btn.disabled) return;
+          currentPage = Number(btn.dataset.page);
+          renderProducts();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         });
       });
     }
