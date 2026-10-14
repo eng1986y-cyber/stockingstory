@@ -3,19 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>STK스토리 심플라이프</title>
+  <title>심플몰</title>
   <link rel="stylesheet" href="style.css">
   <script src="common.js"></script>
   <style>
-    /* 좌우 스크롤 완전 차단 */
-    html, body {
-      overflow-x: hidden !important;
+    /* 좌우 스크롤 완전 차단 (스크롤바 자리 고정으로 흔들림 방지) */
+    html {
+      overflow-y: scroll;     /* 스크롤바 항상 표시 → 좌우 흔들림 원인 제거 */
+      overflow-x: hidden;
+    }
+    body {
+      overflow-x: hidden;
       width: 100%;
       max-width: 100%;
+      margin: 0;
     }
-    body { position: relative; }
 
-    /* 배너: 화면 전체 너비로 (여백 없이) */
+    /* 배너: 화면 전체 너비 */
     #banner-wrap {
       width: 100vw;
       position: relative;
@@ -27,35 +31,45 @@
       overflow: hidden;
     }
 
-    /* 상품 컨테이너: 최대 1100px 고정 */
+    /* 상품 컨테이너: 최대 1400px */
     #product-container {
-      max-width: 1100px;
+      max-width: 1400px;
       margin: 0 auto;
       padding: 0 16px;
       box-sizing: border-box;
       width: 100%;
     }
 
+    /* 상품 그리드: 고정 너비, 페이지 넘겨도 크기 그대로 */
     #product-list {
       display: grid;
-      gap: 12px;
+      gap: 16px;
       width: 100%;
+      box-sizing: border-box;
     }
     #product-list .card {
       min-width: 0;
       overflow: hidden;
       display: block;
+      box-sizing: border-box;
     }
     #product-list .card img {
       width: 100%;
       display: block;
     }
+
+    /* 페이지네이션: 위치 고정, 좌우 흔들림 없게 */
     #pagination {
       display: flex;
       justify-content: center;
+      align-items: center;
       gap: 6px;
       margin-top: 20px;
+      margin-bottom: 40px;
       flex-wrap: wrap;
+      width: 100%;
+      box-sizing: border-box;
+      min-height: 50px;    /* 페이지 1개여도 높이 고정 → 상하 흔들림 방지 */
     }
   </style>
 </head>
@@ -67,7 +81,7 @@
     <div id="banner-inner"></div>
   </div>
 
-  <!-- 상품 영역: 최대 1100px -->
+  <!-- 상품 영역 -->
   <main id="product-container">
     <div id="product-list">로딩중...</div>
     <div id="pagination"></div>
@@ -83,7 +97,8 @@
 
   <script>
     const isPC = () => window.innerWidth >= 769;
-    const PC_PER_PAGE = 35;
+    // PC: 7열, 상품 크기 확대 위해 6열로 조정 (더 크게)
+    const PC_PER_PAGE = 30;   // 6열 × 5행
     const PC_MAX_PAGES = 10;
     const MOBILE_PER_PAGE = 10;
     const MOBILE_MAX_PAGES = 5;
@@ -91,7 +106,7 @@
     let allProducts = [];
     let currentPage = 1;
 
-    // ===== 배너 로드 (화면 전체 너비, 높이 700) =====
+    // ===== 배너 로드 =====
     async function loadBanner() {
       const wrap = document.getElementById('banner-wrap');
       const inner = document.getElementById('banner-inner');
@@ -141,8 +156,9 @@
 
     function applyGridColumns() {
       const list = document.getElementById('product-list');
+      // PC 6열 (더 크게), 모바일 2열
       list.style.gridTemplateColumns = isPC()
-        ? 'repeat(7, minmax(0, 1fr))'
+        ? 'repeat(6, minmax(0, 1fr))'
         : 'repeat(2, minmax(0, 1fr))';
     }
 
@@ -158,10 +174,10 @@
       list.innerHTML = items.map(p => `
         <a class="card" href="product.html?id=${p.id}" style="text-decoration:none; color:inherit; display:block; min-width:0;">
           <img src="${p.main_image}" alt="${p.name}" loading="lazy"
-            style="width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:8px; display:block;">
-          <div style="padding:8px 4px; min-width:0;">
-            <div style="font-size:13px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${p.name}</div>
-            <div style="color:#e53935; font-weight:700; font-size:14px; margin-top:2px;">${Number(p.price).toLocaleString()}원</div>
+            style="width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:10px; display:block;">
+          <div style="padding:10px 4px; min-width:0;">
+            <div style="font-size:14px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${p.name}</div>
+            <div style="color:#e53935; font-weight:700; font-size:15px; margin-top:4px;">${Number(p.price).toLocaleString()}원</div>
           </div>
         </a>
       `).join('');
@@ -175,20 +191,24 @@
       const maxPages = getMaxPages();
       const totalPages = Math.min(Math.ceil(allProducts.length / perPage), maxPages);
 
-      if (totalPages <= 1) { el.innerHTML = ''; return; }
+      // 페이지 1개 이하면 버튼 숨기되, 높이는 유지
+      if (totalPages <= 1) {
+        el.innerHTML = '';
+        return;
+      }
 
       let html = '';
 
       html += `<button class="page-nav" data-page="${currentPage-1}" ${currentPage===1?'disabled':''}
-        style="padding:8px 14px; border:1px solid #ddd; border-radius:6px; background:${currentPage===1?'#f5f5f5':'#fff'}; color:${currentPage===1?'#bbb':'#222'}; cursor:${currentPage===1?'default':'pointer'};">이전</button>`;
+        style="padding:8px 14px; border:1px solid #ddd; border-radius:6px; background:${currentPage===1?'#f5f5f5':'#fff'}; color:${currentPage===1?'#bbb':'#222'}; cursor:${currentPage===1?'default':'pointer'}; font-size:14px;">이전</button>`;
 
       for (let i = 1; i <= totalPages; i++) {
         html += `<button class="page-num" data-page="${i}"
-          style="padding:8px 14px; border:1px solid ${i===currentPage?'#1976d2':'#ddd'}; border-radius:6px; background:${i===currentPage?'#1976d2':'#fff'}; color:${i===currentPage?'#fff':'#222'}; cursor:pointer; font-weight:${i===currentPage?'700':'400'};">${i}</button>`;
+          style="padding:8px 14px; border:1px solid ${i===currentPage?'#1976d2':'#ddd'}; border-radius:6px; background:${i===currentPage?'#1976d2':'#fff'}; color:${i===currentPage?'#fff':'#222'}; cursor:pointer; font-size:14px; font-weight:${i===currentPage?'700':'400'};">${i}</button>`;
       }
 
       html += `<button class="page-nav" data-page="${currentPage+1}" ${currentPage===totalPages?'disabled':''}
-        style="padding:8px 14px; border:1px solid #ddd; border-radius:6px; background:${currentPage===totalPages?'#f5f5f5':'#fff'}; color:${currentPage===totalPages?'#bbb':'#222'}; cursor:${currentPage===totalPages?'default':'pointer'};">다음</button>`;
+        style="padding:8px 14px; border:1px solid #ddd; border-radius:6px; background:${currentPage===totalPages?'#f5f5f5':'#fff'}; color:${currentPage===totalPages?'#bbb':'#222'}; cursor:${currentPage===totalPages?'default':'pointer'}; font-size:14px;">다음</button>`;
 
       el.innerHTML = html;
 
@@ -211,7 +231,10 @@
         if (inner.innerHTML.trim()) {
           wrap.style.display = isPC() ? 'block' : 'none';
         }
-        currentPage = 1;
+        // 화면 크기 바뀌어도 페이지 번호 유지 (범위 초과 시 조정)
+        const maxP = getMaxPages();
+        const totalP = Math.min(Math.ceil(allProducts.length / getPerPage()), maxP);
+        if (currentPage > totalP) currentPage = totalP || 1;
         renderPage();
       }, 200);
     });
