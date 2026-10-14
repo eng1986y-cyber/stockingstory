@@ -1,5 +1,30 @@
 // ===== 공통 유틸 =====
 
+// 좌우 흔들림 완전 방지 (스크롤바 자리 고정)
+(function() {
+  const style = document.createElement('style');
+  style.textContent = `
+    html {
+      overflow-y: scroll !important;
+      overflow-x: hidden !important;
+    }
+    body {
+      overflow-x: hidden !important;
+      margin: 0 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+    #app-header, #app-header * {
+      box-sizing: border-box;
+    }
+    #app-header a, #app-header button, #app-header span {
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+  `;
+  document.head.appendChild(style);
+})();
+
 // 연락처 자동 하이픈 (이벤트 위임)
 document.addEventListener('input', (e) => {
   const el = e.target;
@@ -22,7 +47,7 @@ function applyPhoneAttrs() {
   });
 }
 
-// ===== 공통 헤더 렌더 =====
+// ===== 공통 헤더 렌더 (버튼 크기 완전 고정) =====
 function renderHeader(current) {
   const wrap = document.getElementById('app-header');
   if (!wrap) return;
@@ -30,21 +55,30 @@ function renderHeader(current) {
   const member = localStorage.getItem('member');
   const m = member ? JSON.parse(member) : null;
 
+  // ⭐ active 상태여도 padding/font-weight/border 동일 → 크기 안 변함
+  // active는 background/color만 바꿈
   const btnStyle = (active) => `
-    padding:8px 14px;
-    background:${active ? '#222' : '#fff'};
-    color:${active ? '#fff' : '#222'};
-    border:1px solid #ddd;
-    border-radius:6px;
-    text-decoration:none;
-    font-size:14px;
-    font-weight:500;
-    display:inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 14px;
+    min-width: 76px;
+    height: 36px;
+    background: ${active ? '#222' : '#fff'};
+    color: ${active ? '#fff' : '#222'};
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    box-sizing: border-box;
+    flex-shrink: 0;
   `;
 
   const userBtns = m
     ? `
-      <span style="color:#555; font-size:13px; padding:0 6px;">${m.name}님</span>
+      <span style="color:#555; font-size:13px; padding:0 6px; white-space:nowrap;">${m.name}님</span>
       <a href="mypage.html" style="${btnStyle(current === 'mypage')}">내정보</a>
       <a href="#" id="logout-btn" style="${btnStyle(false)}">로그아웃</a>
     `
@@ -55,12 +89,12 @@ function renderHeader(current) {
 
   wrap.innerHTML = `
     <header style="background:#fff; border-bottom:1px solid #eee; padding:14px 16px;">
-      <div style="max-width:1100px; margin:0 auto;">
+      <div style="max-width:1400px; margin:0 auto;">
         <div style="margin-bottom:12px;">
           <a href="index.html" style="font-size:22px; font-weight:700; color:#222; text-decoration:none;">🛍️ 심플몰</a>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:flex-end;">
-          <a href="cart.html" style="${btnStyle(current === 'cart')}">장바구니 <span id="cart-count">0</span></a>
+          <a href="cart.html" style="${btnStyle(current === 'cart')}">장바구니 <span id="cart-count" style="margin-left:4px;">0</span></a>
           <a href="orders.html" style="${btnStyle(current === 'orders')}">주문조회</a>
           ${userBtns}
         </div>
