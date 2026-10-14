@@ -68,12 +68,10 @@ function renderHeader(current) {
     </header>
   `;
 
-  // 장바구니 개수
   const cart = JSON.parse(localStorage.getItem('cart') || '[]');
   const cc = document.getElementById('cart-count');
   if (cc) cc.textContent = cart.length;
 
-  // 로그아웃
   const lb = document.getElementById('logout-btn');
   if (lb) {
     lb.onclick = (e) => {
@@ -84,8 +82,27 @@ function renderHeader(current) {
   }
 }
 
-// 초기화
+// ===== 자동 실행 =====
+// 페이지 파일명을 보고 자동으로 renderHeader 호출
 document.addEventListener('DOMContentLoaded', () => {
   applyPhoneAttrs();
   new MutationObserver(applyPhoneAttrs).observe(document.body, { childList: true, subtree: true });
+
+  // 현재 페이지 이름 (확장자 제거)
+  const path = location.pathname.split('/').pop().replace('.html', '') || 'index';
+  const map = {
+    'index': 'home',
+    'login': 'login',
+    'signup': 'signup',
+    'cart': 'cart',
+    'orders': 'orders',
+    'product': 'product',
+    'mypage': 'mypage',
+  };
+  const current = map[path] || 'home';
+
+  // app-header 요소 있으면 자동 렌더
+  if (document.getElementById('app-header')) {
+    renderHeader(current);
+  }
 });
