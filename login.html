@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>로그인 - 심플몰</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="common.js" defer></script>
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <main>
+    <div style="max-width:400px; margin:40px auto;">
+      <h2 style="margin-bottom:16px;">로그인</h2>
+      <form id="login-form" style="display:grid; gap:10px; background:#fff; padding:24px; border-radius:8px;">
+        <input name="username" placeholder="아이디" required
+          style="padding:12px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
+        <input name="password" type="password" placeholder="비밀번호" required
+          style="padding:12px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
+        <button type="submit"
+          style="padding:14px; background:#03c75a; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600; font-size:15px;">
+          로그인
+        </button>
+      </form>
+      <p id="msg" style="margin-top:12px; font-weight:600; text-align:center;"></p>
+      <div style="text-align:center; margin-top:16px;">
+        <a href="signup.html" style="color:#1976d2; text-decoration:none; font-size:14px;">회원가입 하러가기</a>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const db = supabase.createClient(
+      "https://alpdhgcipjeekzrpxlbh.supabase.co",
+      "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya"
+    );
+  </script>
+
+  <script>
+    renderHeader('login');
+    const form = document.getElementById('login-form');
+    const msg = document.getElementById('msg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.textContent = '로그인 중...';
+      msg.style.color = '#222';
+
+      const username = form.username.value.trim();
+      const password = form.password.value;
+
+      const { data, error } = await db
+        .from('members')
+        .select('*')
+        .eq('username', username)
+        .eq('password', password)
+        .maybeSingle();
+
+      if (error) {
+        msg.style.color = 'crimson';
+        msg.textContent = '❌ ' + error.message;
+        return;
+      }
+      if (!data) {
+        msg.style.color = 'crimson';
+        msg.textContent = '❌ 아이디 또는 비밀번호가 틀렸습니다.';
+        return;
+      }
+
+      localStorage.setItem('member', JSON.stringify({
+        id: data.id,
+        username: data.username,
+        name: data.name,
+        phone: data.phone,
+        email: data.email,
+        address: data.address || '',
+        address_detail: data.address_detail || '',
+        postcode: data.postcode || '',
+      }));
+
+      msg.style.color = 'green';
+      msg.textContent = '✅ 로그인 성공! 이동 중...';
+      setTimeout(() => location.href = 'index.html', 800);
+    });
+  </script>
+</body>
+</html>

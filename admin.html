@@ -16,63 +16,60 @@
     <div id="login-screen" style="display:none; max-width:360px; margin:60px auto;">
       <h2 style="margin-bottom:16px;">관리자 로그인</h2>
       <form id="login-form" style="display:grid; gap:10px; background:#fff; padding:20px; border-radius:8px;">
-        <input name="email" type="email" placeholder="이메일" required
-          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-        <input name="password" type="password" placeholder="비밀번호" required
-          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-        <button type="submit"
-          style="padding:12px; background:#222; color:#fff; border:0; border-radius:6px; cursor:pointer;">
-          로그인
-        </button>
+        <input name="email" type="email" placeholder="이메일" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <input name="password" type="password" placeholder="비밀번호" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <button type="submit" style="padding:12px; background:#222; color:#fff; border:0; border-radius:6px; cursor:pointer;">로그인</button>
       </form>
       <p id="login-msg" style="margin-top:12px; font-weight:600;"></p>
     </div>
 
     <div id="admin-screen" style="display:none;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h2>상품 등록</h2>
-        <button id="logout-btn"
-          style="padding:8px 14px; background:#999; color:#fff; border:0; border-radius:6px; cursor:pointer; font-size:13px;">
-          로그아웃
-        </button>
+        <h2>관리자</h2>
+        <button id="logout-btn" style="padding:8px 14px; background:#999; color:#fff; border:0; border-radius:6px; cursor:pointer; font-size:13px;">로그아웃</button>
       </div>
 
+      <!-- 전체 배송비 설정 -->
+      <div style="background:#fff; padding:16px; border-radius:8px; margin-bottom:16px;">
+        <h3 style="font-size:15px; margin-bottom:10px;">전체 배송비 설정</h3>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <input id="global-shipping" type="number" min="0" placeholder="배송비 (0=무료)"
+            style="padding:10px; border:1px solid #ddd; border-radius:6px; width:200px;">
+          <button id="save-shipping"
+            style="padding:10px 20px; background:#03c75a; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">
+            저장
+          </button>
+          <span id="shipping-msg" style="font-size:13px; font-weight:600;"></span>
+        </div>
+        <p style="font-size:12px; color:#888; margin-top:6px;">모든 상품에 동일하게 적용됩니다.</p>
+      </div>
+
+      <h2 style="margin:24px 0 16px;">상품 등록</h2>
       <form id="product-form"
-        style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:10px; background:#fff; padding:16px; border-radius:8px; max-width:none;">
-
-        <input name="name" placeholder="상품명" required
-          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-        <input name="price" type="number" placeholder="가격 (숫자만)" required
-          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-        <input name="main_image" placeholder="메인 이미지 URL (필수)" required
-          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-        <input name="colors" placeholder="색상 (쉼표: 빨강,파랑,검정)"
-          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-        <input name="sizes" placeholder="사이즈 (쉼표: S,M,L,XL)"
-          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-        <input name="extra_options" placeholder="추가옵션 (쉼표: 각인,포장)"
-          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-        <input name="shipping_fee" type="number" min="0" value="0" placeholder="배송비 (0이면 무료)"
-          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-
-        <textarea name="description" placeholder="상품 설명"
-          style="grid-column: 1 / -1; padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
-        <textarea name="detail_images" placeholder="상세 이미지 URL (한 줄에 하나씩)"
-          style="grid-column: 1 / -1; padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
-
-        <button type="submit"
-          style="grid-column: 1 / -1; padding:12px; background:#222; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">
-          등록하기
-        </button>
+        style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:10px; background:#fff; padding:16px; border-radius:8px;">
+        <input name="product_code" placeholder="제품번호" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <input name="name" placeholder="상품명" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <input name="price" type="number" placeholder="가격" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <input name="main_image" placeholder="메인 이미지 URL" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <input name="colors" placeholder="색상 (쉼표: 빨강,파랑)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <input name="sizes" placeholder="사이즈 (쉼표: S,M,L)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <input name="extra_options" placeholder="추가옵션 (쉼표: 각인,포장)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <textarea name="description" placeholder="상품 설명" style="grid-column: 1 / -1; padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
+        <textarea name="detail_images" placeholder="상세 이미지 URL (줄바꿈)" style="grid-column: 1 / -1; padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
+        <button type="submit" style="grid-column: 1 / -1; padding:12px; background:#222; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">등록하기</button>
       </form>
-
       <p id="msg" style="margin-top:12px; font-weight:600;"></p>
 
       <h2 style="margin:32px 0 16px;">등록된 상품</h2>
       <div id="admin-list" style="display:grid; grid-template-columns: repeat(2, 1fr); gap:10px;">로딩중...</div>
-      <div id="admin-pagination" style="display:flex; justify-content:center; align-items:center; gap:6px; margin-top:16px; flex-wrap:wrap;"></div>
+      <div id="admin-pagination" style="display:flex; justify-content:center; gap:6px; margin-top:16px; flex-wrap:wrap;"></div>
 
       <h2 style="margin:32px 0 16px;">주문 목록</h2>
+      <div style="display:flex; gap:8px; margin-bottom:12px;">
+        <input id="order-search" placeholder="주문번호로 검색" style="flex:1; padding:10px; border:1px solid #ddd; border-radius:6px; text-transform:uppercase;">
+        <button id="order-search-btn" style="padding:10px 20px; background:#1976d2; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">검색</button>
+        <button id="order-reset-btn" style="padding:10px 20px; background:#eee; border:0; border-radius:6px; cursor:pointer;">전체</button>
+      </div>
       <div id="order-list" style="display:grid; gap:10px;">로딩중...</div>
 
       <h2 style="margin:32px 0 16px;">회원 목록</h2>
@@ -81,7 +78,6 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <script>
     const db = supabase.createClient(
       "https://alpdhgcipjeekzrpxlbh.supabase.co",
@@ -109,6 +105,7 @@
     function showAdmin() {
       loginScreen.style.display = 'none';
       adminScreen.style.display = 'block';
+      loadShippingSetting();
       loadAdminList();
       loadOrders();
       loadMembers();
@@ -118,12 +115,10 @@
       e.preventDefault();
       loginMsg.textContent = '로그인 중...';
       loginMsg.style.color = '#222';
-
       const { error } = await db.auth.signInWithPassword({
         email: loginForm.email.value.trim(),
         password: loginForm.password.value,
       });
-
       if (error) {
         loginMsg.style.color = 'crimson';
         loginMsg.textContent = '❌ ' + error.message;
@@ -138,23 +133,45 @@
       showLogin();
     });
 
+    // ===== 배송비 설정 =====
+    async function loadShippingSetting() {
+      const { data } = await db.from('settings').select('value').eq('key', 'shipping_fee').maybeSingle();
+      document.getElementById('global-shipping').value = data ? (data.value || 0) : 0;
+    }
+
+    document.getElementById('save-shipping').addEventListener('click', async () => {
+      const val = Number(document.getElementById('global-shipping').value) || 0;
+      const sm = document.getElementById('shipping-msg');
+      sm.textContent = '저장 중...';
+      sm.style.color = '#222';
+
+      // upsert (있으면 update, 없으면 insert)
+      const { error } = await db.from('settings').upsert({ key: 'shipping_fee', value: String(val) });
+      if (error) {
+        sm.style.color = 'crimson';
+        sm.textContent = '❌ ' + error.message;
+      } else {
+        sm.style.color = 'green';
+        sm.textContent = '✅ 저장 완료!';
+        setTimeout(() => sm.textContent = '', 2000);
+      }
+    });
+
+    // ===== 상품 등록 =====
     const form = document.getElementById('product-form');
     const msg = document.getElementById('msg');
     const listEl = document.getElementById('admin-list');
-
-    const parseList = (str) =>
-      (str || '').split(',').map(s => s.trim()).filter(Boolean);
+    const parseList = (str) => (str || '').split(',').map(s => s.trim()).filter(Boolean);
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-
-      const detail_images = form.detail_images.value
-        .split('\n').map(s => s.trim()).filter(Boolean);
+      const detail_images = form.detail_images.value.split('\n').map(s => s.trim()).filter(Boolean);
 
       msg.textContent = '등록 중...';
       msg.style.color = '#222';
 
       const { error } = await db.from('products').insert({
+        product_code: form.product_code.value.trim() || null,
         name: form.name.value.trim(),
         price: Number(form.price.value),
         description: form.description.value.trim(),
@@ -163,7 +180,6 @@
         colors: parseList(form.colors.value),
         sizes: parseList(form.sizes.value),
         extra_options: parseList(form.extra_options.value),
-        shipping_fee: Number(form.shipping_fee.value) || 0,
       });
 
       if (error) {
@@ -184,9 +200,7 @@
     const MAX_PAGES = 5;
 
     async function loadAdminList() {
-      const { data, error } = await db
-        .from('products').select('*')
-        .order('created_at', { ascending: false });
+      const { data, error } = await db.from('products').select('*').order('created_at', { ascending: false });
 
       if (error) { listEl.innerHTML = '<p>불러오기 실패</p>'; return; }
       if (!data || data.length === 0) {
@@ -194,7 +208,6 @@
         document.getElementById('admin-pagination').innerHTML = '';
         return;
       }
-
       allProducts = data;
       currentPage = 1;
       renderProducts();
@@ -203,48 +216,33 @@
     function renderProducts() {
       const totalPages = Math.min(Math.ceil(allProducts.length / PER_PAGE), MAX_PAGES);
       const start = (currentPage - 1) * PER_PAGE;
-      const pageItems = allProducts.slice(start, start + PER_PAGE);
+      const items = allProducts.slice(start, start + PER_PAGE);
 
-      listEl.innerHTML = pageItems.map(p => `
+      listEl.innerHTML = items.map(p => `
         <div style="background:#fff; border-radius:8px; border-left:4px solid #1976d2; overflow:hidden;">
-          <div class="product-summary"
-            style="padding:8px; display:flex; align-items:center; gap:8px; cursor:pointer;">
-            <img src="${p.main_image}" alt="${p.name}"
-              style="width:36px; height:36px; object-fit:cover; border-radius:6px; flex-shrink:0;">
+          <div class="product-summary" style="padding:8px; display:flex; align-items:center; gap:8px; cursor:pointer;">
+            <img src="${p.main_image}" style="width:36px; height:36px; object-fit:cover; border-radius:6px; flex-shrink:0;">
             <div style="flex:1; min-width:0; font-size:12px; line-height:1.3;">
-              <div style="font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                ${p.name}
-              </div>
-              <div style="color:#e53935; font-weight:700;">
-                ${Number(p.price).toLocaleString()}원
-              </div>
+              <div style="font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.name}</div>
+              <div style="color:#e53935; font-weight:700;">${Number(p.price).toLocaleString()}원</div>
             </div>
             <span class="product-arrow" style="color:#888; font-size:11px; transition:transform .2s;">▼</span>
           </div>
-
-          <div class="product-detail"
-            style="display:none; padding:0 10px 10px; font-size:12px; line-height:1.7; color:#333; border-top:1px solid #eee;">
+          <div class="product-detail" style="display:none; padding:0 10px 10px; font-size:12px; line-height:1.7; color:#333; border-top:1px solid #eee;">
             <div style="padding-top:8px;">
+              ${p.product_code ? `<div><span style="color:#888;">제품번호:</span> ${p.product_code}</div>` : ''}
               ${p.description ? `<div><span style="color:#888;">설명:</span> ${p.description}</div>` : ''}
               ${(p.colors && p.colors.length) ? `<div><span style="color:#888;">색상:</span> ${p.colors.join(', ')}</div>` : ''}
               ${(p.sizes && p.sizes.length) ? `<div><span style="color:#888;">사이즈:</span> ${p.sizes.join(', ')}</div>` : ''}
               ${(p.extra_options && p.extra_options.length) ? `<div><span style="color:#888;">추가:</span> ${p.extra_options.join(', ')}</div>` : ''}
-              <div><span style="color:#888;">배송:</span> ${p.shipping_fee > 0 ? p.shipping_fee.toLocaleString() + '원' : '무료'}</div>
             </div>
-
-            <div style="display:flex; gap:4px; margin-top:8px; flex-wrap:wrap;">
+            <div style="display:flex; gap:4px; margin-top:8px;">
               <a href="product.html?id=${p.id}" target="_blank" rel="noopener"
-                style="flex:1; text-align:center; padding:6px; background:#555; color:#fff; border-radius:4px; text-decoration:none; font-size:11px;">
-                보기
-              </a>
+                style="flex:1; text-align:center; padding:6px; background:#555; color:#fff; border-radius:4px; text-decoration:none; font-size:11px;">보기</a>
               <a href="edit.html?id=${p.id}"
-                style="flex:1; text-align:center; padding:6px; background:#1976d2; color:#fff; border-radius:4px; text-decoration:none; font-size:11px;">
-                수정
-              </a>
+                style="flex:1; text-align:center; padding:6px; background:#1976d2; color:#fff; border-radius:4px; text-decoration:none; font-size:11px;">수정</a>
               <button class="del-btn" data-id="${p.id}"
-                style="flex:1; padding:6px; background:#e53935; color:#fff; border:0; border-radius:4px; cursor:pointer; font-size:11px;">
-                삭제
-              </button>
+                style="flex:1; padding:6px; background:#e53935; color:#fff; border:0; border-radius:4px; cursor:pointer; font-size:11px;">삭제</button>
             </div>
           </div>
         </div>
@@ -280,45 +278,18 @@
     function renderPagination(totalPages) {
       const el = document.getElementById('admin-pagination');
       if (totalPages <= 1) { el.innerHTML = ''; return; }
-
       let html = '';
-
-      html += `
-        <button class="page-nav" data-page="${currentPage - 1}"
-          ${currentPage === 1 ? 'disabled' : ''}
-          style="padding:6px 12px; border:1px solid #ddd; border-radius:6px; background:${currentPage === 1 ? '#f5f5f5' : '#fff'}; color:${currentPage === 1 ? '#bbb' : '#222'}; cursor:${currentPage === 1 ? 'default' : 'pointer'}; font-size:13px;">
-          이전
-        </button>
-      `;
-
+      html += `<button class="page-nav" data-page="${currentPage-1}" ${currentPage===1?'disabled':''}
+        style="padding:6px 12px; border:1px solid #ddd; border-radius:6px; background:${currentPage===1?'#f5f5f5':'#fff'}; color:${currentPage===1?'#bbb':'#222'}; cursor:${currentPage===1?'default':'pointer'}; font-size:13px;">이전</button>`;
       for (let i = 1; i <= totalPages; i++) {
-        html += `
-          <button class="page-num" data-page="${i}"
-            style="padding:6px 12px; border:1px solid ${i === currentPage ? '#1976d2' : '#ddd'}; border-radius:6px; background:${i === currentPage ? '#1976d2' : '#fff'}; color:${i === currentPage ? '#fff' : '#222'}; cursor:pointer; font-size:13px; font-weight:${i === currentPage ? '700' : '400'};">
-            ${i}
-          </button>
-        `;
+        html += `<button class="page-num" data-page="${i}"
+          style="padding:6px 12px; border:1px solid ${i===currentPage?'#1976d2':'#ddd'}; border-radius:6px; background:${i===currentPage?'#1976d2':'#fff'}; color:${i===currentPage?'#fff':'#222'}; cursor:pointer; font-size:13px; font-weight:${i===currentPage?'700':'400'};">${i}</button>`;
       }
-
-      html += `
-        <button class="page-nav" data-page="${currentPage + 1}"
-          ${currentPage === totalPages ? 'disabled' : ''}
-          style="padding:6px 12px; border:1px solid #ddd; border-radius:6px; background:${currentPage === totalPages ? '#f5f5f5' : '#fff'}; color:${currentPage === totalPages ? '#bbb' : '#222'}; cursor:${currentPage === totalPages ? 'default' : 'pointer'}; font-size:13px;">
-          다음
-        </button>
-      `;
-
+      html += `<button class="page-nav" data-page="${currentPage+1}" ${currentPage===totalPages?'disabled':''}
+        style="padding:6px 12px; border:1px solid #ddd; border-radius:6px; background:${currentPage===totalPages?'#f5f5f5':'#fff'}; color:${currentPage===totalPages?'#bbb':'#222'}; cursor:${currentPage===totalPages?'default':'pointer'}; font-size:13px;">다음</button>`;
       el.innerHTML = html;
 
-      el.querySelectorAll('.page-num').forEach(btn => {
-        btn.addEventListener('click', () => {
-          currentPage = Number(btn.dataset.page);
-          renderProducts();
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-      });
-
-      el.querySelectorAll('.page-nav').forEach(btn => {
+      el.querySelectorAll('.page-num, .page-nav').forEach(btn => {
         btn.addEventListener('click', () => {
           if (btn.disabled) return;
           currentPage = Number(btn.dataset.page);
@@ -328,76 +299,81 @@
       });
     }
 
-    // ===== 주문 목록 (1줄 요약 + 클릭 펼침) =====
+    // ===== 주문 목록 =====
     let currentOrders = [];
 
-    async function loadOrders() {
+    async function loadOrders(filterNum) {
       const el = document.getElementById('order-list');
-      const { data, error } = await db
-        .from('orders').select('*')
-        .order('created_at', { ascending: false });
+      let query = db.from('orders').select('*').order('created_at', { ascending: false });
+      if (filterNum) query = query.eq('order_number', filterNum);
 
+      const { data, error } = await query;
       if (error) { el.innerHTML = '<p>불러오기 실패: ' + error.message + '</p>'; return; }
       if (!data || data.length === 0) { el.innerHTML = '<p>주문이 없습니다.</p>'; return; }
 
+      // 주문번호로 그룹화
+      const groups = {};
+      data.forEach(o => {
+        const key = o.order_number || `no_num_${o.id}`;
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(o);
+      });
+
       currentOrders = data;
 
-      el.innerHTML = data.map(o => `
-        <div class="order-row" data-id="${o.id}"
-          style="background:#fff; border-radius:8px; border-left:4px solid ${statusColor(o.status)}; overflow:hidden;">
-          <div class="order-summary"
-            style="padding:12px 14px; display:flex; justify-content:space-between; align-items:center; gap:10px; cursor:pointer; flex-wrap:wrap;">
-            <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0; flex-wrap:wrap;">
-              <span style="background:${statusColor(o.status)}; color:#fff; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:600; white-space:nowrap;">
-                ${o.status}
-              </span>
-              <span style="font-size:14px; white-space:nowrap;">
-                <b>${o.customer_name}</b>
-              </span>
-              <span style="font-size:13px; color:#555; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px;">
-                ${o.product_name} × ${o.quantity}
-              </span>
-              <span style="font-size:14px; font-weight:700; color:#e53935; white-space:nowrap;">
-                ${o.total_price.toLocaleString()}원
-              </span>
+      el.innerHTML = Object.entries(groups).map(([num, items]) => {
+        const first = items[0];
+        const totalAll = items.reduce((s, o) => s + Number(o.total_price || 0), 0);
+        return `
+          <div style="background:#fff; border-radius:8px; border-left:4px solid ${statusColor(first.status)}; overflow:hidden;">
+            <div class="order-summary" style="padding:12px 14px; display:flex; justify-content:space-between; align-items:center; gap:10px; cursor:pointer; flex-wrap:wrap;">
+              <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0; flex-wrap:wrap;">
+                <span style="background:${statusColor(first.status)}; color:#fff; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:600; white-space:nowrap;">${first.status}</span>
+                <span style="font-size:13px; color:#1976d2; font-weight:600;">${num}</span>
+                <span style="font-size:14px; white-space:nowrap;"><b>${first.customer_name}</b></span>
+                <span style="font-size:13px; color:#555;">${items.length}건</span>
+                <span style="font-size:14px; font-weight:700; color:#e53935; white-space:nowrap;">${totalAll.toLocaleString()}원</span>
+              </div>
+              <span class="order-arrow" style="color:#888; font-size:12px; transition:transform .2s;">▼</span>
             </div>
-            <span class="order-arrow" style="color:#888; font-size:12px; transition:transform .2s;">▼</span>
-          </div>
-
-          <div class="order-detail" style="display:none; padding:0 14px 14px; font-size:13px; line-height:1.8; color:#333; border-top:1px solid #eee;">
-            <div style="padding-top:10px;">
-              <div><span style="color:#888;">연락처:</span> ${o.customer_phone}</div>
-              <div><span style="color:#888;">입금자명:</span> <b>${o.depositor_name}</b></div>
-              ${o.selected_color ? `<div><span style="color:#888;">색상:</span> ${o.selected_color}</div>` : ''}
-              ${o.selected_size ? `<div><span style="color:#888;">사이즈:</span> ${o.selected_size}</div>` : ''}
-              ${(o.selected_extras && o.selected_extras.length) ? `<div><span style="color:#888;">추가옵션:</span> ${o.selected_extras.join(', ')}</div>` : ''}
-              ${o.shipping_fee > 0 ? `<div><span style="color:#888;">배송비:</span> ${o.shipping_fee.toLocaleString()}원</div>` : ''}
-              ${o.group_id ? `<div><span style="color:#888;">그룹:</span> ${o.group_id.slice(-6)}</div>` : ''}
-              ${o.memo ? `<div><span style="color:#888;">요청:</span> ${o.memo}</div>` : ''}
-              <div style="color:#888; font-size:12px; margin-top:4px;">
-                ${new Date(o.created_at).toLocaleString('ko-KR')}
+            <div class="order-detail" style="display:none; padding:0 14px 14px; font-size:13px; line-height:1.8; color:#333; border-top:1px solid #eee;">
+              <div style="padding-top:10px;">
+                <div><span style="color:#888;">연락처:</span> ${first.customer_phone}</div>
+                <div><span style="color:#888;">주소:</span> ${first.postcode ? `[${first.postcode}] ` : ''}${first.address || ''} ${first.address_detail || ''}</div>
+                <div><span style="color:#888;">입금자명:</span> <b>${first.depositor_name}</b></div>
+                ${first.memo ? `<div><span style="color:#888;">요청:</span> ${first.memo}</div>` : ''}
+                <hr style="border:0; border-top:1px dashed #ddd; margin:8px 0;">
+                ${items.map(o => `
+                  <div style="padding:4px 0;">
+                    <b>${o.product_name}</b>
+                    ${o.product_code ? `<span style="color:#888;">[${o.product_code}]</span>` : ''}
+                    × ${o.quantity} = <b style="color:#e53935;">${Number(o.total_price).toLocaleString()}원</b>
+                    ${o.selected_color ? `<br><span style="color:#888; font-size:12px;">색상: ${o.selected_color}</span>` : ''}
+                    ${o.selected_size ? ` <span style="color:#888; font-size:12px;">사이즈: ${o.selected_size}</span>` : ''}
+                    ${o.selected_extras?.length ? `<br><span style="color:#888; font-size:12px;">추가: ${o.selected_extras.join(', ')}</span>` : ''}
+                    <button class="order-edit" data-id="${o.id}"
+                      style="margin-left:6px; padding:3px 8px; background:#1976d2; color:#fff; border:0; border-radius:4px; cursor:pointer; font-size:11px;">수정</button>
+                    <button class="order-del" data-id="${o.id}"
+                      style="margin-left:4px; padding:3px 8px; background:#e53935; color:#fff; border:0; border-radius:4px; cursor:pointer; font-size:11px;">삭제</button>
+                  </div>
+                `).join('')}
+                <div style="margin-top:10px; display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                  <span style="color:#888; font-size:12px;">대표 상태 변경:</span>
+                  <select data-ids="${items.map(o => o.id).join(',')}" class="group-status-select"
+                    style="padding:5px; border:1px solid #ddd; border-radius:6px;">
+                    ${['입금대기','입금완료','배송중','완료','취소'].map(s =>
+                      `<option ${s === first.status ? 'selected' : ''}>${s}</option>`
+                    ).join('')}
+                  </select>
+                </div>
+                <div style="color:#888; font-size:12px; margin-top:6px;">
+                  ${new Date(first.created_at).toLocaleString('ko-KR')}
+                </div>
               </div>
             </div>
-
-            <div style="display:flex; gap:6px; margin-top:12px; flex-wrap:wrap;">
-              <select data-id="${o.id}" class="status-select"
-                style="flex:1; min-width:100px; padding:6px; border:1px solid #ddd; border-radius:6px;">
-                ${['입금대기','입금완료','배송중','완료','취소'].map(s =>
-                  `<option ${s === o.status ? 'selected' : ''}>${s}</option>`
-                ).join('')}
-              </select>
-              <button class="order-edit" data-id="${o.id}"
-                style="flex:1; min-width:80px; padding:8px; background:#1976d2; color:#fff; border:0; border-radius:6px; cursor:pointer; font-size:13px;">
-                수정
-              </button>
-              <button class="order-del" data-id="${o.id}"
-                style="flex:1; min-width:80px; padding:8px; background:#e53935; color:#fff; border:0; border-radius:6px; cursor:pointer; font-size:13px;">
-                삭제
-              </button>
-            </div>
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
 
       el.querySelectorAll('.order-summary').forEach(sum => {
         sum.addEventListener('click', () => {
@@ -413,10 +389,12 @@
         });
       });
 
-      el.querySelectorAll('.status-select').forEach(sel => {
+      // 그룹 상태 변경
+      el.querySelectorAll('.group-status-select').forEach(sel => {
         sel.addEventListener('click', (e) => e.stopPropagation());
         sel.addEventListener('change', async () => {
-          const { error } = await db.from('orders').update({ status: sel.value }).eq('id', sel.dataset.id);
+          const ids = sel.dataset.ids.split(',');
+          const { error } = await db.from('orders').update({ status: sel.value }).in('id', ids);
           if (error) alert('상태 변경 실패: ' + error.message);
           else loadOrders();
         });
@@ -445,95 +423,79 @@
       return { '입금대기':'#ff9800', '입금완료':'#03c75a', '배송중':'#1976d2', '완료':'#555', '취소':'#e53935' }[s] || '#ccc';
     }
 
+    document.getElementById('order-search-btn').addEventListener('click', () => {
+      const num = document.getElementById('order-search').value.trim().toUpperCase();
+      loadOrders(num || null);
+    });
+    document.getElementById('order-reset-btn').addEventListener('click', () => {
+      document.getElementById('order-search').value = '';
+      loadOrders();
+    });
+
     // ===== 주문 수정 모달 =====
     function showOrderEditModal(o) {
       const modal = document.createElement('div');
       modal.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:1000; padding:10px;`;
       modal.innerHTML = `
         <div style="background:#fff; padding:20px; border-radius:10px; width:100%; max-width:440px; max-height:90vh; overflow-y:auto;">
-          <h2 style="margin-bottom:16px; font-size:18px;">주문 수정 (ID: ${o.id})</h2>
+          <h2 style="margin-bottom:16px; font-size:18px;">주문 수정 (${o.order_number || o.id})</h2>
           <form id="order-edit-form" style="display:grid; gap:10px;">
             <label style="font-size:13px; font-weight:600;">상품명</label>
-            <input name="product_name" value="${o.product_name}" required
-              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-
+            <input name="product_name" value="${o.product_name}" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <label style="font-size:13px; font-weight:600;">제품번호</label>
+            <input name="product_code" value="${o.product_code || ''}" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
             <label style="font-size:13px; font-weight:600;">상품 가격</label>
-            <input name="product_price" type="number" value="${o.product_price}" required
-              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-
+            <input name="product_price" type="number" value="${o.product_price}" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
             <label style="font-size:13px; font-weight:600;">수량</label>
-            <input name="quantity" type="number" min="1" value="${o.quantity}" required
-              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-
+            <input name="quantity" type="number" min="1" value="${o.quantity}" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
             <label style="font-size:13px; font-weight:600;">배송비</label>
-            <input name="shipping_fee" type="number" min="0" value="${o.shipping_fee || 0}"
-              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-
+            <input name="shipping_fee" type="number" min="0" value="${o.shipping_fee || 0}" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
             <label style="font-size:13px; font-weight:600;">주문자 이름</label>
-            <input name="customer_name" value="${o.customer_name}" required
-              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-
+            <input name="customer_name" value="${o.customer_name}" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
             <label style="font-size:13px; font-weight:600;">연락처</label>
-            <input name="customer_phone" type="tel" inputmode="numeric" value="${o.customer_phone}" required
-              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-
+            <input name="customer_phone" type="tel" inputmode="numeric" value="${o.customer_phone}" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <label style="font-size:13px; font-weight:600;">우편번호</label>
+            <input name="postcode" value="${o.postcode || ''}" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <label style="font-size:13px; font-weight:600;">주소</label>
+            <input name="address" value="${o.address || ''}" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <label style="font-size:13px; font-weight:600;">상세주소</label>
+            <input name="address_detail" value="${o.address_detail || ''}" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
             <label style="font-size:13px; font-weight:600;">입금자명</label>
-            <input name="depositor_name" value="${o.depositor_name}" required
-              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-
+            <input name="depositor_name" value="${o.depositor_name}" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
             <label style="font-size:13px; font-weight:600;">색상</label>
-            <input name="selected_color" value="${o.selected_color || ''}"
-              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-
+            <input name="selected_color" value="${o.selected_color || ''}" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
             <label style="font-size:13px; font-weight:600;">사이즈</label>
-            <input name="selected_size" value="${o.selected_size || ''}"
-              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-
-            <label style="font-size:13px; font-weight:600;">추가옵션 (쉼표 구분)</label>
-            <input name="selected_extras" value="${(o.selected_extras || []).join(',')}"
-              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-
+            <input name="selected_size" value="${o.selected_size || ''}" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <label style="font-size:13px; font-weight:600;">추가옵션 (쉼표)</label>
+            <input name="selected_extras" value="${(o.selected_extras || []).join(',')}" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
             <label style="font-size:13px; font-weight:600;">요청사항</label>
-            <textarea name="memo"
-              style="padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;">${o.memo || ''}</textarea>
-
+            <textarea name="memo" style="padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;">${o.memo || ''}</textarea>
             <label style="font-size:13px; font-weight:600;">상태</label>
-            <select name="status"
-              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <select name="status" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
               ${['입금대기','입금완료','배송중','완료','취소'].map(s =>
                 `<option ${s === o.status ? 'selected' : ''}>${s}</option>`
               ).join('')}
             </select>
-
             <div style="display:flex; gap:8px; margin-top:8px;">
-              <button type="submit"
-                style="flex:1; padding:12px; background:#1976d2; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">
-                저장
-              </button>
-              <button type="button" id="cancel-edit"
-                style="flex:1; padding:12px; background:#eee; border:0; border-radius:6px; cursor:pointer;">
-                취소
-              </button>
+              <button type="submit" style="flex:1; padding:12px; background:#1976d2; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">저장</button>
+              <button type="button" id="cancel-edit" style="flex:1; padding:12px; background:#eee; border:0; border-radius:6px; cursor:pointer;">취소</button>
             </div>
           </form>
         </div>
       `;
       document.body.appendChild(modal);
-
       modal.querySelector('#cancel-edit').onclick = () => modal.remove();
-
       modal.querySelector('#order-edit-form').addEventListener('submit', async (ev) => {
         ev.preventDefault();
         const f = ev.target;
         const qty = Number(f.quantity.value);
         const price = Number(f.product_price.value);
         const ship = Number(f.shipping_fee.value) || 0;
-
-        const extrasArr = f.selected_extras.value
-          .split(',').map(s => s.trim()).filter(Boolean);
+        const extrasArr = f.selected_extras.value.split(',').map(s => s.trim()).filter(Boolean);
 
         const { error } = await db.from('orders').update({
           product_name: f.product_name.value.trim(),
+          product_code: f.product_code.value.trim() || null,
           product_price: price,
           quantity: qty,
           total_price: price * qty + ship,
@@ -541,6 +503,9 @@
           customer_name: f.customer_name.value.trim(),
           customer_phone: f.customer_phone.value.trim(),
           depositor_name: f.depositor_name.value.trim(),
+          address: f.address.value.trim(),
+          address_detail: f.address_detail.value.trim(),
+          postcode: f.postcode.value.trim(),
           selected_color: f.selected_color.value.trim() || null,
           selected_size: f.selected_size.value.trim() || null,
           selected_extras: extrasArr,
@@ -557,17 +522,15 @@
     // ===== 회원 목록 =====
     async function loadMembers() {
       const el = document.getElementById('member-list');
-      const { data, error } = await db
-        .from('members').select('*')
-        .order('created_at', { ascending: false });
+      const { data, error } = await db.from('members').select('*').order('created_at', { ascending: false });
 
       if (error) { el.innerHTML = '<p>불러오기 실패</p>'; return; }
       if (!data || data.length === 0) { el.innerHTML = '<p>회원이 없습니다.</p>'; return; }
 
       el.innerHTML = data.map(m => `
-        <div style="background:#fff; padding:10px 14px; border-radius:6px; font-size:14px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
-          <div><b>${m.name}</b> · ${m.phone}</div>
-          <div style="color:#888;">${m.email}</div>
+        <div style="background:#fff; padding:10px 14px; border-radius:6px; font-size:13px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+          <div><b>${m.name}</b> (${m.username || '-'}) · ${m.phone}</div>
+          <div style="color:#888;">${m.email || ''}</div>
         </div>
       `).join('');
     }

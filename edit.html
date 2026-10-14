@@ -16,36 +16,30 @@
     <div id="login-screen" style="display:none; max-width:360px; margin:60px auto;">
       <h2 style="margin-bottom:16px;">관리자 로그인</h2>
       <form id="login-form" style="display:grid; gap:10px; background:#fff; padding:20px; border-radius:8px;">
-        <input name="email" type="email" placeholder="이메일" required
-          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-        <input name="password" type="password" placeholder="비밀번호" required
-          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-        <button type="submit"
-          style="padding:12px; background:#222; color:#fff; border:0; border-radius:6px; cursor:pointer;">
-          로그인
-        </button>
+        <input name="email" type="email" placeholder="이메일" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <input name="password" type="password" placeholder="비밀번호" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <button type="submit" style="padding:12px; background:#222; color:#fff; border:0; border-radius:6px; cursor:pointer;">로그인</button>
       </form>
       <p id="login-msg" style="margin-top:12px; font-weight:600;"></p>
     </div>
 
     <div id="edit-screen" style="display:none;">
       <h2 style="margin-bottom:16px;">상품 수정</h2>
-      <form id="edit-form">
-        <input name="name" placeholder="상품명" required>
-        <input name="price" type="number" placeholder="가격 (숫자만)" required>
-        <textarea name="description" placeholder="상품 설명"></textarea>
-        <input name="main_image" placeholder="메인 이미지 URL (필수)" required>
-        <textarea name="detail_images" placeholder="상세 이미지 URL (한 줄에 하나씩)"></textarea>
-        <input name="colors" placeholder="색상 (쉼표로 구분)">
-        <input name="sizes" placeholder="사이즈 (쉼표로 구분)">
-        <input name="extra_options" placeholder="추가옵션 (쉼표로 구분)">
-        <input name="shipping_fee" type="number" min="0" placeholder="배송비 (0이면 무료)">
-        <div style="display:flex; gap:8px;">
-          <button type="submit" style="flex:1;">수정 완료</button>
-          <a href="admin.html"
-            style="flex:1; text-align:center; padding:12px; background:#999; color:#fff; border-radius:6px; text-decoration:none;">
-            취소
-          </a>
+      <form id="edit-form" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:10px; background:#fff; padding:16px; border-radius:8px;">
+        <input name="product_code" placeholder="제품번호" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <input name="name" placeholder="상품명" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <input name="price" type="number" placeholder="가격" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <input name="main_image" placeholder="메인 이미지 URL" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <input name="colors" placeholder="색상 (쉼표)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <input name="sizes" placeholder="사이즈 (쉼표)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <input name="extra_options" placeholder="추가옵션 (쉼표)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+
+        <textarea name="description" placeholder="상품 설명" style="grid-column: 1 / -1; padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
+        <textarea name="detail_images" placeholder="상세 이미지 URL (줄바꿈)" style="grid-column: 1 / -1; padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
+
+        <div style="grid-column: 1 / -1; display:flex; gap:8px;">
+          <button type="submit" style="flex:1; padding:12px; background:#1976d2; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">수정 완료</button>
+          <a href="admin.html" style="flex:1; text-align:center; padding:12px; background:#999; color:#fff; border-radius:6px; text-decoration:none;">취소</a>
         </div>
       </form>
       <p id="msg" style="margin-top:12px; font-weight:600;"></p>
@@ -53,7 +47,6 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <script>
     const db = supabase.createClient(
       "https://alpdhgcipjeekzrpxlbh.supabase.co",
@@ -66,14 +59,11 @@
     const editScreen = document.getElementById('edit-screen');
     const loginForm = document.getElementById('login-form');
     const loginMsg = document.getElementById('login-msg');
-
     const form = document.getElementById('edit-form');
     const msg = document.getElementById('msg');
-    const params = new URLSearchParams(location.search);
-    const id = params.get('id');
+    const id = new URLSearchParams(location.search).get('id');
 
-    const parseList = (str) =>
-      (str || '').split(',').map(s => s.trim()).filter(Boolean);
+    const parseList = (str) => (str || '').split(',').map(s => s.trim()).filter(Boolean);
 
     async function checkSession() {
       const { data: { session } } = await db.auth.getSession();
@@ -91,37 +81,22 @@
       e.preventDefault();
       loginMsg.textContent = '로그인 중...';
       loginMsg.style.color = '#222';
-
       const { error } = await db.auth.signInWithPassword({
         email: loginForm.email.value.trim(),
         password: loginForm.password.value,
       });
-
       if (error) {
         loginMsg.style.color = 'crimson';
         loginMsg.textContent = '❌ ' + error.message;
-      } else {
-        checkSession();
-      }
+      } else checkSession();
     });
 
     async function loadProduct() {
-      if (!id) {
-        msg.textContent = '❌ 상품 ID가 없습니다.';
-        msg.style.color = 'crimson';
-        return;
-      }
+      if (!id) { msg.textContent = '❌ 상품 ID가 없습니다.'; return; }
+      const { data, error } = await db.from('products').select('*').eq('id', id).single();
+      if (error || !data) { msg.textContent = '❌ 상품을 불러올 수 없습니다.'; return; }
 
-      const { data, error } = await db
-        .from('products').select('*')
-        .eq('id', id).single();
-
-      if (error || !data) {
-        msg.textContent = '❌ 상품을 불러올 수 없습니다.';
-        msg.style.color = 'crimson';
-        return;
-      }
-
+      form.product_code.value = data.product_code || '';
       form.name.value = data.name;
       form.price.value = data.price;
       form.description.value = data.description || '';
@@ -130,40 +105,34 @@
       form.colors.value = (data.colors || []).join(',');
       form.sizes.value = (data.sizes || []).join(',');
       form.extra_options.value = (data.extra_options || []).join(',');
-      form.shipping_fee.value = data.shipping_fee || 0;
     }
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-
-      const detail_images = form.detail_images.value
-        .split('\n').map(s => s.trim()).filter(Boolean);
+      const detail_images = form.detail_images.value.split('\n').map(s => s.trim()).filter(Boolean);
 
       msg.textContent = '수정 중...';
       msg.style.color = '#222';
 
-      const { error } = await db
-        .from('products')
-        .update({
-          name: form.name.value.trim(),
-          price: Number(form.price.value),
-          description: form.description.value.trim(),
-          main_image: form.main_image.value.trim(),
-          detail_images,
-          colors: parseList(form.colors.value),
-          sizes: parseList(form.sizes.value),
-          extra_options: parseList(form.extra_options.value),
-          shipping_fee: Number(form.shipping_fee.value) || 0,
-        })
-        .eq('id', id);
+      const { error } = await db.from('products').update({
+        product_code: form.product_code.value.trim() || null,
+        name: form.name.value.trim(),
+        price: Number(form.price.value),
+        description: form.description.value.trim(),
+        main_image: form.main_image.value.trim(),
+        detail_images,
+        colors: parseList(form.colors.value),
+        sizes: parseList(form.sizes.value),
+        extra_options: parseList(form.extra_options.value),
+      }).eq('id', id);
 
       if (error) {
         msg.style.color = 'crimson';
         msg.textContent = '❌ ' + error.message;
       } else {
         msg.style.color = 'green';
-        msg.textContent = '✅ 수정 완료! 잠시 후 관리자 페이지로 이동...';
-        setTimeout(() => location.href = 'admin.html', 1000);
+        msg.textContent = '✅ 수정 완료!';
+        setTimeout(() => location.href = 'admin.html', 800);
       }
     });
 

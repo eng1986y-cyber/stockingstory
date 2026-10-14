@@ -8,27 +8,49 @@
   <script src="common.js" defer></script>
 </head>
 <body>
-  <header>
-    <h1><a href="index.html">🛍️ 심플몰</a></h1>
-  </header>
+  <div id="app-header"></div>
 
   <main>
-    <div style="max-width:400px; margin:40px auto;">
+    <div style="max-width:440px; margin:40px auto;">
       <h2 style="margin-bottom:16px;">회원가입</h2>
-
       <form id="signup-form" style="display:grid; gap:10px; background:#fff; padding:24px; border-radius:8px;">
+        <label style="font-size:13px; color:#666;">아이디</label>
+        <input name="username" placeholder="아이디" required
+          style="padding:12px; border:1px solid #ddd; border-radius:6px;">
+
+        <label style="font-size:13px; color:#666;">비밀번호</label>
+        <input name="password" type="password" placeholder="비밀번호" required
+          style="padding:12px; border:1px solid #ddd; border-radius:6px;">
+
+        <label style="font-size:13px; color:#666;">이름</label>
         <input name="name" placeholder="이름" required
-          style="padding:12px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
-        <input name="phone" type="tel" inputmode="numeric" placeholder="연락처 (010-0000-0000)" required
-          style="padding:12px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
+          style="padding:12px; border:1px solid #ddd; border-radius:6px;">
+
+        <label style="font-size:13px; color:#666;">연락처</label>
+        <input name="phone" type="tel" inputmode="numeric" placeholder="010-0000-0000" required
+          style="padding:12px; border:1px solid #ddd; border-radius:6px;">
+
+        <label style="font-size:13px; color:#666;">이메일</label>
         <input name="email" type="email" placeholder="이메일" required
-          style="padding:12px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
+          style="padding:12px; border:1px solid #ddd; border-radius:6px;">
+
+        <label style="font-size:13px; color:#666;">우편번호</label>
+        <input name="postcode" placeholder="우편번호"
+          style="padding:12px; border:1px solid #ddd; border-radius:6px;">
+
+        <label style="font-size:13px; color:#666;">주소</label>
+        <input name="address" placeholder="주소"
+          style="padding:12px; border:1px solid #ddd; border-radius:6px;">
+
+        <label style="font-size:13px; color:#666;">상세주소</label>
+        <input name="address_detail" placeholder="상세주소"
+          style="padding:12px; border:1px solid #ddd; border-radius:6px;">
+
         <button type="submit"
           style="padding:14px; background:#03c75a; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600; font-size:15px;">
           가입하기
         </button>
       </form>
-
       <p id="msg" style="margin-top:12px; font-weight:600; text-align:center;"></p>
     </div>
   </main>
@@ -42,38 +64,57 @@
   </script>
 
   <script>
+    renderHeader('signup');
     const form = document.getElementById('signup-form');
     const msg = document.getElementById('msg');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-
       msg.textContent = '가입 중...';
       msg.style.color = '#222';
 
-      const name = form.name.value.trim();
-      const phone = form.phone.value.trim();
-      const email = form.email.value.trim();
+      const payload = {
+        username: form.username.value.trim(),
+        password: form.password.value,
+        name: form.name.value.trim(),
+        phone: form.phone.value.trim(),
+        email: form.email.value.trim(),
+        postcode: form.postcode.value.trim(),
+        address: form.address.value.trim(),
+        address_detail: form.address_detail.value.trim(),
+      };
 
-      const { error } = await db.from('members').insert({ name, phone, email });
-
-      if (error) {
-        if (error.message.includes('duplicate')) {
-          msg.style.color = 'crimson';
-          msg.textContent = '❌ 이미 가입된 이메일입니다.';
-        } else {
-          msg.style.color = 'crimson';
-          msg.textContent = '❌ ' + error.message;
-        }
+      // 아이디 중복 체크
+      const { data: exist } = await db.from('members').select('id').eq('username', payload.username).maybeSingle();
+      if (exist) {
+        msg.style.color = 'crimson';
+        msg.textContent = '❌ 이미 사용 중인 아이디입니다.';
         return;
       }
 
-      localStorage.setItem('member', JSON.stringify({ name, phone, email }));
+      const { data, error } = await db.from('members').insert(payload).select().single();
+
+      if (error) {
+        msg.style.color = 'crimson';
+        msg.textContent = '❌ ' + error.message;
+        return;
+      }
+
+      // 자동 로그인
+      localStorage.setItem('member', JSON.stringify({
+        id: data.id,
+        username: data.username,
+        name: data.name,
+        phone: data.phone,
+        email: data.email,
+        postcode: data.postcode || '',
+        address: data.address || '',
+        address_detail: data.address_detail || '',
+      }));
 
       msg.style.color = 'green';
-      msg.textContent = '✅ 가입 완료! 잠시 후 메인으로 이동...';
-
-      setTimeout(() => location.href = 'index.html', 1200);
+      msg.textContent = '✅ 가입 완료! 메인으로 이동...';
+      setTimeout(() => location.href = 'index.html', 1000);
     });
   </script>
 </body>

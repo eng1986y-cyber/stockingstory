@@ -8,24 +8,18 @@
   <script src="common.js" defer></script>
 </head>
 <body>
-  <header style="display:flex; justify-content:space-between; align-items:center;">
-    <h1><a href="index.html">🛍️ 심플몰</a></h1>
-    <a href="index.html" style="padding:8px 14px; background:#eee; border-radius:6px; text-decoration:none; color:#222; font-size:14px;">
-      홈으로
-    </a>
-  </header>
+  <div id="app-header"></div>
 
   <main>
     <div style="max-width:640px; margin:0 auto;">
-      <h2 style="margin-bottom:16px;">주문 내역</h2>
+      <h2 style="margin-bottom:16px;">주문 조회</h2>
 
-      <div id="search-box" style="background:#fff; padding:16px; border-radius:8px; margin-bottom:20px;">
+      <div style="background:#fff; padding:16px; border-radius:8px; margin-bottom:20px;">
         <p style="font-size:13px; color:#666; margin-bottom:8px;">
-          주문 시 입력한 <b>연락처</b>로 조회합니다.
+          <b>주문번호</b>로 조회합니다. (예: ORD-251014-A3F9)
         </p>
         <div style="display:flex; gap:8px;">
-          <input id="phone-input" type="tel" inputmode="numeric" placeholder="010-0000-0000"
-            style="flex:1; padding:10px; border:1px solid #ddd; border-radius:6px;">
+          <input id="order-number-input" placeholder="ORD-000000-XXXX" style="flex:1; padding:10px; border:1px solid #ddd; border-radius:6px; text-transform:uppercase;">
           <button id="search-btn"
             style="padding:10px 20px; background:#03c75a; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">
             조회
@@ -46,63 +40,81 @@
   </script>
 
   <script>
-    const phoneInput = document.getElementById('phone-input');
+    renderHeader('orders');
+    const input = document.getElementById('order-number-input');
     const searchBtn = document.getElementById('search-btn');
     const resultEl = document.getElementById('orders-result');
-
-    try {
-      const m = JSON.parse(localStorage.getItem('member') || '{}');
-      if (m.phone) phoneInput.value = m.phone;
-    } catch {}
 
     function statusColor(s) {
       return { '입금대기':'#ff9800', '입금완료':'#03c75a', '배송중':'#1976d2', '완료':'#555', '취소':'#e53935' }[s] || '#ccc';
     }
 
     async function searchOrders() {
-      const phone = phoneInput.value.trim();
-      if (!phone) { alert('연락처를 입력해주세요.'); return; }
+      const num = input.value.trim().toUpperCase();
+      if (!num) { alert('주문번호를 입력해주세요.'); return; }
 
       resultEl.innerHTML = '<p style="text-align:center; padding:20px;">조회 중...</p>';
 
       const { data, error } = await db
         .from('orders').select('*')
-        .eq('customer_phone', phone)
-        .order('created_at', { ascending: false });
+        .eq('order_number', num)
+        .order('created_at', { ascending: true });
 
-      if (error) {
-        resultEl.innerHTML = '<p>조회 실패: ' + error.message + '</p>';
-        return;
-      }
+      if (error) { resultEl.innerHTML = '<p>조회 실패: ' + error.message + '</p>'; return; }
       if (!data || data.length === 0) {
-        resultEl.innerHTML = '<p style="text-align:center; padding:20px; color:#888;">주문 내역이 없습니다.</p>';
+        resultEl.innerHTML = '<p style="text-align:center; padding:20px; color:#888;">해당 주문번호로 조회된 주문이 없습니다.</p>';
         return;
       }
 
-      resultEl.innerHTML = data.map(o => `
-        <div style="background:#fff; padding:14px; border-radius:8px; margin-bottom:10px; border-left:4px solid ${statusColor(o.status)};">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:6px;">
-            <span style="background:${statusColor(o.status)}; color:#fff; padding:3px 10px; border-radius:12px; font-size:12px; font-weight:600;">
-              ${o.status}
+      const first = data[0];
+      const totalAll = data.reduce((s, o) => s + Number(o.total_price || 0), 0);
+
+      resultEl.innerHTML = `
+        <div style="background:#fff; padding:16px; border-radius:8px; margin-bottom:12px; border-left:4px solid ${statusColor(first.status)};">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+            <span style="font-size:15px; font-weight:700; color:#1976d2; letter-spacing:1px;">${first.order_number}</span>
+            <span style="background:${statusColor(first.status)}; color:#fff; padding:3px 10px; border-radius:12px; font-size:12px; font-weight:600;">
+              ${first.status}
             </span>
-            <span style="color:#888; font-size:12px;">${new Date(o.created_at).toLocaleString('ko-KR')}</span>
           </div>
-          <div style="font-size:14px; line-height:1.7;">
-            <b>${o.product_name}</b> × ${o.quantity} = <b style="color:#e53935;">${o.total_price.toLocaleString()}원</b><br>
-            ${o.selected_color ? `색상: ${o.selected_color} · ` : ''}${o.selected_size ? `사이즈: ${o.selected_size}` : ''}
-            ${o.selected_extras?.length ? `<br>추가옵션: ${o.selected_extras.join(', ')}` : ''}
-            <br><span style="color:#888; font-size:13px;">입금자명: ${o.depositor_name}</span>
+          <div style="font-size:13px; color:#555; line-height:1.7; margin-bottom:10px;">
+            주문자: ${first.customer_name} (${first.customer_phone})<br>
+            주소: ${first.postcode ? `[${first.postcode}] ` : ''}${first.address || ''} ${first.address_detail || ''}<br>
+            입금자명: <b>${first.depositor_name}</b>
+            ${first.memo ? `<br>요청: ${first.memo}` : ''}
+          </div>
+
+          <hr style="border:0; border-top:1px solid #eee; margin:10px 0;">
+
+          ${data.map(o => `
+            <div style="font-size:13px; line-height:1.7; padding:6px 0; border-bottom:1px dashed #eee;">
+              <b>${o.product_name}</b>
+              ${o.product_code ? `<span style="color:#888;">[${o.product_code}]</span>` : ''}
+              × ${o.quantity} = <b style="color:#e53935;">${Number(o.total_price).toLocaleString()}원</b>
+              ${o.selected_color ? `<br><span style="color:#888; font-size:12px;">색상: ${o.selected_color}</span>` : ''}
+              ${o.selected_size ? ` <span style="color:#888; font-size:12px;">사이즈: ${o.selected_size}</span>` : ''}
+              ${o.selected_extras?.length ? `<br><span style="color:#888; font-size:12px;">추가옵션: ${o.selected_extras.join(', ')}</span>` : ''}
+            </div>
+          `).join('')}
+
+          <div style="text-align:right; font-size:16px; margin-top:12px;">
+            총 <b style="color:#e53935; font-size:18px;">${totalAll.toLocaleString()}원</b>
+          </div>
+          <div style="font-size:12px; color:#888; text-align:right; margin-top:4px;">
+            ${new Date(first.created_at).toLocaleString('ko-KR')}
           </div>
         </div>
-      `).join('');
+      `;
     }
 
     searchBtn.addEventListener('click', searchOrders);
-    phoneInput.addEventListener('keypress', (e) => {
+    input.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') searchOrders();
     });
 
-    if (phoneInput.value) searchOrders();
+    // URL 파라미터로 자동 조회
+    const urlNum = new URLSearchParams(location.search).get('num');
+    if (urlNum) { input.value = urlNum; searchOrders(); }
   </script>
 </body>
 </html>
