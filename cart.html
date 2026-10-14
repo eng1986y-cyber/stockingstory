@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>장바구니 - 심플몰</title>
   <link rel="stylesheet" href="style.css">
-  <script src="common.js" defer></script>
+  <script src="common.js"></script>
 </head>
 <body>
   <div id="app-header"></div>
@@ -24,7 +24,6 @@
   </script>
 
   <script>
-    renderHeader('cart');
     const listEl = document.getElementById('cart-list');
     const summaryEl = document.getElementById('cart-summary');
 
@@ -99,7 +98,7 @@
           cart[idx].quantity = Math.max(1, Number(inp.value) || 1);
           saveCart(cart);
           render();
-          renderHeader('cart');
+          if (document.getElementById('app-header')) renderHeader('cart');
         });
       });
 
@@ -109,7 +108,7 @@
           cart.splice(Number(btn.dataset.idx), 1);
           saveCart(cart);
           render();
-          renderHeader('cart');
+          if (document.getElementById('app-header')) renderHeader('cart');
         });
       });
 
@@ -183,7 +182,6 @@
 
         const orderNumber = generateOrderNumber();
 
-        // 각 상품마다 order_number는 같고, 배송비는 첫 행에만
         const rows = cart.map((it, idx) => ({
           order_number: orderNumber,
           product_id: it.product_id,
@@ -210,7 +208,7 @@
         if (error) { alert('❌ 주문 실패: ' + error.message); return; }
 
         localStorage.removeItem('cart');
-        renderHeader('cart');
+        if (document.getElementById('app-header')) renderHeader('cart');
         showOrderComplete(modal, orderNumber, total);
       });
     }

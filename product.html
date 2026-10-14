@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>상품 상세 - 심플몰</title>
   <link rel="stylesheet" href="style.css">
-  <script src="common.js" defer></script>
+  <script src="common.js"></script>
 </head>
 <body>
   <div id="app-header"></div>
@@ -21,7 +21,6 @@
   </script>
 
   <script>
-    renderHeader('product');
     const params = new URLSearchParams(location.search);
     const id = params.get('id');
 
@@ -219,7 +218,6 @@
         const selectedColor = f.selected_color ? f.selected_color.value : null;
         const selectedSize  = f.selected_size  ? f.selected_size.value  : null;
 
-        // 필수 체크
         if (colors.length && !selectedColor) { alert('색상을 선택하세요.'); return; }
         if (sizes.length && !selectedSize) { alert('사이즈를 선택하세요.'); return; }
         if (extras.length && !selectedExtra) { alert('추가옵션을 선택하세요.'); return; }
@@ -227,7 +225,6 @@
         if (isCart) {
           const cart = JSON.parse(localStorage.getItem('cart') || '[]');
 
-          // 중복 체크 (같은 상품 + 같은 옵션)
           const dupIdx = cart.findIndex(it =>
             it.product_id === p.id &&
             it.selected_color === selectedColor &&
@@ -254,11 +251,10 @@
           localStorage.setItem('cart', JSON.stringify(cart));
           alert('✅ 장바구니에 담았습니다!');
           modal.remove();
-          renderHeader('product');
+          if (document.getElementById('app-header')) renderHeader('product');
           return;
         }
 
-        // 바로 구매
         const orderNumber = generateOrderNumber();
 
         const { error } = await db.from('orders').insert({

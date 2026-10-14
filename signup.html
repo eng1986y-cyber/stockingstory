@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>회원가입 - 심플몰</title>
   <link rel="stylesheet" href="style.css">
-  <script src="common.js" defer></script>
+  <script src="common.js"></script>
 </head>
 <body>
   <div id="app-header"></div>
@@ -64,7 +64,6 @@
   </script>
 
   <script>
-    renderHeader('signup');
     const form = document.getElementById('signup-form');
     const msg = document.getElementById('msg');
 
@@ -84,7 +83,6 @@
         address_detail: form.address_detail.value.trim(),
       };
 
-      // 아이디 중복 체크
       const { data: exist } = await db.from('members').select('id').eq('username', payload.username).maybeSingle();
       if (exist) {
         msg.style.color = 'crimson';
@@ -100,7 +98,6 @@
         return;
       }
 
-      // 자동 로그인
       localStorage.setItem('member', JSON.stringify({
         id: data.id,
         username: data.username,

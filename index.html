@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>심플몰</title>
   <link rel="stylesheet" href="style.css">
-  <script src="common.js" defer></script>
+  <script src="common.js"></script>
 </head>
 <body>
   <div id="app-header"></div>
@@ -24,11 +24,9 @@
   </script>
 
   <script>
-    renderHeader('home');
-
     let allProducts = [];
     let currentPage = 1;
-    const PER_PAGE = 10;   // 모바일 2열 × 5줄
+    const PER_PAGE = 10;
     const MAX_PAGES = 5;
 
     async function loadProducts() {
