@@ -3,15 +3,47 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>STK스토리 심플라이프</title>
+  <title>심플몰</title>
   <link rel="stylesheet" href="style.css">
   <script src="common.js"></script>
   <style>
+    /* 좌우 스크롤 완전 차단 */
     html, body {
-      overflow-x: hidden;
-      max-width: 100vw;
+      overflow-x: hidden !important;
+      width: 100%;
+      max-width: 100%;
     }
-    #product-list { max-width: 100%; }
+    body {
+      position: relative;
+    }
+    /* 모든 요소 좌우 넘침 방지 */
+    * {
+      max-width: 100%;
+    }
+    /* main 컨테이너 좌우 여백 + 넘침 방지 */
+    main {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+      box-sizing: border-box;
+    }
+    #product-list {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+      box-sizing: border-box;
+    }
+    #product-list .card {
+      min-width: 0;
+      overflow: hidden;
+    }
+    #product-list .card img {
+      width: 100%;
+      display: block;
+    }
+    #pagination {
+      overflow-x: hidden;
+    }
   </style>
 </head>
 <body>
@@ -19,8 +51,8 @@
 
   <main>
     <!-- PC 배너 (모바일에서는 숨김) -->
-    <div id="banner-wrap" style="display:none; margin-bottom:20px;">
-      <div id="banner-inner"></div>
+    <div id="banner-wrap" style="display:none; margin-bottom:20px; width:100%; max-width:100%;">
+      <div id="banner-inner" style="width:100%; max-width:100%; overflow:hidden; border-radius:12px;"></div>
     </div>
 
     <div id="product-list" style="display:grid; gap:12px;">로딩중...</div>
@@ -67,11 +99,11 @@
 
       const imgHtml = `
         <img src="${data.image_url}" alt="배너"
-          style="width:100%; height:700px; object-fit:cover; display:block; border-radius:12px;">
+          style="width:100%; height:700px; object-fit:cover; display:block;">
       `;
 
       inner.innerHTML = data.link_url
-        ? `<a href="${data.link_url}" style="display:block;">${imgHtml}</a>`
+        ? `<a href="${data.link_url}" style="display:block; width:100%;">${imgHtml}</a>`
         : imgHtml;
     }
 
@@ -97,9 +129,10 @@
 
     function applyGridColumns() {
       const list = document.getElementById('product-list');
+      // minmax(0, 1fr) 로 해야 이미지가 그리드를 넘치지 않음
       list.style.gridTemplateColumns = isPC()
-        ? 'repeat(7, 1fr)'
-        : 'repeat(2, 1fr)';
+        ? 'repeat(7, minmax(0, 1fr))'
+        : 'repeat(2, minmax(0, 1fr))';
     }
 
     function getPerPage() {
@@ -116,10 +149,10 @@
       const items = allProducts.slice(start, start + perPage);
 
       list.innerHTML = items.map(p => `
-        <a class="card" href="product.html?id=${p.id}" style="text-decoration:none; color:inherit;">
+        <a class="card" href="product.html?id=${p.id}" style="text-decoration:none; color:inherit; display:block; min-width:0;">
           <img src="${p.main_image}" alt="${p.name}" loading="lazy"
-            style="width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:8px;">
-          <div style="padding:8px 4px;">
+            style="width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:8px; display:block;">
+          <div style="padding:8px 4px; min-width:0;">
             <div style="font-size:13px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${p.name}</div>
             <div style="color:#e53935; font-weight:700; font-size:14px; margin-top:2px;">${Number(p.price).toLocaleString()}원</div>
           </div>
@@ -157,7 +190,7 @@
           if (btn.disabled) return;
           currentPage = Number(btn.dataset.page);
           renderPage();
-          // 페이지 이동 시 스크롤 이동 없음
+          // 스크롤 이동 없음
         });
       });
     }
