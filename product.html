@@ -299,8 +299,12 @@
         <h2 style="margin-bottom:16px; color:#03c75a;">✅ 주문 접수 완료</h2>
         <div style="background:#f8f8f8; padding:16px; border-radius:8px; margin-bottom:16px; line-height:1.8; font-size:14px;">
           <div style="font-size:13px; color:#888;">주문번호</div>
-          <div style="font-size:18px; font-weight:700; color:#1976d2; margin-bottom:8px; letter-spacing:1px;">
-            ${orderNumber}
+          <div style="font-size:18px; font-weight:700; color:#1976d2; margin-bottom:8px; letter-spacing:1px; display:flex; align-items:center; flex-wrap:wrap; gap:6px;">
+            <span id="order-number-text">${orderNumber}</span>
+            <button id="copy-order-number"
+              style="padding:3px 8px; background:#222; color:#fff; border:0; border-radius:4px; cursor:pointer; font-size:11px;">
+              복사
+            </button>
           </div>
           <hr style="border:0; border-top:1px solid #ddd; margin:8px 0;">
           <b>입금 계좌 안내</b><br>
@@ -322,6 +326,12 @@
           메인으로
         </button>
       `;
+
+      modal.querySelector('#copy-order-number').onclick = () => {
+        navigator.clipboard.writeText(orderNumber).then(() => {
+          alert('주문번호가 복사되었습니다.');
+        });
+      };
 
       modal.querySelector('#copy-account').onclick = () => {
         navigator.clipboard.writeText('123-456-789012').then(() => {
