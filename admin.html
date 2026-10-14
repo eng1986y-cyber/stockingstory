@@ -9,7 +9,7 @@
 </head>
 <body>
   <header>
-    <h1><a href="index.html">🛍️ 심플몰</a> - 관리자</h1>
+    <h1><a href="index.html">STK스토리 심플라이프</a> - 관리자</h1>
   </header>
 
   <main>
@@ -356,13 +356,15 @@
               ${(p.sizes && p.sizes.length) ? `<div><span style="color:#888;">사이즈:</span> ${p.sizes.join(', ')}</div>` : ''}
               ${(p.extra_options && p.extra_options.length) ? `<div><span style="color:#888;">추가:</span> ${p.extra_options.join(', ')}</div>` : ''}
             </div>
-            <div style="display:flex; gap:4px; margin-top:8px;">
+            <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:4px; margin-top:8px;">
               <a href="product.html?id=${p.id}" target="_blank" rel="noopener"
-                style="flex:1; text-align:center; padding:6px; background:#555; color:#fff; border-radius:4px; text-decoration:none; font-size:11px;">보기</a>
+                style="text-align:center; padding:6px; background:#555; color:#fff; border-radius:4px; text-decoration:none; font-size:11px;">보기</a>
               <a href="edit.html?id=${p.id}"
-                style="flex:1; text-align:center; padding:6px; background:#1976d2; color:#fff; border-radius:4px; text-decoration:none; font-size:11px;">수정</a>
+                style="text-align:center; padding:6px; background:#1976d2; color:#fff; border-radius:4px; text-decoration:none; font-size:11px;">수정</a>
+              <button class="copy-btn" data-id="${p.id}"
+                style="padding:6px; background:#03c75a; color:#fff; border:0; border-radius:4px; cursor:pointer; font-size:11px;">복사</button>
               <button class="del-btn" data-id="${p.id}"
-                style="flex:1; padding:6px; background:#e53935; color:#fff; border:0; border-radius:4px; cursor:pointer; font-size:11px;">삭제</button>
+                style="padding:6px; background:#e53935; color:#fff; border:0; border-radius:4px; cursor:pointer; font-size:11px;">삭제</button>
             </div>
           </div>
         </div>
@@ -382,6 +384,40 @@
         });
       });
 
+      // 복사
+      listEl.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const p = allProducts.find(x => String(x.id) === String(btn.dataset.id));
+          if (!p) return;
+          if (!confirm(`"${p.name}" 을 그대로 복사해서 새로 등록할까요?`)) return;
+
+          btn.disabled = true;
+          btn.textContent = '...';
+
+          const { error } = await db.from('products').insert({
+            product_code: p.product_code ? p.product_code + '-C' : null,
+            name: p.name + ' (복사)',
+            price: p.price,
+            description: p.description,
+            main_image: p.main_image,
+            detail_images: p.detail_images || [],
+            colors: p.colors || [],
+            sizes: p.sizes || [],
+            extra_options: p.extra_options || [],
+          });
+
+          if (error) {
+            alert('❌ 복사 실패: ' + error.message);
+            btn.disabled = false;
+            btn.textContent = '복사';
+          } else {
+            loadAdminList();
+          }
+        });
+      });
+
+      // 삭제
       listEl.querySelectorAll('.del-btn').forEach(btn => {
         btn.addEventListener('click', async (e) => {
           e.stopPropagation();
