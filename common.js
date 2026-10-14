@@ -1,6 +1,6 @@
 // ===== 공통 유틸 =====
 
-// 좌우 흔들림 완전 방지 (스크롤바 자리 고정)
+// 좌우 흔들림 완전 방지
 (function() {
   const style = document.createElement('style');
   style.textContent = `
@@ -25,7 +25,7 @@
   document.head.appendChild(style);
 })();
 
-// 연락처 자동 하이픈 (이벤트 위임)
+// 연락처 자동 하이픈
 document.addEventListener('input', (e) => {
   const el = e.target;
   if (el.tagName !== 'INPUT') return;
@@ -47,16 +47,40 @@ function applyPhoneAttrs() {
   });
 }
 
-// ===== 공통 헤더 렌더 (버튼 크기 완전 고정) =====
-function renderHeader(current) {
+// ===== Supabase 클라이언트 (로고 로드용) =====
+let _logoDb = null;
+function getLogoDb() {
+  if (_logoDb) return _logoDb;
+  if (typeof supabase === 'undefined') return null;
+  _logoDb = supabase.createClient(
+    "https://alpdhgcipjeekzrpxlbh.supabase.co",
+    "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya"
+  );
+  return _logoDb;
+}
+
+// ===== 공통 헤더 렌더 =====
+async function renderHeader(current) {
   const wrap = document.getElementById('app-header');
   if (!wrap) return;
 
   const member = localStorage.getItem('member');
   const m = member ? JSON.parse(member) : null;
 
-  // ⭐ active 상태여도 padding/font-weight/border 동일 → 크기 안 변함
-  // active는 background/color만 바꿈
+  // 로고 로드 (실패 시 기본값)
+  let logoImageUrl = '';
+  let siteName = '🛍️ 심플몰';
+  try {
+    const db = getLogoDb();
+    if (db) {
+      const { data } = await db.from('logos').select('*').order('id', { ascending: false }).limit(1).maybeSingle();
+      if (data) {
+        logoImageUrl = data.image_url || '';
+        siteName = data.site_name || siteName;
+      }
+    }
+  } catch (e) {}
+
   const btnStyle = (active) => `
     display: inline-flex;
     align-items: center;
@@ -87,12 +111,15 @@ function renderHeader(current) {
       <a href="signup.html" style="${btnStyle(current === 'signup')}">회원가입</a>
     `;
 
+  // 로고 영역: 이미지 있으면 이미지, 없으면 텍스트
+  const logoHtml = logoImageUrl
+    ? `<a href="index.html" style="display:inline-block;"><img src="${logoImageUrl}" alt="${siteName}" style="height:40px; max-width:240px; object-fit:contain; display:block;"></a>`
+    : `<a href="index.html" style="font-size:22px; font-weight:700; color:#222; text-decoration:none;">${siteName}</a>`;
+
   wrap.innerHTML = `
     <header style="background:#fff; border-bottom:1px solid #eee; padding:14px 16px;">
       <div style="max-width:1400px; margin:0 auto;">
-        <div style="margin-bottom:12px;">
-          <a href="index.html" style="font-size:22px; font-weight:700; color:#222; text-decoration:none;">🛍️ 심플몰</a>
-        </div>
+        <div style="margin-bottom:12px;">${logoHtml}</div>
         <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:flex-end;">
           <a href="cart.html" style="${btnStyle(current === 'cart')}">장바구니 <span id="cart-count" style="margin-left:4px;">0</span></a>
           <a href="orders.html" style="${btnStyle(current === 'orders')}">주문조회</a>
@@ -102,12 +129,10 @@ function renderHeader(current) {
     </header>
   `;
 
-  // 장바구니 개수
   const cart = JSON.parse(localStorage.getItem('cart') || '[]');
   const cc = document.getElementById('cart-count');
   if (cc) cc.textContent = cart.length;
 
-  // 로그아웃
   const lb = document.getElementById('logout-btn');
   if (lb) {
     lb.onclick = (e) => {

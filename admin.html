@@ -7,15 +7,12 @@
   <link rel="stylesheet" href="style.css">
   <script src="common.js"></script>
   <style>
-    html, body {
-      overflow-x: hidden;
-      max-width: 100vw;
-    }
+    html, body { overflow-x: hidden; max-width: 100vw; }
   </style>
 </head>
 <body>
   <header>
-    <h1><a href="index.html">STK스토리</a> - 관리자</h1>
+    <h1><a href="index.html">🛍️ 심플몰</a> - 관리자</h1>
   </header>
 
   <main>
@@ -33,6 +30,27 @@
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
         <h2>관리자</h2>
         <button id="logout-btn" style="padding:8px 14px; background:#999; color:#fff; border:0; border-radius:6px; cursor:pointer; font-size:13px;">로그아웃</button>
+      </div>
+
+      <!-- 로고 관리 -->
+      <div style="background:#fff; padding:16px; border-radius:8px; margin-bottom:16px;">
+        <h3 style="font-size:15px; margin-bottom:10px;">로고 / 사이트명 관리</h3>
+        <div style="display:grid; gap:8px;">
+          <input id="logo-site-name" placeholder="사이트명 (텍스트 로고, 예: 🛍️ 심플몰)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+          <input id="logo-image-url" placeholder="로고 이미지 URL (입력 시 이미지가 우선)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+          <div style="display:flex; gap:8px;">
+            <button id="logo-save-btn" style="flex:1; padding:10px; background:#1976d2; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">등록/수정</button>
+            <button id="logo-delete-btn" style="flex:1; padding:10px; background:#e53935; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">삭제</button>
+          </div>
+          <p id="logo-msg" style="font-size:13px; font-weight:600;"></p>
+        </div>
+        <div id="logo-preview" style="margin-top:12px; display:none;">
+          <div style="font-size:12px; color:#888; margin-bottom:4px;">현재 로고:</div>
+          <img id="logo-preview-img" style="max-height:60px; object-fit:contain; display:block; background:#f5f5f5; padding:6px; border-radius:6px;">
+        </div>
+        <p style="font-size:12px; color:#888; margin-top:8px;">
+          ※ 이미지 URL을 비우면 텍스트(사이트명)가 로고로 표시됩니다.
+        </p>
       </div>
 
       <!-- 배너 관리 -->
@@ -126,6 +144,7 @@
     function showAdmin() {
       loginScreen.style.display = 'none';
       adminScreen.style.display = 'block';
+      loadLogo();
       loadBanner();
       loadShippingSetting();
       loadAdminList();
@@ -153,6 +172,111 @@
     document.getElementById('logout-btn').addEventListener('click', async () => {
       await db.auth.signOut();
       showLogin();
+    });
+
+    // ===== 로고 관리 =====
+    let currentLogoId = null;
+
+    async function loadLogo() {
+      const { data, error } = await db
+        .from('logos').select('*')
+        .order('id', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const preview = document.getElementById('logo-preview');
+      const img = document.getElementById('logo-preview-img');
+      const siteNameInput = document.getElementById('logo-site-name');
+      const imgUrlInput = document.getElementById('logo-image-url');
+
+      if (error || !data) {
+        preview.style.display = 'none';
+        siteNameInput.value = '';
+        imgUrlInput.value = '';
+        currentLogoId = null;
+        return;
+      }
+
+      currentLogoId = data.id;
+      siteNameInput.value = data.site_name || '';
+      imgUrlInput.value = data.image_url || '';
+
+      if (data.image_url) {
+        img.src = data.image_url;
+        preview.style.display = 'block';
+      } else {
+        preview.style.display = 'none';
+      }
+    }
+
+    document.getElementById('logo-save-btn').addEventListener('click', async () => {
+      const msg = document.getElementById('logo-msg');
+      const siteName = document.getElementById('logo-site-name').value.trim();
+      const imageUrl = document.getElementById('logo-image-url').value.trim();
+
+      if (!siteName && !imageUrl) {
+        msg.style.color = 'crimson';
+        msg.textContent = '❌ 사이트명 또는 이미지 URL 중 하나는 필요합니다.';
+        return;
+      }
+
+      msg.textContent = '저장 중...';
+      msg.style.color = '#222';
+
+      let error;
+      if (currentLogoId) {
+        ({ error } = await db.from('logos').update({
+          site_name: siteName || null,
+          image_url: imageUrl || null,
+          updated_at: new Date().toISOString(),
+        }).eq('id', currentLogoId));
+      } else {
+        const res = await db.from('logos').insert({
+          site_name: siteName || null,
+          image_url: imageUrl || null,
+        }).select().single();
+        error = res.error;
+        if (res.data) currentLogoId = res.data.id;
+      }
+
+      if (error) {
+        msg.style.color = 'crimson';
+        msg.textContent = '❌ ' + error.message;
+      } else {
+        msg.style.color = 'green';
+        msg.textContent = '✅ 저장 완료!';
+        loadLogo();
+        setTimeout(() => msg.textContent = '', 2000);
+      }
+    });
+
+    document.getElementById('logo-delete-btn').addEventListener('click', async () => {
+      const msg = document.getElementById('logo-msg');
+
+      if (!currentLogoId) {
+        msg.style.color = 'crimson';
+        msg.textContent = '❌ 삭제할 로고가 없습니다.';
+        return;
+      }
+      if (!confirm('로고를 삭제할까요? (기본값으로 돌아갑니다)')) return;
+
+      msg.textContent = '삭제 중...';
+      msg.style.color = '#222';
+
+      const { error } = await db.from('logos').delete().eq('id', currentLogoId);
+
+      if (error) {
+        msg.style.color = 'crimson';
+        msg.textContent = '❌ ' + error.message;
+      } else {
+        msg.style.color = 'green';
+        msg.textContent = '✅ 삭제 완료!';
+        document.getElementById('logo-site-name').value = '';
+        document.getElementById('logo-image-url').value = '';
+        document.getElementById('logo-preview').style.display = 'none';
+        currentLogoId = null;
+        setTimeout(() => msg.textContent = '', 2000);
+      }
     });
 
     // ===== 배너 관리 =====
@@ -390,7 +514,6 @@
         });
       });
 
-      // 복사
       listEl.querySelectorAll('.copy-btn').forEach(btn => {
         btn.addEventListener('click', async (e) => {
           e.stopPropagation();
@@ -423,7 +546,6 @@
         });
       });
 
-      // 삭제
       listEl.querySelectorAll('.del-btn').forEach(btn => {
         btn.addEventListener('click', async (e) => {
           e.stopPropagation();
@@ -456,7 +578,6 @@
           if (btn.disabled) return;
           currentPage = Number(btn.dataset.page);
           renderProducts();
-          // 페이지 이동 시 스크롤 이동 없음
         });
       });
     }
