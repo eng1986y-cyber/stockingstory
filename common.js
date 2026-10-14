@@ -56,14 +56,21 @@ function setCachedLogo(obj) {
   try { localStorage.setItem('logo_cache', JSON.stringify(obj)); } catch {}
 }
 
+// ⭐ 전역 db 재사용 (GoTrue 중복 방지)
 async function refreshLogoCache() {
   if (typeof supabase === 'undefined') return;
   try {
-    const db = supabase.createClient(
-      "https://alpdhgcipjeekzrpxlbh.supabase.co",
-      "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya"
-    );
-    const { data } = await db.from('logos').select('*')
+    let client = window.db;
+    if (!client) {
+      // auth 완전 비활성화로 GoTrue 중복 방지
+      client = supabase.createClient(
+        "https://alpdhgcipjeekzrpxlbh.supabase.co",
+        "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya",
+        { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } }
+      );
+      window.db = client;
+    }
+    const { data } = await client.from('logos').select('*')
       .order('id', { ascending: false }).limit(1).maybeSingle();
     if (data) {
       setCachedLogo({ image_url: data.image_url || '', site_name: data.site_name || '' });

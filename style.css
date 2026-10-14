@@ -6,7 +6,7 @@ main { max-width: 1100px; margin: 20px auto; padding: 0 16px; }
 
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
 
-/* 카드: transition 제거 (iOS 스크롤 깜빡임 방지) */
+/* 카드: transition 제거 (iOS Safari 스크롤 깜빡임 방지) */
 .card {
   background: #fff;
   border-radius: 8px;
@@ -15,7 +15,7 @@ main { max-width: 1100px; margin: 20px auto; padding: 0 16px; }
   color: inherit;
 }
 
-/* hover 효과는 마우스 있는 기기에서만 (터치 기기 제외) */
+/* hover 효과는 마우스 있는 기기에서만 */
 @media (hover: hover) {
   .card:hover {
     transform: translateY(-2px);

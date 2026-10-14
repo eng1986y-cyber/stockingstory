@@ -50,7 +50,6 @@
       box-sizing: border-box;
     }
 
-    /* 이미지 자리: padding-bottom 트릭 (iOS 호환 100%) */
     #product-list .card .thumb {
       width: 100%;
       padding-bottom: 100%;
@@ -96,10 +95,12 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const db = supabase.createClient(
+    // ⭐ 전역 db 한 번만 생성 (GoTrue 중복 방지)
+    window.db = supabase.createClient(
       "https://alpdhgcipjeekzrpxlbh.supabase.co",
       "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya"
     );
+    const db = window.db;
   </script>
 
   <script>
@@ -111,14 +112,6 @@
 
     let allProducts = [];
     let currentPage = 1;
-
-    // ===== 이미지 프록시 변환 (Postimages → wsrv.nl CDN + WebP + 리사이즈) =====
-    function proxyImage(url) {
-      if (!url) return '';
-      // 이미 프록시된 URL이면 그대로
-      if (url.includes('wsrv.nl')) return url;
-      return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=400&h=400&fit=cover&output=webp&q=80`;
-    }
 
     async function loadBanner() {
       const wrap = document.getElementById('banner-wrap');
@@ -137,10 +130,8 @@
 
       wrap.style.display = isPC() ? 'block' : 'none';
 
-      const bannerSrc = `https://wsrv.nl/?url=${encodeURIComponent(data.image_url)}&w=1920&output=webp&q=85`;
-
       const imgHtml = `
-        <img src="${bannerSrc}" alt="배너"
+        <img src="${data.image_url}" alt="배너"
           style="width:100%; height:700px; object-fit:cover; display:block;">
       `;
 
@@ -187,7 +178,7 @@
       list.innerHTML = items.map(p => `
         <a class="card" href="product.html?id=${p.id}" style="text-decoration:none; color:inherit; display:block; min-width:0;">
           <div class="thumb">
-            <img src="${proxyImage(p.main_image)}" alt="${p.name}" decoding="async">
+            <img src="${p.main_image}" alt="${p.name}" loading="lazy" decoding="async">
           </div>
           <div style="padding:10px 4px; min-width:0;">
             <div style="font-size:14px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${p.name}</div>
