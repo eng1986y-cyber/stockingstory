@@ -47,7 +47,7 @@ function applyPhoneAttrs() {
   });
 }
 
-// ===== 로고 캐시 (localStorage) =====
+// ===== 로고 캐시 =====
 function getCachedLogo() {
   try { return JSON.parse(localStorage.getItem('logo_cache') || 'null') || {}; }
   catch { return {}; }
@@ -56,7 +56,6 @@ function setCachedLogo(obj) {
   try { localStorage.setItem('logo_cache', JSON.stringify(obj)); } catch {}
 }
 
-// Supabase에서 로고 한 번만 가져와서 캐시 갱신 (헤더 재렌더 없음)
 async function refreshLogoCache() {
   if (typeof supabase === 'undefined') return;
   try {
@@ -74,21 +73,18 @@ async function refreshLogoCache() {
   } catch (e) {}
 }
 
-// ===== 공통 헤더 렌더 (동기, 헤더 한 번만 그림) =====
+// ===== 공통 헤더 렌더 =====
 let _headerRendered = false;
 function renderHeader(current) {
   const wrap = document.getElementById('app-header');
   if (!wrap) return;
 
-  // 이미 렌더된 헤더가 있으면 active 상태만 바꿈
   if (_headerRendered && wrap.querySelector('header')) {
-    // active 스타일만 갱신
     wrap.querySelectorAll('[data-nav]').forEach(el => {
       const isActive = el.dataset.nav === current;
       el.style.background = isActive ? '#222' : '#fff';
       el.style.color = isActive ? '#fff' : '#222';
     });
-    // 장바구니 카운트만 갱신
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const cc = document.getElementById('cart-count');
     if (cc) cc.textContent = cart.length;
@@ -98,7 +94,6 @@ function renderHeader(current) {
   const member = localStorage.getItem('member');
   const m = member ? JSON.parse(member) : null;
 
-  // 로고는 캐시에서 즉시 사용
   const cached = getCachedLogo();
   const logoImageUrl = cached.image_url || '';
   const siteName = cached.site_name || '🛍️ 심플몰';
@@ -134,13 +129,13 @@ function renderHeader(current) {
     `;
 
   const logoHtml = logoImageUrl
-    ? `<a href="index.html" style="display:inline-block;"><img src="${logoImageUrl}" alt="${siteName}" style="height:40px; max-width:240px; object-fit:contain; display:block;"></a>`
-    : `<a href="index.html" style="font-size:22px; font-weight:700; color:#222; text-decoration:none;">${siteName}</a>`;
+    ? `<a href="index.html" style="display:inline-block;"><img src="${logoImageUrl}" alt="${siteName}" style="height:40px; max-width:240px; object-fit:contain; display:block; margin:0 auto;"></a>`
+    : `<a href="index.html" style="font-size:22px; font-weight:700; color:#222; text-decoration:none; display:inline-block;">${siteName}</a>`;
 
   wrap.innerHTML = `
     <header style="background:#fff; border-bottom:1px solid #eee; padding:14px 16px;">
       <div style="max-width:1400px; margin:0 auto;">
-        <div style="margin-bottom:12px;">${logoHtml}</div>
+        <div style="margin-bottom:12px; text-align:center;">${logoHtml}</div>
         <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:flex-end;">
           <a href="cart.html" data-nav="cart" style="${btnStyle(current === 'cart')}">장바구니 <span id="cart-count" style="margin-left:4px;">0</span></a>
           <a href="orders.html" data-nav="orders" style="${btnStyle(current === 'orders')}">주문조회</a>
@@ -165,8 +160,6 @@ function renderHeader(current) {
     };
   }
 
-  // 백그라운드에서 로고 캐시 갱신 (헤더 재렌더 없음)
-  // 로고가 실제로 바뀐 경우에만 다음 방문 시 반영
   refreshLogoCache();
 }
 
