@@ -7,31 +7,28 @@
   <link rel="stylesheet" href="style.css">
   <script src="common.js"></script>
   <style>
-    /* 좌우 스크롤 완전 차단 (스크롤바 자리 고정으로 흔들림 방지) */
     html {
-      overflow-y: scroll;     /* 스크롤바 항상 표시 → 좌우 흔들림 원인 제거 */
+      overflow-y: scroll;
       overflow-x: hidden;
+      -webkit-text-size-adjust: 100%;
     }
     body {
       overflow-x: hidden;
       width: 100%;
       max-width: 100%;
       margin: 0;
+      -webkit-overflow-scrolling: touch;
     }
 
-    /* 배너: 화면 전체 너비 */
     #banner-wrap {
       width: 100vw;
       position: relative;
       left: 50%;
-      right: 50%;
       margin-left: -50vw;
-      margin-right: -50vw;
       margin-bottom: 24px;
       overflow: hidden;
     }
 
-    /* 상품 컨테이너: 최대 1400px */
     #product-container {
       max-width: 1400px;
       margin: 0 auto;
@@ -40,25 +37,44 @@
       width: 100%;
     }
 
-    /* 상품 그리드: 고정 너비, 페이지 넘겨도 크기 그대로 */
     #product-list {
       display: grid;
       gap: 16px;
       width: 100%;
       box-sizing: border-box;
     }
+
+    /* 카드: 레이아웃 고정, 재계산 방지 */
     #product-list .card {
       min-width: 0;
       overflow: hidden;
       display: block;
       box-sizing: border-box;
-    }
-    #product-list .card img {
-      width: 100%;
-      display: block;
+      contain: layout paint;                 /* ⭐ 재레이아웃 격리 */
+      -webkit-backface-visibility: hidden;   /* ⭐ GPU 재렌더 방지 */
+      backface-visibility: hidden;
+      transform: translateZ(0);              /* ⭐ GPU 레이어 고정 */
     }
 
-    /* 페이지네이션: 위치 고정, 좌우 흔들림 없게 */
+    /* 이미지: 자리 미리 확보, 로드 후 크기 변동 없음 */
+    #product-list .card .thumb {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: #f0f0f0;                    /* ⭐ 로드 전 회색 자리 */
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+      contain: strict;                        /* ⭐ 내부 크기 고정 */
+    }
+    #product-list .card .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+    }
+
     #pagination {
       display: flex;
       justify-content: center;
@@ -69,19 +85,17 @@
       flex-wrap: wrap;
       width: 100%;
       box-sizing: border-box;
-      min-height: 50px;    /* 페이지 1개여도 높이 고정 → 상하 흔들림 방지 */
+      min-height: 50px;
     }
   </style>
 </head>
 <body>
   <div id="app-header"></div>
 
-  <!-- 배너: 화면 전체 너비 -->
   <div id="banner-wrap" style="display:none;">
     <div id="banner-inner"></div>
   </div>
 
-  <!-- 상품 영역 -->
   <main id="product-container">
     <div id="product-list">로딩중...</div>
     <div id="pagination"></div>
@@ -97,8 +111,7 @@
 
   <script>
     const isPC = () => window.innerWidth >= 769;
-    // PC: 7열, 상품 크기 확대 위해 6열로 조정 (더 크게)
-    const PC_PER_PAGE = 30;   // 6열 × 5행
+    const PC_PER_PAGE = 30;
     const PC_MAX_PAGES = 10;
     const MOBILE_PER_PAGE = 10;
     const MOBILE_MAX_PAGES = 5;
@@ -106,7 +119,6 @@
     let allProducts = [];
     let currentPage = 1;
 
-    // ===== 배너 로드 =====
     async function loadBanner() {
       const wrap = document.getElementById('banner-wrap');
       const inner = document.getElementById('banner-inner');
@@ -125,7 +137,7 @@
       wrap.style.display = isPC() ? 'block' : 'none';
 
       const imgHtml = `
-        <img src="${data.image_url}" alt="배너"
+        <img src="${data.image_url}" alt="배너" decoding="async"
           style="width:100%; height:700px; object-fit:cover; display:block;">
       `;
 
@@ -134,7 +146,6 @@
         : imgHtml;
     }
 
-    // ===== 상품 목록 =====
     async function loadProducts() {
       const list = document.getElementById('product-list');
       const { data, error } = await db
@@ -156,7 +167,6 @@
 
     function applyGridColumns() {
       const list = document.getElementById('product-list');
-      // PC 6열 (더 크게), 모바일 2열
       list.style.gridTemplateColumns = isPC()
         ? 'repeat(6, minmax(0, 1fr))'
         : 'repeat(2, minmax(0, 1fr))';
@@ -173,8 +183,9 @@
 
       list.innerHTML = items.map(p => `
         <a class="card" href="product.html?id=${p.id}" style="text-decoration:none; color:inherit; display:block; min-width:0;">
-          <img src="${p.main_image}" alt="${p.name}" loading="lazy"
-            style="width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:10px; display:block;">
+          <div class="thumb">
+            <img src="${p.main_image}" alt="${p.name}" loading="lazy" decoding="async">
+          </div>
           <div style="padding:10px 4px; min-width:0;">
             <div style="font-size:14px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${p.name}</div>
             <div style="color:#e53935; font-weight:700; font-size:15px; margin-top:4px;">${Number(p.price).toLocaleString()}원</div>
@@ -191,14 +202,9 @@
       const maxPages = getMaxPages();
       const totalPages = Math.min(Math.ceil(allProducts.length / perPage), maxPages);
 
-      // 페이지 1개 이하면 버튼 숨기되, 높이는 유지
-      if (totalPages <= 1) {
-        el.innerHTML = '';
-        return;
-      }
+      if (totalPages <= 1) { el.innerHTML = ''; return; }
 
       let html = '';
-
       html += `<button class="page-nav" data-page="${currentPage-1}" ${currentPage===1?'disabled':''}
         style="padding:8px 14px; border:1px solid #ddd; border-radius:6px; background:${currentPage===1?'#f5f5f5':'#fff'}; color:${currentPage===1?'#bbb':'#222'}; cursor:${currentPage===1?'default':'pointer'}; font-size:14px;">이전</button>`;
 
@@ -231,7 +237,6 @@
         if (inner.innerHTML.trim()) {
           wrap.style.display = isPC() ? 'block' : 'none';
         }
-        // 화면 크기 바뀌어도 페이지 번호 유지 (범위 초과 시 조정)
         const maxP = getMaxPages();
         const totalP = Math.min(Math.ceil(allProducts.length / getPerPage()), maxP);
         if (currentPage > totalP) currentPage = totalP || 1;
