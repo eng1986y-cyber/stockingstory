@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>관리자 - 심플몰</title>
   <link rel="stylesheet" href="style.css">
-  <script src="common.js" defer></script>
+  <script src="common.js"></script>
 </head>
 <body>
   <header>
@@ -29,16 +29,31 @@
         <button id="logout-btn" style="padding:8px 14px; background:#999; color:#fff; border:0; border-radius:6px; cursor:pointer; font-size:13px;">로그아웃</button>
       </div>
 
+      <!-- 배너 관리 -->
+      <div style="background:#fff; padding:16px; border-radius:8px; margin-bottom:16px;">
+        <h3 style="font-size:15px; margin-bottom:10px;">배너 이미지 관리</h3>
+        <div style="display:grid; gap:8px;">
+          <input id="banner-image-url" placeholder="배너 이미지 URL" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+          <input id="banner-link-url" placeholder="클릭 시 이동할 링크 URL (선택)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+          <div style="display:flex; gap:8px;">
+            <button id="banner-save-btn" style="flex:1; padding:10px; background:#1976d2; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">등록/수정</button>
+            <button id="banner-delete-btn" style="flex:1; padding:10px; background:#e53935; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">삭제</button>
+          </div>
+          <p id="banner-msg" style="font-size:13px; font-weight:600;"></p>
+        </div>
+        <div id="banner-preview" style="margin-top:12px; display:none;">
+          <div style="font-size:12px; color:#888; margin-bottom:4px;">현재 배너:</div>
+          <img id="banner-preview-img" style="width:100%; max-height:200px; object-fit:cover; border-radius:6px;">
+        </div>
+      </div>
+
       <!-- 전체 배송비 설정 -->
       <div style="background:#fff; padding:16px; border-radius:8px; margin-bottom:16px;">
         <h3 style="font-size:15px; margin-bottom:10px;">전체 배송비 설정</h3>
         <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
           <input id="global-shipping" type="number" min="0" placeholder="배송비 (0=무료)"
             style="padding:10px; border:1px solid #ddd; border-radius:6px; width:200px;">
-          <button id="save-shipping"
-            style="padding:10px 20px; background:#03c75a; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">
-            저장
-          </button>
+          <button id="save-shipping" style="padding:10px 20px; background:#03c75a; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">저장</button>
           <span id="shipping-msg" style="font-size:13px; font-weight:600;"></span>
         </div>
         <p style="font-size:12px; color:#888; margin-top:6px;">모든 상품에 동일하게 적용됩니다.</p>
@@ -105,6 +120,7 @@
     function showAdmin() {
       loginScreen.style.display = 'none';
       adminScreen.style.display = 'block';
+      loadBanner();
       loadShippingSetting();
       loadAdminList();
       loadOrders();
@@ -133,6 +149,111 @@
       showLogin();
     });
 
+    // ===== 배너 관리 =====
+    let currentBannerId = null;
+
+    async function loadBanner() {
+      const { data, error } = await db
+        .from('banners').select('*')
+        .order('id', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const preview = document.getElementById('banner-preview');
+      const img = document.getElementById('banner-preview-img');
+      const imgUrl = document.getElementById('banner-image-url');
+      const linkUrl = document.getElementById('banner-link-url');
+
+      if (error || !data) {
+        preview.style.display = 'none';
+        imgUrl.value = '';
+        linkUrl.value = '';
+        currentBannerId = null;
+        return;
+      }
+
+      currentBannerId = data.id;
+      imgUrl.value = data.image_url || '';
+      linkUrl.value = data.link_url || '';
+
+      if (data.image_url) {
+        img.src = data.image_url;
+        preview.style.display = 'block';
+      } else {
+        preview.style.display = 'none';
+      }
+    }
+
+    document.getElementById('banner-save-btn').addEventListener('click', async () => {
+      const msg = document.getElementById('banner-msg');
+      const imageUrl = document.getElementById('banner-image-url').value.trim();
+      const linkUrl = document.getElementById('banner-link-url').value.trim();
+
+      if (!imageUrl) {
+        msg.style.color = 'crimson';
+        msg.textContent = '❌ 배너 이미지 URL을 입력하세요.';
+        return;
+      }
+
+      msg.textContent = '저장 중...';
+      msg.style.color = '#222';
+
+      let error;
+      if (currentBannerId) {
+        ({ error } = await db.from('banners').update({
+          image_url: imageUrl,
+          link_url: linkUrl || null,
+          updated_at: new Date().toISOString(),
+        }).eq('id', currentBannerId));
+      } else {
+        const res = await db.from('banners').insert({
+          image_url: imageUrl,
+          link_url: linkUrl || null,
+        }).select().single();
+        error = res.error;
+        if (res.data) currentBannerId = res.data.id;
+      }
+
+      if (error) {
+        msg.style.color = 'crimson';
+        msg.textContent = '❌ ' + error.message;
+      } else {
+        msg.style.color = 'green';
+        msg.textContent = '✅ 저장 완료!';
+        loadBanner();
+        setTimeout(() => msg.textContent = '', 2000);
+      }
+    });
+
+    document.getElementById('banner-delete-btn').addEventListener('click', async () => {
+      const msg = document.getElementById('banner-msg');
+
+      if (!currentBannerId) {
+        msg.style.color = 'crimson';
+        msg.textContent = '❌ 삭제할 배너가 없습니다.';
+        return;
+      }
+      if (!confirm('배너를 삭제할까요?')) return;
+
+      msg.textContent = '삭제 중...';
+      msg.style.color = '#222';
+
+      const { error } = await db.from('banners').delete().eq('id', currentBannerId);
+
+      if (error) {
+        msg.style.color = 'crimson';
+        msg.textContent = '❌ ' + error.message;
+      } else {
+        msg.style.color = 'green';
+        msg.textContent = '✅ 삭제 완료!';
+        document.getElementById('banner-image-url').value = '';
+        document.getElementById('banner-link-url').value = '';
+        document.getElementById('banner-preview').style.display = 'none';
+        currentBannerId = null;
+        setTimeout(() => msg.textContent = '', 2000);
+      }
+    });
+
     // ===== 배송비 설정 =====
     async function loadShippingSetting() {
       const { data } = await db.from('settings').select('value').eq('key', 'shipping_fee').maybeSingle();
@@ -145,7 +266,6 @@
       sm.textContent = '저장 중...';
       sm.style.color = '#222';
 
-      // upsert (있으면 update, 없으면 insert)
       const { error } = await db.from('settings').upsert({ key: 'shipping_fee', value: String(val) });
       if (error) {
         sm.style.color = 'crimson';
@@ -193,7 +313,7 @@
       }
     });
 
-    // ===== 상품 목록 (2열 + 페이지네이션) =====
+    // ===== 상품 목록 =====
     let allProducts = [];
     let currentPage = 1;
     const PER_PAGE = 10;
@@ -311,7 +431,6 @@
       if (error) { el.innerHTML = '<p>불러오기 실패: ' + error.message + '</p>'; return; }
       if (!data || data.length === 0) { el.innerHTML = '<p>주문이 없습니다.</p>'; return; }
 
-      // 주문번호로 그룹화
       const groups = {};
       data.forEach(o => {
         const key = o.order_number || `no_num_${o.id}`;
@@ -389,7 +508,6 @@
         });
       });
 
-      // 그룹 상태 변경
       el.querySelectorAll('.group-status-select').forEach(sel => {
         sel.addEventListener('click', (e) => e.stopPropagation());
         sel.addEventListener('change', async () => {
