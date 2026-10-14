@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>심플몰</title>
+  <title>STK스토리 심플라이프</title>
   <link rel="stylesheet" href="style.css">
   <script src="common.js"></script>
   <style>
@@ -13,50 +13,64 @@
       width: 100%;
       max-width: 100%;
     }
-    body {
+    body { position: relative; }
+
+    /* 배너: 화면 전체 너비로 (여백 없이) */
+    #banner-wrap {
+      width: 100vw;
       position: relative;
+      left: 50%;
+      right: 50%;
+      margin-left: -50vw;
+      margin-right: -50vw;
+      margin-bottom: 24px;
+      overflow: hidden;
     }
-    /* 모든 요소 좌우 넘침 방지 */
-    * {
-      max-width: 100%;
-    }
-    /* main 컨테이너 좌우 여백 + 넘침 방지 */
-    main {
-      width: 100%;
-      max-width: 100%;
-      overflow-x: hidden;
+
+    /* 상품 컨테이너: 최대 1100px 고정 */
+    #product-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 16px;
       box-sizing: border-box;
+      width: 100%;
     }
+
     #product-list {
+      display: grid;
+      gap: 12px;
       width: 100%;
-      max-width: 100%;
-      overflow-x: hidden;
-      box-sizing: border-box;
     }
     #product-list .card {
       min-width: 0;
       overflow: hidden;
+      display: block;
     }
     #product-list .card img {
       width: 100%;
       display: block;
     }
     #pagination {
-      overflow-x: hidden;
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 20px;
+      flex-wrap: wrap;
     }
   </style>
 </head>
 <body>
   <div id="app-header"></div>
 
-  <main>
-    <!-- PC 배너 (모바일에서는 숨김) -->
-    <div id="banner-wrap" style="display:none; margin-bottom:20px; width:100%; max-width:100%;">
-      <div id="banner-inner" style="width:100%; max-width:100%; overflow:hidden; border-radius:12px;"></div>
-    </div>
+  <!-- 배너: 화면 전체 너비 -->
+  <div id="banner-wrap" style="display:none;">
+    <div id="banner-inner"></div>
+  </div>
 
-    <div id="product-list" style="display:grid; gap:12px;">로딩중...</div>
-    <div id="pagination" style="display:flex; justify-content:center; gap:6px; margin-top:20px; flex-wrap:wrap;"></div>
+  <!-- 상품 영역: 최대 1100px -->
+  <main id="product-container">
+    <div id="product-list">로딩중...</div>
+    <div id="pagination"></div>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -68,7 +82,6 @@
   </script>
 
   <script>
-    // ===== 반응형 페이지 크기 설정 =====
     const isPC = () => window.innerWidth >= 769;
     const PC_PER_PAGE = 35;
     const PC_MAX_PAGES = 10;
@@ -78,14 +91,13 @@
     let allProducts = [];
     let currentPage = 1;
 
-    // ===== 배너 로드 =====
+    // ===== 배너 로드 (화면 전체 너비, 높이 700) =====
     async function loadBanner() {
       const wrap = document.getElementById('banner-wrap');
       const inner = document.getElementById('banner-inner');
 
       const { data, error } = await db
-        .from('banners')
-        .select('*')
+        .from('banners').select('*')
         .order('id', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -129,18 +141,13 @@
 
     function applyGridColumns() {
       const list = document.getElementById('product-list');
-      // minmax(0, 1fr) 로 해야 이미지가 그리드를 넘치지 않음
       list.style.gridTemplateColumns = isPC()
         ? 'repeat(7, minmax(0, 1fr))'
         : 'repeat(2, minmax(0, 1fr))';
     }
 
-    function getPerPage() {
-      return isPC() ? PC_PER_PAGE : MOBILE_PER_PAGE;
-    }
-    function getMaxPages() {
-      return isPC() ? PC_MAX_PAGES : MOBILE_MAX_PAGES;
-    }
+    function getPerPage() { return isPC() ? PC_PER_PAGE : MOBILE_PER_PAGE; }
+    function getMaxPages() { return isPC() ? PC_MAX_PAGES : MOBILE_MAX_PAGES; }
 
     function renderPage() {
       const list = document.getElementById('product-list');
@@ -190,30 +197,25 @@
           if (btn.disabled) return;
           currentPage = Number(btn.dataset.page);
           renderPage();
-          // 스크롤 이동 없음
         });
       });
     }
 
-    // ===== 화면 크기 변경 시 자동 대응 =====
     let resizeTimer;
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
         applyGridColumns();
-
         const wrap = document.getElementById('banner-wrap');
         const inner = document.getElementById('banner-inner');
         if (inner.innerHTML.trim()) {
           wrap.style.display = isPC() ? 'block' : 'none';
         }
-
         currentPage = 1;
         renderPage();
       }, 200);
     });
 
-    // ===== 시작 =====
     (async () => {
       await loadBanner();
       await loadProducts();
