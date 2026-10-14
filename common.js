@@ -59,7 +59,7 @@ function renderHeader(current) {
         <div style="margin-bottom:12px;">
           <a href="index.html" style="font-size:22px; font-weight:700; color:#222; text-decoration:none;">🛍️ 심플몰</a>
         </div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:flex-end;">
           <a href="cart.html" style="${btnStyle(current === 'cart')}">장바구니 <span id="cart-count">0</span></a>
           <a href="orders.html" style="${btnStyle(current === 'orders')}">주문조회</a>
           ${userBtns}
@@ -68,10 +68,12 @@ function renderHeader(current) {
     </header>
   `;
 
+  // 장바구니 개수
   const cart = JSON.parse(localStorage.getItem('cart') || '[]');
   const cc = document.getElementById('cart-count');
   if (cc) cc.textContent = cart.length;
 
+  // 로그아웃
   const lb = document.getElementById('logout-btn');
   if (lb) {
     lb.onclick = (e) => {
@@ -83,12 +85,10 @@ function renderHeader(current) {
 }
 
 // ===== 자동 실행 =====
-// 페이지 파일명을 보고 자동으로 renderHeader 호출
 document.addEventListener('DOMContentLoaded', () => {
   applyPhoneAttrs();
   new MutationObserver(applyPhoneAttrs).observe(document.body, { childList: true, subtree: true });
 
-  // 현재 페이지 이름 (확장자 제거)
   const path = location.pathname.split('/').pop().replace('.html', '') || 'index';
   const map = {
     'index': 'home',
@@ -101,7 +101,6 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   const current = map[path] || 'home';
 
-  // app-header 요소 있으면 자동 렌더
   if (document.getElementById('app-header')) {
     renderHeader(current);
   }
