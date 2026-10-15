@@ -34,6 +34,14 @@
       padding: 0 16px;
       box-sizing: border-box;
       width: 100%;
+      margin-top: 32px;   /* ⭐ 헤더와 상품 목록 사이 간격 (PC) */
+    }
+
+    /* 모바일에서는 조금 더 좁게 */
+    @media (max-width: 768px) {
+      #product-container {
+        margin-top: 24px;
+      }
     }
 
     #product-list {
