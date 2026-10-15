@@ -16,7 +16,6 @@
       width: 100%;
       max-width: 100%;
       margin: 0;
-      -webkit-overflow-scrolling: auto;
     }
 
     #banner-wrap {
@@ -34,14 +33,10 @@
       padding: 0 16px;
       box-sizing: border-box;
       width: 100%;
-      margin-top: 32px;   /* ⭐ 헤더와 상품 목록 사이 간격 (PC) */
+      margin-top: 32px;
     }
-
-    /* 모바일에서는 조금 더 좁게 */
     @media (max-width: 768px) {
-      #product-container {
-        margin-top: 24px;
-      }
+      #product-container { margin-top: 24px; }
     }
 
     #product-list {
@@ -51,28 +46,49 @@
       box-sizing: border-box;
     }
 
+    /* ⭐ iOS Safari 최적화: 카드 */
     #product-list .card {
       min-width: 0;
-      overflow: hidden;
       display: block;
       box-sizing: border-box;
+      text-decoration: none;
+      color: inherit;
+      /* GPU 레이어 승격 */
+      -webkit-transform: translate3d(0, 0, 0);
+      transform: translate3d(0, 0, 0);
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
     }
 
+    /* ⭐ 핵심: 이미지 대신 background-image 사용 */
     #product-list .card .thumb {
       width: 100%;
       padding-bottom: 100%;
       position: relative;
-      background: #f0f0f0;
-      border-radius: 10px;
       overflow: hidden;
+      border-radius: 10px;
+      /* 배경이미지로 렌더링 → iOS에서 재디코딩 없음 */
+      background-color: #f0f0f0;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      -webkit-background-size: cover;
+      /* iOS 리페인트 방지 */
+      -webkit-transform: translate3d(0, 0, 0);
+      transform: translate3d(0, 0, 0);
     }
+
+    /* 이미지 태그는 완전히 숨김 */
     #product-list .card .thumb img {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
+      display: none;
+    }
+
+    /* 카드 내 텍스트 영역 */
+    #product-list .card .card-info {
+      padding: 10px 4px;
+      min-width: 0;
+      -webkit-transform: translate3d(0, 0, 0);
+      transform: translate3d(0, 0, 0);
     }
 
     #pagination {
@@ -103,7 +119,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // ⭐ 전역 db 한 번만 생성 (GoTrue 중복 방지)
     window.db = supabase.createClient(
       "https://alpdhgcipjeekzrpxlbh.supabase.co",
       "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya"
@@ -177,6 +192,14 @@
     function getPerPage() { return isPC() ? PC_PER_PAGE : MOBILE_PER_PAGE; }
     function getMaxPages() { return isPC() ? PC_MAX_PAGES : MOBILE_MAX_PAGES; }
 
+    // 이미지 URL 안전하게 CSS url() 로 감싸기
+    function bgUrl(url) {
+      if (!url) return 'none';
+      // 작은따옴표, 괄호 이스케이프
+      const safe = String(url).replace(/'/g, "\\'").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
+      return `url('${safe}')`;
+    }
+
     function renderPage() {
       const list = document.getElementById('product-list');
       const perPage = getPerPage();
@@ -184,11 +207,9 @@
       const items = allProducts.slice(start, start + perPage);
 
       list.innerHTML = items.map(p => `
-        <a class="card" href="product.html?id=${p.id}" style="text-decoration:none; color:inherit; display:block; min-width:0;">
-          <div class="thumb">
-            <img src="${p.main_image}" alt="${p.name}" loading="lazy" decoding="async">
-          </div>
-          <div style="padding:10px 4px; min-width:0;">
+        <a class="card" href="product.html?id=${p.id}">
+          <div class="thumb" style="background-image: ${bgUrl(p.main_image)};"></div>
+          <div class="card-info">
             <div style="font-size:14px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${p.name}</div>
             <div style="color:#e53935; font-weight:700; font-size:15px; margin-top:4px;">${Number(p.price).toLocaleString()}원</div>
           </div>
