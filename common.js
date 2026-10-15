@@ -14,15 +14,13 @@
       width: 100% !important;
       max-width: 100% !important;
     }
-    #app-header, #app-header * {
-      box-sizing: border-box;
-    }
+    #app-header, #app-header * { box-sizing: border-box; }
     #app-header a, #app-header button, #app-header span {
       white-space: nowrap;
       flex-shrink: 0;
     }
 
-    /* ⭐ 플로팅 스크롤 버튼 (화면 중앙 기준, 콘텐츠 우측 가장자리) */
+    /* ⭐ 플로팅 스크롤 버튼 */
     #scroll-btns {
       position: fixed;
       left: 50%;
@@ -34,8 +32,7 @@
       z-index: 900;
     }
     #scroll-btns button {
-      width: 44px;
-      height: 44px;
+      width: 44px; height: 44px;
       border-radius: 50%;
       border: 1px solid #ddd;
       background: #fff;
@@ -44,34 +41,56 @@
       font-weight: 700;
       cursor: pointer;
       box-shadow: 0 2px 8px rgba(0,0,0,.12);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-      line-height: 1;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0; line-height: 1;
       transition: background .15s, transform .1s;
     }
     #scroll-btns button:hover { background: #f0f0f0; }
     #scroll-btns button:active { transform: scale(.92); }
 
-    /* 화면이 좁으면 오른쪽 끝에 붙임 */
     @media (max-width: 1450px) {
-      #scroll-btns {
-        left: auto;
-        right: 16px;
-        transform: none;
-      }
+      #scroll-btns { left: auto; right: 16px; transform: none; }
     }
     @media (max-width: 768px) {
-      #scroll-btns {
-        right: 12px;
-        bottom: 12px;
-      }
-      #scroll-btns button {
-        width: 40px;
-        height: 40px;
-        font-size: 16px;
-      }
+      #scroll-btns { right: 12px; bottom: 12px; }
+      #scroll-btns button { width: 40px; height: 40px; font-size: 16px; }
+    }
+
+    /* ⭐ Footer */
+    #app-footer {
+      margin-top: 40px;
+      padding: 24px 16px;
+      background: #fafafa;
+      border-top: 1px solid #eee;
+      color: #666;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+    #app-footer .footer-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    #app-footer .footer-title {
+      font-weight: 700;
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    #app-footer .footer-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 16px;
+    }
+    #app-footer .footer-item {
+      color: #666;
+    }
+    #app-footer .footer-text {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed #ddd;
+      font-size: 12px;
+      color: #999;
+      white-space: pre-wrap;
     }
   `;
   document.head.appendChild(style);
@@ -99,10 +118,9 @@ function applyPhoneAttrs() {
   });
 }
 
-// ===== 플로팅 스크롤 버튼 생성 =====
+// ===== 플로팅 스크롤 버튼 =====
 function createScrollButtons() {
   if (document.getElementById('scroll-btns')) return;
-
   const wrap = document.createElement('div');
   wrap.id = 'scroll-btns';
   wrap.innerHTML = `
@@ -111,13 +129,10 @@ function createScrollButtons() {
   `;
   document.body.appendChild(wrap);
 
-  const btnTop = document.getElementById('btn-scroll-top');
-  const btnBottom = document.getElementById('btn-scroll-bottom');
-
-  btnTop.addEventListener('click', () => {
+  document.getElementById('btn-scroll-top').addEventListener('click', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
-  btnBottom.addEventListener('click', () => {
+  document.getElementById('btn-scroll-bottom').addEventListener('click', () => {
     window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
   });
 
@@ -126,14 +141,12 @@ function createScrollButtons() {
     wrap.style.display = canScroll ? 'flex' : 'none';
   };
   updateVisibility();
-
   window.addEventListener('resize', updateVisibility);
-  const obs = new MutationObserver(updateVisibility);
-  obs.observe(document.body, { childList: true, subtree: true });
+  new MutationObserver(updateVisibility).observe(document.body, { childList: true, subtree: true });
   window.addEventListener('scroll', updateVisibility, { passive: true });
 }
 
-// ===== 로고 캐시 =====
+// ===== 로고 / 푸터 캐시 =====
 function getCachedLogo() {
   try { return JSON.parse(localStorage.getItem('logo_cache') || 'null') || {}; }
   catch { return {}; }
@@ -142,29 +155,95 @@ function setCachedLogo(obj) {
   try { localStorage.setItem('logo_cache', JSON.stringify(obj)); } catch {}
 }
 
+function getCachedFooter() {
+  try { return JSON.parse(localStorage.getItem('footer_cache') || 'null') || {}; }
+  catch { return {}; }
+}
+function setCachedFooter(obj) {
+  try { localStorage.setItem('footer_cache', JSON.stringify(obj)); } catch {}
+}
+
+// ===== Supabase 클라이언트 재사용 =====
+function getSupabaseClient() {
+  if (typeof supabase === 'undefined') return null;
+  let client = window.db;
+  if (!client) {
+    client = supabase.createClient(
+      "https://alpdhgcipjeekzrpxlbh.supabase.co",
+      "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya",
+      { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } }
+    );
+    window.db = client;
+  }
+  return client;
+}
+
 async function refreshLogoCache() {
-  if (typeof supabase === 'undefined') return;
+  const client = getSupabaseClient();
+  if (!client) return;
   try {
-    let client = window.db;
-    if (!client) {
-      client = supabase.createClient(
-        "https://alpdhgcipjeekzrpxlbh.supabase.co",
-        "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya",
-        { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } }
-      );
-      window.db = client;
-    }
     const { data } = await client.from('logos').select('*')
       .order('id', { ascending: false }).limit(1).maybeSingle();
-    if (data) {
-      setCachedLogo({ image_url: data.image_url || '', site_name: data.site_name || '' });
-    } else {
-      setCachedLogo({ image_url: '', site_name: '' });
-    }
+    if (data) setCachedLogo({ image_url: data.image_url || '', site_name: data.site_name || '' });
+    else setCachedLogo({ image_url: '', site_name: '' });
   } catch (e) {}
 }
 
-// ===== 회원 상태 서버에서 재확인 =====
+async function refreshFooterCache() {
+  const client = getSupabaseClient();
+  if (!client) return;
+  try {
+    const { data } = await client.from('settings').select('key, value')
+      .in('key', ['footer_owner','footer_phone','footer_email','footer_address','footer_business','footer_text']);
+    const obj = {};
+    (data || []).forEach(row => { obj[row.key] = row.value || ''; });
+    setCachedFooter(obj);
+  } catch (e) {}
+}
+
+// ===== ⭐ Footer 자동 렌더 (요소 자동 생성) =====
+function renderFooter() {
+  // ⭐ 페이지에 app-footer 없으면 자동 생성
+  let wrap = document.getElementById('app-footer');
+  if (!wrap) {
+    wrap = document.createElement('div');
+    wrap.id = 'app-footer';
+    document.body.appendChild(wrap);
+  }
+
+  const f = getCachedFooter();
+  const owner = f.footer_owner || '';
+  const phone = f.footer_phone || '';
+  const email = f.footer_email || '';
+  const address = f.footer_address || '';
+  const business = f.footer_business || '';
+  const text = f.footer_text || '';
+
+  // 아무 정보도 없으면 footer 숨김
+  if (!owner && !phone && !email && !address && !business && !text) {
+    wrap.style.display = 'none';
+    refreshFooterCache();
+    return;
+  }
+
+  wrap.style.display = 'block';
+
+  const items = [];
+  if (phone) items.push(`<span class="footer-item">📞 ${phone}</span>`);
+  if (email) items.push(`<span class="footer-item">✉️ ${email}</span>`);
+  if (business) items.push(`<span class="footer-item">사업자번호: ${business}</span>`);
+
+  wrap.innerHTML = `
+    <div class="footer-inner">
+      ${owner ? `<div class="footer-title">${owner}</div>` : ''}
+      ${address ? `<div class="footer-item" style="margin-bottom:6px;">${address}</div>` : ''}
+      ${items.length ? `<div class="footer-row">${items.join('')}</div>` : ''}
+      ${text ? `<div class="footer-text">${text}</div>` : ''}
+    </div>
+  `;
+}
+
+// ===== 회원 상태 재확인 =====
 async function verifyMemberStatus() {
   const memberStr = localStorage.getItem('member');
   if (!memberStr) return true;
@@ -173,24 +252,13 @@ async function verifyMemberStatus() {
   try { member = JSON.parse(memberStr); } catch { return true; }
   if (!member || !member.id) return true;
 
-  if (typeof supabase === 'undefined') return true;
+  const client = getSupabaseClient();
+  if (!client) return true;
 
   try {
-    let client = window.db;
-    if (!client) {
-      client = supabase.createClient(
-        "https://alpdhgcipjeekzrpxlbh.supabase.co",
-        "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya",
-        { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } }
-      );
-      window.db = client;
-    }
-
     const { data, error } = await client
-      .from('members')
-      .select('id, status')
-      .eq('id', member.id)
-      .maybeSingle();
+      .from('members').select('id, status')
+      .eq('id', member.id).maybeSingle();
 
     if (error) return true;
 
@@ -202,7 +270,6 @@ async function verifyMemberStatus() {
     }
 
     const status = data.status || '정상';
-
     if (status === '정지') {
       localStorage.removeItem('member');
       alert('정지된 계정입니다. 관리자에게 문의하세요.');
@@ -219,7 +286,6 @@ async function verifyMemberStatus() {
     member.status = status;
     localStorage.setItem('member', JSON.stringify(member));
     return true;
-
   } catch (e) {
     return true;
   }
@@ -320,10 +386,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   applyPhoneAttrs();
   new MutationObserver(applyPhoneAttrs).observe(document.body, { childList: true, subtree: true });
 
-  // 플로팅 스크롤 버튼 생성
   createScrollButtons();
+  renderFooter();
 
-  // 정지 회원 자동 로그아웃
   const isOk = await verifyMemberStatus();
   if (!isOk) return;
 

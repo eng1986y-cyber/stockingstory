@@ -84,6 +84,21 @@
         </div>
       </div>
 
+      <!-- 푸터(소유자 정보) 관리 -->
+      <div style="background:#fff; padding:16px; border-radius:8px; margin-bottom:16px;">
+        <h3 style="font-size:15px; margin-bottom:10px;">사이트 하단 정보 (Footer)</h3>
+        <div style="display:grid; gap:8px;">
+          <input id="footer-owner" placeholder="상호명 / 대표자 (예: STK스토리 / 홍길동)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+          <input id="footer-phone" placeholder="연락처 (예: 010-0000-0000)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+          <input id="footer-email" placeholder="이메일 (예: help@stk.com)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+          <input id="footer-address" placeholder="주소 (예: 서울시 강남구 ...)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+          <input id="footer-business" placeholder="사업자등록번호 (예: 123-45-67890)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+          <textarea id="footer-text" placeholder="추가 안내문 (예: 저작권, 통신판매업 신고번호 등)" style="padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
+          <button id="save-footer" style="padding:12px; background:#03c75a; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">저장</button>
+          <p id="footer-msg" style="font-size:13px; font-weight:600;"></p>
+        </div>
+      </div>
+
       <!-- 배너 관리 -->
       <div style="background:#fff; padding:16px; border-radius:8px; margin-bottom:16px;">
         <h3 style="font-size:15px; margin-bottom:10px;">배너 이미지 관리</h3>
@@ -114,7 +129,7 @@
         <p style="font-size:12px; color:#888; margin-top:6px;">모든 상품에 동일하게 적용됩니다.</p>
       </div>
 
-      <!-- 상품 등록 + 목록 -->
+      <!-- 상품 등록 + 목록 좌우 배치 -->
       <div class="product-layout">
         <div class="product-left">
           <h2 style="margin:0 0 12px;">상품 등록</h2>
@@ -192,6 +207,7 @@
       loginScreen.style.display = 'none';
       adminScreen.style.display = 'block';
       loadLogo();
+      loadFooter();
       loadBanner();
       loadShippingSetting();
       loadAdminList();
@@ -306,6 +322,49 @@
         document.getElementById('logo-image-url').value = '';
         document.getElementById('logo-preview').style.display = 'none';
         currentLogoId = null;
+        setTimeout(() => msg.textContent = '', 2000);
+      }
+    });
+
+    // ===== 푸터(소유자 정보) 관리 =====
+    async function loadFooter() {
+      const keys = ['footer_owner','footer_phone','footer_email','footer_address','footer_business','footer_text'];
+      const { data } = await db.from('settings').select('key, value').in('key', keys);
+
+      const map = {};
+      (data || []).forEach(row => { map[row.key] = row.value || ''; });
+
+      document.getElementById('footer-owner').value = map.footer_owner || '';
+      document.getElementById('footer-phone').value = map.footer_phone || '';
+      document.getElementById('footer-email').value = map.footer_email || '';
+      document.getElementById('footer-address').value = map.footer_address || '';
+      document.getElementById('footer-business').value = map.footer_business || '';
+      document.getElementById('footer-text').value = map.footer_text || '';
+    }
+
+    document.getElementById('save-footer').addEventListener('click', async () => {
+      const msg = document.getElementById('footer-msg');
+      msg.textContent = '저장 중...';
+      msg.style.color = '#222';
+
+      const updates = [
+        { key: 'footer_owner', value: document.getElementById('footer-owner').value.trim() },
+        { key: 'footer_phone', value: document.getElementById('footer-phone').value.trim() },
+        { key: 'footer_email', value: document.getElementById('footer-email').value.trim() },
+        { key: 'footer_address', value: document.getElementById('footer-address').value.trim() },
+        { key: 'footer_business', value: document.getElementById('footer-business').value.trim() },
+        { key: 'footer_text', value: document.getElementById('footer-text').value.trim() },
+      ];
+
+      const { error } = await db.from('settings').upsert(updates);
+
+      if (error) {
+        msg.style.color = 'crimson';
+        msg.textContent = '❌ ' + error.message;
+      } else {
+        msg.style.color = 'green';
+        msg.textContent = '✅ 저장 완료!';
+        localStorage.removeItem('footer_cache');
         setTimeout(() => msg.textContent = '', 2000);
       }
     });
