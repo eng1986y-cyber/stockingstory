@@ -68,6 +68,8 @@
             <h2 style="margin:8px 0;">${data.name}</h2>
             <p style="color:#e53935; font-weight:700; font-size:22px;">${Number(data.price).toLocaleString()}원</p>
             <p style="margin:6px 0;">${shippingLabel}</p>
+            ${data.hem_option ? `<p style="margin:6px 0; font-size:13px; color:#555;"><b>밑단선택:</b> ${data.hem_option}</p>` : ''}
+            ${data.other_option ? `<p style="margin:6px 0; font-size:13px; color:#555;"><b>기타옵션:</b> ${data.other_option}</p>` : ''}
             <p style="color:#555; margin:12px 0; white-space:pre-wrap;">${data.description || ''}</p>
             <div style="display:flex; gap:8px; margin-top:16px;">
               <button id="cart-btn"
@@ -95,7 +97,8 @@
     function showOrderModal(p, mode) {
       const colors = p.colors || [];
       const sizes = p.sizes || [];
-      const extras = p.extra_options || [];
+      const hemOption = p.hem_option || '';
+      const otherOption = p.other_option || '';
       const isCart = mode === 'cart';
 
       const colorHtml = colors.length ? `
@@ -116,13 +119,16 @@
         </select>
       ` : '';
 
-      const extrasHtml = extras.length ? `
-        <label style="font-size:13px; font-weight:600;">추가옵션 <span style="color:red;">*</span></label>
-        <select name="selected_extra" required
-          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-          <option value="">추가옵션 선택</option>
-          ${extras.map(x => `<option>${x}</option>`).join('')}
-        </select>
+      const hemHtml = hemOption ? `
+        <label style="font-size:13px; font-weight:600;">밑단선택</label>
+        <input name="selected_hem" value="${hemOption}" readonly
+          style="padding:10px; border:1px solid #ddd; border-radius:6px; background:#f9f9f9;">
+      ` : '';
+
+      const otherHtml = otherOption ? `
+        <label style="font-size:13px; font-weight:600;">기타옵션</label>
+        <input name="selected_other" value="${otherOption}" readonly
+          style="padding:10px; border:1px solid #ddd; border-radius:6px; background:#f9f9f9;">
       ` : '';
 
       const m = getMember();
@@ -143,7 +149,8 @@
           <form id="order-form" style="display:grid; gap:10px;">
             ${colorHtml}
             ${sizeHtml}
-            ${extrasHtml}
+            ${hemHtml}
+            ${otherHtml}
 
             <label style="font-size:13px; font-weight:600;">수량 <span style="color:red;">*</span></label>
             <input name="quantity" type="number" min="1" value="1" required
@@ -213,14 +220,13 @@
         const subTotal = p.price * qty;
         const total = subTotal + globalShipping;
 
-        const selectedExtra = f.selected_extra ? f.selected_extra.value : '';
-        const selectedExtras = selectedExtra ? [selectedExtra] : [];
         const selectedColor = f.selected_color ? f.selected_color.value : null;
         const selectedSize  = f.selected_size  ? f.selected_size.value  : null;
+        const selectedHem   = f.selected_hem   ? f.selected_hem.value   : null;
+        const selectedOther = f.selected_other ? f.selected_other.value : null;
 
         if (colors.length && !selectedColor) { alert('색상을 선택하세요.'); return; }
         if (sizes.length && !selectedSize) { alert('사이즈를 선택하세요.'); return; }
-        if (extras.length && !selectedExtra) { alert('추가옵션을 선택하세요.'); return; }
 
         if (isCart) {
           const cart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -228,8 +234,7 @@
           const dupIdx = cart.findIndex(it =>
             it.product_id === p.id &&
             it.selected_color === selectedColor &&
-            it.selected_size === selectedSize &&
-            JSON.stringify(it.selected_extras || []) === JSON.stringify(selectedExtras)
+            it.selected_size === selectedSize
           );
 
           if (dupIdx >= 0) {
@@ -244,7 +249,8 @@
               quantity: qty,
               selected_color: selectedColor,
               selected_size: selectedSize,
-              selected_extras: selectedExtras,
+              selected_hem: selectedHem,
+              selected_other: selectedOther,
             });
           }
 
@@ -274,7 +280,8 @@
           postcode: f.postcode.value.trim(),
           selected_color: selectedColor,
           selected_size: selectedSize,
-          selected_extras: selectedExtras,
+          selected_hem: selectedHem,
+          selected_other: selectedOther,
           shipping_fee: globalShipping,
           status: '입금대기',
         });

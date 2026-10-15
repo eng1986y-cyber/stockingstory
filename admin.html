@@ -93,19 +93,9 @@
         <input name="colors" placeholder="색상 (쉼표: 빨강,파랑)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
         <input name="sizes" placeholder="사이즈 (쉼표: S,M,L)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
 
-        <!-- ⭐ 추가옵션 UI 변경: 입력 + 추가 버튼 -->
-        <div style="grid-column: 1 / -1;">
-          <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">추가옵션</label>
-          <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <input id="extra-option-input" placeholder="추가옵션 입력 (예: 각인)"
-              style="flex:1; min-width:150px; padding:10px; border:1px solid #ddd; border-radius:6px;">
-            <button type="button" id="extra-option-add"
-              style="padding:10px 20px; background:#03c75a; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600; white-space:nowrap;">
-              + 추가
-            </button>
-          </div>
-          <div id="extra-option-list" style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;"></div>
-        </div>
+        <!-- ⭐ 밑단선택 / 기타옵션 자유 입력 -->
+        <input name="hem_option" placeholder="밑단선택 (예: 기본, 밑단줄임)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <input name="other_option" placeholder="기타옵션 (예: 없음, 각인가능)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
 
         <textarea name="description" placeholder="상품 설명" style="grid-column: 1 / -1; padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
         <textarea name="detail_images" placeholder="상세 이미지 URL (줄바꿈)" style="grid-column: 1 / -1; padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
@@ -266,7 +256,6 @@
 
     document.getElementById('logo-delete-btn').addEventListener('click', async () => {
       const msg = document.getElementById('logo-msg');
-
       if (!currentLogoId) {
         msg.style.color = 'crimson';
         msg.textContent = '❌ 삭제할 로고가 없습니다.';
@@ -276,9 +265,7 @@
 
       msg.textContent = '삭제 중...';
       msg.style.color = '#222';
-
       const { error } = await db.from('logos').delete().eq('id', currentLogoId);
-
       if (error) {
         msg.style.color = 'crimson';
         msg.textContent = '❌ ' + error.message;
@@ -371,7 +358,6 @@
 
     document.getElementById('banner-delete-btn').addEventListener('click', async () => {
       const msg = document.getElementById('banner-msg');
-
       if (!currentBannerId) {
         msg.style.color = 'crimson';
         msg.textContent = '❌ 삭제할 배너가 없습니다.';
@@ -381,9 +367,7 @@
 
       msg.textContent = '삭제 중...';
       msg.style.color = '#222';
-
       const { error } = await db.from('banners').delete().eq('id', currentBannerId);
-
       if (error) {
         msg.style.color = 'crimson';
         msg.textContent = '❌ ' + error.message;
@@ -421,51 +405,6 @@
       }
     });
 
-    // ===== 추가옵션 UI =====
-    let extraOptions = [];
-
-    function renderExtraOptions() {
-      const el = document.getElementById('extra-option-list');
-      if (extraOptions.length === 0) {
-        el.innerHTML = '<span style="font-size:12px; color:#aaa;">추가된 옵션이 없습니다.</span>';
-        return;
-      }
-      el.innerHTML = extraOptions.map((opt, i) => `
-        <span style="display:inline-flex; align-items:center; gap:6px; padding:6px 10px; background:#e3f2fd; border:1px solid #90caf9; border-radius:16px; font-size:13px;">
-          ${opt}
-          <button type="button" data-idx="${i}" class="remove-extra"
-            style="background:none; border:0; color:#e53935; cursor:pointer; font-size:14px; font-weight:700; padding:0; line-height:1;">
-            ×
-          </button>
-        </span>
-      `).join('');
-
-      el.querySelectorAll('.remove-extra').forEach(btn => {
-        btn.addEventListener('click', () => {
-          extraOptions.splice(Number(btn.dataset.idx), 1);
-          renderExtraOptions();
-        });
-      });
-    }
-
-    document.getElementById('extra-option-add').addEventListener('click', () => {
-      const input = document.getElementById('extra-option-input');
-      const val = input.value.trim();
-      if (!val) { alert('추가옵션을 입력하세요.'); return; }
-      if (extraOptions.includes(val)) { alert('이미 추가된 옵션입니다.'); return; }
-      extraOptions.push(val);
-      input.value = '';
-      input.focus();
-      renderExtraOptions();
-    });
-
-    document.getElementById('extra-option-input').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        document.getElementById('extra-option-add').click();
-      }
-    });
-
     // ===== 상품 등록 =====
     const form = document.getElementById('product-form');
     const msg = document.getElementById('msg');
@@ -488,7 +427,8 @@
         detail_images,
         colors: parseList(form.colors.value),
         sizes: parseList(form.sizes.value),
-        extra_options: extraOptions,
+        hem_option: form.hem_option.value.trim() || null,
+        other_option: form.other_option.value.trim() || null,
       });
 
       if (error) {
@@ -498,8 +438,6 @@
         msg.style.color = 'green';
         msg.textContent = '✅ 등록 완료!';
         form.reset();
-        extraOptions = [];
-        renderExtraOptions();
         loadAdminList();
       }
     });
@@ -545,7 +483,8 @@
               ${p.description ? `<div><span style="color:#888;">설명:</span> ${p.description}</div>` : ''}
               ${(p.colors && p.colors.length) ? `<div><span style="color:#888;">색상:</span> ${p.colors.join(', ')}</div>` : ''}
               ${(p.sizes && p.sizes.length) ? `<div><span style="color:#888;">사이즈:</span> ${p.sizes.join(', ')}</div>` : ''}
-              ${(p.extra_options && p.extra_options.length) ? `<div><span style="color:#888;">추가:</span> ${p.extra_options.join(', ')}</div>` : ''}
+              ${p.hem_option ? `<div><span style="color:#888;">밑단선택:</span> ${p.hem_option}</div>` : ''}
+              ${p.other_option ? `<div><span style="color:#888;">기타옵션:</span> ${p.other_option}</div>` : ''}
             </div>
             <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:4px; margin-top:8px;">
               <a href="product.html?id=${p.id}" target="_blank" rel="noopener"
@@ -594,7 +533,8 @@
             detail_images: p.detail_images || [],
             colors: p.colors || [],
             sizes: p.sizes || [],
-            extra_options: p.extra_options || [],
+            hem_option: p.hem_option || null,
+            other_option: p.other_option || null,
           });
 
           if (error) {
@@ -693,7 +633,8 @@
                     × ${o.quantity} = <b style="color:#e53935;">${Number(o.total_price).toLocaleString()}원</b>
                     ${o.selected_color ? `<br><span style="color:#888; font-size:12px;">색상: ${o.selected_color}</span>` : ''}
                     ${o.selected_size ? ` <span style="color:#888; font-size:12px;">사이즈: ${o.selected_size}</span>` : ''}
-                    ${o.selected_extras?.length ? `<br><span style="color:#888; font-size:12px;">추가: ${o.selected_extras.join(', ')}</span>` : ''}
+                    ${o.selected_hem ? `<br><span style="color:#888; font-size:12px;">밑단선택: ${o.selected_hem}</span>` : ''}
+                    ${o.selected_other ? `<br><span style="color:#888; font-size:12px;">기타옵션: ${o.selected_other}</span>` : ''}
                     <button class="order-edit" data-id="${o.id}"
                       style="margin-left:6px; padding:3px 8px; background:#1976d2; color:#fff; border:0; border-radius:4px; cursor:pointer; font-size:11px;">수정</button>
                     <button class="order-del" data-id="${o.id}"
@@ -808,8 +749,10 @@
             <input name="selected_color" value="${o.selected_color || ''}" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
             <label style="font-size:13px; font-weight:600;">사이즈</label>
             <input name="selected_size" value="${o.selected_size || ''}" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-            <label style="font-size:13px; font-weight:600;">추가옵션 (쉼표)</label>
-            <input name="selected_extras" value="${(o.selected_extras || []).join(',')}" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <label style="font-size:13px; font-weight:600;">밑단선택</label>
+            <input name="selected_hem" value="${o.selected_hem || ''}" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <label style="font-size:13px; font-weight:600;">기타옵션</label>
+            <input name="selected_other" value="${o.selected_other || ''}" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
             <label style="font-size:13px; font-weight:600;">요청사항</label>
             <textarea name="memo" style="padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;">${o.memo || ''}</textarea>
             <label style="font-size:13px; font-weight:600;">상태</label>
@@ -833,7 +776,6 @@
         const qty = Number(f.quantity.value);
         const price = Number(f.product_price.value);
         const ship = Number(f.shipping_fee.value) || 0;
-        const extrasArr = f.selected_extras.value.split(',').map(s => s.trim()).filter(Boolean);
 
         const { error } = await db.from('orders').update({
           product_name: f.product_name.value.trim(),
@@ -850,7 +792,8 @@
           postcode: f.postcode.value.trim(),
           selected_color: f.selected_color.value.trim() || null,
           selected_size: f.selected_size.value.trim() || null,
-          selected_extras: extrasArr,
+          selected_hem: f.selected_hem.value.trim() || null,
+          selected_other: f.selected_other.value.trim() || null,
           memo: f.memo.value.trim(),
           status: f.status.value,
         }).eq('id', o.id);
@@ -878,9 +821,6 @@
     }
 
     checkSession();
-
-    // 추가옵션 초기 렌더
-    renderExtraOptions();
   </script>
 </body>
 </html>

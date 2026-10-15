@@ -92,7 +92,8 @@
               × ${o.quantity} = <b style="color:#e53935;">${Number(o.total_price).toLocaleString()}원</b>
               ${o.selected_color ? `<br><span style="color:#888; font-size:12px;">색상: ${o.selected_color}</span>` : ''}
               ${o.selected_size ? ` <span style="color:#888; font-size:12px;">사이즈: ${o.selected_size}</span>` : ''}
-              ${o.selected_extras?.length ? `<br><span style="color:#888; font-size:12px;">추가옵션: ${o.selected_extras.join(', ')}</span>` : ''}
+              ${o.selected_hem ? `<br><span style="color:#888; font-size:12px;">밑단선택: ${o.selected_hem}</span>` : ''}
+              ${o.selected_other ? `<br><span style="color:#888; font-size:12px;">기타옵션: ${o.selected_other}</span>` : ''}
             </div>
           `).join('')}
 
