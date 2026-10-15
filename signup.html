@@ -30,22 +30,6 @@
         <input name="phone" type="tel" inputmode="numeric" placeholder="010-0000-0000" required
           style="padding:12px; border:1px solid #ddd; border-radius:6px;">
 
-        <label style="font-size:13px; color:#666;">이메일</label>
-        <input name="email" type="email" placeholder="이메일" required
-          style="padding:12px; border:1px solid #ddd; border-radius:6px;">
-
-        <label style="font-size:13px; color:#666;">우편번호</label>
-        <input name="postcode" placeholder="우편번호"
-          style="padding:12px; border:1px solid #ddd; border-radius:6px;">
-
-        <label style="font-size:13px; color:#666;">주소</label>
-        <input name="address" placeholder="주소"
-          style="padding:12px; border:1px solid #ddd; border-radius:6px;">
-
-        <label style="font-size:13px; color:#666;">상세주소</label>
-        <input name="address_detail" placeholder="상세주소"
-          style="padding:12px; border:1px solid #ddd; border-radius:6px;">
-
         <button type="submit"
           style="padding:14px; background:#03c75a; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600; font-size:15px;">
           가입하기
@@ -77,10 +61,6 @@
         password: form.password.value,
         name: form.name.value.trim(),
         phone: form.phone.value.trim(),
-        email: form.email.value.trim(),
-        postcode: form.postcode.value.trim(),
-        address: form.address.value.trim(),
-        address_detail: form.address_detail.value.trim(),
       };
 
       const { data: exist } = await db.from('members').select('id').eq('username', payload.username).maybeSingle();
@@ -103,10 +83,6 @@
         username: data.username,
         name: data.name,
         phone: data.phone,
-        email: data.email,
-        postcode: data.postcode || '',
-        address: data.address || '',
-        address_detail: data.address_detail || '',
       }));
 
       msg.style.color = 'green';
