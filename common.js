@@ -56,7 +56,7 @@
       #scroll-btns button { width: 40px; height: 40px; font-size: 16px; }
     }
 
-    /* ⭐ Footer */
+    /* ⭐ Footer (중앙 정렬) */
     #app-footer {
       margin-top: 40px;
       padding: 24px 16px;
@@ -69,6 +69,7 @@
     #app-footer .footer-inner {
       max-width: 1400px;
       margin: 0 auto;
+      text-align: center;
     }
     #app-footer .footer-title {
       font-weight: 700;
@@ -80,6 +81,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 6px 16px;
+      justify-content: center;
     }
     #app-footer .footer-item {
       color: #666;
@@ -91,6 +93,9 @@
       font-size: 12px;
       color: #999;
       white-space: pre-wrap;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
     }
   `;
   document.head.appendChild(style);
@@ -201,9 +206,8 @@ async function refreshFooterCache() {
   } catch (e) {}
 }
 
-// ===== ⭐ Footer 자동 렌더 (요소 자동 생성) =====
+// ===== Footer 자동 렌더 =====
 function renderFooter() {
-  // ⭐ 페이지에 app-footer 없으면 자동 생성
   let wrap = document.getElementById('app-footer');
   if (!wrap) {
     wrap = document.createElement('div');
@@ -219,7 +223,6 @@ function renderFooter() {
   const business = f.footer_business || '';
   const text = f.footer_text || '';
 
-  // 아무 정보도 없으면 footer 숨김
   if (!owner && !phone && !email && !address && !business && !text) {
     wrap.style.display = 'none';
     refreshFooterCache();
