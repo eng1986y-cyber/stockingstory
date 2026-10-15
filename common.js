@@ -56,13 +56,11 @@ function setCachedLogo(obj) {
   try { localStorage.setItem('logo_cache', JSON.stringify(obj)); } catch {}
 }
 
-// ⭐ 전역 db 재사용 (GoTrue 중복 방지)
 async function refreshLogoCache() {
   if (typeof supabase === 'undefined') return;
   try {
     let client = window.db;
     if (!client) {
-      // auth 완전 비활성화로 GoTrue 중복 방지
       client = supabase.createClient(
         "https://alpdhgcipjeekzrpxlbh.supabase.co",
         "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya",
@@ -78,6 +76,71 @@ async function refreshLogoCache() {
       setCachedLogo({ image_url: '', site_name: '' });
     }
   } catch (e) {}
+}
+
+// ===== ⭐ 회원 상태 서버에서 재확인 =====
+// 정지/탈퇴 회원 자동 로그아웃
+async function verifyMemberStatus() {
+  const memberStr = localStorage.getItem('member');
+  if (!memberStr) return true;
+
+  let member;
+  try { member = JSON.parse(memberStr); } catch { return true; }
+  if (!member || !member.id) return true;
+
+  if (typeof supabase === 'undefined') return true;
+
+  try {
+    let client = window.db;
+    if (!client) {
+      client = supabase.createClient(
+        "https://alpdhgcipjeekzrpxlbh.supabase.co",
+        "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya",
+        { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } }
+      );
+      window.db = client;
+    }
+
+    const { data, error } = await client
+      .from('members')
+      .select('id, status')
+      .eq('id', member.id)
+      .maybeSingle();
+
+    if (error) return true; // 서버 에러 시 그냥 통과 (사용자 경험 우선)
+
+    // 회원이 삭제된 경우
+    if (!data) {
+      localStorage.removeItem('member');
+      alert('회원 정보가 없어졌습니다. 다시 로그인해주세요.');
+      location.href = 'index.html';
+      return false;
+    }
+
+    const status = data.status || '정상';
+
+    // ⭐ 정지/탈퇴 차단
+    if (status === '정지') {
+      localStorage.removeItem('member');
+      alert('정지된 계정입니다. 관리자에게 문의하세요.');
+      location.href = 'index.html';
+      return false;
+    }
+    if (status === '탈퇴') {
+      localStorage.removeItem('member');
+      alert('탈퇴한 계정입니다.');
+      location.href = 'index.html';
+      return false;
+    }
+
+    // 정상 → localStorage 상태 최신화
+    member.status = status;
+    localStorage.setItem('member', JSON.stringify(member));
+    return true;
+
+  } catch (e) {
+    return true;
+  }
 }
 
 // ===== 공통 헤더 렌더 =====
@@ -171,9 +234,13 @@ function renderHeader(current) {
 }
 
 // ===== 자동 실행 =====
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   applyPhoneAttrs();
   new MutationObserver(applyPhoneAttrs).observe(document.body, { childList: true, subtree: true });
+
+  // ⭐ 정지 회원 자동 로그아웃 (헤더 렌더 전에 실행)
+  const isOk = await verifyMemberStatus();
+  if (!isOk) return;
 
   const path = location.pathname.split('/').pop().replace('.html', '') || 'index';
   const map = {
