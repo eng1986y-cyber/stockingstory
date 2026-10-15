@@ -21,6 +21,52 @@
       white-space: nowrap;
       flex-shrink: 0;
     }
+
+    /* ⭐ 플로팅 스크롤 버튼 */
+    #scroll-btns {
+      position: fixed;
+      right: 16px;
+      bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 900;
+    }
+    #scroll-btns button {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid #ddd;
+      background: #fff;
+      color: #222;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      line-height: 1;
+      transition: background .15s, transform .1s;
+    }
+    #scroll-btns button:hover {
+      background: #f0f0f0;
+    }
+    #scroll-btns button:active {
+      transform: scale(.92);
+    }
+    @media (max-width: 768px) {
+      #scroll-btns {
+        right: 12px;
+        bottom: 12px;
+      }
+      #scroll-btns button {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+      }
+    }
   `;
   document.head.appendChild(style);
 })();
@@ -45,6 +91,44 @@ function applyPhoneAttrs() {
     el.setAttribute('inputmode', 'numeric');
     el.setAttribute('autocomplete', 'tel');
   });
+}
+
+// ===== ⭐ 플로팅 스크롤 버튼 생성 =====
+function createScrollButtons() {
+  if (document.getElementById('scroll-btns')) return;
+
+  const wrap = document.createElement('div');
+  wrap.id = 'scroll-btns';
+  wrap.innerHTML = `
+    <button id="btn-scroll-top" title="맨 위로" aria-label="맨 위로">▲</button>
+    <button id="btn-scroll-bottom" title="맨 아래로" aria-label="맨 아래로">▼</button>
+  `;
+  document.body.appendChild(wrap);
+
+  const btnTop = document.getElementById('btn-scroll-top');
+  const btnBottom = document.getElementById('btn-scroll-bottom');
+
+  btnTop.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  btnBottom.addEventListener('click', () => {
+    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+  });
+
+  // 페이지가 짧아서 스크롤 없으면 숨김
+  const updateVisibility = () => {
+    const canScroll = document.documentElement.scrollHeight > window.innerHeight + 50;
+    wrap.style.display = canScroll ? 'flex' : 'none';
+  };
+  updateVisibility();
+
+  window.addEventListener('resize', updateVisibility);
+  // DOM 변경(콘텐츠 로드) 감지
+  const obs = new MutationObserver(updateVisibility);
+  obs.observe(document.body, { childList: true, subtree: true });
+  // 스크롤 시에도 재확인 (이미지 lazy 로드 등)
+  window.addEventListener('scroll', updateVisibility, { passive: true });
 }
 
 // ===== 로고 캐시 =====
@@ -78,8 +162,7 @@ async function refreshLogoCache() {
   } catch (e) {}
 }
 
-// ===== ⭐ 회원 상태 서버에서 재확인 =====
-// 정지/탈퇴 회원 자동 로그아웃
+// ===== 회원 상태 서버에서 재확인 =====
 async function verifyMemberStatus() {
   const memberStr = localStorage.getItem('member');
   if (!memberStr) return true;
@@ -107,9 +190,8 @@ async function verifyMemberStatus() {
       .eq('id', member.id)
       .maybeSingle();
 
-    if (error) return true; // 서버 에러 시 그냥 통과 (사용자 경험 우선)
+    if (error) return true;
 
-    // 회원이 삭제된 경우
     if (!data) {
       localStorage.removeItem('member');
       alert('회원 정보가 없어졌습니다. 다시 로그인해주세요.');
@@ -119,7 +201,6 @@ async function verifyMemberStatus() {
 
     const status = data.status || '정상';
 
-    // ⭐ 정지/탈퇴 차단
     if (status === '정지') {
       localStorage.removeItem('member');
       alert('정지된 계정입니다. 관리자에게 문의하세요.');
@@ -133,7 +214,6 @@ async function verifyMemberStatus() {
       return false;
     }
 
-    // 정상 → localStorage 상태 최신화
     member.status = status;
     localStorage.setItem('member', JSON.stringify(member));
     return true;
@@ -238,7 +318,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   applyPhoneAttrs();
   new MutationObserver(applyPhoneAttrs).observe(document.body, { childList: true, subtree: true });
 
-  // ⭐ 정지 회원 자동 로그아웃 (헤더 렌더 전에 실행)
+  // ⭐ 플로팅 스크롤 버튼 생성
+  createScrollButtons();
+
+  // 정지 회원 자동 로그아웃
   const isOk = await verifyMemberStatus();
   if (!isOk) return;
 
