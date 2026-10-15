@@ -30,6 +30,7 @@
     }
 
     let globalShipping = 0;
+    let currentProduct = null;
 
     async function loadShippingFee() {
       const { data } = await db.from('settings').select('value').eq('key', 'shipping_fee').maybeSingle();
@@ -51,13 +52,69 @@
         return;
       }
 
+      currentProduct = data;
+
       const detailImgs = (data.detail_images || [])
         .map(url => `<img src="${url}" alt="상세" loading="lazy" style="width:100%; display:block; margin-top:8px; border-radius:6px;">`)
         .join('');
 
       const shippingLabel = globalShipping > 0
-        ? `<span style="color:#888; font-size:13px;">배송비 ${globalShipping.toLocaleString()}원</span>`
-        : `<span style="color:#03c75a; font-size:13px;">무료배송</span>`;
+        ? `배송비 ${globalShipping.toLocaleString()}원`
+        : `<span style="color:#03c75a;">무료배송</span>`;
+
+      // 옵션 UI
+      const colors = data.colors || [];
+      const sizes = data.sizes || [];
+      const hemOptions = data.hem_option || [];
+      const otherOptions = data.other_option || [];
+
+      const colorSel = colors.length ? `
+        <div style="margin-bottom:10px;">
+          <label style="font-size:13px; font-weight:600; display:block; margin-bottom:4px;">색상 <span style="color:red;">*</span></label>
+          <select id="opt-color" required style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <option value="">색상 선택</option>
+            ${colors.map(c => `<option>${c}</option>`).join('')}
+          </select>
+        </div>
+      ` : '';
+
+      const sizeSel = sizes.length ? `
+        <div style="margin-bottom:10px;">
+          <label style="font-size:13px; font-weight:600; display:block; margin-bottom:4px;">사이즈 <span style="color:red;">*</span></label>
+          <select id="opt-size" required style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <option value="">사이즈 선택</option>
+            ${sizes.map(s => `<option>${s}</option>`).join('')}
+          </select>
+        </div>
+      ` : '';
+
+      const hemSel = hemOptions.length ? `
+        <div style="margin-bottom:10px;">
+          <label style="font-size:13px; font-weight:600; display:block; margin-bottom:4px;">밑단선택 <span style="color:red;">*</span></label>
+          <select id="opt-hem" required style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <option value="">밑단선택</option>
+            ${hemOptions.map(h => `<option>${h}</option>`).join('')}
+          </select>
+        </div>
+      ` : '';
+
+      const otherSel = otherOptions.length ? `
+        <div style="margin-bottom:10px;">
+          <label style="font-size:13px; font-weight:600; display:block; margin-bottom:4px;">기타옵션 <span style="color:red;">*</span></label>
+          <select id="opt-other" required style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <option value="">기타옵션</option>
+            ${otherOptions.map(o => `<option>${o}</option>`).join('')}
+          </select>
+        </div>
+      ` : '';
+
+      const qtyInput = `
+        <div style="margin-bottom:10px;">
+          <label style="font-size:13px; font-weight:600; display:block; margin-bottom:4px;">수량 <span style="color:red;">*</span></label>
+          <input id="opt-qty" type="number" min="1" value="1" required
+            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
+        </div>
+      `;
 
       detailEl.innerHTML = `
         <div style="background:#fff; border-radius:8px; padding:16px;">
@@ -69,9 +126,8 @@
                 style="width:100%; border-radius:8px; display:block;">
             </div>
 
-            <!-- 오른쪽: 정보 (위) + 버튼 (아래로 밀기) -->
+            <!-- 오른쪽: 정보 + 옵션 + 버튼 -->
             <div style="flex:1 1 320px; min-width:0; display:flex; flex-direction:column; justify-content:space-between;">
-              <!-- 위쪽: 상품 정보 -->
               <div>
                 ${data.product_code ? `<div style="color:#888; font-size:12px; margin-bottom:4px;">제품번호: ${data.product_code}</div>` : ''}
                 <h2 style="margin:0 0 12px; font-size:22px;">${data.name}</h2>
@@ -79,11 +135,21 @@
                   ${Number(data.price).toLocaleString()}원
                 </p>
                 <p style="margin:0 0 16px;">${shippingLabel}</p>
-                <p style="color:#555; margin:0; white-space:pre-wrap; line-height:1.7;">${data.description || ''}</p>
+                <p style="color:#555; margin:0 0 20px; white-space:pre-wrap; line-height:1.7;">${data.description || ''}</p>
+
+                <!-- ⭐ 옵션들 -->
+                ${colorSel}
+                ${sizeSel}
+                ${hemSel}
+                ${otherSel}
+                ${qtyInput}
+
+                <!-- 합계 -->
+                <div id="total-preview" style="text-align:right; font-size:14px; font-weight:600; color:#e53935; line-height:1.6; margin-bottom:16px;"></div>
               </div>
 
-              <!-- 아래쪽: 버튼 (이미지 하단 라인에 맞춰짐) -->
-              <div style="display:flex; gap:8px; margin-top:24px;">
+              <!-- 버튼 -->
+              <div style="display:flex; gap:8px;">
                 <button id="cart-btn"
                   style="flex:1; padding:14px; background:#1976d2; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600; font-size:15px;">
                   장바구니
@@ -99,112 +165,157 @@
         ${detailImgs ? `<div style="margin-top:16px;">${detailImgs}</div>` : ''}
       `;
 
-      document.getElementById('buy-btn').addEventListener('click', () => {
-        showOrderModal(data, 'single');
-      });
+      // 합계 미리보기
+      const qtyEl = document.getElementById('opt-qty');
+      const totalPrev = document.getElementById('total-preview');
+      const updateTotal = () => {
+        const q = Number(qtyEl.value) || 1;
+        const sub = data.price * q;
+        const sum = sub + globalShipping;
+        totalPrev.innerHTML = `
+          상품: ${sub.toLocaleString()}원<br>
+          배송비: ${globalShipping > 0 ? globalShipping.toLocaleString() + '원' : '무료'}<br>
+          <span style="font-size:17px;">합계: ${sum.toLocaleString()}원</span>
+        `;
+      };
+      qtyEl.addEventListener('input', updateTotal);
+      updateTotal();
+
       document.getElementById('cart-btn').addEventListener('click', () => {
-        showOrderModal(data, 'cart');
+        handleOrder('cart');
+      });
+      document.getElementById('buy-btn').addEventListener('click', () => {
+        handleOrder('single');
       });
     }
 
-    function showOrderModal(p, mode) {
+    function getSelectedOptions() {
+      const p = currentProduct;
+      if (!p) return null;
+
       const colors = p.colors || [];
       const sizes = p.sizes || [];
       const hemOptions = p.hem_option || [];
       const otherOptions = p.other_option || [];
-      const isCart = mode === 'cart';
 
-      const colorHtml = colors.length ? `
-        <label style="font-size:13px; font-weight:600;">색상 <span style="color:red;">*</span></label>
-        <select name="selected_color" required
-          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-          <option value="">색상 선택</option>
-          ${colors.map(c => `<option>${c}</option>`).join('')}
-        </select>
-      ` : '';
+      const colorEl = document.getElementById('opt-color');
+      const sizeEl = document.getElementById('opt-size');
+      const hemEl = document.getElementById('opt-hem');
+      const otherEl = document.getElementById('opt-other');
+      const qtyEl = document.getElementById('opt-qty');
 
-      const sizeHtml = sizes.length ? `
-        <label style="font-size:13px; font-weight:600;">사이즈 <span style="color:red;">*</span></label>
-        <select name="selected_size" required
-          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-          <option value="">사이즈 선택</option>
-          ${sizes.map(s => `<option>${s}</option>`).join('')}
-        </select>
-      ` : '';
+      const selectedColor = colorEl ? colorEl.value : null;
+      const selectedSize = sizeEl ? sizeEl.value : null;
+      const selectedHem = hemEl ? hemEl.value : null;
+      const selectedOther = otherEl ? otherEl.value : null;
+      const qty = Math.max(1, Number(qtyEl.value) || 1);
 
-      const hemHtml = hemOptions.length ? `
-        <label style="font-size:13px; font-weight:600;">밑단선택 <span style="color:red;">*</span></label>
-        <select name="selected_hem" required
-          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-          <option value="">밑단선택</option>
-          ${hemOptions.map(h => `<option>${h}</option>`).join('')}
-        </select>
-      ` : '';
+      if (colors.length && !selectedColor) { alert('색상을 선택하세요.'); return null; }
+      if (sizes.length && !selectedSize) { alert('사이즈를 선택하세요.'); return null; }
+      if (hemOptions.length && !selectedHem) { alert('밑단선택을 선택하세요.'); return null; }
+      if (otherOptions.length && !selectedOther) { alert('기타옵션을 선택하세요.'); return null; }
 
-      const otherHtml = otherOptions.length ? `
-        <label style="font-size:13px; font-weight:600;">기타옵션 <span style="color:red;">*</span></label>
-        <select name="selected_other" required
-          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-          <option value="">기타옵션</option>
-          ${otherOptions.map(o => `<option>${o}</option>`).join('')}
-        </select>
-      ` : '';
+      return { selectedColor, selectedSize, selectedHem, selectedOther, qty };
+    }
 
+    function handleOrder(mode) {
+      const p = currentProduct;
+      if (!p) return;
+
+      const opts = getSelectedOptions();
+      if (!opts) return;
+
+      const { selectedColor, selectedSize, selectedHem, selectedOther, qty } = opts;
+
+      if (mode === 'cart') {
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const dupIdx = cart.findIndex(it =>
+          it.product_id === p.id &&
+          it.selected_color === selectedColor &&
+          it.selected_size === selectedSize &&
+          it.selected_hem === selectedHem &&
+          it.selected_other === selectedOther
+        );
+
+        if (dupIdx >= 0) {
+          cart[dupIdx].quantity += qty;
+        } else {
+          cart.push({
+            product_id: p.id,
+            product_code: p.product_code || '',
+            product_name: p.name,
+            product_price: p.price,
+            main_image: p.main_image,
+            quantity: qty,
+            selected_color: selectedColor,
+            selected_size: selectedSize,
+            selected_hem: selectedHem,
+            selected_other: selectedOther,
+          });
+        }
+        localStorage.setItem('cart', JSON.stringify(cart));
+        alert('✅ 장바구니에 담았습니다!');
+        if (document.getElementById('app-header')) renderHeader('product');
+        return;
+      }
+
+      // 바로 구매 → 주문 정보 입력 모달
+      showCheckoutModal({
+        product_id: p.id,
+        product_code: p.product_code || '',
+        product_name: p.name,
+        product_price: p.price,
+        quantity: qty,
+        selected_color: selectedColor,
+        selected_size: selectedSize,
+        selected_hem: selectedHem,
+        selected_other: selectedOther,
+      });
+    }
+
+    // ===== 주문 정보 입력 모달 (바로 구매) =====
+    function showCheckoutModal(item) {
+      const subTotal = item.product_price * item.quantity;
+      const total = subTotal + globalShipping;
       const m = getMember();
-      const memberName = m ? (m.name || '') : '';
-      const memberPhone = m ? (m.phone || '') : '';
-      const memberAddr = m ? (m.address || '') : '';
-      const memberAddrDetail = m ? (m.address_detail || '') : '';
-      const memberPostcode = m ? (m.postcode || '') : '';
 
       const modal = document.createElement('div');
       modal.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:1000; padding:10px;`;
       modal.innerHTML = `
         <div style="background:#fff; padding:20px; border-radius:10px; width:100%; max-width:440px; max-height:90vh; overflow-y:auto;">
-          <h2 style="margin-bottom:16px; font-size:18px;">${isCart ? '옵션 선택' : '주문 정보 입력'}</h2>
-          <p style="margin-bottom:12px; font-size:14px; color:#555;">
-            <b>${p.name}</b><br>${Number(p.price).toLocaleString()}원
-          </p>
-          <form id="order-form" style="display:grid; gap:10px;">
-            ${colorHtml}
-            ${sizeHtml}
-            ${hemHtml}
-            ${otherHtml}
-
-            <label style="font-size:13px; font-weight:600;">수량 <span style="color:red;">*</span></label>
-            <input name="quantity" type="number" min="1" value="1" required
+          <h2 style="margin-bottom:16px; font-size:18px;">주문 정보 입력</h2>
+          <form id="checkout-form" style="display:grid; gap:10px;">
+            <label style="font-size:13px; font-weight:600;">주문자 이름 *</label>
+            <input name="customer_name" required value="${m?.name || ''}"
               style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <label style="font-size:13px; font-weight:600;">연락처 *</label>
+            <input name="customer_phone" type="tel" inputmode="numeric" required value="${m?.phone || ''}"
+              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <label style="font-size:13px; font-weight:600;">우편번호</label>
+            <input name="postcode" value="${m?.postcode || ''}"
+              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <label style="font-size:13px; font-weight:600;">주소 *</label>
+            <input name="address" required value="${m?.address || ''}"
+              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <label style="font-size:13px; font-weight:600;">상세주소</label>
+            <input name="address_detail" value="${m?.address_detail || ''}"
+              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <label style="font-size:13px; font-weight:600;">입금자명 *</label>
+            <input name="depositor_name" required
+              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <label style="font-size:13px; font-weight:600;">요청사항</label>
+            <textarea name="memo"
+              style="padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
 
-            ${isCart ? '' : `
-              <hr style="border:0; border-top:1px solid #eee; margin:8px 0;">
-              <label style="font-size:13px; font-weight:600;">주문자 이름 *</label>
-              <input name="customer_name" required value="${memberName}"
-                style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-              <label style="font-size:13px; font-weight:600;">연락처 *</label>
-              <input name="customer_phone" type="tel" inputmode="numeric" required value="${memberPhone}"
-                style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-              <label style="font-size:13px; font-weight:600;">우편번호</label>
-              <input name="postcode" value="${memberPostcode}"
-                style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-              <label style="font-size:13px; font-weight:600;">주소 *</label>
-              <input name="address" required value="${memberAddr}"
-                style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-              <label style="font-size:13px; font-weight:600;">상세주소</label>
-              <input name="address_detail" value="${memberAddrDetail}"
-                style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-              <label style="font-size:13px; font-weight:600;">입금자명 *</label>
-              <input name="depositor_name" required
-                style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-              <label style="font-size:13px; font-weight:600;">요청사항</label>
-              <textarea name="memo"
-                style="padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
-            `}
-
-            <div id="total-preview" style="text-align:right; font-size:14px; font-weight:600; color:#e53935; line-height:1.6;"></div>
+            <div style="text-align:right; font-size:14px; font-weight:600; color:#e53935; line-height:1.7; margin-top:8px;">
+              상품: ${subTotal.toLocaleString()}원<br>
+              배송비: ${globalShipping > 0 ? globalShipping.toLocaleString() + '원' : '무료'}<br>
+              <span style="font-size:17px;">총액: ${total.toLocaleString()}원</span>
+            </div>
 
             <button type="submit"
-              style="padding:12px; background:${isCart ? '#1976d2' : '#03c75a'}; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">
-              ${isCart ? '장바구니 담기' : '주문 완료'}
+              style="padding:12px; background:#03c75a; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">
+              주문 완료
             </button>
             <button type="button" id="close-modal"
               style="padding:10px; background:#eee; border:0; border-radius:6px; cursor:pointer;">
@@ -215,83 +326,21 @@
       `;
       document.body.appendChild(modal);
 
-      const totalPreview = modal.querySelector('#total-preview');
-      const qtyInput = modal.querySelector('[name="quantity"]');
-      const updateTotal = () => {
-        const q = Number(qtyInput.value) || 1;
-        const sub = p.price * q;
-        const sum = sub + globalShipping;
-        totalPreview.innerHTML = `
-          상품: ${sub.toLocaleString()}원<br>
-          배송비: ${globalShipping > 0 ? globalShipping.toLocaleString() + '원' : '무료'}<br>
-          <span style="font-size:17px;">합계: ${sum.toLocaleString()}원</span>
-        `;
-      };
-      qtyInput.addEventListener('input', updateTotal);
-      updateTotal();
-
       modal.querySelector('#close-modal').onclick = () => modal.remove();
 
-      modal.querySelector('#order-form').addEventListener('submit', async (ev) => {
+      modal.querySelector('#checkout-form').addEventListener('submit', async (ev) => {
         ev.preventDefault();
         const f = ev.target;
-        const qty = Number(f.quantity.value);
-        const subTotal = p.price * qty;
-        const total = subTotal + globalShipping;
-
-        const selectedColor = f.selected_color ? f.selected_color.value : null;
-        const selectedSize  = f.selected_size  ? f.selected_size.value  : null;
-        const selectedHem   = f.selected_hem   ? f.selected_hem.value   : null;
-        const selectedOther = f.selected_other ? f.selected_other.value : null;
-
-        if (colors.length && !selectedColor) { alert('색상을 선택하세요.'); return; }
-        if (sizes.length && !selectedSize) { alert('사이즈를 선택하세요.'); return; }
-        if (hemOptions.length && !selectedHem) { alert('밑단선택을 선택하세요.'); return; }
-        if (otherOptions.length && !selectedOther) { alert('기타옵션을 선택하세요.'); return; }
-
-        if (isCart) {
-          const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-          const dupIdx = cart.findIndex(it =>
-            it.product_id === p.id &&
-            it.selected_color === selectedColor &&
-            it.selected_size === selectedSize &&
-            it.selected_hem === selectedHem &&
-            it.selected_other === selectedOther
-          );
-
-          if (dupIdx >= 0) {
-            cart[dupIdx].quantity += qty;
-          } else {
-            cart.push({
-              product_id: p.id,
-              product_code: p.product_code || '',
-              product_name: p.name,
-              product_price: p.price,
-              main_image: p.main_image,
-              quantity: qty,
-              selected_color: selectedColor,
-              selected_size: selectedSize,
-              selected_hem: selectedHem,
-              selected_other: selectedOther,
-            });
-          }
-
-          localStorage.setItem('cart', JSON.stringify(cart));
-          alert('✅ 장바구니에 담았습니다!');
-          modal.remove();
-          if (document.getElementById('app-header')) renderHeader('product');
-          return;
-        }
 
         const orderNumber = generateOrderNumber();
 
         const { error } = await db.from('orders').insert({
           order_number: orderNumber,
-          product_id: p.id,
-          product_code: p.product_code || '',
-          product_name: p.name,
-          product_price: p.price,
-          quantity: qty,
+          product_id: item.product_id,
+          product_code: item.product_code,
+          product_name: item.product_name,
+          product_price: item.product_price,
+          quantity: item.quantity,
           total_price: total,
           customer_name: f.customer_name.value.trim(),
           customer_phone: f.customer_phone.value.trim(),
@@ -300,10 +349,10 @@
           address: f.address.value.trim(),
           address_detail: f.address_detail.value.trim(),
           postcode: f.postcode.value.trim(),
-          selected_color: selectedColor,
-          selected_size: selectedSize,
-          selected_hem: selectedHem,
-          selected_other: selectedOther,
+          selected_color: item.selected_color,
+          selected_size: item.selected_size,
+          selected_hem: item.selected_hem,
+          selected_other: item.selected_other,
           shipping_fee: globalShipping,
           status: '입금대기',
         });
