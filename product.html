@@ -61,21 +61,12 @@
 
       detailEl.innerHTML = `
         <div style="background:#fff; border-radius:8px; padding:16px;">
+          <!-- 위: 좌우 배치 -->
           <div style="display:flex; gap:24px; flex-wrap:wrap; align-items:flex-start;">
-            <!-- 왼쪽: 메인 이미지 + 버튼 -->
+            <!-- 왼쪽: 메인 이미지 -->
             <div style="flex:1 1 320px; min-width:0;">
               <img src="${data.main_image}" alt="${data.name}"
                 style="width:100%; border-radius:8px; display:block;">
-              <div style="display:flex; gap:8px; margin-top:12px;">
-                <button id="cart-btn"
-                  style="flex:1; padding:14px; background:#1976d2; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600; font-size:15px;">
-                  장바구니
-                </button>
-                <button id="buy-btn"
-                  style="flex:1; padding:14px; background:#03c75a; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600; font-size:15px;">
-                  바로 구매
-                </button>
-              </div>
             </div>
 
             <!-- 오른쪽: 상품 정보 -->
@@ -88,6 +79,18 @@
               <p style="margin:0 0 16px;">${shippingLabel}</p>
               <p style="color:#555; margin:0; white-space:pre-wrap; line-height:1.7;">${data.description || ''}</p>
             </div>
+          </div>
+
+          <!-- 아래: 버튼 (전체 폭) -->
+          <div style="display:flex; gap:8px; margin-top:20px;">
+            <button id="cart-btn"
+              style="flex:1; padding:14px; background:#1976d2; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600; font-size:15px;">
+              장바구니
+            </button>
+            <button id="buy-btn"
+              style="flex:1; padding:14px; background:#03c75a; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600; font-size:15px;">
+              바로 구매
+            </button>
           </div>
         </div>
         ${detailImgs ? `<div style="margin-top:16px;">${detailImgs}</div>` : ''}
