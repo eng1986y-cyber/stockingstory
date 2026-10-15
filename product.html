@@ -68,7 +68,7 @@
       const otherOptions = data.other_option || [];
 
       const colorSel = colors.length ? `
-        <div style="margin-bottom:10px;">
+        <div>
           <label style="font-size:13px; font-weight:600; display:block; margin-bottom:4px;">색상 <span style="color:red;">*</span></label>
           <select id="opt-color" required style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
             <option value="">색상 선택</option>
@@ -78,7 +78,7 @@
       ` : '';
 
       const sizeSel = sizes.length ? `
-        <div style="margin-bottom:10px;">
+        <div>
           <label style="font-size:13px; font-weight:600; display:block; margin-bottom:4px;">사이즈 <span style="color:red;">*</span></label>
           <select id="opt-size" required style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
             <option value="">사이즈 선택</option>
@@ -88,7 +88,7 @@
       ` : '';
 
       const hemSel = hemOptions.length ? `
-        <div style="margin-bottom:10px;">
+        <div>
           <label style="font-size:13px; font-weight:600; display:block; margin-bottom:4px;">밑단선택 <span style="color:red;">*</span></label>
           <select id="opt-hem" required style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
             <option value="">밑단선택</option>
@@ -98,7 +98,7 @@
       ` : '';
 
       const otherSel = otherOptions.length ? `
-        <div style="margin-bottom:10px;">
+        <div>
           <label style="font-size:13px; font-weight:600; display:block; margin-bottom:4px;">기타옵션 <span style="color:red;">*</span></label>
           <select id="opt-other" required style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
             <option value="">기타옵션</option>
@@ -108,24 +108,37 @@
       ` : '';
 
       const qtyInput = `
-        <div style="margin-bottom:10px;">
+        <div style="margin-top:10px;">
           <label style="font-size:13px; font-weight:600; display:block; margin-bottom:4px;">수량 <span style="color:red;">*</span></label>
           <input id="opt-qty" type="number" min="1" value="1" required
             style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
         </div>
       `;
 
+      // ⭐ 2열 배치
+      const row1 = (colors.length || sizes.length) ? `
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+          ${colorSel}
+          ${sizeSel}
+        </div>
+      ` : '';
+
+      const row2 = (hemOptions.length || otherOptions.length) ? `
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+          ${hemSel}
+          ${otherSel}
+        </div>
+      ` : '';
+
       detailEl.innerHTML = `
         <div style="background:#fff; border-radius:8px; padding:16px;">
           <div style="display:flex; gap:24px; flex-wrap:wrap; align-items:stretch;">
 
-            <!-- 왼쪽: 메인 이미지 -->
             <div style="flex:1 1 320px; min-width:0;">
               <img src="${data.main_image}" alt="${data.name}"
                 style="width:100%; border-radius:8px; display:block;">
             </div>
 
-            <!-- 오른쪽: 정보 + 옵션 + 버튼 -->
             <div style="flex:1 1 320px; min-width:0; display:flex; flex-direction:column; justify-content:space-between;">
               <div>
                 ${data.product_code ? `<div style="color:#888; font-size:12px; margin-bottom:4px;">제품번호: ${data.product_code}</div>` : ''}
@@ -135,13 +148,11 @@
                 </p>
                 <p style="margin:0 0 20px;">${shippingLabel}</p>
 
-                ${colorSel}
-                ${sizeSel}
-                ${hemSel}
-                ${otherSel}
+                ${row1}
+                ${row2}
                 ${qtyInput}
 
-                <div id="total-preview" style="text-align:right; font-size:14px; font-weight:600; color:#e53935; line-height:1.6; margin-bottom:16px;"></div>
+                <div id="total-preview" style="text-align:right; font-size:14px; font-weight:600; color:#e53935; line-height:1.6; margin:12px 0 16px;"></div>
               </div>
 
               <div style="display:flex; gap:8px;">
