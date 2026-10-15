@@ -13,7 +13,7 @@
     .product-layout {
       display: flex;
       gap: 16px;
-      align-items: stretch;
+      align-items: flex-start;
       margin-top: 8px;
     }
     .product-left {
@@ -23,24 +23,21 @@
     .product-right {
       flex: 1 1 auto;
       min-width: 0;
-      display: flex;
-      flex-direction: column;
     }
 
-    /* 우측 상품 목록 스크롤 영역 */
+    /* 우측 상품 목록 (스크롤 없음) */
     #admin-list-wrap {
       background: #fff;
       border-radius: 8px;
       padding: 12px;
-      overflow-y: auto;
     }
 
-    /* 페이지네이션 (하단 고정) */
+    /* 페이지네이션 (하단) */
     #admin-pagination {
       display: flex;
       justify-content: center;
       gap: 6px;
-      margin-top: 10px;
+      margin-top: 12px;
       flex-wrap: wrap;
     }
 
@@ -51,9 +48,6 @@
       }
       .product-left {
         flex: 1 1 auto;
-      }
-      #admin-list-wrap {
-        max-height: 500px;
       }
     }
   </style>
@@ -150,7 +144,7 @@
           <p id="msg" style="margin-top:12px; font-weight:600;"></p>
         </div>
 
-        <!-- 우측: 등록된 상품 (1열, 내부 스크롤) -->
+        <!-- 우측: 등록된 상품 (스크롤 없이 페이지네이션) -->
         <div class="product-right">
           <h2 style="margin:0 0 12px;">등록된 상품 <span id="product-count" style="font-size:14px; color:#888; font-weight:400;"></span></h2>
           <div id="admin-list-wrap">
@@ -207,30 +201,6 @@
       loadAdminList();
       loadOrders();
       loadMembers();
-      setTimeout(matchHeights, 100);
-      window.addEventListener('resize', matchHeights);
-    }
-
-    // 좌측 카드 높이 → 우측 목록 높이
-    function matchHeights() {
-      const layout = document.querySelector('.product-layout');
-      if (!layout) return;
-      if (window.innerWidth <= 900) {
-        document.getElementById('admin-list-wrap').style.maxHeight = '';
-        return;
-      }
-      const left = document.querySelector('.product-left');
-      const wrap = document.getElementById('admin-list-wrap');
-      const pag = document.getElementById('admin-pagination');
-      const rightH2 = document.querySelector('.product-right h2');
-      if (!left || !wrap) return;
-
-      const leftHeight = left.offsetHeight;
-      const h2Height = rightH2 ? rightH2.offsetHeight : 0;
-      const pagHeight = pag ? pag.offsetHeight : 0;
-
-      const available = leftHeight - h2Height - pagHeight - 24;
-      wrap.style.maxHeight = Math.max(available, 200) + 'px';
     }
 
     loginForm.addEventListener('submit', async (e) => {
@@ -509,7 +479,6 @@
       currentPage = 1;
       document.getElementById('product-count').textContent = `(${data.length}개)`;
       renderProducts();
-      setTimeout(matchHeights, 50);
     }
 
     function renderProducts() {
@@ -518,7 +487,7 @@
       const items = allProducts.slice(start, start + PER_PAGE);
 
       listEl.innerHTML = items.map(p => `
-        <div style="background:#fff; border-radius:8px; border-left:4px solid #1976d2; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.05);">
+        <div style="background:#f9f9f9; border-radius:8px; border-left:4px solid #1976d2; overflow:hidden;">
           <div class="product-summary" style="padding:10px; display:flex; align-items:center; gap:10px; cursor:pointer;">
             <img src="${p.main_image}" style="width:44px; height:44px; object-fit:cover; border-radius:6px; flex-shrink:0;">
             <div style="flex:1; min-width:0; font-size:13px; line-height:1.3;">
@@ -610,7 +579,7 @@
 
     function renderPagination(totalPages) {
       const el = document.getElementById('admin-pagination');
-      if (totalPages <= 1) { el.innerHTML = ''; setTimeout(matchHeights, 20); return; }
+      if (totalPages <= 1) { el.innerHTML = ''; return; }
       let html = '';
       html += `<button class="page-nav" data-page="${currentPage-1}" ${currentPage===1?'disabled':''}
         style="padding:6px 12px; border:1px solid #ddd; border-radius:6px; background:${currentPage===1?'#f5f5f5':'#fff'}; color:${currentPage===1?'#bbb':'#222'}; cursor:${currentPage===1?'default':'pointer'}; font-size:13px;">이전</button>`;
@@ -627,11 +596,8 @@
           if (btn.disabled) return;
           currentPage = Number(btn.dataset.page);
           renderProducts();
-          document.getElementById('admin-list-wrap').scrollTop = 0;
         });
       });
-
-      setTimeout(matchHeights, 20);
     }
 
     // ===== 주문 목록 =====
