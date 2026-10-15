@@ -19,7 +19,7 @@
           style="padding:12px; border:1px solid #ddd; border-radius:6px; background:#f5f5f5;">
 
         <label style="font-size:13px; color:#666;">비밀번호</label>
-        <input name="password" type="password" required
+        <input name="password" type="password" placeholder="비밀번호 (변경 시 입력)"
           style="padding:12px; border:1px solid #ddd; border-radius:6px;">
 
         <label style="font-size:13px; color:#666;">이름</label>
@@ -67,19 +67,41 @@
     const form = document.getElementById('mypage-form');
     const msg = document.getElementById('msg');
 
-    const member = JSON.parse(localStorage.getItem('member') || 'null');
-    if (!member) {
+    let member = JSON.parse(localStorage.getItem('member') || 'null');
+    if (!member || !member.id) {
       alert('로그인이 필요합니다.');
       location.href = 'login.html';
-    } else {
-      form.username.value = member.username || '';
-      form.name.value = member.name || '';
-      form.phone.value = member.phone || '';
-      form.email.value = member.email || '';
-      form.postcode.value = member.postcode || '';
-      form.address.value = member.address || '';
-      form.address_detail.value = member.address_detail || '';
     }
+
+    // ⭐ 서버에서 최신 정보 다시 불러오기 (localStorage 값이 오래됐을 수 있음)
+    async function loadFromServer() {
+      const { data, error } = await db
+        .from('members')
+        .select('*')
+        .eq('id', member.id)
+        .maybeSingle();
+
+      if (error) { console.error(error); return; }
+      if (!data) {
+        alert('회원 정보를 찾을 수 없습니다. 다시 로그인해주세요.');
+        localStorage.removeItem('member');
+        location.href = 'login.html';
+        return;
+      }
+
+      member = data;
+      localStorage.setItem('member', JSON.stringify(data));
+
+      form.username.value = data.username || '';
+      form.name.value = data.name || '';
+      form.phone.value = data.phone || '';
+      form.email.value = data.email || '';
+      form.postcode.value = data.postcode || '';
+      form.address.value = data.address || '';
+      form.address_detail.value = data.address_detail || '';
+    }
+
+    loadFromServer();
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -87,14 +109,18 @@
       msg.style.color = '#222';
 
       const updates = {
-        password: form.password.value,
         name: form.name.value.trim(),
         phone: form.phone.value.trim(),
-        email: form.email.value.trim(),
-        postcode: form.postcode.value.trim(),
-        address: form.address.value.trim(),
-        address_detail: form.address_detail.value.trim(),
+        email: form.email.value.trim() || null,
+        postcode: form.postcode.value.trim() || null,
+        address: form.address.value.trim() || null,
+        address_detail: form.address_detail.value.trim() || null,
       };
+
+      // 비밀번호 입력했을 때만 변경
+      if (form.password.value) {
+        updates.password = form.password.value;
+      }
 
       const { error } = await db
         .from('members')
@@ -107,9 +133,15 @@
         return;
       }
 
-      localStorage.setItem('member', JSON.stringify({ ...member, ...updates }));
+      // localStorage 갱신
+      const updated = { ...member, ...updates };
+      localStorage.setItem('member', JSON.stringify(updated));
+      member = updated;
+
+      form.password.value = '';
       msg.style.color = 'green';
       msg.textContent = '✅ 저장 완료!';
+      setTimeout(() => msg.textContent = '', 2000);
     });
   </script>
 </body>
