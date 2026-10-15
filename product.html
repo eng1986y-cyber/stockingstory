@@ -68,8 +68,6 @@
             <h2 style="margin:8px 0;">${data.name}</h2>
             <p style="color:#e53935; font-weight:700; font-size:22px;">${Number(data.price).toLocaleString()}원</p>
             <p style="margin:6px 0;">${shippingLabel}</p>
-            ${data.hem_option ? `<p style="margin:6px 0; font-size:13px; color:#555;"><b>밑단선택:</b> ${data.hem_option}</p>` : ''}
-            ${data.other_option ? `<p style="margin:6px 0; font-size:13px; color:#555;"><b>기타옵션:</b> ${data.other_option}</p>` : ''}
             <p style="color:#555; margin:12px 0; white-space:pre-wrap;">${data.description || ''}</p>
             <div style="display:flex; gap:8px; margin-top:16px;">
               <button id="cart-btn"
@@ -97,8 +95,8 @@
     function showOrderModal(p, mode) {
       const colors = p.colors || [];
       const sizes = p.sizes || [];
-      const hemOption = p.hem_option || '';
-      const otherOption = p.other_option || '';
+      const hemOptions = p.hem_option || [];
+      const otherOptions = p.other_option || [];
       const isCart = mode === 'cart';
 
       const colorHtml = colors.length ? `
@@ -119,16 +117,24 @@
         </select>
       ` : '';
 
-      const hemHtml = hemOption ? `
-        <label style="font-size:13px; font-weight:600;">밑단선택</label>
-        <input name="selected_hem" value="${hemOption}" readonly
-          style="padding:10px; border:1px solid #ddd; border-radius:6px; background:#f9f9f9;">
+      // ⭐ 밑단선택 드롭다운
+      const hemHtml = hemOptions.length ? `
+        <label style="font-size:13px; font-weight:600;">밑단선택 <span style="color:red;">*</span></label>
+        <select name="selected_hem" required
+          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+          <option value="">밑단선택</option>
+          ${hemOptions.map(h => `<option>${h}</option>`).join('')}
+        </select>
       ` : '';
 
-      const otherHtml = otherOption ? `
-        <label style="font-size:13px; font-weight:600;">기타옵션</label>
-        <input name="selected_other" value="${otherOption}" readonly
-          style="padding:10px; border:1px solid #ddd; border-radius:6px; background:#f9f9f9;">
+      // ⭐ 기타옵션 드롭다운
+      const otherHtml = otherOptions.length ? `
+        <label style="font-size:13px; font-weight:600;">기타옵션 <span style="color:red;">*</span></label>
+        <select name="selected_other" required
+          style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+          <option value="">기타옵션</option>
+          ${otherOptions.map(o => `<option>${o}</option>`).join('')}
+        </select>
       ` : '';
 
       const m = getMember();
@@ -227,14 +233,17 @@
 
         if (colors.length && !selectedColor) { alert('색상을 선택하세요.'); return; }
         if (sizes.length && !selectedSize) { alert('사이즈를 선택하세요.'); return; }
+        if (hemOptions.length && !selectedHem) { alert('밑단선택을 선택하세요.'); return; }
+        if (otherOptions.length && !selectedOther) { alert('기타옵션을 선택하세요.'); return; }
 
         if (isCart) {
           const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-
           const dupIdx = cart.findIndex(it =>
             it.product_id === p.id &&
             it.selected_color === selectedColor &&
-            it.selected_size === selectedSize
+            it.selected_size === selectedSize &&
+            it.selected_hem === selectedHem &&
+            it.selected_other === selectedOther
           );
 
           if (dupIdx >= 0) {

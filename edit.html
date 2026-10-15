@@ -32,8 +32,8 @@
         <input name="main_image" placeholder="메인 이미지 URL" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
         <input name="colors" placeholder="색상 (쉼표)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
         <input name="sizes" placeholder="사이즈 (쉼표)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-        <input name="hem_option" placeholder="밑단선택 (예: 기본, 밑단줄임)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-        <input name="other_option" placeholder="기타옵션 (예: 없음, 각인가능)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <input name="hem_option" placeholder="밑단선택 (쉼표)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <input name="other_option" placeholder="기타옵션 (쉼표)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
 
         <textarea name="description" placeholder="상품 설명" style="grid-column: 1 / -1; padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
         <textarea name="detail_images" placeholder="상세 이미지 URL (줄바꿈)" style="grid-column: 1 / -1; padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
@@ -105,8 +105,8 @@
       form.detail_images.value = (data.detail_images || []).join('\n');
       form.colors.value = (data.colors || []).join(',');
       form.sizes.value = (data.sizes || []).join(',');
-      form.hem_option.value = data.hem_option || '';
-      form.other_option.value = data.other_option || '';
+      form.hem_option.value = (data.hem_option || []).join(',');
+      form.other_option.value = (data.other_option || []).join(',');
     }
 
     form.addEventListener('submit', async (e) => {
@@ -125,8 +125,8 @@
         detail_images,
         colors: parseList(form.colors.value),
         sizes: parseList(form.sizes.value),
-        hem_option: form.hem_option.value.trim() || null,
-        other_option: form.other_option.value.trim() || null,
+        hem_option: parseList(form.hem_option.value),
+        other_option: parseList(form.other_option.value),
       }).eq('id', id);
 
       if (error) {

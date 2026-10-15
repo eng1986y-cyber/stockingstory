@@ -119,7 +119,6 @@
     function showCheckoutModal(cart) {
       const subTotal = cart.reduce((s, it) => s + it.product_price * it.quantity, 0);
       const total = subTotal + globalShipping;
-
       const m = getMember();
 
       const modal = document.createElement('div');

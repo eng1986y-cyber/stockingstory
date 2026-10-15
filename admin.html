@@ -92,10 +92,8 @@
         <input name="main_image" placeholder="메인 이미지 URL" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
         <input name="colors" placeholder="색상 (쉼표: 빨강,파랑)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
         <input name="sizes" placeholder="사이즈 (쉼표: S,M,L)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-
-        <!-- ⭐ 밑단선택 / 기타옵션 자유 입력 -->
-        <input name="hem_option" placeholder="밑단선택 (예: 기본, 밑단줄임)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-        <input name="other_option" placeholder="기타옵션 (예: 없음, 각인가능)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <input name="hem_option" placeholder="밑단선택 (쉼표: 기본,밑단줄임)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <input name="other_option" placeholder="기타옵션 (쉼표: 없음,각인가능)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
 
         <textarea name="description" placeholder="상품 설명" style="grid-column: 1 / -1; padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
         <textarea name="detail_images" placeholder="상세 이미지 URL (줄바꿈)" style="grid-column: 1 / -1; padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
@@ -180,14 +178,8 @@
 
     // ===== 로고 관리 =====
     let currentLogoId = null;
-
     async function loadLogo() {
-      const { data, error } = await db
-        .from('logos').select('*')
-        .order('id', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
+      const { data, error } = await db.from('logos').select('*').order('id', { ascending: false }).limit(1).maybeSingle();
       const preview = document.getElementById('logo-preview');
       const img = document.getElementById('logo-preview-img');
       const siteNameInput = document.getElementById('logo-site-name');
@@ -200,11 +192,9 @@
         currentLogoId = null;
         return;
       }
-
       currentLogoId = data.id;
       siteNameInput.value = data.site_name || '';
       imgUrlInput.value = data.image_url || '';
-
       if (data.image_url) {
         img.src = data.image_url;
         preview.style.display = 'block';
@@ -217,16 +207,13 @@
       const msg = document.getElementById('logo-msg');
       const siteName = document.getElementById('logo-site-name').value.trim();
       const imageUrl = document.getElementById('logo-image-url').value.trim();
-
       if (!siteName && !imageUrl) {
         msg.style.color = 'crimson';
         msg.textContent = '❌ 사이트명 또는 이미지 URL 중 하나는 필요합니다.';
         return;
       }
-
       msg.textContent = '저장 중...';
       msg.style.color = '#222';
-
       let error;
       if (currentLogoId) {
         ({ error } = await db.from('logos').update({
@@ -242,7 +229,6 @@
         error = res.error;
         if (res.data) currentLogoId = res.data.id;
       }
-
       if (error) {
         msg.style.color = 'crimson';
         msg.textContent = '❌ ' + error.message;
@@ -262,7 +248,6 @@
         return;
       }
       if (!confirm('로고를 삭제할까요? (기본값으로 돌아갑니다)')) return;
-
       msg.textContent = '삭제 중...';
       msg.style.color = '#222';
       const { error } = await db.from('logos').delete().eq('id', currentLogoId);
@@ -282,19 +267,12 @@
 
     // ===== 배너 관리 =====
     let currentBannerId = null;
-
     async function loadBanner() {
-      const { data, error } = await db
-        .from('banners').select('*')
-        .order('id', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
+      const { data, error } = await db.from('banners').select('*').order('id', { ascending: false }).limit(1).maybeSingle();
       const preview = document.getElementById('banner-preview');
       const img = document.getElementById('banner-preview-img');
       const imgUrl = document.getElementById('banner-image-url');
       const linkUrl = document.getElementById('banner-link-url');
-
       if (error || !data) {
         preview.style.display = 'none';
         imgUrl.value = '';
@@ -302,11 +280,9 @@
         currentBannerId = null;
         return;
       }
-
       currentBannerId = data.id;
       imgUrl.value = data.image_url || '';
       linkUrl.value = data.link_url || '';
-
       if (data.image_url) {
         img.src = data.image_url;
         preview.style.display = 'block';
@@ -319,16 +295,13 @@
       const msg = document.getElementById('banner-msg');
       const imageUrl = document.getElementById('banner-image-url').value.trim();
       const linkUrl = document.getElementById('banner-link-url').value.trim();
-
       if (!imageUrl) {
         msg.style.color = 'crimson';
         msg.textContent = '❌ 배너 이미지 URL을 입력하세요.';
         return;
       }
-
       msg.textContent = '저장 중...';
       msg.style.color = '#222';
-
       let error;
       if (currentBannerId) {
         ({ error } = await db.from('banners').update({
@@ -344,7 +317,6 @@
         error = res.error;
         if (res.data) currentBannerId = res.data.id;
       }
-
       if (error) {
         msg.style.color = 'crimson';
         msg.textContent = '❌ ' + error.message;
@@ -364,7 +336,6 @@
         return;
       }
       if (!confirm('배너를 삭제할까요?')) return;
-
       msg.textContent = '삭제 중...';
       msg.style.color = '#222';
       const { error } = await db.from('banners').delete().eq('id', currentBannerId);
@@ -393,7 +364,6 @@
       const sm = document.getElementById('shipping-msg');
       sm.textContent = '저장 중...';
       sm.style.color = '#222';
-
       const { error } = await db.from('settings').upsert({ key: 'shipping_fee', value: String(val) });
       if (error) {
         sm.style.color = 'crimson';
@@ -427,8 +397,8 @@
         detail_images,
         colors: parseList(form.colors.value),
         sizes: parseList(form.sizes.value),
-        hem_option: form.hem_option.value.trim() || null,
-        other_option: form.other_option.value.trim() || null,
+        hem_option: parseList(form.hem_option.value),
+        other_option: parseList(form.other_option.value),
       });
 
       if (error) {
@@ -450,7 +420,6 @@
 
     async function loadAdminList() {
       const { data, error } = await db.from('products').select('*').order('created_at', { ascending: false });
-
       if (error) { listEl.innerHTML = '<p>불러오기 실패</p>'; return; }
       if (!data || data.length === 0) {
         listEl.innerHTML = '<p>등록된 상품이 없습니다.</p>';
@@ -483,8 +452,8 @@
               ${p.description ? `<div><span style="color:#888;">설명:</span> ${p.description}</div>` : ''}
               ${(p.colors && p.colors.length) ? `<div><span style="color:#888;">색상:</span> ${p.colors.join(', ')}</div>` : ''}
               ${(p.sizes && p.sizes.length) ? `<div><span style="color:#888;">사이즈:</span> ${p.sizes.join(', ')}</div>` : ''}
-              ${p.hem_option ? `<div><span style="color:#888;">밑단선택:</span> ${p.hem_option}</div>` : ''}
-              ${p.other_option ? `<div><span style="color:#888;">기타옵션:</span> ${p.other_option}</div>` : ''}
+              ${(p.hem_option && p.hem_option.length) ? `<div><span style="color:#888;">밑단선택:</span> ${p.hem_option.join(', ')}</div>` : ''}
+              ${(p.other_option && p.other_option.length) ? `<div><span style="color:#888;">기타옵션:</span> ${p.other_option.join(', ')}</div>` : ''}
             </div>
             <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:4px; margin-top:8px;">
               <a href="product.html?id=${p.id}" target="_blank" rel="noopener"
@@ -533,8 +502,8 @@
             detail_images: p.detail_images || [],
             colors: p.colors || [],
             sizes: p.sizes || [],
-            hem_option: p.hem_option || null,
-            other_option: p.other_option || null,
+            hem_option: p.hem_option || [],
+            other_option: p.other_option || [],
           });
 
           if (error) {
@@ -808,10 +777,8 @@
     async function loadMembers() {
       const el = document.getElementById('member-list');
       const { data, error } = await db.from('members').select('*').order('created_at', { ascending: false });
-
       if (error) { el.innerHTML = '<p>불러오기 실패</p>'; return; }
       if (!data || data.length === 0) { el.innerHTML = '<p>회원이 없습니다.</p>'; return; }
-
       el.innerHTML = data.map(m => `
         <div style="background:#fff; padding:10px 14px; border-radius:6px; font-size:13px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
           <div><b>${m.name}</b> (${m.username || '-'}) · ${m.phone}</div>
