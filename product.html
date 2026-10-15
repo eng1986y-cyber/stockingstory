@@ -62,7 +62,6 @@
         ? `배송비 ${globalShipping.toLocaleString()}원`
         : `<span style="color:#03c75a;">무료배송</span>`;
 
-      // 옵션 UI
       const colors = data.colors || [];
       const sizes = data.sizes || [];
       const hemOptions = data.hem_option || [];
@@ -134,21 +133,17 @@
                 <p style="color:#e53935; font-weight:700; font-size:24px; margin:0 0 8px;">
                   ${Number(data.price).toLocaleString()}원
                 </p>
-                <p style="margin:0 0 16px;">${shippingLabel}</p>
-                <p style="color:#555; margin:0 0 20px; white-space:pre-wrap; line-height:1.7;">${data.description || ''}</p>
+                <p style="margin:0 0 20px;">${shippingLabel}</p>
 
-                <!-- ⭐ 옵션들 -->
                 ${colorSel}
                 ${sizeSel}
                 ${hemSel}
                 ${otherSel}
                 ${qtyInput}
 
-                <!-- 합계 -->
                 <div id="total-preview" style="text-align:right; font-size:14px; font-weight:600; color:#e53935; line-height:1.6; margin-bottom:16px;"></div>
               </div>
 
-              <!-- 버튼 -->
               <div style="display:flex; gap:8px;">
                 <button id="cart-btn"
                   style="flex:1; padding:14px; background:#1976d2; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600; font-size:15px;">
@@ -165,7 +160,6 @@
         ${detailImgs ? `<div style="margin-top:16px;">${detailImgs}</div>` : ''}
       `;
 
-      // 합계 미리보기
       const qtyEl = document.getElementById('opt-qty');
       const totalPrev = document.getElementById('total-preview');
       const updateTotal = () => {
@@ -259,7 +253,6 @@
         return;
       }
 
-      // 바로 구매 → 주문 정보 입력 모달
       showCheckoutModal({
         product_id: p.id,
         product_code: p.product_code || '',
@@ -273,7 +266,6 @@
       });
     }
 
-    // ===== 주문 정보 입력 모달 (바로 구매) =====
     function showCheckoutModal(item) {
       const subTotal = item.product_price * item.quantity;
       const total = subTotal + globalShipping;
