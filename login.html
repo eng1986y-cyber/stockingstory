@@ -68,6 +68,22 @@
         return;
       }
 
+      // ⭐ 회원 상태 체크
+      const status = data.status || '정상';
+
+      if (status === '정지') {
+        msg.style.color = 'crimson';
+        msg.innerHTML = `❌ <b>정지된 계정</b>입니다.<br>관리자에게 문의하세요.`;
+        return;
+      }
+
+      if (status === '탈퇴') {
+        msg.style.color = 'crimson';
+        msg.textContent = '❌ 탈퇴한 계정입니다.';
+        return;
+      }
+
+      // 정상 → 로그인
       localStorage.setItem('member', JSON.stringify({
         id: data.id,
         username: data.username,
@@ -77,6 +93,7 @@
         address: data.address || '',
         address_detail: data.address_detail || '',
         postcode: data.postcode || '',
+        status: status,
       }));
 
       msg.style.color = 'green';
