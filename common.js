@@ -22,10 +22,11 @@
       flex-shrink: 0;
     }
 
-    /* ⭐ 플로팅 스크롤 버튼 */
+    /* ⭐ 플로팅 스크롤 버튼 (화면 중앙 기준, 콘텐츠 우측 가장자리) */
     #scroll-btns {
       position: fixed;
-      right: 16px;
+      left: 50%;
+      transform: translateX(calc(700px + 16px));
       bottom: 20px;
       display: flex;
       flex-direction: column;
@@ -50,11 +51,16 @@
       line-height: 1;
       transition: background .15s, transform .1s;
     }
-    #scroll-btns button:hover {
-      background: #f0f0f0;
-    }
-    #scroll-btns button:active {
-      transform: scale(.92);
+    #scroll-btns button:hover { background: #f0f0f0; }
+    #scroll-btns button:active { transform: scale(.92); }
+
+    /* 화면이 좁으면 오른쪽 끝에 붙임 */
+    @media (max-width: 1450px) {
+      #scroll-btns {
+        left: auto;
+        right: 16px;
+        transform: none;
+      }
     }
     @media (max-width: 768px) {
       #scroll-btns {
@@ -93,7 +99,7 @@ function applyPhoneAttrs() {
   });
 }
 
-// ===== ⭐ 플로팅 스크롤 버튼 생성 =====
+// ===== 플로팅 스크롤 버튼 생성 =====
 function createScrollButtons() {
   if (document.getElementById('scroll-btns')) return;
 
@@ -111,12 +117,10 @@ function createScrollButtons() {
   btnTop.addEventListener('click', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
-
   btnBottom.addEventListener('click', () => {
     window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
   });
 
-  // 페이지가 짧아서 스크롤 없으면 숨김
   const updateVisibility = () => {
     const canScroll = document.documentElement.scrollHeight > window.innerHeight + 50;
     wrap.style.display = canScroll ? 'flex' : 'none';
@@ -124,10 +128,8 @@ function createScrollButtons() {
   updateVisibility();
 
   window.addEventListener('resize', updateVisibility);
-  // DOM 변경(콘텐츠 로드) 감지
   const obs = new MutationObserver(updateVisibility);
   obs.observe(document.body, { childList: true, subtree: true });
-  // 스크롤 시에도 재확인 (이미지 lazy 로드 등)
   window.addEventListener('scroll', updateVisibility, { passive: true });
 }
 
@@ -318,7 +320,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   applyPhoneAttrs();
   new MutationObserver(applyPhoneAttrs).observe(document.body, { childList: true, subtree: true });
 
-  // ⭐ 플로팅 스크롤 버튼 생성
+  // 플로팅 스크롤 버튼 생성
   createScrollButtons();
 
   // 정지 회원 자동 로그아웃
