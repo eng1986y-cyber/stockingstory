@@ -95,7 +95,6 @@
         <input name="hem_option" placeholder="밑단선택 (쉼표: 기본,밑단줄임)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
         <input name="other_option" placeholder="기타옵션 (쉼표: 없음,각인가능)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
 
-        <textarea name="description" placeholder="상품 설명" style="grid-column: 1 / -1; padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
         <textarea name="detail_images" placeholder="상세 이미지 URL (줄바꿈)" style="grid-column: 1 / -1; padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
         <button type="submit" style="grid-column: 1 / -1; padding:12px; background:#222; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">등록하기</button>
       </form>
@@ -392,7 +391,6 @@
         product_code: form.product_code.value.trim() || null,
         name: form.name.value.trim(),
         price: Number(form.price.value),
-        description: form.description.value.trim(),
         main_image: form.main_image.value.trim(),
         detail_images,
         colors: parseList(form.colors.value),
@@ -449,7 +447,6 @@
           <div class="product-detail" style="display:none; padding:0 10px 10px; font-size:12px; line-height:1.7; color:#333; border-top:1px solid #eee;">
             <div style="padding-top:8px;">
               ${p.product_code ? `<div><span style="color:#888;">제품번호:</span> ${p.product_code}</div>` : ''}
-              ${p.description ? `<div><span style="color:#888;">설명:</span> ${p.description}</div>` : ''}
               ${(p.colors && p.colors.length) ? `<div><span style="color:#888;">색상:</span> ${p.colors.join(', ')}</div>` : ''}
               ${(p.sizes && p.sizes.length) ? `<div><span style="color:#888;">사이즈:</span> ${p.sizes.join(', ')}</div>` : ''}
               ${(p.hem_option && p.hem_option.length) ? `<div><span style="color:#888;">밑단선택:</span> ${p.hem_option.join(', ')}</div>` : ''}
@@ -497,7 +494,6 @@
             product_code: p.product_code ? p.product_code + '-C' : null,
             name: p.name + ' (복사)',
             price: p.price,
-            description: p.description,
             main_image: p.main_image,
             detail_images: p.detail_images || [],
             colors: p.colors || [],

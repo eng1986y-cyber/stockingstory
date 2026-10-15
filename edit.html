@@ -35,7 +35,6 @@
         <input name="hem_option" placeholder="밑단선택 (쉼표)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
         <input name="other_option" placeholder="기타옵션 (쉼표)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
 
-        <textarea name="description" placeholder="상품 설명" style="grid-column: 1 / -1; padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
         <textarea name="detail_images" placeholder="상세 이미지 URL (줄바꿈)" style="grid-column: 1 / -1; padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
 
         <div style="grid-column: 1 / -1; display:flex; gap:8px;">
@@ -100,7 +99,6 @@
       form.product_code.value = data.product_code || '';
       form.name.value = data.name;
       form.price.value = data.price;
-      form.description.value = data.description || '';
       form.main_image.value = data.main_image;
       form.detail_images.value = (data.detail_images || []).join('\n');
       form.colors.value = (data.colors || []).join(',');
@@ -120,7 +118,6 @@
         product_code: form.product_code.value.trim() || null,
         name: form.name.value.trim(),
         price: Number(form.price.value),
-        description: form.description.value.trim(),
         main_image: form.main_image.value.trim(),
         detail_images,
         colors: parseList(form.colors.value),
