@@ -92,7 +92,21 @@
         <input name="main_image" placeholder="메인 이미지 URL" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
         <input name="colors" placeholder="색상 (쉼표: 빨강,파랑)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
         <input name="sizes" placeholder="사이즈 (쉼표: S,M,L)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-        <input name="extra_options" placeholder="추가옵션 (쉼표: 각인,포장)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+
+        <!-- ⭐ 추가옵션 UI 변경: 입력 + 추가 버튼 -->
+        <div style="grid-column: 1 / -1;">
+          <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">추가옵션</label>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <input id="extra-option-input" placeholder="추가옵션 입력 (예: 각인)"
+              style="flex:1; min-width:150px; padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <button type="button" id="extra-option-add"
+              style="padding:10px 20px; background:#03c75a; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600; white-space:nowrap;">
+              + 추가
+            </button>
+          </div>
+          <div id="extra-option-list" style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;"></div>
+        </div>
+
         <textarea name="description" placeholder="상품 설명" style="grid-column: 1 / -1; padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
         <textarea name="detail_images" placeholder="상세 이미지 URL (줄바꿈)" style="grid-column: 1 / -1; padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
         <button type="submit" style="grid-column: 1 / -1; padding:12px; background:#222; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">등록하기</button>
@@ -407,6 +421,51 @@
       }
     });
 
+    // ===== 추가옵션 UI =====
+    let extraOptions = [];
+
+    function renderExtraOptions() {
+      const el = document.getElementById('extra-option-list');
+      if (extraOptions.length === 0) {
+        el.innerHTML = '<span style="font-size:12px; color:#aaa;">추가된 옵션이 없습니다.</span>';
+        return;
+      }
+      el.innerHTML = extraOptions.map((opt, i) => `
+        <span style="display:inline-flex; align-items:center; gap:6px; padding:6px 10px; background:#e3f2fd; border:1px solid #90caf9; border-radius:16px; font-size:13px;">
+          ${opt}
+          <button type="button" data-idx="${i}" class="remove-extra"
+            style="background:none; border:0; color:#e53935; cursor:pointer; font-size:14px; font-weight:700; padding:0; line-height:1;">
+            ×
+          </button>
+        </span>
+      `).join('');
+
+      el.querySelectorAll('.remove-extra').forEach(btn => {
+        btn.addEventListener('click', () => {
+          extraOptions.splice(Number(btn.dataset.idx), 1);
+          renderExtraOptions();
+        });
+      });
+    }
+
+    document.getElementById('extra-option-add').addEventListener('click', () => {
+      const input = document.getElementById('extra-option-input');
+      const val = input.value.trim();
+      if (!val) { alert('추가옵션을 입력하세요.'); return; }
+      if (extraOptions.includes(val)) { alert('이미 추가된 옵션입니다.'); return; }
+      extraOptions.push(val);
+      input.value = '';
+      input.focus();
+      renderExtraOptions();
+    });
+
+    document.getElementById('extra-option-input').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('extra-option-add').click();
+      }
+    });
+
     // ===== 상품 등록 =====
     const form = document.getElementById('product-form');
     const msg = document.getElementById('msg');
@@ -429,7 +488,7 @@
         detail_images,
         colors: parseList(form.colors.value),
         sizes: parseList(form.sizes.value),
-        extra_options: parseList(form.extra_options.value),
+        extra_options: extraOptions,
       });
 
       if (error) {
@@ -439,6 +498,8 @@
         msg.style.color = 'green';
         msg.textContent = '✅ 등록 완료!';
         form.reset();
+        extraOptions = [];
+        renderExtraOptions();
         loadAdminList();
       }
     });
@@ -817,6 +878,9 @@
     }
 
     checkSession();
+
+    // 추가옵션 초기 렌더
+    renderExtraOptions();
   </script>
 </body>
 </html>
