@@ -83,9 +83,7 @@
       gap: 6px 16px;
       justify-content: center;
     }
-    #app-footer .footer-item {
-      color: #666;
-    }
+    #app-footer .footer-item { color: #666; }
     #app-footer .footer-text {
       margin-top: 12px;
       padding-top: 12px;
@@ -338,9 +336,9 @@ function renderHeader(current) {
     flex-shrink: 0;
   `;
 
+  // ⭐ 이름은 별도, 버튼들만 나열
   const userBtns = m
     ? `
-      <span style="color:#555; font-size:13px; padding:0 6px; white-space:nowrap;">${m.name}님</span>
       <a href="mypage.html" data-nav="mypage" style="${btnStyle(current === 'mypage')}">내정보</a>
       <a href="#" id="logout-btn" style="${btnStyle(false)}">로그아웃</a>
     `
@@ -348,6 +346,11 @@ function renderHeader(current) {
       <a href="login.html" data-nav="login" style="${btnStyle(current === 'login')}">로그인</a>
       <a href="signup.html" data-nav="signup" style="${btnStyle(current === 'signup')}">회원가입</a>
     `;
+
+  // ⭐ 이름 줄 (로그인 상태일 때만, 버튼 위에 별도로)
+  const nameRow = m
+    ? `<div class="header-name-row" style="text-align:right; font-size:13px; color:#555; margin-bottom:6px;">${m.name}님</div>`
+    : '';
 
   const logoHtml = logoImageUrl
     ? `<a href="index.html" style="display:inline-block;"><img src="${logoImageUrl}" alt="${siteName}" style="height:40px; max-width:240px; object-fit:contain; display:block; margin:0 auto;"></a>`
@@ -357,6 +360,7 @@ function renderHeader(current) {
     <header style="background:#fff; border-bottom:1px solid #eee; padding:14px 16px;">
       <div style="max-width:1400px; margin:0 auto;">
         <div style="margin-bottom:12px; text-align:center;">${logoHtml}</div>
+        ${nameRow}
         <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:flex-end;">
           <a href="cart.html" data-nav="cart" style="${btnStyle(current === 'cart')}">장바구니 <span id="cart-count" style="margin-left:4px;">0</span></a>
           <a href="orders.html" data-nav="orders" style="${btnStyle(current === 'orders')}">주문조회</a>
