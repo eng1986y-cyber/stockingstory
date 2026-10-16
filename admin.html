@@ -7,19 +7,15 @@
   <link rel="stylesheet" href="style.css">
   <script src="common.js"></script>
   <style>
-    /* ⭐ admin은 무조건 밝은 톤 강제 */
     html, body {
       background: #f4f6f8 !important;
       color: #1f2937 !important;
     }
     * { box-sizing: border-box; }
-
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       margin: 0;
     }
-
-    /* 상단 헤더 */
     .admin-header {
       background: #ffffff !important;
       border-bottom: 1px solid #e5e7eb;
@@ -32,184 +28,68 @@
       z-index: 100;
     }
     .admin-header .logo {
-      font-size: 18px;
-      font-weight: 700;
-      color: #111827 !important;
-      text-decoration: none;
-      letter-spacing: -0.3px;
+      font-size: 18px; font-weight: 700; color: #111827 !important;
+      text-decoration: none; letter-spacing: -0.3px;
     }
     .admin-header .logo .badge {
-      background: #111827;
-      color: #fff;
-      font-size: 11px;
-      font-weight: 600;
-      padding: 3px 8px;
-      border-radius: 4px;
-      margin-left: 8px;
-      vertical-align: middle;
+      background: #111827; color: #fff; font-size: 11px; font-weight: 600;
+      padding: 3px 8px; border-radius: 4px; margin-left: 8px; vertical-align: middle;
     }
     .admin-header .logout-btn {
-      padding: 8px 16px;
-      background: #f3f4f6;
-      color: #374151;
-      border: 1px solid #e5e7eb;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 500;
-      transition: all .15s;
-      font-family: inherit;
+      padding: 8px 16px; background: #f3f4f6; color: #374151;
+      border: 1px solid #e5e7eb; border-radius: 6px; cursor: pointer;
+      font-size: 13px; font-weight: 500; transition: all .15s; font-family: inherit;
     }
-    .admin-header .logout-btn:hover {
-      background: #e5e7eb;
-      color: #111827;
-    }
+    .admin-header .logout-btn:hover { background: #e5e7eb; color: #111827; }
 
-    /* 레이아웃 */
-    .admin-layout {
-      display: flex;
-      gap: 24px;
-      max-width: 1600px;
-      margin: 0 auto;
-      padding: 24px;
-    }
-
-    /* 사이드바 */
-    .admin-sidebar {
-      width: 200px;
-      flex-shrink: 0;
-      position: sticky;
-      top: 88px;
-      height: fit-content;
-    }
-    .admin-sidebar .nav-group {
-      background: #ffffff;
-      border-radius: 10px;
-      padding: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,.04);
-    }
+    .admin-layout { display: flex; gap: 24px; max-width: 1600px; margin: 0 auto; padding: 24px; }
+    .admin-sidebar { width: 200px; flex-shrink: 0; position: sticky; top: 88px; height: fit-content; }
+    .admin-sidebar .nav-group { background: #ffffff; border-radius: 10px; padding: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
     .admin-sidebar .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      color: #4b5563;
-      font-size: 14px;
-      font-weight: 500;
-      transition: all .15s;
-      border: 0;
-      background: none;
-      width: 100%;
-      text-align: left;
-      font-family: inherit;
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 6px; cursor: pointer;
+      color: #4b5563; font-size: 14px; font-weight: 500;
+      transition: all .15s; border: 0; background: none; width: 100%;
+      text-align: left; font-family: inherit;
     }
     .admin-sidebar .nav-item:hover { background: #f3f4f6; color: #111827; }
     .admin-sidebar .nav-item.active { background: #111827; color: #ffffff; }
     .admin-sidebar .nav-icon { font-size: 16px; width: 20px; text-align: center; }
 
-    /* 컨텐츠 */
     .admin-content { flex: 1; min-width: 0; }
-
-    /* 섹션 */
     .admin-section { display: none; }
     .admin-section.active { display: block; animation: fadeIn .2s ease; }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(4px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* 타이틀 */
-    .page-title {
-      font-size: 22px;
-      font-weight: 700;
-      color: #111827 !important;
-      margin: 0 0 6px;
-      letter-spacing: -0.5px;
-    }
-    .page-subtitle {
-      font-size: 13px;
-      color: #6b7280 !important;
-      margin: 0 0 20px;
-    }
+    .page-title { font-size: 22px; font-weight: 700; color: #111827 !important; margin: 0 0 6px; letter-spacing: -0.5px; }
+    .page-subtitle { font-size: 13px; color: #6b7280 !important; margin: 0 0 20px; }
 
-    /* 카드 */
-    .card {
-      background: #ffffff !important;
-      border-radius: 12px;
-      padding: 24px;
-      box-shadow: 0 1px 3px rgba(0,0,0,.04);
-      margin-bottom: 16px;
-    }
-    .card-title {
-      font-size: 15px;
-      font-weight: 600;
-      color: #111827 !important;
-      margin: 0 0 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .card-title .hint {
-      font-size: 12px;
-      font-weight: 400;
-      color: #9ca3af;
-    }
+    .card { background: #ffffff !important; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,.04); margin-bottom: 16px; }
+    .card-title { font-size: 15px; font-weight: 600; color: #111827 !important; margin: 0 0 16px; display: flex; align-items: center; gap: 8px; }
+    .card-title .hint { font-size: 12px; font-weight: 400; color: #9ca3af; }
 
-    /* 입력 필드 통일 */
-    .input,
-    .card input,
-    .card textarea {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      font-size: 14px;
-      font-family: inherit;
-      color: #111827 !important;
-      background: #ffffff !important;
-      transition: all .15s;
-      box-sizing: border-box;
+    .input, .card input, .card textarea {
+      width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px;
+      font-size: 14px; font-family: inherit; color: #111827 !important;
+      background: #ffffff !important; transition: all .15s; box-sizing: border-box;
     }
-    .card input:focus,
-    .card textarea:focus {
-      outline: none;
-      border-color: #111827;
+    .card input:focus, .card textarea:focus {
+      outline: none; border-color: #111827;
       box-shadow: 0 0 0 3px rgba(17,24,39,.08);
     }
-    .card input[readonly] {
-      background: #f9fafb !important;
-      color: #6b7280 !important;
-      cursor: not-allowed;
-    }
+    .card input[readonly] { background: #f9fafb !important; color: #6b7280 !important; cursor: not-allowed; }
     .card textarea { resize: vertical; min-height: 70px; }
 
-    /* 그리드 폼 */
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 10px;
-    }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
     .form-grid .full { grid-column: 1 / -1; }
     .form-row { display: flex; gap: 8px; flex-wrap: wrap; }
     .form-row > * { flex: 1; min-width: 150px; }
 
-    /* 버튼 */
     .btn {
-      padding: 10px 18px;
-      border-radius: 8px;
-      border: 0;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
-      font-family: inherit;
-      transition: all .15s;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      text-decoration: none;
+      padding: 10px 18px; border-radius: 8px; border: 0; cursor: pointer;
+      font-size: 14px; font-weight: 600; font-family: inherit;
+      transition: all .15s; display: inline-flex; align-items: center; justify-content: center;
+      gap: 6px; text-decoration: none;
     }
     .btn-primary { background: #111827; color: #fff; }
     .btn-primary:hover { background: #1f2937; transform: translateY(-1px); }
@@ -221,143 +101,72 @@
     .btn-secondary:hover { background: #e5e7eb; }
     .btn-sm { padding: 6px 12px; font-size: 12px; }
 
-    /* 메시지 */
     .msg { font-size: 13px; font-weight: 600; margin-top: 12px; }
     .msg.success { color: #059669; }
     .msg.error { color: #dc2626; }
 
-    /* 상품 등록 + 목록 */
     .product-layout { display: flex; gap: 16px; align-items: flex-start; }
     .product-left { flex: 0 0 460px; max-width: 100%; }
     .product-right { flex: 1 1 auto; min-width: 0; }
 
     #admin-list { display: grid; grid-template-columns: 1fr; gap: 8px; }
 
-    .product-item {
-      background: #fff !important;
-      border: 1px solid #f3f4f6;
-      border-radius: 10px;
-      overflow: hidden;
-      transition: all .15s;
-    }
+    .product-item { background: #fff !important; border: 1px solid #f3f4f6; border-radius: 10px; overflow: hidden; transition: all .15s; }
     .product-item:hover { border-color: #e5e7eb; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
-    .product-summary {
-      padding: 12px; display: flex; align-items: center; gap: 12px; cursor: pointer;
-    }
-    .product-summary img {
-      width: 44px; height: 44px;
-      object-fit: cover;
-      border-radius: 8px;
-      flex-shrink: 0;
-      background: #f3f4f6;
-    }
+    .product-summary { padding: 12px; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+    .product-summary img { width: 44px; height: 44px; object-fit: cover; border-radius: 8px; flex-shrink: 0; background: #f3f4f6; }
     .product-summary .info { flex: 1; min-width: 0; }
-    .product-summary .name {
-      font-size: 14px; font-weight: 600; color: #111827 !important;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
+    .product-summary .name { font-size: 14px; font-weight: 600; color: #111827 !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .product-summary .price { color: #e53935; font-weight: 700; font-size: 13px; margin-top: 2px; }
     .product-arrow { color: #9ca3af; font-size: 12px; transition: transform .2s; }
     .product-detail {
-      display: none;
-      padding: 0 12px 12px;
-      font-size: 13px; line-height: 1.7;
-      color: #4b5563 !important;
-      border-top: 1px solid #f3f4f6;
+      display: none; padding: 0 12px 12px; font-size: 13px; line-height: 1.7;
+      color: #4b5563 !important; border-top: 1px solid #f3f4f6;
     }
     .product-detail .line { padding-top: 10px; }
     .product-detail .label { color: #9ca3af; margin-right: 4px; }
     .product-detail .actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 10px; }
 
-    /* 주문 카드 */
     .order-item {
-      background: #fff !important;
-      border-radius: 10px;
-      border-left: 4px solid #f59e0b;
-      overflow: hidden;
-      box-shadow: 0 1px 3px rgba(0,0,0,.04);
-      margin-bottom: 8px;
+      background: #fff !important; border-radius: 10px; border-left: 4px solid #f59e0b;
+      overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.04); margin-bottom: 8px;
     }
-    .order-summary {
-      padding: 14px 16px;
-      display: flex; justify-content: space-between; align-items: center;
-      gap: 10px; cursor: pointer; flex-wrap: wrap;
-    }
-    .order-status-badge {
-      color: #fff; padding: 3px 10px; border-radius: 12px;
-      font-size: 11px; font-weight: 600; white-space: nowrap;
-    }
+    .order-summary { padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px; cursor: pointer; flex-wrap: wrap; }
+    .order-status-badge { color: #fff; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; white-space: nowrap; }
     .order-num { font-size: 13px; color: #1976d2; font-weight: 600; }
-    .order-detail {
-      display: none; padding: 0 16px 16px;
-      font-size: 13px; line-height: 1.8;
-      color: #374151 !important;
-      border-top: 1px solid #f3f4f6;
-    }
+    .order-detail { display: none; padding: 0 16px 16px; font-size: 13px; line-height: 1.8; color: #374151 !important; border-top: 1px solid #f3f4f6; }
 
-    /* 회원 카드 */
     .member-item {
-      background: #fff !important;
-      padding: 14px 16px;
-      border-radius: 10px;
-      box-shadow: 0 1px 3px rgba(0,0,0,.04);
-      display: flex; justify-content: space-between; align-items: center;
-      gap: 10px; flex-wrap: wrap;
+      background: #fff !important; padding: 14px 16px; border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.04); display: flex; justify-content: space-between;
+      align-items: center; gap: 10px; flex-wrap: wrap;
     }
-    .member-status-badge {
-      padding: 2px 8px; border-radius: 10px;
-      font-size: 11px; font-weight: 600; color: #fff;
-    }
+    .member-status-badge { padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; color: #fff; }
 
     #admin-pagination { display: flex; justify-content: center; gap: 6px; margin-top: 14px; flex-wrap: wrap; }
 
-    /* 미리보기 */
-    .preview-box {
-      margin-top: 12px; padding: 12px;
-      background: #f9fafb !important;
-      border-radius: 8px;
-      border: 1px dashed #e5e7eb;
-    }
+    .preview-box { margin-top: 12px; padding: 12px; background: #f9fafb !important; border-radius: 8px; border: 1px dashed #e5e7eb; }
     .preview-box .preview-label { font-size: 12px; color: #6b7280; margin-bottom: 6px; }
 
-    /* 로그인 */
     .login-wrap {
-      max-width: 380px; margin: 80px auto;
-      background: #fff !important;
-      padding: 32px;
-      border-radius: 12px;
-      box-shadow: 0 4px 16px rgba(0,0,0,.06);
+      max-width: 380px; margin: 80px auto; background: #fff !important;
+      padding: 32px; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,.06);
     }
-    .login-wrap h2 {
-      font-size: 22px; font-weight: 700;
-      color: #111827 !important;
-      margin: 0 0 6px;
-      letter-spacing: -0.5px;
-    }
+    .login-wrap h2 { font-size: 22px; font-weight: 700; color: #111827 !important; margin: 0 0 6px; letter-spacing: -0.5px; }
     .login-wrap p.sub { font-size: 13px; color: #6b7280 !important; margin: 0 0 24px; }
     .login-wrap form { display: grid; gap: 10px; }
     .login-wrap input {
-      padding: 12px 14px;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      font-size: 14px; font-family: inherit;
-      width: 100%; box-sizing: border-box;
-      background: #fff !important;
-      color: #111827 !important;
+      padding: 12px 14px; border: 1px solid #e5e7eb; border-radius: 8px;
+      font-size: 14px; font-family: inherit; width: 100%; box-sizing: border-box;
+      background: #fff !important; color: #111827 !important;
     }
-    .login-wrap input:focus {
-      outline: none; border-color: #111827;
-      box-shadow: 0 0 0 3px rgba(17,24,39,.08);
-    }
+    .login-wrap input:focus { outline: none; border-color: #111827; box-shadow: 0 0 0 3px rgba(17,24,39,.08); }
     .login-wrap button {
-      padding: 12px; background: #111827; color: #fff;
-      border: 0; border-radius: 8px; cursor: pointer;
-      font-size: 14px; font-weight: 600; font-family: inherit;
-      margin-top: 4px;
+      padding: 12px; background: #111827; color: #fff; border: 0; border-radius: 8px;
+      cursor: pointer; font-size: 14px; font-weight: 600; font-family: inherit; margin-top: 4px;
     }
     .login-wrap button:hover { background: #1f2937; }
 
-    /* 반응형 */
     @media (max-width: 1000px) {
       .admin-layout { flex-direction: column; padding: 16px; }
       .admin-sidebar { width: 100%; position: static; }
@@ -366,7 +175,6 @@
       .product-layout { flex-direction: column; }
       .product-left { flex: 1 1 auto; }
     }
-
     @media (max-width: 600px) {
       .admin-header { padding: 12px 16px; }
       .admin-layout { padding: 12px; gap: 16px; }
@@ -393,9 +201,7 @@
   <!-- 관리자 -->
   <div id="admin-screen" style="display:none;">
     <header class="admin-header">
-      <a href="index.html" class="logo">
-        🛍️ 심플몰 <span class="badge">ADMIN</span>
-      </a>
+      <a href="index.html" class="logo">🛍️ 심플몰 <span class="badge">ADMIN</span></a>
       <button id="logout-btn" class="logout-btn">로그아웃</button>
     </header>
 
@@ -429,6 +235,7 @@
                   <input name="sizes" placeholder="사이즈 (쉼표: S,M,L)">
                   <input name="hem_option" placeholder="밑단선택 (쉼표)">
                   <input name="other_option" placeholder="기타옵션 (쉼표)">
+                  <input name="min_qty" type="number" min="1" value="6" placeholder="최소 주문수량 (기본 6)">
                   <textarea name="detail_images" class="full" placeholder="상세 이미지 URL (줄바꿈)"></textarea>
                   <button type="submit" class="btn btn-primary full">상품 등록</button>
                 </form>
@@ -438,10 +245,7 @@
 
             <div class="product-right">
               <div class="card">
-                <div class="card-title">
-                  📋 등록된 상품
-                  <span id="product-count" class="hint"></span>
-                </div>
+                <div class="card-title">📋 등록된 상품 <span id="product-count" class="hint"></span></div>
                 <div id="admin-list">로딩중...</div>
                 <div id="admin-pagination"></div>
               </div>
@@ -508,12 +312,12 @@
           <div class="card">
             <div class="card-title">📄 사이트 하단 정보 (Footer)</div>
             <div class="form-grid" style="grid-template-columns: 1fr;">
-              <input id="footer-owner" placeholder="상호명 / 대표자 (예: STK스토리 / 홍길동)">
-              <input id="footer-phone" placeholder="연락처 (예: 010-0000-0000)">
-              <input id="footer-email" placeholder="이메일 (예: help@stk.com)">
-              <input id="footer-address" placeholder="주소 (예: 서울시 강남구 ...)">
-              <input id="footer-business" placeholder="사업자등록번호 (예: 123-45-67890)">
-              <textarea id="footer-text" placeholder="추가 안내문 (저작권, 통신판매업 신고번호 등)"></textarea>
+              <input id="footer-owner" placeholder="상호명 / 대표자">
+              <input id="footer-phone" placeholder="연락처">
+              <input id="footer-email" placeholder="이메일">
+              <input id="footer-address" placeholder="주소">
+              <input id="footer-business" placeholder="사업자등록번호">
+              <textarea id="footer-text" placeholder="추가 안내문"></textarea>
               <button id="save-footer" class="btn btn-success">저장</button>
             </div>
             <p id="footer-msg" class="msg"></p>
@@ -557,8 +361,7 @@
       "https://alpdhgcipjeekzrpxlbh.supabase.co",
       "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya"
     );
-
-    // ⭐ admin은 다크 클래스 강제 제거
+    // admin은 다크 클래스 강제 제거
     document.addEventListener('DOMContentLoaded', () => {
       document.body.classList.remove('dark');
       document.documentElement.classList.remove('dark');
@@ -571,7 +374,6 @@
     const loginForm = document.getElementById('login-form');
     const loginMsg = document.getElementById('login-msg');
 
-    // 탭 네비게이션
     document.querySelectorAll('.admin-sidebar .nav-item').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.admin-sidebar .nav-item').forEach(b => b.classList.remove('active'));
@@ -586,22 +388,15 @@
       if (session) showAdmin();
       else showLogin();
     }
-
     function showLogin() {
       loginScreen.style.display = 'block';
       adminScreen.style.display = 'none';
     }
-
     function showAdmin() {
       loginScreen.style.display = 'none';
       adminScreen.style.display = 'block';
-      loadLogo();
-      loadFooter();
-      loadBanner();
-      loadShippingSetting();
-      loadAdminList();
-      loadOrders();
-      loadMembers();
+      loadLogo(); loadFooter(); loadBanner(); loadShippingSetting();
+      loadAdminList(); loadOrders(); loadMembers();
     }
 
     loginForm.addEventListener('submit', async (e) => {
@@ -634,7 +429,6 @@
       const img = document.getElementById('logo-preview-img');
       const siteNameInput = document.getElementById('logo-site-name');
       const imgUrlInput = document.getElementById('logo-image-url');
-
       if (error || !data) {
         preview.style.display = 'none';
         siteNameInput.value = '';
@@ -841,12 +635,10 @@
       }
     });
 
-    // ===== 배송비 =====
-    async function loadShippingSetting() {
+    // ===== 배송비 =====    async function loadShippingSetting() {
       const { data } = await db.from('settings').select('value').eq('key', 'shipping_fee').maybeSingle();
       document.getElementById('global-shipping').value = data ? (data.value || 0) : 0;
     }
-
     document.getElementById('save-shipping').addEventListener('click', async () => {
       const val = Number(document.getElementById('global-shipping').value) || 0;
       const sm = document.getElementById('shipping-msg');
@@ -885,6 +677,7 @@
         sizes: parseList(form.sizes.value),
         hem_option: parseList(form.hem_option.value),
         other_option: parseList(form.other_option.value),
+        min_qty: Number(form.min_qty.value) || 6,
       });
 
       if (error) {
@@ -894,6 +687,8 @@
         msg.className = 'msg success';
         msg.textContent = '✅ 등록 완료!';
         form.reset();
+        // 리셋 후 min_qty 기본값 재설정
+        form.min_qty.value = 6;
         loadAdminList();
       }
     });
@@ -941,6 +736,7 @@
               ${(p.sizes && p.sizes.length) ? `<div><span class="label">사이즈</span>${p.sizes.join(', ')}</div>` : ''}
               ${(p.hem_option && p.hem_option.length) ? `<div><span class="label">밑단</span>${p.hem_option.join(', ')}</div>` : ''}
               ${(p.other_option && p.other_option.length) ? `<div><span class="label">기타</span>${p.other_option.join(', ')}</div>` : ''}
+              <div><span class="label">최소주문수량</span>${p.min_qty || 6}개</div>
             </div>
             <div class="actions">
               <a href="product.html?id=${p.id}" target="_blank" class="btn btn-secondary btn-sm">보기</a>
@@ -986,6 +782,7 @@
             sizes: p.sizes || [],
             hem_option: p.hem_option || [],
             other_option: p.other_option || [],
+            min_qty: p.min_qty || 6,
           });
 
           if (error) {
@@ -1261,7 +1058,6 @@
     function renderMembers(filterText) {
       const el = document.getElementById('member-list');
       let list = allMembers;
-
       if (filterText) {
         const f = filterText.toLowerCase();
         list = allMembers.filter(m =>
@@ -1271,16 +1067,13 @@
           (m.email && m.email.toLowerCase().includes(f))
         );
       }
-
       if (list.length === 0) {
         el.innerHTML = '<p style="text-align:center; color:#9ca3af; padding:20px;">해당하는 회원이 없습니다</p>';
         return;
       }
-
       el.innerHTML = list.map(m => {
         const status = m.status || '정상';
         const statusColor = status === '정상' ? '#059669' : status === '정지' ? '#f59e0b' : '#dc2626';
-
         return `
           <div class="member-item" style="border-left:4px solid ${statusColor};">
             <div style="flex:1; min-width:0;">
@@ -1309,13 +1102,11 @@
           if (m) showMemberEditModal(m);
         });
       });
-
       el.querySelectorAll('.member-del-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
           const m = allMembers.find(x => String(x.id) === String(btn.dataset.id));
           if (!m) return;
           if (!confirm(`"${m.name}" 회원을 완전히 삭제할까요?\n(복구 불가)`)) return;
-
           const { error } = await db.from('members').delete().eq('id', m.id);
           if (error) alert('삭제 실패: ' + error.message);
           else { alert('✅ 회원이 삭제되었습니다.'); loadMembers(); }

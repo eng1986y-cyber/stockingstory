@@ -40,28 +40,15 @@
       globalShipping = data ? Number(data.value) || 0 : 0;
     }
 
-    // ⭐ 주문 규칙:
-    // - 장바구니에 1개 품목만 → 총 6개 이상
-    // - 여러 품목 → 품목당 2개 이상, 총 6개 이상
+    // ⭐ 총 6개 규칙: 상품별 min_qty 무시하고 총합 6개 이상이면 OK
+    const TOTAL_MIN = 6;
     function validateOrder(cart) {
-      const itemKinds = cart.length;
       const totalQty = cart.reduce((s, it) => s + it.quantity, 0);
-
-      if (totalQty < 6) {
-        return { ok: false, msg: '총 주문 수량은 최소 6개 이상이어야 합니다.' };
-      }
-
-      if (itemKinds === 1) {
-        if (cart[0].quantity < 6) {
-          return { ok: false, msg: '단일 품목 주문 시 최소 6개 이상 주문해야 합니다.' };
-        }
-      } else {
-        // 여러 품목: 각 품목 최소 2개
-        for (const it of cart) {
-          if (it.quantity < 2) {
-            return { ok: false, msg: `여러 품목 주문 시 품목당 최소 2개 이상이어야 합니다.\n"${it.product_name}" 수량을 늘려주세요.` };
-          }
-        }
+      if (totalQty < TOTAL_MIN) {
+        return {
+          ok: false,
+          msg: `⚠️ 최소 주문수량은 총 ${TOTAL_MIN}개입니다.\n현재: ${totalQty}개 (${TOTAL_MIN - totalQty}개 부족)\n\n수량을 늘려주세요.`
+        };
       }
       return { ok: true };
     }
@@ -100,17 +87,15 @@
 
       const subTotal = cart.reduce((s, it) => s + it.product_price * it.quantity, 0);
       const total = subTotal + globalShipping;
-
       const totalQty = cart.reduce((s, it) => s + it.quantity, 0);
-      const ruleText = cart.length === 1
-        ? `단일 품목 (최소 6개)`
-        : `묶음 구매 (품목당 최소 2개, 총 최소 6개)`;
 
       summaryEl.style.display = 'block';
       summaryEl.innerHTML = `
         <div style="background:#151515; border:1px solid #222; padding:20px; border-radius:12px; text-align:right; font-size:14px; line-height:1.8; color:#e5e7eb;">
-          <div style="color:#888; font-size:12px; text-align:left; margin-bottom:12px; padding:8px 12px; background:#0f0f0f; border-radius:6px; border-left:3px solid #f59e0b;">
-            📦 주문 규칙: ${ruleText} · 현재 총 <b style="color:#e5e7eb;">${totalQty}개</b>
+          <div style="color:#888; font-size:12px; text-align:left; margin-bottom:12px; padding:8px 12px; background:#0f0f0f; border-radius:6px; border-left:3px solid ${totalQty >= TOTAL_MIN ? '#10b981' : '#f59e0b'};">
+            📦 주문 규칙: 총 ${TOTAL_MIN}개 이상 주문해야 합니다.<br>
+            현재 총 <b style="color:${totalQty >= TOTAL_MIN ? '#10b981' : '#f59e0b'};">${totalQty}개</b>
+            ${totalQty < TOTAL_MIN ? ` <span style="color:#f59e0b;">(${TOTAL_MIN - totalQty}개 부족)</span>` : ' <span style="color:#10b981;">✅ 주문 가능</span>'}
           </div>
           <div>상품 합계: <b>${subTotal.toLocaleString()}원</b></div>
           <div>배송비: <b>${globalShipping > 0 ? globalShipping.toLocaleString() + '원' : '무료'}</b></div>
@@ -150,12 +135,8 @@
     }
 
     function showCheckoutModal(cart) {
-      // ⭐ 주문 규칙 검증
       const v = validateOrder(cart);
-      if (!v.ok) {
-        alert('⚠️ ' + v.msg);
-        return;
-      }
+      if (!v.ok) { alert(v.msg); return; }
 
       const subTotal = cart.reduce((s, it) => s + it.product_price * it.quantity, 0);
       const total = subTotal + globalShipping;
@@ -169,7 +150,7 @@
       modal.innerHTML = `
         <div style="background:#151515; border:1px solid #222; padding:24px; border-radius:12px; width:100%; max-width:460px; max-height:90vh; overflow-y:auto; color:#e5e7eb;">
           <h2 style="margin:0 0 16px; font-size:18px; color:#fff;">주문 정보 입력</h2>
-          <form id="checkout-form" style="display:grid; gap:10px; background:none; padding:0; border:0; border-radius:0; max-width:none;">
+          <form id="checkout-form" style="display:grid; gap:10px; background:none; padding:0; border:0; max-width:none;">
             <label style="${labelStyle}">주문자 이름 *</label>
             <input name="customer_name" required value="${m?.name || ''}" style="${inputStyle}">
             <label style="${labelStyle}">연락처 *</label>

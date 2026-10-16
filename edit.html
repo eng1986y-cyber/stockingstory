@@ -6,45 +6,106 @@
   <title>상품 수정 - 심플몰</title>
   <link rel="stylesheet" href="style.css">
   <script src="common.js" defer></script>
+  <style>
+    html, body { background: #f4f6f8 !important; color: #1f2937 !important; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; }
+    .edit-header {
+      background: #fff; border-bottom: 1px solid #e5e7eb;
+      padding: 16px 24px;
+    }
+    .edit-header a { color: #111827; text-decoration: none; font-weight: 700; font-size: 18px; }
+    .edit-wrap { max-width: 900px; margin: 40px auto; padding: 0 16px; }
+    .edit-title { font-size: 22px; font-weight: 700; color: #111827; margin: 0 0 20px; letter-spacing: -0.5px; }
+    .login-wrap {
+      max-width: 380px; margin: 80px auto; background: #fff;
+      padding: 32px; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,.06);
+    }
+    .login-wrap h2 { font-size: 22px; font-weight: 700; color: #111827; margin: 0 0 6px; }
+    .login-wrap form { display: grid; gap: 10px; }
+    .login-wrap input {
+      padding: 12px 14px; border: 1px solid #e5e7eb; border-radius: 8px;
+      font-size: 14px; font-family: inherit;
+    }
+    .login-wrap input:focus { outline: none; border-color: #111827; box-shadow: 0 0 0 3px rgba(17,24,39,.08); }
+    .login-wrap button {
+      padding: 12px; background: #111827; color: #fff; border: 0; border-radius: 8px;
+      cursor: pointer; font-size: 14px; font-weight: 600; font-family: inherit;
+    }
+    .form-card {
+      background: #fff; border-radius: 12px; padding: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.04);
+    }
+    .form-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;
+    }
+    .form-grid .full { grid-column: 1 / -1; }
+    .form-grid input, .form-grid textarea {
+      width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px;
+      font-size: 14px; font-family: inherit; color: #111827;
+      background: #fff; box-sizing: border-box; transition: all .15s;
+    }
+    .form-grid input:focus, .form-grid textarea:focus {
+      outline: none; border-color: #111827; box-shadow: 0 0 0 3px rgba(17,24,39,.08);
+    }
+    .form-grid textarea { resize: vertical; min-height: 60px; }
+    .btn {
+      padding: 12px; border-radius: 8px; border: 0; cursor: pointer;
+      font-size: 14px; font-weight: 600; font-family: inherit;
+      text-decoration: none; display: inline-block; text-align: center;
+    }
+    .btn-primary { background: #111827; color: #fff; flex: 1; }
+    .btn-primary:hover { background: #1f2937; }
+    .btn-secondary { background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; flex: 1; }
+    .btn-secondary:hover { background: #e5e7eb; }
+    .actions { display: flex; gap: 8px; grid-column: 1 / -1; margin-top: 10px; }
+    .msg { font-size: 13px; font-weight: 600; margin-top: 12px; }
+    .msg.success { color: #059669; }
+    .msg.error { color: #dc2626; }
+  </style>
 </head>
 <body>
-  <header>
-    <h1><a href="index.html">🛍️ 심플몰</a> - 상품 수정</h1>
+  <header class="edit-header">
+    <a href="index.html">🛍️ 심플몰 - 상품 수정</a>
   </header>
 
-  <main>
-    <div id="login-screen" style="display:none; max-width:360px; margin:60px auto;">
-      <h2 style="margin-bottom:16px;">관리자 로그인</h2>
-      <form id="login-form" style="display:grid; gap:10px; background:#fff; padding:20px; border-radius:8px;">
-        <input name="email" type="email" placeholder="이메일" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-        <input name="password" type="password" placeholder="비밀번호" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-        <button type="submit" style="padding:12px; background:#222; color:#fff; border:0; border-radius:6px; cursor:pointer;">로그인</button>
+  <div id="login-screen" style="display:none;">
+    <div class="login-wrap">
+      <h2>관리자 로그인</h2>
+      <form id="login-form">
+        <input name="email" type="email" placeholder="이메일" required>
+        <input name="password" type="password" placeholder="비밀번호" required>
+        <button type="submit">로그인</button>
       </form>
-      <p id="login-msg" style="margin-top:12px; font-weight:600;"></p>
+      <p id="login-msg" class="msg"></p>
     </div>
+  </div>
 
-    <div id="edit-screen" style="display:none;">
-      <h2 style="margin-bottom:16px;">상품 수정</h2>
-      <form id="edit-form" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:10px; background:#fff; padding:16px; border-radius:8px;">
-        <input name="product_code" placeholder="제품번호" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-        <input name="name" placeholder="상품명" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-        <input name="price" type="number" placeholder="가격" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-        <input name="main_image" placeholder="메인 이미지 URL" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-        <input name="colors" placeholder="색상 (쉼표)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-        <input name="sizes" placeholder="사이즈 (쉼표)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-        <input name="hem_option" placeholder="밑단선택 (쉼표)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-        <input name="other_option" placeholder="기타옵션 (쉼표)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+  <div id="edit-screen" style="display:none;">
+    <div class="edit-wrap">
+      <h1 class="edit-title">상품 수정</h1>
+      <div class="form-card">
+        <form id="edit-form" class="form-grid">
+          <input name="product_code" placeholder="제품번호">
+          <input name="name" placeholder="상품명" required>
+          <input name="price" type="number" placeholder="가격" required>
+          <input name="main_image" placeholder="메인 이미지 URL" required>
+          <input name="colors" placeholder="색상 (쉼표)">
+          <input name="sizes" placeholder="사이즈 (쉼표)">
+          <input name="hem_option" placeholder="밑단선택 (쉼표)">
+          <input name="other_option" placeholder="기타옵션 (쉼표)">
+          <input name="min_qty" type="number" min="1" placeholder="최소 주문수량 (기본 6)">
 
-        <textarea name="detail_images" placeholder="상세 이미지 URL (줄바꿈)" style="grid-column: 1 / -1; padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
+          <textarea name="detail_images" class="full" placeholder="상세 이미지 URL (줄바꿈)"></textarea>
 
-        <div style="grid-column: 1 / -1; display:flex; gap:8px;">
-          <button type="submit" style="flex:1; padding:12px; background:#1976d2; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">수정 완료</button>
-          <a href="admin.html" style="flex:1; text-align:center; padding:12px; background:#999; color:#fff; border-radius:6px; text-decoration:none;">취소</a>
-        </div>
-      </form>
-      <p id="msg" style="margin-top:12px; font-weight:600;"></p>
+          <div class="actions">
+            <button type="submit" class="btn btn-primary">수정 완료</button>
+            <a href="admin.html" class="btn btn-secondary">취소</a>
+          </div>
+        </form>
+        <p id="msg" class="msg"></p>
+      </div>
     </div>
-  </main>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -52,6 +113,11 @@
       "https://alpdhgcipjeekzrpxlbh.supabase.co",
       "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya"
     );
+    // admin은 밝은 톤 강제
+    document.addEventListener('DOMContentLoaded', () => {
+      document.body.classList.remove('dark');
+      document.documentElement.classList.remove('dark');
+    });
   </script>
 
   <script>
@@ -80,13 +146,13 @@
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       loginMsg.textContent = '로그인 중...';
-      loginMsg.style.color = '#222';
+      loginMsg.className = 'msg';
       const { error } = await db.auth.signInWithPassword({
         email: loginForm.email.value.trim(),
         password: loginForm.password.value,
       });
       if (error) {
-        loginMsg.style.color = 'crimson';
+        loginMsg.className = 'msg error';
         loginMsg.textContent = '❌ ' + error.message;
       } else checkSession();
     });
@@ -105,6 +171,7 @@
       form.sizes.value = (data.sizes || []).join(',');
       form.hem_option.value = (data.hem_option || []).join(',');
       form.other_option.value = (data.other_option || []).join(',');
+      form.min_qty.value = data.min_qty || 6;
     }
 
     form.addEventListener('submit', async (e) => {
@@ -112,7 +179,7 @@
       const detail_images = form.detail_images.value.split('\n').map(s => s.trim()).filter(Boolean);
 
       msg.textContent = '수정 중...';
-      msg.style.color = '#222';
+      msg.className = 'msg';
 
       const { error } = await db.from('products').update({
         product_code: form.product_code.value.trim() || null,
@@ -124,13 +191,14 @@
         sizes: parseList(form.sizes.value),
         hem_option: parseList(form.hem_option.value),
         other_option: parseList(form.other_option.value),
+        min_qty: Number(form.min_qty.value) || 6,
       }).eq('id', id);
 
       if (error) {
-        msg.style.color = 'crimson';
+        msg.className = 'msg error';
         msg.textContent = '❌ ' + error.message;
       } else {
-        msg.style.color = 'green';
+        msg.className = 'msg success';
         msg.textContent = '✅ 수정 완료!';
         setTimeout(() => location.href = 'admin.html', 800);
       }

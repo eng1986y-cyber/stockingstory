@@ -22,7 +22,7 @@
   <script>
     const params = new URLSearchParams(location.search);
     const id = params.get('id');
-    const MIN_QTY = 6;   // ⭐ 최소 주문 수량
+    let MIN_QTY = 6;   // 상품 로드 시 덮어씀
 
     function getMember() {
       try { return JSON.parse(localStorage.getItem('member') || 'null'); }
@@ -50,6 +50,7 @@
       if (error || !data) { detailEl.innerHTML = '<p>상품이 없습니다.</p>'; return; }
 
       currentProduct = data;
+      MIN_QTY = Number(data.min_qty) || 6;   // ⭐ 상품의 최소수량으로 갱신
 
       const detailImgs = (data.detail_images || [])
         .map(url => `<img src="${url}" alt="상세" loading="lazy" style="width:100%; display:block; margin-top:8px; border-radius:8px;">`)
@@ -205,9 +206,9 @@
       if (hemOptions.length && !selectedHem) { alert('밑단선택을 선택하세요.'); return null; }
       if (otherOptions.length && !selectedOther) { alert('기타옵션을 선택하세요.'); return null; }
 
-      // ⭐ 최소 수량 체크
+      // ⭐ 이 상품의 최소수량 체크
       if (qty < MIN_QTY) {
-        alert(`최소 주문 수량은 ${MIN_QTY}개입니다.`);
+        alert(`이 상품의 최소 주문수량은 ${MIN_QTY}개입니다.`);
         return null;
       }
 
@@ -225,8 +226,6 @@
 
       if (mode === 'cart') {
         const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-
-        // ⭐ 중복 추가 방지
         const dupIdx = cart.findIndex(it =>
           it.product_id === p.id &&
           it.selected_color === selectedColor &&
@@ -281,7 +280,7 @@
       modal.innerHTML = `
         <div style="background:#151515; border:1px solid #222; padding:24px; border-radius:12px; width:100%; max-width:460px; max-height:90vh; overflow-y:auto; color:#e5e7eb;">
           <h2 style="margin:0 0 16px; font-size:18px; color:#fff;">주문 정보 입력</h2>
-          <form id="checkout-form" style="display:grid; gap:10px; background:none; padding:0; border:0; border-radius:0; max-width:none;">
+          <form id="checkout-form" style="display:grid; gap:10px; background:none; padding:0; border:0; max-width:none;">
             <label style="${labelStyle}">주문자 이름 *</label>
             <input name="customer_name" required value="${m?.name || ''}" style="${inputStyle}">
             <label style="${labelStyle}">연락처 *</label>
