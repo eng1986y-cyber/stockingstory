@@ -12,16 +12,17 @@
 
   <main>
     <div style="max-width:640px; margin:0 auto;">
-      <h2 style="margin-bottom:16px;">주문 조회</h2>
+      <h2 style="margin-bottom:16px; color:#fff;">주문 조회</h2>
 
-      <div style="background:#fff; padding:16px; border-radius:8px; margin-bottom:20px;">
-        <p style="font-size:13px; color:#666; margin-bottom:8px;">
-          <b>주문번호</b>로 조회합니다. (예: ORD-251014-A3F9)
+      <div style="background:#151515; border:1px solid #222; padding:16px; border-radius:12px; margin-bottom:20px;">
+        <p style="font-size:13px; color:#888; margin-bottom:8px;">
+          <b style="color:#e5e7eb;">주문번호</b>로 조회합니다. (예: ORD-251016-A3F9)
         </p>
         <div style="display:flex; gap:8px;">
-          <input id="order-number-input" placeholder="ORD-000000-XXXX" style="flex:1; padding:10px; border:1px solid #ddd; border-radius:6px; text-transform:uppercase;">
+          <input id="order-number-input" placeholder="ORD-000000-XXXX"
+            style="flex:1; padding:10px 12px; background:#0f0f0f; border:1px solid #2a2a2a; border-radius:8px; color:#e5e7eb; text-transform:uppercase; font-family:inherit; font-size:14px;">
           <button id="search-btn"
-            style="padding:10px 20px; background:#03c75a; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">
+            style="padding:10px 20px; background:#e5e7eb; color:#111; border:0; border-radius:8px; cursor:pointer; font-weight:600; font-family:inherit;">
             조회
           </button>
         </div>
@@ -45,23 +46,21 @@
     const resultEl = document.getElementById('orders-result');
 
     function statusColor(s) {
-      return { '입금대기':'#ff9800', '입금완료':'#03c75a', '배송중':'#1976d2', '완료':'#555', '취소':'#e53935' }[s] || '#ccc';
+      return { '입금대기':'#f59e0b', '입금완료':'#10b981', '배송중':'#3b82f6', '완료':'#6b7280', '취소':'#dc2626' }[s] || '#9ca3af';
     }
 
     async function searchOrders() {
       const num = input.value.trim().toUpperCase();
       if (!num) { alert('주문번호를 입력해주세요.'); return; }
 
-      resultEl.innerHTML = '<p style="text-align:center; padding:20px;">조회 중...</p>';
+      resultEl.innerHTML = '<p style="text-align:center; padding:20px; color:#888;">조회 중...</p>';
 
-      const { data, error } = await db
-        .from('orders').select('*')
-        .eq('order_number', num)
-        .order('created_at', { ascending: true });
+      const { data, error } = await db.from('orders').select('*')
+        .eq('order_number', num).order('created_at', { ascending: true });
 
       if (error) { resultEl.innerHTML = '<p>조회 실패: ' + error.message + '</p>'; return; }
       if (!data || data.length === 0) {
-        resultEl.innerHTML = '<p style="text-align:center; padding:20px; color:#888;">해당 주문번호로 조회된 주문이 없습니다.</p>';
+        resultEl.innerHTML = '<p style="text-align:center; padding:20px; color:#666;">해당 주문번호로 조회된 주문이 없습니다.</p>';
         return;
       }
 
@@ -69,27 +68,27 @@
       const totalAll = data.reduce((s, o) => s + Number(o.total_price || 0), 0);
 
       resultEl.innerHTML = `
-        <div style="background:#fff; padding:16px; border-radius:8px; margin-bottom:12px; border-left:4px solid ${statusColor(first.status)};">
+        <div style="background:#151515; border:1px solid #222; padding:16px; border-radius:12px; margin-bottom:12px; border-left:4px solid ${statusColor(first.status)};">
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
-            <span style="font-size:15px; font-weight:700; color:#1976d2; letter-spacing:1px;">${first.order_number}</span>
+            <span style="font-size:15px; font-weight:700; color:#60a5fa; letter-spacing:1px;">${first.order_number}</span>
             <span style="background:${statusColor(first.status)}; color:#fff; padding:3px 10px; border-radius:12px; font-size:12px; font-weight:600;">
               ${first.status}
             </span>
           </div>
-          <div style="font-size:13px; color:#555; line-height:1.7; margin-bottom:10px;">
+          <div style="font-size:13px; color:#ccc; line-height:1.7; margin-bottom:10px;">
             주문자: ${first.customer_name} (${first.customer_phone})<br>
             주소: ${first.postcode ? `[${first.postcode}] ` : ''}${first.address || ''} ${first.address_detail || ''}<br>
             입금자명: <b>${first.depositor_name}</b>
             ${first.memo ? `<br>요청: ${first.memo}` : ''}
           </div>
 
-          <hr style="border:0; border-top:1px solid #eee; margin:10px 0;">
+          <hr style="border:0; border-top:1px solid #222; margin:10px 0;">
 
           ${data.map(o => `
-            <div style="font-size:13px; line-height:1.7; padding:6px 0; border-bottom:1px dashed #eee;">
-              <b>${o.product_name}</b>
-              ${o.product_code ? `<span style="color:#888;">[${o.product_code}]</span>` : ''}
-              × ${o.quantity} = <b style="color:#e53935;">${Number(o.total_price).toLocaleString()}원</b>
+            <div style="font-size:13px; line-height:1.7; padding:6px 0; border-bottom:1px dashed #222; color:#ccc;">
+              <b style="color:#fff;">${o.product_name}</b>
+              ${o.product_code ? `<span style="color:#666;">[${o.product_code}]</span>` : ''}
+              × ${o.quantity} = <b style="color:#ef4444;">${Number(o.total_price).toLocaleString()}원</b>
               ${o.selected_color ? `<br><span style="color:#888; font-size:12px;">색상: ${o.selected_color}</span>` : ''}
               ${o.selected_size ? ` <span style="color:#888; font-size:12px;">사이즈: ${o.selected_size}</span>` : ''}
               ${o.selected_hem ? `<br><span style="color:#888; font-size:12px;">밑단선택: ${o.selected_hem}</span>` : ''}
@@ -97,10 +96,10 @@
             </div>
           `).join('')}
 
-          <div style="text-align:right; font-size:16px; margin-top:12px;">
-            총 <b style="color:#e53935; font-size:18px;">${totalAll.toLocaleString()}원</b>
+          <div style="text-align:right; font-size:16px; margin-top:12px; color:#e5e7eb;">
+            총 <b style="color:#ef4444; font-size:18px;">${totalAll.toLocaleString()}원</b>
           </div>
-          <div style="font-size:12px; color:#888; text-align:right; margin-top:4px;">
+          <div style="font-size:12px; color:#666; text-align:right; margin-top:4px;">
             ${new Date(first.created_at).toLocaleString('ko-KR')}
           </div>
         </div>
@@ -108,9 +107,7 @@
     }
 
     searchBtn.addEventListener('click', searchOrders);
-    input.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') searchOrders();
-    });
+    input.addEventListener('keypress', (e) => { if (e.key === 'Enter') searchOrders(); });
 
     const urlNum = new URLSearchParams(location.search).get('num');
     if (urlNum) { input.value = urlNum; searchOrders(); }

@@ -7,17 +7,14 @@
   <link rel="stylesheet" href="style.css">
   <script src="common.js"></script>
   <style>
-    html {
-      overflow-x: hidden;
-      -webkit-text-size-adjust: 100%;
-    }
+    html { overflow-x: hidden; -webkit-text-size-adjust: 100%; }
     body {
       overflow-x: hidden;
-      width: 100%;
-      max-width: 100%;
+      width: 100%; max-width: 100%;
       margin: 0;
+      background: #0a0a0a;
+      color: #e5e7eb;
     }
-
     #banner-wrap {
       width: 100vw;
       position: relative;
@@ -26,7 +23,6 @@
       margin-bottom: 24px;
       overflow: hidden;
     }
-
     #product-container {
       max-width: 1400px;
       margin: 0 auto;
@@ -35,9 +31,7 @@
       width: 100%;
       margin-top: 32px;
     }
-    @media (max-width: 768px) {
-      #product-container { margin-top: 24px; }
-    }
+    @media (max-width: 768px) { #product-container { margin-top: 24px; } }
 
     #product-list {
       display: grid;
@@ -45,52 +39,51 @@
       width: 100%;
       box-sizing: border-box;
     }
-
-    /* ⭐ iOS Safari 최적화: 카드 */
     #product-list .card {
       min-width: 0;
       display: block;
       box-sizing: border-box;
       text-decoration: none;
       color: inherit;
-      /* GPU 레이어 승격 */
       -webkit-transform: translate3d(0, 0, 0);
       transform: translate3d(0, 0, 0);
       -webkit-backface-visibility: hidden;
       backface-visibility: hidden;
     }
-
-    /* ⭐ 핵심: 이미지 대신 background-image 사용 */
     #product-list .card .thumb {
       width: 100%;
       padding-bottom: 100%;
       position: relative;
       overflow: hidden;
       border-radius: 10px;
-      /* 배경이미지로 렌더링 → iOS에서 재디코딩 없음 */
-      background-color: #f0f0f0;
+      background-color: #151515;
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
       -webkit-background-size: cover;
-      /* iOS 리페인트 방지 */
       -webkit-transform: translate3d(0, 0, 0);
       transform: translate3d(0, 0, 0);
+      border: 1px solid #222;
     }
-
-    /* 이미지 태그는 완전히 숨김 */
-    #product-list .card .thumb img {
-      display: none;
-    }
-
-    /* 카드 내 텍스트 영역 */
+    #product-list .card .thumb img { display: none; }
     #product-list .card .card-info {
       padding: 10px 4px;
       min-width: 0;
-      -webkit-transform: translate3d(0, 0, 0);
-      transform: translate3d(0, 0, 0);
     }
-
+    #product-list .card .name {
+      font-size: 14px;
+      font-weight: 500;
+      color: #e5e7eb;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    #product-list .card .price {
+      color: #ef4444;
+      font-weight: 700;
+      font-size: 15px;
+      margin-top: 4px;
+    }
     #pagination {
       display: flex;
       justify-content: center;
@@ -139,43 +132,26 @@
     async function loadBanner() {
       const wrap = document.getElementById('banner-wrap');
       const inner = document.getElementById('banner-inner');
-
-      const { data, error } = await db
-        .from('banners').select('*')
-        .order('id', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
+      const { data, error } = await db.from('banners').select('*')
+        .order('id', { ascending: false }).limit(1).maybeSingle();
       if (error || !data || !data.image_url) {
         wrap.style.display = 'none';
         return;
       }
-
       wrap.style.display = isPC() ? 'block' : 'none';
-
-      const imgHtml = `
-        <img src="${data.image_url}" alt="배너"
-          style="width:100%; height:700px; object-fit:cover; display:block;">
-      `;
-
-      inner.innerHTML = data.link_url
-        ? `<a href="${data.link_url}" style="display:block; width:100%;">${imgHtml}</a>`
-        : imgHtml;
+      const imgHtml = `<img src="${data.image_url}" alt="배너" style="width:100%; height:700px; object-fit:cover; display:block;">`;
+      inner.innerHTML = data.link_url ? `<a href="${data.link_url}" style="display:block; width:100%;">${imgHtml}</a>` : imgHtml;
     }
 
     async function loadProducts() {
       const list = document.getElementById('product-list');
-      const { data, error } = await db
-        .from('products').select('*')
-        .order('created_at', { ascending: false });
-
+      const { data, error } = await db.from('products').select('*').order('created_at', { ascending: false });
       if (error) { list.innerHTML = '<p>상품을 불러올 수 없습니다.</p>'; return; }
       if (!data || data.length === 0) {
-        list.innerHTML = '<p>등록된 상품이 없습니다.</p>';
+        list.innerHTML = '<p style="color:#888;">등록된 상품이 없습니다.</p>';
         document.getElementById('pagination').innerHTML = '';
         return;
       }
-
       allProducts = data;
       currentPage = 1;
       applyGridColumns();
@@ -192,10 +168,8 @@
     function getPerPage() { return isPC() ? PC_PER_PAGE : MOBILE_PER_PAGE; }
     function getMaxPages() { return isPC() ? PC_MAX_PAGES : MOBILE_MAX_PAGES; }
 
-    // 이미지 URL 안전하게 CSS url() 로 감싸기
     function bgUrl(url) {
       if (!url) return 'none';
-      // 작은따옴표, 괄호 이스케이프
       const safe = String(url).replace(/'/g, "\\'").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
       return `url('${safe}')`;
     }
@@ -210,8 +184,8 @@
         <a class="card" href="product.html?id=${p.id}">
           <div class="thumb" style="background-image: ${bgUrl(p.main_image)};"></div>
           <div class="card-info">
-            <div style="font-size:14px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${p.name}</div>
-            <div style="color:#e53935; font-weight:700; font-size:15px; margin-top:4px;">${Number(p.price).toLocaleString()}원</div>
+            <div class="name">${p.name}</div>
+            <div class="price">${Number(p.price).toLocaleString()}원</div>
           </div>
         </a>
       `).join('');
@@ -228,16 +202,18 @@
       if (totalPages <= 1) { el.innerHTML = ''; return; }
 
       let html = '';
+      const btnBase = 'padding:8px 14px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; font-family:inherit; transition:all .15s;';
+
       html += `<button class="page-nav" data-page="${currentPage-1}" ${currentPage===1?'disabled':''}
-        style="padding:8px 14px; border:1px solid #ddd; border-radius:6px; background:${currentPage===1?'#f5f5f5':'#fff'}; color:${currentPage===1?'#bbb':'#222'}; cursor:${currentPage===1?'default':'pointer'}; font-size:14px;">이전</button>`;
+        style="${btnBase} background:${currentPage===1?'#151515':'#1f1f1f'}; color:${currentPage===1?'#555':'#e5e7eb'}; border:1px solid #333; cursor:${currentPage===1?'not-allowed':'pointer'};">이전</button>`;
 
       for (let i = 1; i <= totalPages; i++) {
         html += `<button class="page-num" data-page="${i}"
-          style="padding:8px 14px; border:1px solid ${i===currentPage?'#1976d2':'#ddd'}; border-radius:6px; background:${i===currentPage?'#1976d2':'#fff'}; color:${i===currentPage?'#fff':'#222'}; cursor:pointer; font-size:14px; font-weight:${i===currentPage?'700':'400'};">${i}</button>`;
+          style="${btnBase} background:${i===currentPage?'#e5e7eb':'#1f1f1f'}; color:${i===currentPage?'#111':'#e5e7eb'}; border:1px solid ${i===currentPage?'#e5e7eb':'#333'};">${i}</button>`;
       }
 
       html += `<button class="page-nav" data-page="${currentPage+1}" ${currentPage===totalPages?'disabled':''}
-        style="padding:8px 14px; border:1px solid #ddd; border-radius:6px; background:${currentPage===totalPages?'#f5f5f5':'#fff'}; color:${currentPage===totalPages?'#bbb':'#222'}; cursor:${currentPage===totalPages?'default':'pointer'}; font-size:14px;">다음</button>`;
+        style="${btnBase} background:${currentPage===totalPages?'#151515':'#1f1f1f'}; color:${currentPage===totalPages?'#555':'#e5e7eb'}; border:1px solid #333; cursor:${currentPage===totalPages?'not-allowed':'pointer'};">다음</button>`;
 
       el.innerHTML = html;
 
@@ -257,9 +233,7 @@
         applyGridColumns();
         const wrap = document.getElementById('banner-wrap');
         const inner = document.getElementById('banner-inner');
-        if (inner.innerHTML.trim()) {
-          wrap.style.display = isPC() ? 'block' : 'none';
-        }
+        if (inner.innerHTML.trim()) wrap.style.display = isPC() ? 'block' : 'none';
         const maxP = getMaxPages();
         const totalP = Math.min(Math.ceil(allProducts.length / getPerPage()), maxP);
         if (currentPage > totalP) currentPage = totalP || 1;

@@ -9,8 +9,7 @@
 </head>
 <body>
   <div id="app-header"></div>
-
-  <main id="product-detail">로딩중...</main>
+  <main id="product-detail" style="color:#e5e7eb;">로딩중...</main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -23,6 +22,7 @@
   <script>
     const params = new URLSearchParams(location.search);
     const id = params.get('id');
+    const MIN_QTY = 6;   // ⭐ 최소 주문 수량
 
     function getMember() {
       try { return JSON.parse(localStorage.getItem('member') || 'null'); }
@@ -37,30 +37,27 @@
       globalShipping = data ? Number(data.value) || 0 : 0;
     }
 
+    const inputStyle = 'width:100%; padding:10px 12px; background:#0f0f0f; border:1px solid #2a2a2a; border-radius:8px; color:#e5e7eb; font-family:inherit; font-size:14px;';
+    const labelStyle = 'font-size:13px; font-weight:600; color:#ccc; display:block; margin-bottom:4px;';
+
     async function loadProduct() {
       const detailEl = document.getElementById('product-detail');
       if (!id) { detailEl.innerHTML = '<p>상품 ID가 없습니다.</p>'; return; }
 
       await loadShippingFee();
 
-      const { data, error } = await db
-        .from('products').select('*')
-        .eq('id', id).single();
-
-      if (error || !data) {
-        detailEl.innerHTML = '<p>상품이 없습니다.</p>';
-        return;
-      }
+      const { data, error } = await db.from('products').select('*').eq('id', id).single();
+      if (error || !data) { detailEl.innerHTML = '<p>상품이 없습니다.</p>'; return; }
 
       currentProduct = data;
 
       const detailImgs = (data.detail_images || [])
-        .map(url => `<img src="${url}" alt="상세" loading="lazy" style="width:100%; display:block; margin-top:8px; border-radius:6px;">`)
+        .map(url => `<img src="${url}" alt="상세" loading="lazy" style="width:100%; display:block; margin-top:8px; border-radius:8px;">`)
         .join('');
 
       const shippingLabel = globalShipping > 0
-        ? `배송비 ${globalShipping.toLocaleString()}원`
-        : `<span style="color:#03c75a;">무료배송</span>`;
+        ? `<span style="color:#888;">배송비 ${globalShipping.toLocaleString()}원</span>`
+        : `<span style="color:#10b981;">무료배송</span>`;
 
       const colors = data.colors || [];
       const sizes = data.sizes || [];
@@ -69,8 +66,8 @@
 
       const colorSel = colors.length ? `
         <div>
-          <label style="font-size:13px; font-weight:600; display:block; margin-bottom:4px;">색상 <span style="color:red;">*</span></label>
-          <select id="opt-color" required style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
+          <label style="${labelStyle}">색상 <span style="color:#ef4444;">*</span></label>
+          <select id="opt-color" required style="${inputStyle}">
             <option value="">색상 선택</option>
             ${colors.map(c => `<option>${c}</option>`).join('')}
           </select>
@@ -79,8 +76,8 @@
 
       const sizeSel = sizes.length ? `
         <div>
-          <label style="font-size:13px; font-weight:600; display:block; margin-bottom:4px;">사이즈 <span style="color:red;">*</span></label>
-          <select id="opt-size" required style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
+          <label style="${labelStyle}">사이즈 <span style="color:#ef4444;">*</span></label>
+          <select id="opt-size" required style="${inputStyle}">
             <option value="">사이즈 선택</option>
             ${sizes.map(s => `<option>${s}</option>`).join('')}
           </select>
@@ -89,8 +86,8 @@
 
       const hemSel = hemOptions.length ? `
         <div>
-          <label style="font-size:13px; font-weight:600; display:block; margin-bottom:4px;">밑단선택 <span style="color:red;">*</span></label>
-          <select id="opt-hem" required style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
+          <label style="${labelStyle}">밑단선택 <span style="color:#ef4444;">*</span></label>
+          <select id="opt-hem" required style="${inputStyle}">
             <option value="">밑단선택</option>
             ${hemOptions.map(h => `<option>${h}</option>`).join('')}
           </select>
@@ -99,8 +96,8 @@
 
       const otherSel = otherOptions.length ? `
         <div>
-          <label style="font-size:13px; font-weight:600; display:block; margin-bottom:4px;">기타옵션 <span style="color:red;">*</span></label>
-          <select id="opt-other" required style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
+          <label style="${labelStyle}">기타옵션 <span style="color:#ef4444;">*</span></label>
+          <select id="opt-other" required style="${inputStyle}">
             <option value="">기타옵션</option>
             ${otherOptions.map(o => `<option>${o}</option>`).join('')}
           </select>
@@ -109,59 +106,51 @@
 
       const qtyInput = `
         <div style="margin-top:10px;">
-          <label style="font-size:13px; font-weight:600; display:block; margin-bottom:4px;">수량 <span style="color:red;">*</span></label>
-          <input id="opt-qty" type="number" min="1" value="1" required
-            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
+          <label style="${labelStyle}">수량 <span style="color:#ef4444;">*</span> <span style="font-size:11px; color:#f59e0b; font-weight:400;">(최소 ${MIN_QTY}개)</span></label>
+          <input id="opt-qty" type="number" min="${MIN_QTY}" value="${MIN_QTY}" required style="${inputStyle}">
         </div>
       `;
 
-      // ⭐ 2열 배치
       const row1 = (colors.length || sizes.length) ? `
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
-          ${colorSel}
-          ${sizeSel}
+          ${colorSel}${sizeSel}
         </div>
       ` : '';
 
       const row2 = (hemOptions.length || otherOptions.length) ? `
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
-          ${hemSel}
-          ${otherSel}
+          ${hemSel}${otherSel}
         </div>
       ` : '';
 
       detailEl.innerHTML = `
-        <div style="background:#fff; border-radius:8px; padding:16px;">
+        <div style="background:#151515; border:1px solid #222; border-radius:12px; padding:16px;">
           <div style="display:flex; gap:24px; flex-wrap:wrap; align-items:stretch;">
-
             <div style="flex:1 1 320px; min-width:0;">
               <img src="${data.main_image}" alt="${data.name}"
                 style="width:100%; border-radius:8px; display:block;">
             </div>
-
             <div style="flex:1 1 320px; min-width:0; display:flex; flex-direction:column; justify-content:space-between;">
               <div>
-                ${data.product_code ? `<div style="color:#888; font-size:12px; margin-bottom:4px;">제품번호: ${data.product_code}</div>` : ''}
-                <h2 style="margin:0 0 12px; font-size:22px;">${data.name}</h2>
-                <p style="color:#e53935; font-weight:700; font-size:24px; margin:0 0 8px;">
+                ${data.product_code ? `<div style="color:#666; font-size:12px; margin-bottom:4px;">제품번호: ${data.product_code}</div>` : ''}
+                <h2 style="margin:0 0 12px; font-size:22px; color:#fff;">${data.name}</h2>
+                <p style="color:#ef4444; font-weight:700; font-size:24px; margin:0 0 8px;">
                   ${Number(data.price).toLocaleString()}원
                 </p>
                 <p style="margin:0 0 20px;">${shippingLabel}</p>
 
-                ${row1}
-                ${row2}
-                ${qtyInput}
+                ${row1}${row2}${qtyInput}
 
-                <div id="total-preview" style="text-align:right; font-size:14px; font-weight:600; color:#e53935; line-height:1.6; margin:12px 0 16px;"></div>
+                <div id="total-preview" style="text-align:right; font-size:14px; font-weight:600; color:#ef4444; line-height:1.6; margin:12px 0 16px;"></div>
               </div>
 
               <div style="display:flex; gap:8px;">
                 <button id="cart-btn"
-                  style="flex:1; padding:14px; background:#1976d2; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600; font-size:15px;">
+                  style="flex:1; padding:14px; background:#1a1a1a; color:#e5e7eb; border:1px solid #333; border-radius:8px; cursor:pointer; font-weight:600; font-size:15px; font-family:inherit;">
                   장바구니
                 </button>
                 <button id="buy-btn"
-                  style="flex:1; padding:14px; background:#03c75a; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600; font-size:15px;">
+                  style="flex:1; padding:14px; background:#e5e7eb; color:#111; border:0; border-radius:8px; cursor:pointer; font-weight:600; font-size:15px; font-family:inherit;">
                   바로 구매
                 </button>
               </div>
@@ -174,7 +163,7 @@
       const qtyEl = document.getElementById('opt-qty');
       const totalPrev = document.getElementById('total-preview');
       const updateTotal = () => {
-        const q = Number(qtyEl.value) || 1;
+        const q = Number(qtyEl.value) || MIN_QTY;
         const sub = data.price * q;
         const sum = sub + globalShipping;
         totalPrev.innerHTML = `
@@ -186,12 +175,8 @@
       qtyEl.addEventListener('input', updateTotal);
       updateTotal();
 
-      document.getElementById('cart-btn').addEventListener('click', () => {
-        handleOrder('cart');
-      });
-      document.getElementById('buy-btn').addEventListener('click', () => {
-        handleOrder('single');
-      });
+      document.getElementById('cart-btn').addEventListener('click', () => handleOrder('cart'));
+      document.getElementById('buy-btn').addEventListener('click', () => handleOrder('single'));
     }
 
     function getSelectedOptions() {
@@ -213,12 +198,18 @@
       const selectedSize = sizeEl ? sizeEl.value : null;
       const selectedHem = hemEl ? hemEl.value : null;
       const selectedOther = otherEl ? otherEl.value : null;
-      const qty = Math.max(1, Number(qtyEl.value) || 1);
+      const qty = Number(qtyEl.value) || 0;
 
       if (colors.length && !selectedColor) { alert('색상을 선택하세요.'); return null; }
       if (sizes.length && !selectedSize) { alert('사이즈를 선택하세요.'); return null; }
       if (hemOptions.length && !selectedHem) { alert('밑단선택을 선택하세요.'); return null; }
       if (otherOptions.length && !selectedOther) { alert('기타옵션을 선택하세요.'); return null; }
+
+      // ⭐ 최소 수량 체크
+      if (qty < MIN_QTY) {
+        alert(`최소 주문 수량은 ${MIN_QTY}개입니다.`);
+        return null;
+      }
 
       return { selectedColor, selectedSize, selectedHem, selectedOther, qty };
     }
@@ -234,6 +225,8 @@
 
       if (mode === 'cart') {
         const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+
+        // ⭐ 중복 추가 방지
         const dupIdx = cart.findIndex(it =>
           it.product_id === p.id &&
           it.selected_color === selectedColor &&
@@ -243,21 +236,22 @@
         );
 
         if (dupIdx >= 0) {
-          cart[dupIdx].quantity += qty;
-        } else {
-          cart.push({
-            product_id: p.id,
-            product_code: p.product_code || '',
-            product_name: p.name,
-            product_price: p.price,
-            main_image: p.main_image,
-            quantity: qty,
-            selected_color: selectedColor,
-            selected_size: selectedSize,
-            selected_hem: selectedHem,
-            selected_other: selectedOther,
-          });
+          alert('⚠️ 이미 장바구니에 담긴 상품입니다.\n같은 옵션은 중복 추가할 수 없습니다.');
+          return;
         }
+
+        cart.push({
+          product_id: p.id,
+          product_code: p.product_code || '',
+          product_name: p.name,
+          product_price: p.price,
+          main_image: p.main_image,
+          quantity: qty,
+          selected_color: selectedColor,
+          selected_size: selectedSize,
+          selected_hem: selectedHem,
+          selected_other: selectedOther,
+        });
         localStorage.setItem('cart', JSON.stringify(cart));
         alert('✅ 장바구니에 담았습니다!');
         if (document.getElementById('app-header')) renderHeader('product');
@@ -283,47 +277,34 @@
       const m = getMember();
 
       const modal = document.createElement('div');
-      modal.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:1000; padding:10px;`;
+      modal.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.75); display:flex; align-items:center; justify-content:center; z-index:1000; padding:10px;`;
       modal.innerHTML = `
-        <div style="background:#fff; padding:20px; border-radius:10px; width:100%; max-width:440px; max-height:90vh; overflow-y:auto;">
-          <h2 style="margin-bottom:16px; font-size:18px;">주문 정보 입력</h2>
-          <form id="checkout-form" style="display:grid; gap:10px;">
-            <label style="font-size:13px; font-weight:600;">수취인 이름 *</label>
-            <input name="customer_name" required value="${m?.name || ''}"
-              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-            <label style="font-size:13px; font-weight:600;">연락처 *</label>
-            <input name="customer_phone" type="tel" inputmode="numeric" required value="${m?.phone || ''}"
-              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-            <label style="font-size:13px; font-weight:600;">우편번호</label>
-            <input name="postcode" value="${m?.postcode || ''}"
-              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-            <label style="font-size:13px; font-weight:600;">주소 *</label>
-            <input name="address" required value="${m?.address || ''}"
-              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-            <label style="font-size:13px; font-weight:600;">상세주소</label>
-            <input name="address_detail" value="${m?.address_detail || ''}"
-              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-            <label style="font-size:13px; font-weight:600;">입금자명 *</label>
-            <input name="depositor_name" required
-              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-            <label style="font-size:13px; font-weight:600;">요청사항</label>
-            <textarea name="memo"
-              style="padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
+        <div style="background:#151515; border:1px solid #222; padding:24px; border-radius:12px; width:100%; max-width:460px; max-height:90vh; overflow-y:auto; color:#e5e7eb;">
+          <h2 style="margin:0 0 16px; font-size:18px; color:#fff;">주문 정보 입력</h2>
+          <form id="checkout-form" style="display:grid; gap:10px; background:none; padding:0; border:0; border-radius:0; max-width:none;">
+            <label style="${labelStyle}">주문자 이름 *</label>
+            <input name="customer_name" required value="${m?.name || ''}" style="${inputStyle}">
+            <label style="${labelStyle}">연락처 *</label>
+            <input name="customer_phone" type="tel" inputmode="numeric" required value="${m?.phone || ''}" style="${inputStyle}">
+            <label style="${labelStyle}">우편번호</label>
+            <input name="postcode" value="${m?.postcode || ''}" style="${inputStyle}">
+            <label style="${labelStyle}">주소 *</label>
+            <input name="address" required value="${m?.address || ''}" style="${inputStyle}">
+            <label style="${labelStyle}">상세주소</label>
+            <input name="address_detail" value="${m?.address_detail || ''}" style="${inputStyle}">
+            <label style="${labelStyle}">입금자명 *</label>
+            <input name="depositor_name" required style="${inputStyle}">
+            <label style="${labelStyle}">요청사항</label>
+            <textarea name="memo" style="${inputStyle} min-height:60px;"></textarea>
 
-            <div style="text-align:right; font-size:14px; font-weight:600; color:#e53935; line-height:1.7; margin-top:8px;">
+            <div style="text-align:right; font-size:14px; font-weight:600; color:#ef4444; line-height:1.7; margin-top:8px;">
               상품: ${subTotal.toLocaleString()}원<br>
               배송비: ${globalShipping > 0 ? globalShipping.toLocaleString() + '원' : '무료'}<br>
               <span style="font-size:17px;">총액: ${total.toLocaleString()}원</span>
             </div>
 
-            <button type="submit"
-              style="padding:12px; background:#03c75a; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">
-              주문 완료
-            </button>
-            <button type="button" id="close-modal"
-              style="padding:10px; background:#eee; border:0; border-radius:6px; cursor:pointer;">
-              취소
-            </button>
+            <button type="submit" style="padding:12px; background:#e5e7eb; color:#111; border:0; border-radius:8px; cursor:pointer; font-weight:600; font-family:inherit;">주문 완료</button>
+            <button type="button" id="close-modal" style="padding:10px; background:#222; color:#e5e7eb; border:1px solid #333; border-radius:8px; cursor:pointer; font-family:inherit;">취소</button>
           </form>
         </div>
       `;
@@ -334,7 +315,6 @@
       modal.querySelector('#checkout-form').addEventListener('submit', async (ev) => {
         ev.preventDefault();
         const f = ev.target;
-
         const orderNumber = generateOrderNumber();
 
         const { error } = await db.from('orders').insert({
@@ -377,47 +357,31 @@
 
     function showOrderComplete(modal, orderNumber, total) {
       modal.querySelector('div').innerHTML = `
-        <h2 style="margin-bottom:16px; color:#03c75a;">✅ 주문 접수 완료</h2>
-        <div style="background:#f8f8f8; padding:16px; border-radius:8px; margin-bottom:16px; line-height:1.8; font-size:14px;">
+        <h2 style="margin-bottom:16px; color:#10b981;">✅ 주문 접수 완료</h2>
+        <div style="background:#0f0f0f; padding:16px; border-radius:8px; margin-bottom:16px; line-height:1.8; font-size:14px; border:1px solid #222;">
           <div style="font-size:13px; color:#888;">주문번호</div>
-          <div style="font-size:18px; font-weight:700; color:#1976d2; margin-bottom:8px; letter-spacing:1px; display:flex; align-items:center; flex-wrap:wrap; gap:6px;">
+          <div style="font-size:18px; font-weight:700; color:#60a5fa; margin-bottom:8px; letter-spacing:1px; display:flex; align-items:center; flex-wrap:wrap; gap:6px;">
             <span id="order-number-text">${orderNumber}</span>
-            <button id="copy-order-number"
-              style="padding:3px 8px; background:#222; color:#fff; border:0; border-radius:4px; cursor:pointer; font-size:11px;">
-              복사
-            </button>
+            <button id="copy-order-number" style="padding:3px 8px; background:#222; color:#e5e7eb; border:1px solid #333; border-radius:4px; cursor:pointer; font-size:11px; font-family:inherit;">복사</button>
           </div>
-          <hr style="border:0; border-top:1px solid #ddd; margin:8px 0;">
+          <hr style="border:0; border-top:1px solid #222; margin:8px 0;">
           <b>입금 계좌 안내</b><br>
           은행: <b>○○은행</b><br>
           계좌: <b id="account-num">123-456-789012</b>
-          <button id="copy-account"
-            style="margin-left:6px; padding:3px 8px; background:#222; color:#fff; border:0; border-radius:4px; cursor:pointer; font-size:11px;">
-            복사
-          </button>
-          <br>
-          예금주: <b>홍길동</b><br>
+          <button id="copy-account" style="margin-left:6px; padding:3px 8px; background:#222; color:#e5e7eb; border:1px solid #333; border-radius:4px; cursor:pointer; font-size:11px; font-family:inherit;">복사</button>
+          <br>예금주: <b>홍길동</b><br>
           입금액: <b>${total.toLocaleString()}원</b>
         </div>
-        <p style="font-size:12px; color:#888; margin-bottom:16px;">
+        <p style="font-size:12px; color:#666; margin-bottom:16px;">
           주문번호를 꼭 저장해두세요. [주문조회]에서 주문번호로 조회 가능합니다.
         </p>
-        <button onclick="location.href='index.html'"
-          style="width:100%; padding:12px; background:#222; color:#fff; border:0; border-radius:6px; cursor:pointer;">
-          메인으로
-        </button>
+        <button onclick="location.href='index.html'" style="width:100%; padding:12px; background:#e5e7eb; color:#111; border:0; border-radius:8px; cursor:pointer; font-weight:600; font-family:inherit;">메인으로</button>
       `;
-
       modal.querySelector('#copy-order-number').onclick = () => {
-        navigator.clipboard.writeText(orderNumber).then(() => {
-          alert('주문번호가 복사되었습니다.');
-        });
+        navigator.clipboard.writeText(orderNumber).then(() => alert('주문번호가 복사되었습니다.'));
       };
-
       modal.querySelector('#copy-account').onclick = () => {
-        navigator.clipboard.writeText('123-456-789012').then(() => {
-          alert('계좌번호가 복사되었습니다.');
-        });
+        navigator.clipboard.writeText('123-456-789012').then(() => alert('계좌번호가 복사되었습니다.'));
       };
     }
 

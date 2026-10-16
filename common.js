@@ -1,6 +1,6 @@
 // ===== 공통 유틸 =====
 
-// 좌우 흔들림 완전 방지
+// 좌우 흔들림 + 이미지 복사 방지
 (function() {
   const style = document.createElement('style');
   style.textContent = `
@@ -13,6 +13,8 @@
       margin: 0 !important;
       width: 100% !important;
       max-width: 100% !important;
+      background: #0a0a0a !important;
+      color: #e5e7eb !important;
     }
     #app-header, #app-header * { box-sizing: border-box; }
     #app-header a, #app-header button, #app-header span {
@@ -20,7 +22,18 @@
       flex-shrink: 0;
     }
 
-    /* ⭐ 플로팅 스크롤 버튼 */
+    /* 이미지 복사/드래그 방지 */
+    img {
+      -webkit-user-drag: none !important;
+      user-drag: none !important;
+      user-select: none !important;
+      -webkit-user-select: none !important;
+      -webkit-touch-callout: none !important;
+      pointer-events: none !important;
+    }
+    a img { pointer-events: auto !important; }
+
+    /* 플로팅 스크롤 버튼 */
     #scroll-btns {
       position: fixed;
       left: 50%;
@@ -34,18 +47,18 @@
     #scroll-btns button {
       width: 44px; height: 44px;
       border-radius: 50%;
-      border: 1px solid #ddd;
-      background: #fff;
-      color: #222;
+      border: 1px solid #333;
+      background: #1a1a1a;
+      color: #e5e7eb;
       font-size: 18px;
       font-weight: 700;
       cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,.12);
+      box-shadow: 0 2px 8px rgba(0,0,0,.5);
       display: flex; align-items: center; justify-content: center;
       padding: 0; line-height: 1;
       transition: background .15s, transform .1s;
     }
-    #scroll-btns button:hover { background: #f0f0f0; }
+    #scroll-btns button:hover { background: #2a2a2a; }
     #scroll-btns button:active { transform: scale(.92); }
 
     @media (max-width: 1450px) {
@@ -56,13 +69,13 @@
       #scroll-btns button { width: 40px; height: 40px; font-size: 16px; }
     }
 
-    /* ⭐ Footer (중앙 정렬) */
+    /* Footer */
     #app-footer {
       margin-top: 40px;
       padding: 24px 16px;
-      background: #fafafa;
-      border-top: 1px solid #eee;
-      color: #666;
+      background: #0f0f0f;
+      border-top: 1px solid #1f1f1f;
+      color: #888;
       font-size: 13px;
       line-height: 1.8;
     }
@@ -74,7 +87,7 @@
     #app-footer .footer-title {
       font-weight: 700;
       font-size: 14px;
-      color: #333;
+      color: #ccc;
       margin-bottom: 8px;
     }
     #app-footer .footer-row {
@@ -83,13 +96,13 @@
       gap: 6px 16px;
       justify-content: center;
     }
-    #app-footer .footer-item { color: #666; }
+    #app-footer .footer-item { color: #888; }
     #app-footer .footer-text {
       margin-top: 12px;
       padding-top: 12px;
-      border-top: 1px dashed #ddd;
+      border-top: 1px dashed #222;
       font-size: 12px;
-      color: #999;
+      color: #555;
       white-space: pre-wrap;
       max-width: 800px;
       margin-left: auto;
@@ -98,6 +111,32 @@
   `;
   document.head.appendChild(style);
 })();
+
+// ⭐ 이미지 우클릭 + 드래그 + 복사 방지 (전역)
+document.addEventListener('contextmenu', (e) => {
+  if (e.target.tagName === 'IMG') e.preventDefault();
+});
+document.addEventListener('dragstart', (e) => {
+  if (e.target.tagName === 'IMG') e.preventDefault();
+});
+document.addEventListener('copy', (e) => {
+  const sel = window.getSelection();
+  if (sel && sel.anchorNode && sel.anchorNode.parentElement &&
+      sel.anchorNode.parentElement.tagName === 'IMG') {
+    e.preventDefault();
+  }
+});
+// 키보드 단축키 방지 (Ctrl+C, Ctrl+S, Ctrl+Shift+I/J/C, F12는 개발자만)
+document.addEventListener('keydown', (e) => {
+  // Ctrl+C, Ctrl+X, Ctrl+S, Ctrl+U
+  if ((e.ctrlKey || e.metaKey) && ['c','x','s','u'].includes(e.key.toLowerCase())) {
+    // 텍스트 선택 중이면 허용
+    const sel = window.getSelection();
+    if (!sel || sel.toString().length === 0) {
+      e.preventDefault();
+    }
+  }
+});
 
 // 연락처 자동 하이픈
 document.addEventListener('input', (e) => {
@@ -121,7 +160,7 @@ function applyPhoneAttrs() {
   });
 }
 
-// ===== 플로팅 스크롤 버튼 =====
+// 플로팅 스크롤 버튼
 function createScrollButtons() {
   if (document.getElementById('scroll-btns')) return;
   const wrap = document.createElement('div');
@@ -149,7 +188,7 @@ function createScrollButtons() {
   window.addEventListener('scroll', updateVisibility, { passive: true });
 }
 
-// ===== 로고 / 푸터 캐시 =====
+// 로고 / 푸터 캐시
 function getCachedLogo() {
   try { return JSON.parse(localStorage.getItem('logo_cache') || 'null') || {}; }
   catch { return {}; }
@@ -157,7 +196,6 @@ function getCachedLogo() {
 function setCachedLogo(obj) {
   try { localStorage.setItem('logo_cache', JSON.stringify(obj)); } catch {}
 }
-
 function getCachedFooter() {
   try { return JSON.parse(localStorage.getItem('footer_cache') || 'null') || {}; }
   catch { return {}; }
@@ -166,7 +204,6 @@ function setCachedFooter(obj) {
   try { localStorage.setItem('footer_cache', JSON.stringify(obj)); } catch {}
 }
 
-// ===== Supabase 클라이언트 재사용 =====
 function getSupabaseClient() {
   if (typeof supabase === 'undefined') return null;
   let client = window.db;
@@ -204,7 +241,6 @@ async function refreshFooterCache() {
   } catch (e) {}
 }
 
-// ===== Footer 자동 렌더 =====
 function renderFooter() {
   let wrap = document.getElementById('app-footer');
   if (!wrap) {
@@ -212,7 +248,6 @@ function renderFooter() {
     wrap.id = 'app-footer';
     document.body.appendChild(wrap);
   }
-
   const f = getCachedFooter();
   const owner = f.footer_owner || '';
   const phone = f.footer_phone || '';
@@ -226,7 +261,6 @@ function renderFooter() {
     refreshFooterCache();
     return;
   }
-
   wrap.style.display = 'block';
 
   const items = [];
@@ -244,32 +278,23 @@ function renderFooter() {
   `;
 }
 
-// ===== 회원 상태 재확인 =====
 async function verifyMemberStatus() {
   const memberStr = localStorage.getItem('member');
   if (!memberStr) return true;
-
   let member;
   try { member = JSON.parse(memberStr); } catch { return true; }
   if (!member || !member.id) return true;
-
   const client = getSupabaseClient();
   if (!client) return true;
-
   try {
-    const { data, error } = await client
-      .from('members').select('id, status')
-      .eq('id', member.id).maybeSingle();
-
+    const { data, error } = await client.from('members').select('id, status').eq('id', member.id).maybeSingle();
     if (error) return true;
-
     if (!data) {
       localStorage.removeItem('member');
       alert('회원 정보가 없어졌습니다. 다시 로그인해주세요.');
       location.href = 'index.html';
       return false;
     }
-
     const status = data.status || '정상';
     if (status === '정지') {
       localStorage.removeItem('member');
@@ -283,16 +308,13 @@ async function verifyMemberStatus() {
       location.href = 'index.html';
       return false;
     }
-
     member.status = status;
     localStorage.setItem('member', JSON.stringify(member));
     return true;
-  } catch (e) {
-    return true;
-  }
+  } catch (e) { return true; }
 }
 
-// ===== 공통 헤더 렌더 =====
+// ===== 헤더 렌더 (다크) =====
 let _headerRendered = false;
 function renderHeader(current) {
   const wrap = document.getElementById('app-header');
@@ -301,8 +323,9 @@ function renderHeader(current) {
   if (_headerRendered && wrap.querySelector('header')) {
     wrap.querySelectorAll('[data-nav]').forEach(el => {
       const isActive = el.dataset.nav === current;
-      el.style.background = isActive ? '#222' : '#fff';
-      el.style.color = isActive ? '#fff' : '#222';
+      el.style.background = isActive ? '#e5e7eb' : '#1a1a1a';
+      el.style.color = isActive ? '#111' : '#e5e7eb';
+      el.style.borderColor = isActive ? '#e5e7eb' : '#333';
     });
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const cc = document.getElementById('cart-count');
@@ -312,7 +335,6 @@ function renderHeader(current) {
 
   const member = localStorage.getItem('member');
   const m = member ? JSON.parse(member) : null;
-
   const cached = getCachedLogo();
   const logoImageUrl = cached.image_url || '';
   const siteName = cached.site_name || '🛍️ 심플몰';
@@ -324,9 +346,9 @@ function renderHeader(current) {
     padding: 8px 14px;
     min-width: 76px;
     height: 36px;
-    background: ${active ? '#222' : '#fff'};
-    color: ${active ? '#fff' : '#222'};
-    border: 1px solid #ddd;
+    background: ${active ? '#e5e7eb' : '#1a1a1a'};
+    color: ${active ? '#111' : '#e5e7eb'};
+    border: 1px solid ${active ? '#e5e7eb' : '#333'};
     border-radius: 6px;
     text-decoration: none;
     font-size: 14px;
@@ -334,9 +356,9 @@ function renderHeader(current) {
     white-space: nowrap;
     box-sizing: border-box;
     flex-shrink: 0;
+    transition: all .15s;
   `;
 
-  // ⭐ 이름은 별도, 버튼들만 나열
   const userBtns = m
     ? `
       <a href="mypage.html" data-nav="mypage" style="${btnStyle(current === 'mypage')}">내정보</a>
@@ -347,17 +369,16 @@ function renderHeader(current) {
       <a href="signup.html" data-nav="signup" style="${btnStyle(current === 'signup')}">회원가입</a>
     `;
 
-  // ⭐ 이름 줄 (로그인 상태일 때만, 버튼 위에 별도로)
   const nameRow = m
-    ? `<div class="header-name-row" style="text-align:right; font-size:13px; color:#555; margin-bottom:6px;">${m.name}님</div>`
+    ? `<div class="header-name-row" style="text-align:right; font-size:13px; color:#888; margin-bottom:6px;">${m.name}님</div>`
     : '';
 
   const logoHtml = logoImageUrl
     ? `<a href="index.html" style="display:inline-block;"><img src="${logoImageUrl}" alt="${siteName}" style="height:40px; max-width:240px; object-fit:contain; display:block; margin:0 auto;"></a>`
-    : `<a href="index.html" style="font-size:22px; font-weight:700; color:#222; text-decoration:none; display:inline-block;">${siteName}</a>`;
+    : `<a href="index.html" style="font-size:22px; font-weight:700; color:#fff; text-decoration:none; display:inline-block;">${siteName}</a>`;
 
   wrap.innerHTML = `
-    <header style="background:#fff; border-bottom:1px solid #eee; padding:14px 16px;">
+    <header style="background:#0f0f0f; border-bottom:1px solid #222; padding:14px 16px;">
       <div style="max-width:1400px; margin:0 auto;">
         <div style="margin-bottom:12px; text-align:center;">${logoHtml}</div>
         ${nameRow}
@@ -388,7 +409,6 @@ function renderHeader(current) {
   refreshLogoCache();
 }
 
-// ===== 자동 실행 =====
 document.addEventListener('DOMContentLoaded', async () => {
   applyPhoneAttrs();
   new MutationObserver(applyPhoneAttrs).observe(document.body, { childList: true, subtree: true });
@@ -401,13 +421,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const path = location.pathname.split('/').pop().replace('.html', '') || 'index';
   const map = {
-    'index': 'home',
-    'login': 'login',
-    'signup': 'signup',
-    'cart': 'cart',
-    'orders': 'orders',
-    'product': 'product',
-    'mypage': 'mypage',
+    'index': 'home', 'login': 'login', 'signup': 'signup',
+    'cart': 'cart', 'orders': 'orders', 'product': 'product', 'mypage': 'mypage',
   };
   const current = map[path] || 'home';
 
