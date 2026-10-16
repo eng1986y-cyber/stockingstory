@@ -1,5 +1,18 @@
 // ===== 공통 유틸 =====
 
+// ⭐ 페이지 판별 (index만 밝은 톤, 나머지 다크)
+const _pathName = location.pathname.split('/').pop().replace('.html','') || 'index';
+const _isIndex = (_pathName === '' || _pathName === 'index');
+const _isDark = !_isIndex;
+
+// 다크 테마면 body에 클래스 추가
+if (_isDark) {
+  document.documentElement.style.background = '#0a0a0a';
+  window.addEventListener('DOMContentLoaded', () => {
+    document.body.classList.add('dark');
+  });
+}
+
 // 좌우 흔들림 + 이미지 복사 방지
 (function() {
   const style = document.createElement('style');
@@ -13,8 +26,6 @@
       margin: 0 !important;
       width: 100% !important;
       max-width: 100% !important;
-      background: #0a0a0a !important;
-      color: #e5e7eb !important;
     }
     #app-header, #app-header * { box-sizing: border-box; }
     #app-header a, #app-header button, #app-header span {
@@ -47,19 +58,27 @@
     #scroll-btns button {
       width: 44px; height: 44px;
       border-radius: 50%;
-      border: 1px solid #333;
-      background: #1a1a1a;
-      color: #e5e7eb;
+      border: 1px solid #ddd;
+      background: #fff;
+      color: #222;
       font-size: 18px;
       font-weight: 700;
       cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,.5);
+      box-shadow: 0 2px 8px rgba(0,0,0,.12);
       display: flex; align-items: center; justify-content: center;
       padding: 0; line-height: 1;
       transition: background .15s, transform .1s;
     }
-    #scroll-btns button:hover { background: #2a2a2a; }
+    #scroll-btns button:hover { background: #f0f0f0; }
     #scroll-btns button:active { transform: scale(.92); }
+
+    body.dark #scroll-btns button {
+      border-color: #333;
+      background: #1a1a1a;
+      color: #e5e7eb;
+      box-shadow: 0 2px 8px rgba(0,0,0,.5);
+    }
+    body.dark #scroll-btns button:hover { background: #2a2a2a; }
 
     @media (max-width: 1450px) {
       #scroll-btns { left: auto; right: 16px; transform: none; }
@@ -73,11 +92,16 @@
     #app-footer {
       margin-top: 40px;
       padding: 24px 16px;
-      background: #0f0f0f;
-      border-top: 1px solid #1f1f1f;
-      color: #888;
+      background: #fafafa;
+      border-top: 1px solid #eee;
+      color: #666;
       font-size: 13px;
       line-height: 1.8;
+    }
+    body.dark #app-footer {
+      background: #0f0f0f;
+      border-top-color: #1f1f1f;
+      color: #888;
     }
     #app-footer .footer-inner {
       max-width: 1400px;
@@ -87,32 +111,38 @@
     #app-footer .footer-title {
       font-weight: 700;
       font-size: 14px;
-      color: #ccc;
+      color: #333;
       margin-bottom: 8px;
     }
+    body.dark #app-footer .footer-title { color: #ccc; }
     #app-footer .footer-row {
       display: flex;
       flex-wrap: wrap;
       gap: 6px 16px;
       justify-content: center;
     }
-    #app-footer .footer-item { color: #888; }
+    #app-footer .footer-item { color: #666; }
+    body.dark #app-footer .footer-item { color: #888; }
     #app-footer .footer-text {
       margin-top: 12px;
       padding-top: 12px;
-      border-top: 1px dashed #222;
+      border-top: 1px dashed #ddd;
       font-size: 12px;
-      color: #555;
+      color: #999;
       white-space: pre-wrap;
       max-width: 800px;
       margin-left: auto;
       margin-right: auto;
     }
+    body.dark #app-footer .footer-text {
+      border-top-color: #222;
+      color: #555;
+    }
   `;
   document.head.appendChild(style);
 })();
 
-// ⭐ 이미지 우클릭 + 드래그 + 복사 방지 (전역)
+// 이미지 복사 방지 이벤트
 document.addEventListener('contextmenu', (e) => {
   if (e.target.tagName === 'IMG') e.preventDefault();
 });
@@ -126,15 +156,10 @@ document.addEventListener('copy', (e) => {
     e.preventDefault();
   }
 });
-// 키보드 단축키 방지 (Ctrl+C, Ctrl+S, Ctrl+Shift+I/J/C, F12는 개발자만)
 document.addEventListener('keydown', (e) => {
-  // Ctrl+C, Ctrl+X, Ctrl+S, Ctrl+U
   if ((e.ctrlKey || e.metaKey) && ['c','x','s','u'].includes(e.key.toLowerCase())) {
-    // 텍스트 선택 중이면 허용
     const sel = window.getSelection();
-    if (!sel || sel.toString().length === 0) {
-      e.preventDefault();
-    }
+    if (!sel || sel.toString().length === 0) e.preventDefault();
   }
 });
 
@@ -160,14 +185,13 @@ function applyPhoneAttrs() {
   });
 }
 
-// 플로팅 스크롤 버튼
 function createScrollButtons() {
   if (document.getElementById('scroll-btns')) return;
   const wrap = document.createElement('div');
   wrap.id = 'scroll-btns';
   wrap.innerHTML = `
-    <button id="btn-scroll-top" title="맨 위로" aria-label="맨 위로">▲</button>
-    <button id="btn-scroll-bottom" title="맨 아래로" aria-label="맨 아래로">▼</button>
+    <button id="btn-scroll-top" title="맨 위로">▲</button>
+    <button id="btn-scroll-bottom" title="맨 아래로">▼</button>
   `;
   document.body.appendChild(wrap);
 
@@ -188,7 +212,6 @@ function createScrollButtons() {
   window.addEventListener('scroll', updateVisibility, { passive: true });
 }
 
-// 로고 / 푸터 캐시
 function getCachedLogo() {
   try { return JSON.parse(localStorage.getItem('logo_cache') || 'null') || {}; }
   catch { return {}; }
@@ -314,18 +337,47 @@ async function verifyMemberStatus() {
   } catch (e) { return true; }
 }
 
-// ===== 헤더 렌더 (다크) =====
+// ===== 헤더 렌더 (페이지 자동 감지) =====
 let _headerRendered = false;
 function renderHeader(current) {
   const wrap = document.getElementById('app-header');
   if (!wrap) return;
 
+  const isDark = _isDark;
+
+  // 색상 팔레트
+  const theme = isDark ? {
+    headerBg: '#0f0f0f',
+    borderColor: '#222',
+    textColor: '#e5e7eb',
+    logoColor: '#fff',
+    btnBg: '#1a1a1a',
+    btnBgActive: '#e5e7eb',
+    btnText: '#e5e7eb',
+    btnTextActive: '#111',
+    btnBorder: '#333',
+    btnBorderActive: '#e5e7eb',
+    nameColor: '#888',
+  } : {
+    headerBg: '#fff',
+    borderColor: '#eee',
+    textColor: '#222',
+    logoColor: '#222',
+    btnBg: '#fff',
+    btnBgActive: '#222',
+    btnText: '#222',
+    btnTextActive: '#fff',
+    btnBorder: '#ddd',
+    btnBorderActive: '#222',
+    nameColor: '#555',
+  };
+
   if (_headerRendered && wrap.querySelector('header')) {
     wrap.querySelectorAll('[data-nav]').forEach(el => {
       const isActive = el.dataset.nav === current;
-      el.style.background = isActive ? '#e5e7eb' : '#1a1a1a';
-      el.style.color = isActive ? '#111' : '#e5e7eb';
-      el.style.borderColor = isActive ? '#e5e7eb' : '#333';
+      el.style.background = isActive ? theme.btnBgActive : theme.btnBg;
+      el.style.color = isActive ? theme.btnTextActive : theme.btnText;
+      el.style.borderColor = isActive ? theme.btnBorderActive : theme.btnBorder;
     });
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const cc = document.getElementById('cart-count');
@@ -346,9 +398,9 @@ function renderHeader(current) {
     padding: 8px 14px;
     min-width: 76px;
     height: 36px;
-    background: ${active ? '#e5e7eb' : '#1a1a1a'};
-    color: ${active ? '#111' : '#e5e7eb'};
-    border: 1px solid ${active ? '#e5e7eb' : '#333'};
+    background: ${active ? theme.btnBgActive : theme.btnBg};
+    color: ${active ? theme.btnTextActive : theme.btnText};
+    border: 1px solid ${active ? theme.btnBorderActive : theme.btnBorder};
     border-radius: 6px;
     text-decoration: none;
     font-size: 14px;
@@ -370,15 +422,15 @@ function renderHeader(current) {
     `;
 
   const nameRow = m
-    ? `<div class="header-name-row" style="text-align:right; font-size:13px; color:#888; margin-bottom:6px;">${m.name}님</div>`
+    ? `<div class="header-name-row" style="text-align:right; font-size:13px; color:${theme.nameColor}; margin-bottom:6px;">${m.name}님</div>`
     : '';
 
   const logoHtml = logoImageUrl
     ? `<a href="index.html" style="display:inline-block;"><img src="${logoImageUrl}" alt="${siteName}" style="height:40px; max-width:240px; object-fit:contain; display:block; margin:0 auto;"></a>`
-    : `<a href="index.html" style="font-size:22px; font-weight:700; color:#fff; text-decoration:none; display:inline-block;">${siteName}</a>`;
+    : `<a href="index.html" style="font-size:22px; font-weight:700; color:${theme.logoColor}; text-decoration:none; display:inline-block;">${siteName}</a>`;
 
   wrap.innerHTML = `
-    <header style="background:#0f0f0f; border-bottom:1px solid #222; padding:14px 16px;">
+    <header style="background:${theme.headerBg}; border-bottom:1px solid ${theme.borderColor}; padding:14px 16px;">
       <div style="max-width:1400px; margin:0 auto;">
         <div style="margin-bottom:12px; text-align:center;">${logoHtml}</div>
         ${nameRow}
@@ -410,6 +462,9 @@ function renderHeader(current) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // 다크 테마 클래스 적용
+  if (_isDark) document.body.classList.add('dark');
+
   applyPhoneAttrs();
   new MutationObserver(applyPhoneAttrs).observe(document.body, { childList: true, subtree: true });
 
