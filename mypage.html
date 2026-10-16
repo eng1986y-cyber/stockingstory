@@ -6,52 +6,107 @@
   <title>내 정보 - 심플몰</title>
   <link rel="stylesheet" href="style.css">
   <script src="common.js"></script>
+  <style>
+    .mypage-wrap { max-width: 500px; margin: 40px auto; padding: 0 16px; }
+    .mypage-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #222;
+    }
+    body.dark .mypage-title { color: #fff; }
+    .mypage-form {
+      display: grid;
+      gap: 10px;
+      background: #fff;
+      padding: 24px;
+      border-radius: 8px;
+    }
+    body.dark .mypage-form {
+      background: #151515;
+      border: 1px solid #222;
+      border-radius: 12px;
+    }
+    .mypage-form label {
+      font-size: 13px;
+      color: #666;
+    }
+    body.dark .mypage-form label { color: #999; }
+    .mypage-form input {
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    body.dark .mypage-form input {
+      background: #0f0f0f;
+      border-color: #2a2a2a;
+      color: #e5e7eb;
+    }
+    body.dark .mypage-form input::placeholder { color: #555; }
+    .mypage-form input[readonly] {
+      background: #f5f5f5;
+      color: #888;
+    }
+    body.dark .mypage-form input[readonly] {
+      background: #1a1a1a;
+      color: #666;
+    }
+    body.dark .mypage-form input:focus {
+      outline: none;
+      border-color: #555;
+      box-shadow: 0 0 0 3px rgba(255,255,255,.05);
+    }
+    .mypage-form button {
+      padding: 14px;
+      background: #03c75a;
+      color: #fff;
+      border: 0;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 15px;
+      font-family: inherit;
+    }
+    .mypage-form button:hover { background: #02b151; }
+    #msg { margin-top: 12px; font-weight: 600; text-align: center; }
+  </style>
 </head>
 <body>
   <div id="app-header"></div>
 
   <main>
-    <div style="max-width:500px; margin:40px auto;">
-      <h2 style="margin-bottom:16px;">내 정보</h2>
-      <form id="mypage-form" style="display:grid; gap:10px; background:#fff; padding:24px; border-radius:8px;">
-        <label style="font-size:13px; color:#666;">아이디 (변경 불가)</label>
-        <input name="username" readonly
-          style="padding:12px; border:1px solid #ddd; border-radius:6px; background:#f5f5f5;">
+    <div class="mypage-wrap">
+      <h2 class="mypage-title">내 정보</h2>
+      <form id="mypage-form" class="mypage-form">
+        <label>아이디 (변경 불가)</label>
+        <input name="username" readonly>
 
-        <label style="font-size:13px; color:#666;">비밀번호</label>
-        <input name="password" type="password" placeholder="비밀번호 (변경 시 입력)"
-          style="padding:12px; border:1px solid #ddd; border-radius:6px;">
+        <label>비밀번호</label>
+        <input name="password" type="password" placeholder="비밀번호 (변경 시 입력)">
 
-        <label style="font-size:13px; color:#666;">이름</label>
-        <input name="name" required
-          style="padding:12px; border:1px solid #ddd; border-radius:6px;">
+        <label>이름</label>
+        <input name="name" required>
 
-        <label style="font-size:13px; color:#666;">연락처</label>
-        <input name="phone" type="tel" inputmode="numeric" required
-          style="padding:12px; border:1px solid #ddd; border-radius:6px;">
+        <label>연락처</label>
+        <input name="phone" type="tel" inputmode="numeric" required>
 
-        <label style="font-size:13px; color:#666;">이메일</label>
-        <input name="email" type="email"
-          style="padding:12px; border:1px solid #ddd; border-radius:6px;">
+        <label>이메일</label>
+        <input name="email" type="email">
 
-        <label style="font-size:13px; color:#666;">우편번호</label>
-        <input name="postcode"
-          style="padding:12px; border:1px solid #ddd; border-radius:6px;">
+        <label>우편번호</label>
+        <input name="postcode">
 
-        <label style="font-size:13px; color:#666;">주소</label>
-        <input name="address"
-          style="padding:12px; border:1px solid #ddd; border-radius:6px;">
+        <label>주소</label>
+        <input name="address">
 
-        <label style="font-size:13px; color:#666;">상세주소</label>
-        <input name="address_detail"
-          style="padding:12px; border:1px solid #ddd; border-radius:6px;">
+        <label>상세주소</label>
+        <input name="address_detail">
 
-        <button type="submit"
-          style="padding:14px; background:#03c75a; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600; font-size:15px;">
-          저장
-        </button>
+        <button type="submit">저장</button>
       </form>
-      <p id="msg" style="margin-top:12px; font-weight:600; text-align:center;"></p>
+      <p id="msg"></p>
     </div>
   </main>
 
@@ -73,14 +128,8 @@
       location.href = 'login.html';
     }
 
-    // ⭐ 서버에서 최신 정보 다시 불러오기 (localStorage 값이 오래됐을 수 있음)
     async function loadFromServer() {
-      const { data, error } = await db
-        .from('members')
-        .select('*')
-        .eq('id', member.id)
-        .maybeSingle();
-
+      const { data, error } = await db.from('members').select('*').eq('id', member.id).maybeSingle();
       if (error) { console.error(error); return; }
       if (!data) {
         alert('회원 정보를 찾을 수 없습니다. 다시 로그인해주세요.');
@@ -88,7 +137,6 @@
         location.href = 'login.html';
         return;
       }
-
       member = data;
       localStorage.setItem('member', JSON.stringify(data));
 
@@ -106,7 +154,7 @@
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       msg.textContent = '저장 중...';
-      msg.style.color = '#222';
+      msg.style.color = '#888';
 
       const updates = {
         name: form.name.value.trim(),
@@ -117,29 +165,22 @@
         address_detail: form.address_detail.value.trim() || null,
       };
 
-      // 비밀번호 입력했을 때만 변경
-      if (form.password.value) {
-        updates.password = form.password.value;
-      }
+      if (form.password.value) updates.password = form.password.value;
 
-      const { error } = await db
-        .from('members')
-        .update(updates)
-        .eq('id', member.id);
+      const { error } = await db.from('members').update(updates).eq('id', member.id);
 
       if (error) {
-        msg.style.color = 'crimson';
+        msg.style.color = '#ef4444';
         msg.textContent = '❌ ' + error.message;
         return;
       }
 
-      // localStorage 갱신
       const updated = { ...member, ...updates };
       localStorage.setItem('member', JSON.stringify(updated));
       member = updated;
 
       form.password.value = '';
-      msg.style.color = 'green';
+      msg.style.color = '#10b981';
       msg.textContent = '✅ 저장 완료!';
       setTimeout(() => msg.textContent = '', 2000);
     });
