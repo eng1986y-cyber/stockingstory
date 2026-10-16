@@ -7,16 +7,291 @@
   <link rel="stylesheet" href="style.css">
   <script src="common.js"></script>
   <style>
-    html, body { overflow-x: hidden; max-width: 100vw; }
+    * { box-sizing: border-box; }
 
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f4f6f8;
+      color: #1f2937;
+      margin: 0;
+    }
+
+    /* 상단 헤더 */
+    .admin-header {
+      background: #ffffff;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .admin-header .logo {
+      font-size: 18px;
+      font-weight: 700;
+      color: #111827;
+      text-decoration: none;
+      letter-spacing: -0.3px;
+    }
+    .admin-header .logo .badge {
+      background: #111827;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+    .admin-header .logout-btn {
+      padding: 8px 16px;
+      background: #f3f4f6;
+      color: #374151;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all .15s;
+    }
+    .admin-header .logout-btn:hover {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    /* 레이아웃: 사이드바 + 컨텐츠 */
+    .admin-layout {
+      display: flex;
+      gap: 24px;
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    /* 사이드바 */
+    .admin-sidebar {
+      width: 200px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 88px;
+      height: fit-content;
+    }
+    .admin-sidebar .nav-group {
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.04);
+    }
+    .admin-sidebar .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #4b5563;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all .15s;
+      border: 0;
+      background: none;
+      width: 100%;
+      text-align: left;
+      font-family: inherit;
+    }
+    .admin-sidebar .nav-item:hover {
+      background: #f3f4f6;
+      color: #111827;
+    }
+    .admin-sidebar .nav-item.active {
+      background: #111827;
+      color: #ffffff;
+    }
+    .admin-sidebar .nav-icon {
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+    }
+
+    /* 컨텐츠 */
+    .admin-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* 섹션 */
+    .admin-section {
+      display: none;
+    }
+    .admin-section.active {
+      display: block;
+      animation: fadeIn .2s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 페이지 타이틀 */
+    .page-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #111827;
+      margin: 0 0 6px;
+      letter-spacing: -0.5px;
+    }
+    .page-subtitle {
+      font-size: 13px;
+      color: #6b7280;
+      margin: 0 0 20px;
+    }
+
+    /* 카드 (섹션 공통) */
+    .card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.04);
+      margin-bottom: 16px;
+    }
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #111827;
+      margin: 0 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title .hint {
+      font-size: 12px;
+      font-weight: 400;
+      color: #9ca3af;
+    }
+
+    /* 입력 필드 공통 */
+    .input,
+    .card input[type="text"],
+    .card input[type="number"],
+    .card input[type="email"],
+    .card input[type="password"],
+    .card input:not([type]),
+    .card textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      color: #111827;
+      background: #ffffff;
+      transition: all .15s;
+      box-sizing: border-box;
+    }
+    .card input:focus,
+    .card textarea:focus {
+      outline: none;
+      border-color: #111827;
+      box-shadow: 0 0 0 3px rgba(17,24,39,.08);
+    }
+    .card input[readonly] {
+      background: #f9fafb;
+      color: #6b7280;
+      cursor: not-allowed;
+    }
+    .card textarea {
+      resize: vertical;
+      min-height: 70px;
+    }
+
+    /* 그리드 폼 */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+    }
+    .form-grid .full {
+      grid-column: 1 / -1;
+    }
+    .form-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .form-row > * {
+      flex: 1;
+      min-width: 150px;
+    }
+
+    /* 버튼 */
+    .btn {
+      padding: 10px 18px;
+      border-radius: 8px;
+      border: 0;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      transition: all .15s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-primary {
+      background: #111827;
+      color: #ffffff;
+    }
+    .btn-primary:hover {
+      background: #1f2937;
+      transform: translateY(-1px);
+    }
+    .btn-success {
+      background: #059669;
+      color: #ffffff;
+    }
+    .btn-success:hover {
+      background: #047857;
+    }
+    .btn-danger {
+      background: #dc2626;
+      color: #ffffff;
+    }
+    .btn-danger:hover {
+      background: #b91c1c;
+    }
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #374151;
+      border: 1px solid #e5e7eb;
+    }
+    .btn-secondary:hover {
+      background: #e5e7eb;
+    }
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    /* 상태 메시지 */
+    .msg {
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 12px;
+    }
+    .msg.success { color: #059669; }
+    .msg.error { color: #dc2626; }
+
+    /* 상품 등록 + 목록 좌우 배치 */
     .product-layout {
       display: flex;
       gap: 16px;
       align-items: flex-start;
-      margin-top: 8px;
     }
     .product-left {
-      flex: 0 0 480px;
+      flex: 0 0 460px;
       max-width: 100%;
     }
     .product-right {
@@ -24,159 +299,447 @@
       min-width: 0;
     }
 
-    #admin-list-wrap {
-      background: #fff;
-      border-radius: 8px;
-      padding: 12px;
+    /* 상품 목록 (1열) */
+    #admin-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
     }
 
+    /* 상품 카드 */
+    .product-item {
+      background: #ffffff;
+      border: 1px solid #f3f4f6;
+      border-radius: 10px;
+      overflow: hidden;
+      transition: all .15s;
+    }
+    .product-item:hover {
+      border-color: #e5e7eb;
+      box-shadow: 0 2px 8px rgba(0,0,0,.04);
+    }
+    .product-summary {
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+    .product-summary img {
+      width: 44px; height: 44px;
+      object-fit: cover;
+      border-radius: 8px;
+      flex-shrink: 0;
+      background: #f3f4f6;
+    }
+    .product-summary .info {
+      flex: 1;
+      min-width: 0;
+    }
+    .product-summary .name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #111827;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .product-summary .price {
+      color: #e53935;
+      font-weight: 700;
+      font-size: 13px;
+      margin-top: 2px;
+    }
+    .product-arrow {
+      color: #9ca3af;
+      font-size: 12px;
+      transition: transform .2s;
+    }
+    .product-detail {
+      display: none;
+      padding: 0 12px 12px;
+      font-size: 13px;
+      line-height: 1.7;
+      color: #4b5563;
+      border-top: 1px solid #f3f4f6;
+    }
+    .product-detail .line {
+      padding-top: 10px;
+    }
+    .product-detail .label {
+      color: #9ca3af;
+      margin-right: 4px;
+    }
+    .product-detail .actions {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      margin-top: 10px;
+    }
+
+    /* 주문 카드 */
+    .order-item {
+      background: #ffffff;
+      border-radius: 10px;
+      border-left: 4px solid #f59e0b;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,.04);
+      margin-bottom: 8px;
+    }
+    .order-summary {
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      flex-wrap: wrap;
+    }
+    .order-status-badge {
+      color: #fff;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .order-num {
+      font-size: 13px;
+      color: #1976d2;
+      font-weight: 600;
+    }
+    .order-detail {
+      display: none;
+      padding: 0 16px 16px;
+      font-size: 13px;
+      line-height: 1.8;
+      color: #374151;
+      border-top: 1px solid #f3f4f6;
+    }
+
+    /* 회원 카드 */
+    .member-item {
+      background: #ffffff;
+      padding: 14px 16px;
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.04);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .member-status-badge {
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    /* 페이지네이션 */
     #admin-pagination {
       display: flex;
       justify-content: center;
       gap: 6px;
-      margin-top: 12px;
+      margin-top: 14px;
       flex-wrap: wrap;
     }
 
-    @media (max-width: 900px) {
-      .product-layout { flex-direction: column; }
-      .product-left { flex: 1 1 auto; }
+    /* 로고/배너 미리보기 */
+    .preview-box {
+      margin-top: 12px;
+      padding: 12px;
+      background: #f9fafb;
+      border-radius: 8px;
+      border: 1px dashed #e5e7eb;
+    }
+    .preview-box .preview-label {
+      font-size: 12px;
+      color: #6b7280;
+      margin-bottom: 6px;
+    }
+
+    /* 로그인 화면 */
+    .login-wrap {
+      max-width: 380px;
+      margin: 80px auto;
+      background: #ffffff;
+      padding: 32px;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.06);
+    }
+    .login-wrap h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #111827;
+      margin: 0 0 6px;
+      letter-spacing: -0.5px;
+    }
+    .login-wrap p.sub {
+      font-size: 13px;
+      color: #6b7280;
+      margin: 0 0 24px;
+    }
+    .login-wrap form {
+      display: grid;
+      gap: 10px;
+    }
+    .login-wrap input {
+      padding: 12px 14px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    .login-wrap input:focus {
+      outline: none;
+      border-color: #111827;
+      box-shadow: 0 0 0 3px rgba(17,24,39,.08);
+    }
+    .login-wrap button {
+      padding: 12px;
+      background: #111827;
+      color: #ffffff;
+      border: 0;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      margin-top: 4px;
+    }
+    .login-wrap button:hover {
+      background: #1f2937;
+    }
+
+    /* 반응형 */
+    @media (max-width: 1000px) {
+      .admin-layout {
+        flex-direction: column;
+        padding: 16px;
+      }
+      .admin-sidebar {
+        width: 100%;
+        position: static;
+      }
+      .admin-sidebar .nav-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+      }
+      .admin-sidebar .nav-item {
+        flex: 1;
+        min-width: 100px;
+        justify-content: center;
+      }
+      .product-layout {
+        flex-direction: column;
+      }
+      .product-left {
+        flex: 1 1 auto;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .admin-header { padding: 12px 16px; }
+      .admin-layout { padding: 12px; gap: 16px; }
+      .card { padding: 16px; border-radius: 10px; }
+      .page-title { font-size: 18px; }
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1><a href="index.html">🛍️ 심플몰</a> - 관리자</h1>
-  </header>
-
-  <main>
-    <div id="login-screen" style="display:none; max-width:360px; margin:60px auto;">
-      <h2 style="margin-bottom:16px;">관리자 로그인</h2>
-      <form id="login-form" style="display:grid; gap:10px; background:#fff; padding:20px; border-radius:8px;">
-        <input name="email" type="email" placeholder="이메일" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-        <input name="password" type="password" placeholder="비밀번호" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-        <button type="submit" style="padding:12px; background:#222; color:#fff; border:0; border-radius:6px; cursor:pointer;">로그인</button>
+  <!-- 로그인 화면 -->
+  <div id="login-screen" style="display:none;">
+    <div class="login-wrap">
+      <h2>관리자 로그인</h2>
+      <p class="sub">심플몰 관리자 페이지에 접속합니다</p>
+      <form id="login-form">
+        <input name="email" type="email" placeholder="이메일" required>
+        <input name="password" type="password" placeholder="비밀번호" required>
+        <button type="submit">로그인</button>
       </form>
-      <p id="login-msg" style="margin-top:12px; font-weight:600;"></p>
+      <p id="login-msg" class="msg" style="text-align:center;"></p>
     </div>
+  </div>
 
-    <div id="admin-screen" style="display:none;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h2>관리자</h2>
-        <button id="logout-btn" style="padding:8px 14px; background:#999; color:#fff; border:0; border-radius:6px; cursor:pointer; font-size:13px;">로그아웃</button>
-      </div>
+  <!-- 관리자 화면 -->
+  <div id="admin-screen" style="display:none;">
+    <header class="admin-header">
+      <a href="index.html" class="logo">
+        🛍️ 심플몰 <span class="badge">ADMIN</span>
+      </a>
+      <button id="logout-btn" class="logout-btn">로그아웃</button>
+    </header>
 
-      <!-- 로고 관리 -->
-      <div style="background:#fff; padding:16px; border-radius:8px; margin-bottom:16px;">
-        <h3 style="font-size:15px; margin-bottom:10px;">로고 / 사이트명 관리</h3>
-        <div style="display:grid; gap:8px;">
-          <input id="logo-site-name" placeholder="사이트명 (텍스트 로고, 예: 🛍️ 심플몰)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-          <input id="logo-image-url" placeholder="로고 이미지 URL (입력 시 이미지가 우선)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-          <div style="display:flex; gap:8px;">
-            <button id="logo-save-btn" style="flex:1; padding:10px; background:#1976d2; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">등록/수정</button>
-            <button id="logo-delete-btn" style="flex:1; padding:10px; background:#e53935; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">삭제</button>
+    <div class="admin-layout">
+      <!-- 사이드바 -->
+      <aside class="admin-sidebar">
+        <div class="nav-group">
+          <button class="nav-item active" data-tab="products">
+            <span class="nav-icon">📦</span> 상품
+          </button>
+          <button class="nav-item" data-tab="orders">
+            <span class="nav-icon">🧾</span> 주문
+          </button>
+          <button class="nav-item" data-tab="members">
+            <span class="nav-icon">👥</span> 회원
+          </button>
+          <button class="nav-item" data-tab="settings">
+            <span class="nav-icon">⚙️</span> 사이트 설정
+          </button>
+        </div>
+      </aside>
+
+      <!-- 컨텐츠 -->
+      <div class="admin-content">
+
+        <!-- ========== 상품 섹션 ========== -->
+        <section id="tab-products" class="admin-section active">
+          <h1 class="page-title">상품 관리</h1>
+          <p class="page-subtitle">상품을 등록하고 목록을 관리합니다</p>
+
+          <div class="product-layout">
+            <!-- 좌측: 등록 -->
+            <div class="product-left">
+              <div class="card">
+                <div class="card-title">📝 새 상품 등록</div>
+                <form id="product-form" class="form-grid">
+                  <input name="product_code" placeholder="제품번호">
+                  <input name="name" placeholder="상품명" required>
+                  <input name="price" type="number" placeholder="가격" required>
+                  <input name="main_image" placeholder="메인 이미지 URL" required>
+                  <input name="colors" placeholder="색상 (쉼표: 빨강,파랑)">
+                  <input name="sizes" placeholder="사이즈 (쉼표: S,M,L)">
+                  <input name="hem_option" placeholder="밑단선택 (쉼표)">
+                  <input name="other_option" placeholder="기타옵션 (쉼표)">
+                  <textarea name="detail_images" class="full" placeholder="상세 이미지 URL (줄바꿈)"></textarea>
+                  <button type="submit" class="btn btn-primary full">상품 등록</button>
+                </form>
+                <p id="msg" class="msg"></p>
+              </div>
+            </div>
+
+            <!-- 우측: 목록 -->
+            <div class="product-right">
+              <div class="card">
+                <div class="card-title">
+                  📋 등록된 상품
+                  <span id="product-count" class="hint"></span>
+                </div>
+                <div id="admin-list">로딩중...</div>
+                <div id="admin-pagination"></div>
+              </div>
+            </div>
           </div>
-          <p id="logo-msg" style="font-size:13px; font-weight:600;"></p>
-        </div>
-        <div id="logo-preview" style="margin-top:12px; display:none;">
-          <div style="font-size:12px; color:#888; margin-bottom:4px;">현재 로고:</div>
-          <img id="logo-preview-img" style="max-height:60px; object-fit:contain; display:block; background:#f5f5f5; padding:6px; border-radius:6px;">
-        </div>
-      </div>
+        </section>
 
-      <!-- 푸터(소유자 정보) 관리 -->
-      <div style="background:#fff; padding:16px; border-radius:8px; margin-bottom:16px;">
-        <h3 style="font-size:15px; margin-bottom:10px;">사이트 하단 정보 (Footer)</h3>
-        <div style="display:grid; gap:8px;">
-          <input id="footer-owner" placeholder="상호명 / 대표자 (예: STK스토리 / 홍길동)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-          <input id="footer-phone" placeholder="연락처 (예: 010-0000-0000)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-          <input id="footer-email" placeholder="이메일 (예: help@stk.com)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-          <input id="footer-address" placeholder="주소 (예: 서울시 강남구 ...)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-          <input id="footer-business" placeholder="사업자등록번호 (예: 123-45-67890)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-          <textarea id="footer-text" placeholder="추가 안내문 (예: 저작권, 통신판매업 신고번호 등)" style="padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
-          <button id="save-footer" style="padding:12px; background:#03c75a; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">저장</button>
-          <p id="footer-msg" style="font-size:13px; font-weight:600;"></p>
-        </div>
-      </div>
+        <!-- ========== 주문 섹션 ========== -->
+        <section id="tab-orders" class="admin-section">
+          <h1 class="page-title">주문 관리</h1>
+          <p class="page-subtitle">주문 내역을 확인하고 상태를 변경합니다</p>
 
-      <!-- 배너 관리 -->
-      <div style="background:#fff; padding:16px; border-radius:8px; margin-bottom:16px;">
-        <h3 style="font-size:15px; margin-bottom:10px;">배너 이미지 관리</h3>
-        <div style="display:grid; gap:8px;">
-          <input id="banner-image-url" placeholder="배너 이미지 URL" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-          <input id="banner-link-url" placeholder="클릭 시 이동할 링크 URL (선택)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-          <div style="display:flex; gap:8px;">
-            <button id="banner-save-btn" style="flex:1; padding:10px; background:#1976d2; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">등록/수정</button>
-            <button id="banner-delete-btn" style="flex:1; padding:10px; background:#e53935; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">삭제</button>
+          <div class="card">
+            <div class="card-title">🔍 주문 검색</div>
+            <div class="form-row">
+              <input id="order-search" placeholder="주문번호로 검색 (예: ORD-251016-A3F9)" style="text-transform:uppercase;">
+              <button id="order-search-btn" class="btn btn-primary" style="flex:0 0 auto;">검색</button>
+              <button id="order-reset-btn" class="btn btn-secondary" style="flex:0 0 auto;">전체</button>
+            </div>
           </div>
-          <p id="banner-msg" style="font-size:13px; font-weight:600;"></p>
-        </div>
-        <div id="banner-preview" style="margin-top:12px; display:none;">
-          <div style="font-size:12px; color:#888; margin-bottom:4px;">현재 배너:</div>
-          <img id="banner-preview-img" style="width:100%; max-height:200px; object-fit:cover; border-radius:6px;">
-        </div>
-      </div>
 
-      <!-- 전체 배송비 설정 -->
-      <div style="background:#fff; padding:16px; border-radius:8px; margin-bottom:16px;">
-        <h3 style="font-size:15px; margin-bottom:10px;">전체 배송비 설정</h3>
-        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-          <input id="global-shipping" type="number" min="0" placeholder="배송비 (0=무료)"
-            style="padding:10px; border:1px solid #ddd; border-radius:6px; width:200px;">
-          <button id="save-shipping" style="padding:10px 20px; background:#03c75a; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">저장</button>
-          <span id="shipping-msg" style="font-size:13px; font-weight:600;"></span>
-        </div>
-        <p style="font-size:12px; color:#888; margin-top:6px;">모든 상품에 동일하게 적용됩니다.</p>
-      </div>
+          <div id="order-list">로딩중...</div>
+        </section>
 
-      <!-- 상품 등록 + 목록 좌우 배치 -->
-      <div class="product-layout">
-        <div class="product-left">
-          <h2 style="margin:0 0 12px;">상품 등록</h2>
-          <form id="product-form"
-            style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; background:#fff; padding:16px; border-radius:8px;">
-            <input name="product_code" placeholder="제품번호" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-            <input name="name" placeholder="상품명" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-            <input name="price" type="number" placeholder="가격" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-            <input name="main_image" placeholder="메인 이미지 URL" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-            <input name="colors" placeholder="색상 (쉼표: 빨강,파랑)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-            <input name="sizes" placeholder="사이즈 (쉼표: S,M,L)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-            <input name="hem_option" placeholder="밑단선택 (쉼표: 일반,밑딤픔)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-            <input name="other_option" placeholder="기타옵션 (쉼표: 유발,무발)" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <!-- ========== 회원 섹션 ========== -->
+        <section id="tab-members" class="admin-section">
+          <h1 class="page-title">회원 관리</h1>
+          <p class="page-subtitle">회원 정보를 조회하고 제재할 수 있습니다</p>
 
-            <textarea name="detail_images" placeholder="상세 이미지 URL (줄바꿈)" style="grid-column: 1 / -1; padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;"></textarea>
-            <button type="submit" style="grid-column: 1 / -1; padding:12px; background:#222; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">등록하기</button>
-          </form>
-          <p id="msg" style="margin-top:12px; font-weight:600;"></p>
-        </div>
-
-        <div class="product-right">
-          <h2 style="margin:0 0 12px;">등록된 상품 <span id="product-count" style="font-size:14px; color:#888; font-weight:400;"></span></h2>
-          <div id="admin-list-wrap">
-            <div id="admin-list" style="display:grid; grid-template-columns: 1fr; gap:8px;">로딩중...</div>
+          <div class="card">
+            <div class="card-title">🔍 회원 검색</div>
+            <div class="form-row">
+              <input id="member-search" placeholder="아이디 / 이름 / 연락처 / 이메일">
+              <button id="member-search-btn" class="btn btn-primary" style="flex:0 0 auto;">검색</button>
+              <button id="member-reset-btn" class="btn btn-secondary" style="flex:0 0 auto;">전체</button>
+            </div>
           </div>
-          <div id="admin-pagination"></div>
-        </div>
-      </div>
 
-      <h2 style="margin:32px 0 16px;">주문 목록</h2>
-      <div style="display:flex; gap:8px; margin-bottom:12px;">
-        <input id="order-search" placeholder="주문번호로 검색" style="flex:1; padding:10px; border:1px solid #ddd; border-radius:6px; text-transform:uppercase;">
-        <button id="order-search-btn" style="padding:10px 20px; background:#1976d2; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">검색</button>
-        <button id="order-reset-btn" style="padding:10px 20px; background:#eee; border:0; border-radius:6px; cursor:pointer;">전체</button>
-      </div>
-      <div id="order-list" style="display:grid; gap:10px;">로딩중...</div>
+          <div id="member-list">로딩중...</div>
+        </section>
 
-      <!-- 회원 관리 -->
-      <h2 style="margin:32px 0 16px;">회원 목록</h2>
-      <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
-        <input id="member-search" placeholder="아이디/이름/연락처 검색" style="flex:1; min-width:200px; padding:10px; border:1px solid #ddd; border-radius:6px;">
-        <button id="member-search-btn" style="padding:10px 20px; background:#1976d2; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">검색</button>
-        <button id="member-reset-btn" style="padding:10px 20px; background:#eee; border:0; border-radius:6px; cursor:pointer;">전체</button>
+        <!-- ========== 사이트 설정 섹션 ========== -->
+        <section id="tab-settings" class="admin-section">
+          <h1 class="page-title">사이트 설정</h1>
+          <p class="page-subtitle">로고, 배너, 푸터, 배송비를 관리합니다</p>
+
+          <!-- 로고 -->
+          <div class="card">
+            <div class="card-title">🏷️ 로고 / 사이트명</div>
+            <div class="form-grid" style="grid-template-columns: 1fr;">
+              <input id="logo-site-name" placeholder="사이트명 (텍스트 로고, 예: 🛍️ 심플몰)">
+              <input id="logo-image-url" placeholder="로고 이미지 URL (입력 시 이미지가 우선)">
+              <div class="form-row">
+                <button id="logo-save-btn" class="btn btn-primary">등록/수정</button>
+                <button id="logo-delete-btn" class="btn btn-danger">삭제</button>
+              </div>
+            </div>
+            <p id="logo-msg" class="msg"></p>
+            <div id="logo-preview" class="preview-box" style="display:none;">
+              <div class="preview-label">현재 로고</div>
+              <img id="logo-preview-img" style="max-height:60px; object-fit:contain; display:block;">
+            </div>
+          </div>
+
+          <!-- 푸터 -->
+          <div class="card">
+            <div class="card-title">📄 사이트 하단 정보 (Footer)</div>
+            <div class="form-grid" style="grid-template-columns: 1fr;">
+              <input id="footer-owner" placeholder="상호명 / 대표자 (예: STK스토리 / 홍길동)">
+              <input id="footer-phone" placeholder="연락처 (예: 010-0000-0000)">
+              <input id="footer-email" placeholder="이메일 (예: help@stk.com)">
+              <input id="footer-address" placeholder="주소 (예: 서울시 강남구 ...)">
+              <input id="footer-business" placeholder="사업자등록번호 (예: 123-45-67890)">
+              <textarea id="footer-text" placeholder="추가 안내문 (저작권, 통신판매업 신고번호 등)"></textarea>
+              <button id="save-footer" class="btn btn-success">저장</button>
+            </div>
+            <p id="footer-msg" class="msg"></p>
+          </div>
+
+          <!-- 배너 -->
+          <div class="card">
+            <div class="card-title">🖼️ 배너 이미지</div>
+            <div class="form-grid" style="grid-template-columns: 1fr;">
+              <input id="banner-image-url" placeholder="배너 이미지 URL">
+              <input id="banner-link-url" placeholder="클릭 시 이동할 링크 URL (선택)">
+              <div class="form-row">
+                <button id="banner-save-btn" class="btn btn-primary">등록/수정</button>
+                <button id="banner-delete-btn" class="btn btn-danger">삭제</button>
+              </div>
+            </div>
+            <p id="banner-msg" class="msg"></p>
+            <div id="banner-preview" class="preview-box" style="display:none;">
+              <div class="preview-label">현재 배너</div>
+              <img id="banner-preview-img" style="width:100%; max-height:180px; object-fit:cover; border-radius:6px;">
+            </div>
+          </div>
+
+          <!-- 배송비 -->
+          <div class="card">
+            <div class="card-title">🚚 전체 배송비 설정</div>
+            <div class="form-row">
+              <input id="global-shipping" type="number" min="0" placeholder="배송비 (0=무료)">
+              <button id="save-shipping" class="btn btn-success" style="flex:0 0 auto;">저장</button>
+            </div>
+            <p style="font-size:12px; color:#9ca3af; margin:6px 0 0;">모든 상품에 동일하게 적용됩니다</p>
+            <p id="shipping-msg" class="msg"></p>
+          </div>
+        </section>
+
       </div>
-      <div id="member-list" style="display:grid; gap:8px;">로딩중...</div>
     </div>
-  </main>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -191,6 +754,16 @@
     const adminScreen = document.getElementById('admin-screen');
     const loginForm = document.getElementById('login-form');
     const loginMsg = document.getElementById('login-msg');
+
+    // ===== 탭 네비게이션 =====
+    document.querySelectorAll('.admin-sidebar .nav-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.admin-sidebar .nav-item').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      });
+    });
 
     async function checkSession() {
       const { data: { session } } = await db.auth.getSession();
@@ -218,13 +791,13 @@
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       loginMsg.textContent = '로그인 중...';
-      loginMsg.style.color = '#222';
+      loginMsg.className = 'msg';
       const { error } = await db.auth.signInWithPassword({
         email: loginForm.email.value.trim(),
         password: loginForm.password.value,
       });
       if (error) {
-        loginMsg.style.color = 'crimson';
+        loginMsg.className = 'msg error';
         loginMsg.textContent = '❌ ' + error.message;
       } else {
         loginMsg.textContent = '';
@@ -269,12 +842,12 @@
       const siteName = document.getElementById('logo-site-name').value.trim();
       const imageUrl = document.getElementById('logo-image-url').value.trim();
       if (!siteName && !imageUrl) {
-        msg.style.color = 'crimson';
+        msg.className = 'msg error';
         msg.textContent = '❌ 사이트명 또는 이미지 URL 중 하나는 필요합니다.';
         return;
       }
+      msg.className = 'msg';
       msg.textContent = '저장 중...';
-      msg.style.color = '#222';
       let error;
       if (currentLogoId) {
         ({ error } = await db.from('logos').update({
@@ -291,10 +864,10 @@
         if (res.data) currentLogoId = res.data.id;
       }
       if (error) {
-        msg.style.color = 'crimson';
+        msg.className = 'msg error';
         msg.textContent = '❌ ' + error.message;
       } else {
-        msg.style.color = 'green';
+        msg.className = 'msg success';
         msg.textContent = '✅ 저장 완료!';
         loadLogo();
         setTimeout(() => msg.textContent = '', 2000);
@@ -304,19 +877,19 @@
     document.getElementById('logo-delete-btn').addEventListener('click', async () => {
       const msg = document.getElementById('logo-msg');
       if (!currentLogoId) {
-        msg.style.color = 'crimson';
+        msg.className = 'msg error';
         msg.textContent = '❌ 삭제할 로고가 없습니다.';
         return;
       }
-      if (!confirm('로고를 삭제할까요? (기본값으로 돌아갑니다)')) return;
+      if (!confirm('로고를 삭제할까요?')) return;
+      msg.className = 'msg';
       msg.textContent = '삭제 중...';
-      msg.style.color = '#222';
       const { error } = await db.from('logos').delete().eq('id', currentLogoId);
       if (error) {
-        msg.style.color = 'crimson';
+        msg.className = 'msg error';
         msg.textContent = '❌ ' + error.message;
       } else {
-        msg.style.color = 'green';
+        msg.className = 'msg success';
         msg.textContent = '✅ 삭제 완료!';
         document.getElementById('logo-site-name').value = '';
         document.getElementById('logo-image-url').value = '';
@@ -326,14 +899,12 @@
       }
     });
 
-    // ===== 푸터(소유자 정보) 관리 =====
+    // ===== 푸터 관리 =====
     async function loadFooter() {
       const keys = ['footer_owner','footer_phone','footer_email','footer_address','footer_business','footer_text'];
       const { data } = await db.from('settings').select('key, value').in('key', keys);
-
       const map = {};
       (data || []).forEach(row => { map[row.key] = row.value || ''; });
-
       document.getElementById('footer-owner').value = map.footer_owner || '';
       document.getElementById('footer-phone').value = map.footer_phone || '';
       document.getElementById('footer-email').value = map.footer_email || '';
@@ -344,9 +915,8 @@
 
     document.getElementById('save-footer').addEventListener('click', async () => {
       const msg = document.getElementById('footer-msg');
+      msg.className = 'msg';
       msg.textContent = '저장 중...';
-      msg.style.color = '#222';
-
       const updates = [
         { key: 'footer_owner', value: document.getElementById('footer-owner').value.trim() },
         { key: 'footer_phone', value: document.getElementById('footer-phone').value.trim() },
@@ -355,14 +925,12 @@
         { key: 'footer_business', value: document.getElementById('footer-business').value.trim() },
         { key: 'footer_text', value: document.getElementById('footer-text').value.trim() },
       ];
-
       const { error } = await db.from('settings').upsert(updates);
-
       if (error) {
-        msg.style.color = 'crimson';
+        msg.className = 'msg error';
         msg.textContent = '❌ ' + error.message;
       } else {
-        msg.style.color = 'green';
+        msg.className = 'msg success';
         msg.textContent = '✅ 저장 완료!';
         localStorage.removeItem('footer_cache');
         setTimeout(() => msg.textContent = '', 2000);
@@ -400,12 +968,12 @@
       const imageUrl = document.getElementById('banner-image-url').value.trim();
       const linkUrl = document.getElementById('banner-link-url').value.trim();
       if (!imageUrl) {
-        msg.style.color = 'crimson';
+        msg.className = 'msg error';
         msg.textContent = '❌ 배너 이미지 URL을 입력하세요.';
         return;
       }
+      msg.className = 'msg';
       msg.textContent = '저장 중...';
-      msg.style.color = '#222';
       let error;
       if (currentBannerId) {
         ({ error } = await db.from('banners').update({
@@ -422,10 +990,10 @@
         if (res.data) currentBannerId = res.data.id;
       }
       if (error) {
-        msg.style.color = 'crimson';
+        msg.className = 'msg error';
         msg.textContent = '❌ ' + error.message;
       } else {
-        msg.style.color = 'green';
+        msg.className = 'msg success';
         msg.textContent = '✅ 저장 완료!';
         loadBanner();
         setTimeout(() => msg.textContent = '', 2000);
@@ -435,19 +1003,19 @@
     document.getElementById('banner-delete-btn').addEventListener('click', async () => {
       const msg = document.getElementById('banner-msg');
       if (!currentBannerId) {
-        msg.style.color = 'crimson';
+        msg.className = 'msg error';
         msg.textContent = '❌ 삭제할 배너가 없습니다.';
         return;
       }
       if (!confirm('배너를 삭제할까요?')) return;
+      msg.className = 'msg';
       msg.textContent = '삭제 중...';
-      msg.style.color = '#222';
       const { error } = await db.from('banners').delete().eq('id', currentBannerId);
       if (error) {
-        msg.style.color = 'crimson';
+        msg.className = 'msg error';
         msg.textContent = '❌ ' + error.message;
       } else {
-        msg.style.color = 'green';
+        msg.className = 'msg success';
         msg.textContent = '✅ 삭제 완료!';
         document.getElementById('banner-image-url').value = '';
         document.getElementById('banner-link-url').value = '';
@@ -466,14 +1034,14 @@
     document.getElementById('save-shipping').addEventListener('click', async () => {
       const val = Number(document.getElementById('global-shipping').value) || 0;
       const sm = document.getElementById('shipping-msg');
+      sm.className = 'msg';
       sm.textContent = '저장 중...';
-      sm.style.color = '#222';
       const { error } = await db.from('settings').upsert({ key: 'shipping_fee', value: String(val) });
       if (error) {
-        sm.style.color = 'crimson';
+        sm.className = 'msg error';
         sm.textContent = '❌ ' + error.message;
       } else {
-        sm.style.color = 'green';
+        sm.className = 'msg success';
         sm.textContent = '✅ 저장 완료!';
         setTimeout(() => sm.textContent = '', 2000);
       }
@@ -488,9 +1056,8 @@
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const detail_images = form.detail_images.value.split('\n').map(s => s.trim()).filter(Boolean);
-
+      msg.className = 'msg';
       msg.textContent = '등록 중...';
-      msg.style.color = '#222';
 
       const { error } = await db.from('products').insert({
         product_code: form.product_code.value.trim() || null,
@@ -505,10 +1072,10 @@
       });
 
       if (error) {
-        msg.style.color = 'crimson';
+        msg.className = 'msg error';
         msg.textContent = '❌ ' + error.message;
       } else {
-        msg.style.color = 'green';
+        msg.className = 'msg success';
         msg.textContent = '✅ 등록 완료!';
         form.reset();
         loadAdminList();
@@ -525,14 +1092,14 @@
       const { data, error } = await db.from('products').select('*').order('created_at', { ascending: false });
       if (error) { listEl.innerHTML = '<p>불러오기 실패</p>'; return; }
       if (!data || data.length === 0) {
-        listEl.innerHTML = '<p style="text-align:center; color:#888;">등록된 상품이 없습니다.</p>';
+        listEl.innerHTML = '<p style="text-align:center; color:#9ca3af; padding:20px;">등록된 상품이 없습니다</p>';
         document.getElementById('admin-pagination').innerHTML = '';
         document.getElementById('product-count').textContent = '';
         return;
       }
       allProducts = data;
       currentPage = 1;
-      document.getElementById('product-count').textContent = `(${data.length}개)`;
+      document.getElementById('product-count').textContent = `총 ${data.length}개`;
       renderProducts();
     }
 
@@ -542,32 +1109,28 @@
       const items = allProducts.slice(start, start + PER_PAGE);
 
       listEl.innerHTML = items.map(p => `
-        <div style="background:#f9f9f9; border-radius:8px; border-left:4px solid #1976d2; overflow:hidden;">
-          <div class="product-summary" style="padding:10px; display:flex; align-items:center; gap:10px; cursor:pointer;">
-            <img src="${p.main_image}" style="width:44px; height:44px; object-fit:cover; border-radius:6px; flex-shrink:0;">
-            <div style="flex:1; min-width:0; font-size:13px; line-height:1.3;">
-              <div style="font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.name}</div>
-              <div style="color:#e53935; font-weight:700; margin-top:2px;">${Number(p.price).toLocaleString()}원</div>
+        <div class="product-item">
+          <div class="product-summary">
+            <img src="${p.main_image}" alt="">
+            <div class="info">
+              <div class="name">${p.name}</div>
+              <div class="price">${Number(p.price).toLocaleString()}원</div>
             </div>
-            <span class="product-arrow" style="color:#888; font-size:12px; transition:transform .2s;">▼</span>
+            <span class="product-arrow">▼</span>
           </div>
-          <div class="product-detail" style="display:none; padding:0 12px 12px; font-size:12px; line-height:1.7; color:#333; border-top:1px solid #eee;">
-            <div style="padding-top:8px;">
-              ${p.product_code ? `<div><span style="color:#888;">제품번호:</span> ${p.product_code}</div>` : ''}
-              ${(p.colors && p.colors.length) ? `<div><span style="color:#888;">색상:</span> ${p.colors.join(', ')}</div>` : ''}
-              ${(p.sizes && p.sizes.length) ? `<div><span style="color:#888;">사이즈:</span> ${p.sizes.join(', ')}</div>` : ''}
-              ${(p.hem_option && p.hem_option.length) ? `<div><span style="color:#888;">밑단선택:</span> ${p.hem_option.join(', ')}</div>` : ''}
-              ${(p.other_option && p.other_option.length) ? `<div><span style="color:#888;">기타옵션:</span> ${p.other_option.join(', ')}</div>` : ''}
+          <div class="product-detail">
+            <div class="line">
+              ${p.product_code ? `<div><span class="label">제품번호</span>${p.product_code}</div>` : ''}
+              ${(p.colors && p.colors.length) ? `<div><span class="label">색상</span>${p.colors.join(', ')}</div>` : ''}
+              ${(p.sizes && p.sizes.length) ? `<div><span class="label">사이즈</span>${p.sizes.join(', ')}</div>` : ''}
+              ${(p.hem_option && p.hem_option.length) ? `<div><span class="label">밑단</span>${p.hem_option.join(', ')}</div>` : ''}
+              ${(p.other_option && p.other_option.length) ? `<div><span class="label">기타</span>${p.other_option.join(', ')}</div>` : ''}
             </div>
-            <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:4px; margin-top:8px;">
-              <a href="product.html?id=${p.id}" target="_blank" rel="noopener"
-                style="text-align:center; padding:6px; background:#555; color:#fff; border-radius:4px; text-decoration:none; font-size:11px;">보기</a>
-              <a href="edit.html?id=${p.id}"
-                style="text-align:center; padding:6px; background:#1976d2; color:#fff; border-radius:4px; text-decoration:none; font-size:11px;">수정</a>
-              <button class="copy-btn" data-id="${p.id}"
-                style="padding:6px; background:#03c75a; color:#fff; border:0; border-radius:4px; cursor:pointer; font-size:11px;">복사</button>
-              <button class="del-btn" data-id="${p.id}"
-                style="padding:6px; background:#e53935; color:#fff; border:0; border-radius:4px; cursor:pointer; font-size:11px;">삭제</button>
+            <div class="actions">
+              <a href="product.html?id=${p.id}" target="_blank" class="btn btn-secondary btn-sm">보기</a>
+              <a href="edit.html?id=${p.id}" class="btn btn-primary btn-sm">수정</a>
+              <button class="copy-btn btn btn-success btn-sm" data-id="${p.id}">복사</button>
+              <button class="del-btn btn btn-danger btn-sm" data-id="${p.id}">삭제</button>
             </div>
           </div>
         </div>
@@ -577,7 +1140,7 @@
         sum.addEventListener('click', () => {
           const detail = sum.nextElementSibling;
           const arrow = sum.querySelector('.product-arrow');
-          if (detail.style.display === 'none') {
+          if (detail.style.display === 'none' || !detail.style.display) {
             detail.style.display = 'block';
             arrow.style.transform = 'rotate(180deg)';
           } else {
@@ -592,7 +1155,7 @@
           e.stopPropagation();
           const p = allProducts.find(x => String(x.id) === String(btn.dataset.id));
           if (!p) return;
-          if (!confirm(`"${p.name}" 을 그대로 복사해서 새로 등록할까요?`)) return;
+          if (!confirm(`"${p.name}" 을 복사해서 새로 등록할까요?`)) return;
 
           btn.disabled = true;
           btn.textContent = '...';
@@ -636,14 +1199,11 @@
       const el = document.getElementById('admin-pagination');
       if (totalPages <= 1) { el.innerHTML = ''; return; }
       let html = '';
-      html += `<button class="page-nav" data-page="${currentPage-1}" ${currentPage===1?'disabled':''}
-        style="padding:6px 12px; border:1px solid #ddd; border-radius:6px; background:${currentPage===1?'#f5f5f5':'#fff'}; color:${currentPage===1?'#bbb':'#222'}; cursor:${currentPage===1?'default':'pointer'}; font-size:13px;">이전</button>`;
+      html += `<button class="btn btn-secondary btn-sm page-nav" data-page="${currentPage-1}" ${currentPage===1?'disabled':''} style="${currentPage===1?'opacity:.4;cursor:not-allowed;':''}">이전</button>`;
       for (let i = 1; i <= totalPages; i++) {
-        html += `<button class="page-num" data-page="${i}"
-          style="padding:6px 12px; border:1px solid ${i===currentPage?'#1976d2':'#ddd'}; border-radius:6px; background:${i===currentPage?'#1976d2':'#fff'}; color:${i===currentPage?'#fff':'#222'}; cursor:pointer; font-size:13px; font-weight:${i===currentPage?'700':'400'};">${i}</button>`;
+        html += `<button class="btn btn-sm page-num ${i===currentPage?'btn-primary':'btn-secondary'}" data-page="${i}">${i}</button>`;
       }
-      html += `<button class="page-nav" data-page="${currentPage+1}" ${currentPage===totalPages?'disabled':''}
-        style="padding:6px 12px; border:1px solid #ddd; border-radius:6px; background:${currentPage===totalPages?'#f5f5f5':'#fff'}; color:${currentPage===totalPages?'#bbb':'#222'}; cursor:${currentPage===totalPages?'default':'pointer'}; font-size:13px;">다음</button>`;
+      html += `<button class="btn btn-secondary btn-sm page-nav" data-page="${currentPage+1}" ${currentPage===totalPages?'disabled':''} style="${currentPage===totalPages?'opacity:.4;cursor:not-allowed;':''}">다음</button>`;
       el.innerHTML = html;
 
       el.querySelectorAll('.page-num, .page-nav').forEach(btn => {
@@ -664,8 +1224,8 @@
       if (filterNum) query = query.eq('order_number', filterNum);
 
       const { data, error } = await query;
-      if (error) { el.innerHTML = '<p>불러오기 실패: ' + error.message + '</p>'; return; }
-      if (!data || data.length === 0) { el.innerHTML = '<p>주문이 없습니다.</p>'; return; }
+      if (error) { el.innerHTML = '<p>' + error.message + '</p>'; return; }
+      if (!data || data.length === 0) { el.innerHTML = '<p style="text-align:center; color:#9ca3af; padding:20px;">주문이 없습니다</p>'; return; }
 
       const groups = {};
       data.forEach(o => {
@@ -673,56 +1233,52 @@
         if (!groups[key]) groups[key] = [];
         groups[key].push(o);
       });
-
       currentOrders = data;
 
       el.innerHTML = Object.entries(groups).map(([num, items]) => {
         const first = items[0];
         const totalAll = items.reduce((s, o) => s + Number(o.total_price || 0), 0);
         return `
-          <div style="background:#fff; border-radius:8px; border-left:4px solid ${statusColor(first.status)}; overflow:hidden;">
-            <div class="order-summary" style="padding:12px 14px; display:flex; justify-content:space-between; align-items:center; gap:10px; cursor:pointer; flex-wrap:wrap;">
+          <div class="order-item" style="border-left-color:${statusColor(first.status)};">
+            <div class="order-summary">
               <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0; flex-wrap:wrap;">
-                <span style="background:${statusColor(first.status)}; color:#fff; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:600; white-space:nowrap;">${first.status}</span>
-                <span style="font-size:13px; color:#1976d2; font-weight:600;">${num}</span>
-                <span style="font-size:14px; white-space:nowrap;"><b>${first.customer_name}</b></span>
-                <span style="font-size:13px; color:#555;">${items.length}건</span>
+                <span class="order-status-badge" style="background:${statusColor(first.status)};">${first.status}</span>
+                <span class="order-num">${num}</span>
+                <span style="font-size:14px;"><b>${first.customer_name}</b></span>
+                <span style="font-size:13px; color:#6b7280;">${items.length}건</span>
                 <span style="font-size:14px; font-weight:700; color:#e53935; white-space:nowrap;">${totalAll.toLocaleString()}원</span>
               </div>
-              <span class="order-arrow" style="color:#888; font-size:12px; transition:transform .2s;">▼</span>
+              <span class="product-arrow">▼</span>
             </div>
-            <div class="order-detail" style="display:none; padding:0 14px 14px; font-size:13px; line-height:1.8; color:#333; border-top:1px solid #eee;">
+            <div class="order-detail">
               <div style="padding-top:10px;">
-                <div><span style="color:#888;">연락처:</span> ${first.customer_phone}</div>
-                <div><span style="color:#888;">주소:</span> ${first.postcode ? `[${first.postcode}] ` : ''}${first.address || ''} ${first.address_detail || ''}</div>
-                <div><span style="color:#888;">입금자명:</span> <b>${first.depositor_name}</b></div>
-                ${first.memo ? `<div><span style="color:#888;">요청:</span> ${first.memo}</div>` : ''}
-                <hr style="border:0; border-top:1px dashed #ddd; margin:8px 0;">
+                <div><span class="label">연락처</span>${first.customer_phone}</div>
+                <div><span class="label">주소</span>${first.postcode ? `[${first.postcode}] ` : ''}${first.address || ''} ${first.address_detail || ''}</div>
+                <div><span class="label">입금자명</span><b>${first.depositor_name}</b></div>
+                ${first.memo ? `<div><span class="label">요청</span>${first.memo}</div>` : ''}
+                <hr style="border:0; border-top:1px dashed #e5e7eb; margin:10px 0;">
                 ${items.map(o => `
-                  <div style="padding:4px 0;">
+                  <div style="padding:6px 0; border-bottom:1px dashed #f3f4f6;">
                     <b>${o.product_name}</b>
-                    ${o.product_code ? `<span style="color:#888;">[${o.product_code}]</span>` : ''}
+                    ${o.product_code ? `<span class="label">[${o.product_code}]</span>` : ''}
                     × ${o.quantity} = <b style="color:#e53935;">${Number(o.total_price).toLocaleString()}원</b>
-                    ${o.selected_color ? `<br><span style="color:#888; font-size:12px;">색상: ${o.selected_color}</span>` : ''}
-                    ${o.selected_size ? ` <span style="color:#888; font-size:12px;">사이즈: ${o.selected_size}</span>` : ''}
-                    ${o.selected_hem ? `<br><span style="color:#888; font-size:12px;">밑단선택: ${o.selected_hem}</span>` : ''}
-                    ${o.selected_other ? `<br><span style="color:#888; font-size:12px;">기타옵션: ${o.selected_other}</span>` : ''}
-                    <button class="order-edit" data-id="${o.id}"
-                      style="margin-left:6px; padding:3px 8px; background:#1976d2; color:#fff; border:0; border-radius:4px; cursor:pointer; font-size:11px;">수정</button>
-                    <button class="order-del" data-id="${o.id}"
-                      style="margin-left:4px; padding:3px 8px; background:#e53935; color:#fff; border:0; border-radius:4px; cursor:pointer; font-size:11px;">삭제</button>
+                    ${o.selected_color ? `<br><span class="label">색상</span>${o.selected_color}` : ''}
+                    ${o.selected_size ? ` <span class="label">사이즈</span>${o.selected_size}` : ''}
+                    ${o.selected_hem ? `<br><span class="label">밑단</span>${o.selected_hem}` : ''}
+                    ${o.selected_other ? `<br><span class="label">기타</span>${o.selected_other}` : ''}
+                    <div style="margin-top:6px;">
+                      <button class="order-edit btn btn-primary btn-sm" data-id="${o.id}">수정</button>
+                      <button class="order-del btn btn-danger btn-sm" data-id="${o.id}">삭제</button>
+                    </div>
                   </div>
                 `).join('')}
-                <div style="margin-top:10px; display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
-                  <span style="color:#888; font-size:12px;">대표 상태 변경:</span>
-                  <select data-ids="${items.map(o => o.id).join(',')}" class="group-status-select"
-                    style="padding:5px; border:1px solid #ddd; border-radius:6px;">
-                    ${['입금대기','입금완료','배송중','완료','취소'].map(s =>
-                      `<option ${s === first.status ? 'selected' : ''}>${s}</option>`
-                    ).join('')}
+                <div style="margin-top:12px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                  <span class="label">대표 상태 변경</span>
+                  <select class="group-status-select" data-ids="${items.map(o => o.id).join(',')}" style="padding:6px 10px; border:1px solid #e5e7eb; border-radius:6px; font-family:inherit;">
+                    ${['입금대기','입금완료','배송중','완료','취소'].map(s => `<option ${s === first.status ? 'selected' : ''}>${s}</option>`).join('')}
                   </select>
                 </div>
-                <div style="color:#888; font-size:12px; margin-top:6px;">
+                <div style="color:#9ca3af; font-size:12px; margin-top:8px;">
                   ${new Date(first.created_at).toLocaleString('ko-KR')}
                 </div>
               </div>
@@ -734,8 +1290,8 @@
       el.querySelectorAll('.order-summary').forEach(sum => {
         sum.addEventListener('click', () => {
           const detail = sum.nextElementSibling;
-          const arrow = sum.querySelector('.order-arrow');
-          if (detail.style.display === 'none') {
+          const arrow = sum.querySelector('.product-arrow');
+          if (detail.style.display === 'none' || !detail.style.display) {
             detail.style.display = 'block';
             arrow.style.transform = 'rotate(180deg)';
           } else {
@@ -775,7 +1331,7 @@
     }
 
     function statusColor(s) {
-      return { '입금대기':'#ff9800', '입금완료':'#03c75a', '배송중':'#1976d2', '완료':'#555', '취소':'#e53935' }[s] || '#ccc';
+      return { '입금대기':'#f59e0b', '입금완료':'#059669', '배송중':'#1976d2', '완료':'#6b7280', '취소':'#dc2626' }[s] || '#9ca3af';
     }
 
     document.getElementById('order-search-btn').addEventListener('click', () => {
@@ -792,50 +1348,48 @@
       const modal = document.createElement('div');
       modal.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:1000; padding:10px;`;
       modal.innerHTML = `
-        <div style="background:#fff; padding:20px; border-radius:10px; width:100%; max-width:440px; max-height:90vh; overflow-y:auto;">
-          <h2 style="margin-bottom:16px; font-size:18px;">주문 수정 (${o.order_number || o.id})</h2>
+        <div style="background:#fff; padding:24px; border-radius:12px; width:100%; max-width:460px; max-height:90vh; overflow-y:auto;">
+          <h2 style="margin:0 0 16px; font-size:18px;">주문 수정 (${o.order_number || o.id})</h2>
           <form id="order-edit-form" style="display:grid; gap:10px;">
             <label style="font-size:13px; font-weight:600;">상품명</label>
-            <input name="product_name" value="${o.product_name}" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <input name="product_name" value="${o.product_name}" required style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit;">
             <label style="font-size:13px; font-weight:600;">제품번호</label>
-            <input name="product_code" value="${o.product_code || ''}" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <input name="product_code" value="${o.product_code || ''}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit;">
             <label style="font-size:13px; font-weight:600;">상품 가격</label>
-            <input name="product_price" type="number" value="${o.product_price}" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <input name="product_price" type="number" value="${o.product_price}" required style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit;">
             <label style="font-size:13px; font-weight:600;">수량</label>
-            <input name="quantity" type="number" min="1" value="${o.quantity}" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <input name="quantity" type="number" min="1" value="${o.quantity}" required style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit;">
             <label style="font-size:13px; font-weight:600;">배송비</label>
-            <input name="shipping_fee" type="number" min="0" value="${o.shipping_fee || 0}" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <input name="shipping_fee" type="number" min="0" value="${o.shipping_fee || 0}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit;">
             <label style="font-size:13px; font-weight:600;">주문자 이름</label>
-            <input name="customer_name" value="${o.customer_name}" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <input name="customer_name" value="${o.customer_name}" required style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit;">
             <label style="font-size:13px; font-weight:600;">연락처</label>
-            <input name="customer_phone" type="tel" inputmode="numeric" value="${o.customer_phone}" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <input name="customer_phone" type="tel" inputmode="numeric" value="${o.customer_phone}" required style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit;">
             <label style="font-size:13px; font-weight:600;">우편번호</label>
-            <input name="postcode" value="${o.postcode || ''}" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <input name="postcode" value="${o.postcode || ''}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit;">
             <label style="font-size:13px; font-weight:600;">주소</label>
-            <input name="address" value="${o.address || ''}" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <input name="address" value="${o.address || ''}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit;">
             <label style="font-size:13px; font-weight:600;">상세주소</label>
-            <input name="address_detail" value="${o.address_detail || ''}" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <input name="address_detail" value="${o.address_detail || ''}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit;">
             <label style="font-size:13px; font-weight:600;">입금자명</label>
-            <input name="depositor_name" value="${o.depositor_name}" required style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <input name="depositor_name" value="${o.depositor_name}" required style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit;">
             <label style="font-size:13px; font-weight:600;">색상</label>
-            <input name="selected_color" value="${o.selected_color || ''}" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <input name="selected_color" value="${o.selected_color || ''}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit;">
             <label style="font-size:13px; font-weight:600;">사이즈</label>
-            <input name="selected_size" value="${o.selected_size || ''}" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <input name="selected_size" value="${o.selected_size || ''}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit;">
             <label style="font-size:13px; font-weight:600;">밑단선택</label>
-            <input name="selected_hem" value="${o.selected_hem || ''}" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <input name="selected_hem" value="${o.selected_hem || ''}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit;">
             <label style="font-size:13px; font-weight:600;">기타옵션</label>
-            <input name="selected_other" value="${o.selected_other || ''}" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <input name="selected_other" value="${o.selected_other || ''}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit;">
             <label style="font-size:13px; font-weight:600;">요청사항</label>
-            <textarea name="memo" style="padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;">${o.memo || ''}</textarea>
+            <textarea name="memo" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; min-height:60px; font-family:inherit;">${o.memo || ''}</textarea>
             <label style="font-size:13px; font-weight:600;">상태</label>
-            <select name="status" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-              ${['입금대기','입금완료','배송중','완료','취소'].map(s =>
-                `<option ${s === o.status ? 'selected' : ''}>${s}</option>`
-              ).join('')}
+            <select name="status" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit;">
+              ${['입금대기','입금완료','배송중','완료','취소'].map(s => `<option ${s === o.status ? 'selected' : ''}>${s}</option>`).join('')}
             </select>
-            <div style="display:flex; gap:8px; margin-top:8px;">
-              <button type="submit" style="flex:1; padding:12px; background:#1976d2; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">저장</button>
-              <button type="button" id="cancel-edit" style="flex:1; padding:12px; background:#eee; border:0; border-radius:6px; cursor:pointer;">취소</button>
+            <div style="display:flex; gap:8px; margin-top:10px;">
+              <button type="submit" class="btn btn-primary" style="flex:1;">저장</button>
+              <button type="button" id="cancel-edit" class="btn btn-secondary" style="flex:1;">취소</button>
             </div>
           </form>
         </div>
@@ -883,8 +1437,7 @@
       const el = document.getElementById('member-list');
       const { data, error } = await db.from('members').select('*').order('created_at', { ascending: false });
       if (error) { el.innerHTML = '<p>불러오기 실패</p>'; return; }
-      if (!data || data.length === 0) { el.innerHTML = '<p>회원이 없습니다.</p>'; return; }
-
+      if (!data || data.length === 0) { el.innerHTML = '<p style="text-align:center; color:#9ca3af; padding:20px;">회원이 없습니다</p>'; return; }
       allMembers = data;
       renderMembers();
     }
@@ -904,38 +1457,31 @@
       }
 
       if (list.length === 0) {
-        el.innerHTML = '<p style="text-align:center; color:#888;">해당하는 회원이 없습니다.</p>';
+        el.innerHTML = '<p style="text-align:center; color:#9ca3af; padding:20px;">해당하는 회원이 없습니다</p>';
         return;
       }
 
       el.innerHTML = list.map(m => {
         const status = m.status || '정상';
-        const statusColor = status === '정상' ? '#03c75a'
-                          : status === '정지' ? '#ff9800'
-                          : '#e53935';
+        const statusColor = status === '정상' ? '#059669' : status === '정지' ? '#f59e0b' : '#dc2626';
 
         return `
-          <div style="background:#fff; padding:12px 14px; border-radius:6px; font-size:13px; border-left:4px solid ${statusColor};">
-            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
-              <div style="flex:1; min-width:0;">
-                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                  <b>${m.name || '-'}</b>
-                  <span style="color:#888; font-size:12px;">(${m.username || '-'})</span>
-                  <span style="background:${statusColor}; color:#fff; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:600;">${status}</span>
-                </div>
-                <div style="color:#666; margin-top:4px; font-size:12px;">
-                  ${m.phone || '-'}
-                  ${m.email ? ` · ${m.email}` : ''}
-                </div>
-                ${m.address ? `<div style="color:#888; margin-top:2px; font-size:12px;">[${m.postcode || ''}] ${m.address} ${m.address_detail || ''}</div>` : ''}
-                ${m.memo ? `<div style="color:#888; margin-top:2px; font-size:12px;">메모: ${m.memo}</div>` : ''}
+          <div class="member-item" style="border-left:4px solid ${statusColor};">
+            <div style="flex:1; min-width:0;">
+              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:14px;">
+                <b>${m.name || '-'}</b>
+                <span style="color:#9ca3af; font-size:12px;">(${m.username || '-'})</span>
+                <span class="member-status-badge" style="background:${statusColor};">${status}</span>
               </div>
-              <div style="display:flex; gap:4px;">
-                <button class="member-edit-btn" data-id="${m.id}"
-                  style="padding:6px 12px; background:#1976d2; color:#fff; border:0; border-radius:4px; cursor:pointer; font-size:12px;">수정</button>
-                <button class="member-del-btn" data-id="${m.id}"
-                  style="padding:6px 12px; background:#e53935; color:#fff; border:0; border-radius:4px; cursor:pointer; font-size:12px;">삭제</button>
+              <div style="color:#6b7280; margin-top:4px; font-size:13px;">
+                ${m.phone || '-'}${m.email ? ` · ${m.email}` : ''}
               </div>
+              ${m.address ? `<div style="color:#9ca3af; margin-top:2px; font-size:12px;">[${m.postcode || ''}] ${m.address} ${m.address_detail || ''}</div>` : ''}
+              ${m.memo ? `<div style="color:#9ca3af; margin-top:2px; font-size:12px;">메모: ${m.memo}</div>` : ''}
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button class="member-edit-btn btn btn-primary btn-sm" data-id="${m.id}">수정</button>
+              <button class="member-del-btn btn btn-danger btn-sm" data-id="${m.id}">삭제</button>
             </div>
           </div>
         `;
@@ -955,102 +1501,64 @@
           if (!confirm(`"${m.name}" 회원을 완전히 삭제할까요?\n(복구 불가)`)) return;
 
           const { error } = await db.from('members').delete().eq('id', m.id);
-          if (error) {
-            alert('삭제 실패: ' + error.message);
-          } else {
-            alert('✅ 회원이 삭제되었습니다.');
-            loadMembers();
-          }
+          if (error) alert('삭제 실패: ' + error.message);
+          else { alert('✅ 회원이 삭제되었습니다.'); loadMembers(); }
         });
       });
     }
 
     document.getElementById('member-search-btn').addEventListener('click', () => {
-      const q = document.getElementById('member-search').value.trim();
-      renderMembers(q);
+      renderMembers(document.getElementById('member-search').value.trim());
     });
     document.getElementById('member-reset-btn').addEventListener('click', () => {
       document.getElementById('member-search').value = '';
       renderMembers();
     });
     document.getElementById('member-search').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        renderMembers(document.getElementById('member-search').value.trim());
-      }
+      if (e.key === 'Enter') renderMembers(document.getElementById('member-search').value.trim());
     });
 
-    // ===== 회원 수정/제재 모달 =====
     function showMemberEditModal(m) {
       const modal = document.createElement('div');
       modal.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:1000; padding:10px;`;
       modal.innerHTML = `
-        <div style="background:#fff; padding:20px; border-radius:10px; width:100%; max-width:460px; max-height:90vh; overflow-y:auto;">
-          <h2 style="margin-bottom:16px; font-size:18px;">회원 정보 (ID: ${m.id})</h2>
+        <div style="background:#fff; padding:24px; border-radius:12px; width:100%; max-width:480px; max-height:90vh; overflow-y:auto;">
+          <h2 style="margin:0 0 16px; font-size:18px;">회원 정보 (ID: ${m.id})</h2>
           <form id="member-edit-form" style="display:grid; gap:10px;">
             <label style="font-size:13px; font-weight:600;">아이디</label>
-            <input name="username" value="${m.username || ''}" readonly
-              style="padding:10px; border:1px solid #ddd; border-radius:6px; background:#f5f5f5;">
-
+            <input name="username" value="${m.username || ''}" readonly style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; background:#f9fafb; font-family:inherit;">
             <label style="font-size:13px; font-weight:600;">비밀번호</label>
-            <input name="password" value="${m.password || ''}"
-              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-            <p style="font-size:11px; color:#888; margin:0;">※ 필요 시 변경 (평문 저장됨)</p>
-
+            <input name="password" value="${m.password || ''}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit;">
             <label style="font-size:13px; font-weight:600;">이름</label>
-            <input name="name" value="${m.name || ''}" required
-              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-
+            <input name="name" value="${m.name || ''}" required style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit;">
             <label style="font-size:13px; font-weight:600;">연락처</label>
-            <input name="phone" type="tel" inputmode="numeric" value="${m.phone || ''}" required
-              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-
+            <input name="phone" type="tel" inputmode="numeric" value="${m.phone || ''}" required style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit;">
             <label style="font-size:13px; font-weight:600;">이메일</label>
-            <input name="email" type="email" value="${m.email || ''}"
-              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-
+            <input name="email" type="email" value="${m.email || ''}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit;">
             <label style="font-size:13px; font-weight:600;">우편번호</label>
-            <input name="postcode" value="${m.postcode || ''}"
-              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-
+            <input name="postcode" value="${m.postcode || ''}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit;">
             <label style="font-size:13px; font-weight:600;">주소</label>
-            <input name="address" value="${m.address || ''}"
-              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-
+            <input name="address" value="${m.address || ''}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit;">
             <label style="font-size:13px; font-weight:600;">상세주소</label>
-            <input name="address_detail" value="${m.address_detail || ''}"
-              style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-
+            <input name="address_detail" value="${m.address_detail || ''}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit;">
             <label style="font-size:13px; font-weight:600;">회원 상태</label>
-            <select name="status" style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-              ${['정상','정지','탈퇴'].map(s =>
-                `<option ${s === (m.status || '정상') ? 'selected' : ''}>${s}</option>`
-              ).join('')}
+            <select name="status" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit;">
+              ${['정상','정지','탈퇴'].map(s => `<option ${s === (m.status || '정상') ? 'selected' : ''}>${s}</option>`).join('')}
             </select>
-
             <label style="font-size:13px; font-weight:600;">관리자 메모</label>
-            <textarea name="memo" placeholder="제재 사유 등"
-              style="padding:10px; border:1px solid #ddd; border-radius:6px; min-height:60px;">${m.memo || ''}</textarea>
-
-            <div style="display:flex; gap:8px; margin-top:8px;">
-              <button type="submit"
-                style="flex:1; padding:12px; background:#1976d2; color:#fff; border:0; border-radius:6px; cursor:pointer; font-weight:600;">
-                저장
-              </button>
-              <button type="button" id="cancel-edit"
-                style="flex:1; padding:12px; background:#eee; border:0; border-radius:6px; cursor:pointer;">
-                취소
-              </button>
+            <textarea name="memo" placeholder="제재 사유 등" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; min-height:60px; font-family:inherit;">${m.memo || ''}</textarea>
+            <div style="display:flex; gap:8px; margin-top:10px;">
+              <button type="submit" class="btn btn-primary" style="flex:1;">저장</button>
+              <button type="button" id="cancel-edit" class="btn btn-secondary" style="flex:1;">취소</button>
             </div>
           </form>
         </div>
       `;
       document.body.appendChild(modal);
       modal.querySelector('#cancel-edit').onclick = () => modal.remove();
-
       modal.querySelector('#member-edit-form').addEventListener('submit', async (ev) => {
         ev.preventDefault();
         const f = ev.target;
-
         const updates = {
           password: f.password.value,
           name: f.name.value.trim(),
@@ -1062,9 +1570,7 @@
           status: f.status.value,
           memo: f.memo.value.trim() || null,
         };
-
         const { error } = await db.from('members').update(updates).eq('id', m.id);
-
         if (error) { alert('❌ 저장 실패: ' + error.message); return; }
         alert('✅ 저장 완료!');
         modal.remove();
