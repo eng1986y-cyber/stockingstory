@@ -55,13 +55,14 @@
       font-size: 13px;
       font-weight: 500;
       transition: all .15s;
+      font-family: inherit;
     }
     .admin-header .logout-btn:hover {
       background: #e5e7eb;
       color: #111827;
     }
 
-    /* 레이아웃: 사이드바 + 컨텐츠 */
+    /* 레이아웃 */
     .admin-layout {
       display: flex;
       gap: 24px;
@@ -116,15 +117,10 @@
     }
 
     /* 컨텐츠 */
-    .admin-content {
-      flex: 1;
-      min-width: 0;
-    }
+    .admin-content { flex: 1; min-width: 0; }
 
     /* 섹션 */
-    .admin-section {
-      display: none;
-    }
+    .admin-section { display: none; }
     .admin-section.active {
       display: block;
       animation: fadeIn .2s ease;
@@ -148,7 +144,7 @@
       margin: 0 0 20px;
     }
 
-    /* 카드 (섹션 공통) */
+    /* 카드 */
     .card {
       background: #ffffff;
       border-radius: 12px;
@@ -171,13 +167,9 @@
       color: #9ca3af;
     }
 
-    /* 입력 필드 공통 */
+    /* ⭐ 입력 필드 (모든 input/textarea 통일) */
     .input,
-    .card input[type="text"],
-    .card input[type="number"],
-    .card input[type="email"],
-    .card input[type="password"],
-    .card input:not([type]),
+    .card input,
     .card textarea {
       width: 100%;
       padding: 10px 12px;
@@ -206,15 +198,13 @@
       min-height: 70px;
     }
 
-    /* 그리드 폼 */
+    /* 폼 그리드 */
     .form-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 10px;
     }
-    .form-grid .full {
-      grid-column: 1 / -1;
-    }
+    .form-grid .full { grid-column: 1 / -1; }
     .form-row {
       display: flex;
       gap: 8px;
@@ -239,43 +229,23 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
+      text-decoration: none;
     }
-    .btn-primary {
-      background: #111827;
-      color: #ffffff;
-    }
-    .btn-primary:hover {
-      background: #1f2937;
-      transform: translateY(-1px);
-    }
-    .btn-success {
-      background: #059669;
-      color: #ffffff;
-    }
-    .btn-success:hover {
-      background: #047857;
-    }
-    .btn-danger {
-      background: #dc2626;
-      color: #ffffff;
-    }
-    .btn-danger:hover {
-      background: #b91c1c;
-    }
+    .btn-primary { background: #111827; color: #ffffff; }
+    .btn-primary:hover { background: #1f2937; transform: translateY(-1px); }
+    .btn-success { background: #059669; color: #ffffff; }
+    .btn-success:hover { background: #047857; }
+    .btn-danger { background: #dc2626; color: #ffffff; }
+    .btn-danger:hover { background: #b91c1c; }
     .btn-secondary {
       background: #f3f4f6;
       color: #374151;
       border: 1px solid #e5e7eb;
     }
-    .btn-secondary:hover {
-      background: #e5e7eb;
-    }
-    .btn-sm {
-      padding: 6px 12px;
-      font-size: 12px;
-    }
+    .btn-secondary:hover { background: #e5e7eb; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
 
-    /* 상태 메시지 */
+    /* 메시지 */
     .msg {
       font-size: 13px;
       font-weight: 600;
@@ -284,29 +254,21 @@
     .msg.success { color: #059669; }
     .msg.error { color: #dc2626; }
 
-    /* 상품 등록 + 목록 좌우 배치 */
+    /* 상품 등록 + 목록 */
     .product-layout {
       display: flex;
       gap: 16px;
       align-items: flex-start;
     }
-    .product-left {
-      flex: 0 0 460px;
-      max-width: 100%;
-    }
-    .product-right {
-      flex: 1 1 auto;
-      min-width: 0;
-    }
+    .product-left { flex: 0 0 460px; max-width: 100%; }
+    .product-right { flex: 1 1 auto; min-width: 0; }
 
-    /* 상품 목록 (1열) */
     #admin-list {
       display: grid;
       grid-template-columns: 1fr;
       gap: 8px;
     }
 
-    /* 상품 카드 */
     .product-item {
       background: #ffffff;
       border: 1px solid #f3f4f6;
@@ -332,10 +294,7 @@
       flex-shrink: 0;
       background: #f3f4f6;
     }
-    .product-summary .info {
-      flex: 1;
-      min-width: 0;
-    }
+    .product-summary .info { flex: 1; min-width: 0; }
     .product-summary .name {
       font-size: 14px;
       font-weight: 600;
@@ -363,13 +322,8 @@
       color: #4b5563;
       border-top: 1px solid #f3f4f6;
     }
-    .product-detail .line {
-      padding-top: 10px;
-    }
-    .product-detail .label {
-      color: #9ca3af;
-      margin-right: 4px;
-    }
+    .product-detail .line { padding-top: 10px; }
+    .product-detail .label { color: #9ca3af; margin-right: 4px; }
     .product-detail .actions {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -437,7 +391,6 @@
       color: #fff;
     }
 
-    /* 페이지네이션 */
     #admin-pagination {
       display: flex;
       justify-content: center;
@@ -446,7 +399,7 @@
       flex-wrap: wrap;
     }
 
-    /* 로고/배너 미리보기 */
+    /* 미리보기 */
     .preview-box {
       margin-top: 12px;
       padding: 12px;
@@ -460,7 +413,7 @@
       margin-bottom: 6px;
     }
 
-    /* 로그인 화면 */
+    /* 로그인 */
     .login-wrap {
       max-width: 380px;
       margin: 80px auto;
@@ -481,16 +434,15 @@
       color: #6b7280;
       margin: 0 0 24px;
     }
-    .login-wrap form {
-      display: grid;
-      gap: 10px;
-    }
+    .login-wrap form { display: grid; gap: 10px; }
     .login-wrap input {
       padding: 12px 14px;
       border: 1px solid #e5e7eb;
       border-radius: 8px;
       font-size: 14px;
       font-family: inherit;
+      width: 100%;
+      box-sizing: border-box;
     }
     .login-wrap input:focus {
       outline: none;
@@ -509,9 +461,7 @@
       font-family: inherit;
       margin-top: 4px;
     }
-    .login-wrap button:hover {
-      background: #1f2937;
-    }
+    .login-wrap button:hover { background: #1f2937; }
 
     /* 반응형 */
     @media (max-width: 1000px) {
@@ -533,12 +483,8 @@
         min-width: 100px;
         justify-content: center;
       }
-      .product-layout {
-        flex-direction: column;
-      }
-      .product-left {
-        flex: 1 1 auto;
-      }
+      .product-layout { flex-direction: column; }
+      .product-left { flex: 1 1 auto; }
     }
 
     @media (max-width: 600px) {
@@ -550,7 +496,7 @@
   </style>
 </head>
 <body>
-  <!-- 로그인 화면 -->
+  <!-- 로그인 -->
   <div id="login-screen" style="display:none;">
     <div class="login-wrap">
       <h2>관리자 로그인</h2>
@@ -564,7 +510,7 @@
     </div>
   </div>
 
-  <!-- 관리자 화면 -->
+  <!-- 관리자 -->
   <div id="admin-screen" style="display:none;">
     <header class="admin-header">
       <a href="index.html" class="logo">
@@ -574,34 +520,23 @@
     </header>
 
     <div class="admin-layout">
-      <!-- 사이드바 -->
       <aside class="admin-sidebar">
         <div class="nav-group">
-          <button class="nav-item active" data-tab="products">
-            <span class="nav-icon">📦</span> 상품
-          </button>
-          <button class="nav-item" data-tab="orders">
-            <span class="nav-icon">🧾</span> 주문
-          </button>
-          <button class="nav-item" data-tab="members">
-            <span class="nav-icon">👥</span> 회원
-          </button>
-          <button class="nav-item" data-tab="settings">
-            <span class="nav-icon">⚙️</span> 사이트 설정
-          </button>
+          <button class="nav-item active" data-tab="products"><span class="nav-icon">📦</span> 상품</button>
+          <button class="nav-item" data-tab="orders"><span class="nav-icon">🧾</span> 주문</button>
+          <button class="nav-item" data-tab="members"><span class="nav-icon">👥</span> 회원</button>
+          <button class="nav-item" data-tab="settings"><span class="nav-icon">⚙️</span> 사이트 설정</button>
         </div>
       </aside>
 
-      <!-- 컨텐츠 -->
       <div class="admin-content">
 
-        <!-- ========== 상품 섹션 ========== -->
+        <!-- 상품 -->
         <section id="tab-products" class="admin-section active">
           <h1 class="page-title">상품 관리</h1>
           <p class="page-subtitle">상품을 등록하고 목록을 관리합니다</p>
 
           <div class="product-layout">
-            <!-- 좌측: 등록 -->
             <div class="product-left">
               <div class="card">
                 <div class="card-title">📝 새 상품 등록</div>
@@ -621,7 +556,6 @@
               </div>
             </div>
 
-            <!-- 우측: 목록 -->
             <div class="product-right">
               <div class="card">
                 <div class="card-title">
@@ -635,7 +569,7 @@
           </div>
         </section>
 
-        <!-- ========== 주문 섹션 ========== -->
+        <!-- 주문 -->
         <section id="tab-orders" class="admin-section">
           <h1 class="page-title">주문 관리</h1>
           <p class="page-subtitle">주문 내역을 확인하고 상태를 변경합니다</p>
@@ -652,7 +586,7 @@
           <div id="order-list">로딩중...</div>
         </section>
 
-        <!-- ========== 회원 섹션 ========== -->
+        <!-- 회원 -->
         <section id="tab-members" class="admin-section">
           <h1 class="page-title">회원 관리</h1>
           <p class="page-subtitle">회원 정보를 조회하고 제재할 수 있습니다</p>
@@ -669,12 +603,11 @@
           <div id="member-list">로딩중...</div>
         </section>
 
-        <!-- ========== 사이트 설정 섹션 ========== -->
+        <!-- 설정 -->
         <section id="tab-settings" class="admin-section">
           <h1 class="page-title">사이트 설정</h1>
           <p class="page-subtitle">로고, 배너, 푸터, 배송비를 관리합니다</p>
 
-          <!-- 로고 -->
           <div class="card">
             <div class="card-title">🏷️ 로고 / 사이트명</div>
             <div class="form-grid" style="grid-template-columns: 1fr;">
@@ -692,7 +625,6 @@
             </div>
           </div>
 
-          <!-- 푸터 -->
           <div class="card">
             <div class="card-title">📄 사이트 하단 정보 (Footer)</div>
             <div class="form-grid" style="grid-template-columns: 1fr;">
@@ -707,7 +639,6 @@
             <p id="footer-msg" class="msg"></p>
           </div>
 
-          <!-- 배너 -->
           <div class="card">
             <div class="card-title">🖼️ 배너 이미지</div>
             <div class="form-grid" style="grid-template-columns: 1fr;">
@@ -725,7 +656,6 @@
             </div>
           </div>
 
-          <!-- 배송비 -->
           <div class="card">
             <div class="card-title">🚚 전체 배송비 설정</div>
             <div class="form-row">
@@ -755,7 +685,7 @@
     const loginForm = document.getElementById('login-form');
     const loginMsg = document.getElementById('login-msg');
 
-    // ===== 탭 네비게이션 =====
+    // 탭 네비게이션
     document.querySelectorAll('.admin-sidebar .nav-item').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.admin-sidebar .nav-item').forEach(b => b.classList.remove('active'));
@@ -810,7 +740,7 @@
       showLogin();
     });
 
-    // ===== 로고 관리 =====
+    // ===== 로고 =====
     let currentLogoId = null;
     async function loadLogo() {
       const { data, error } = await db.from('logos').select('*').order('id', { ascending: false }).limit(1).maybeSingle();
@@ -899,7 +829,7 @@
       }
     });
 
-    // ===== 푸터 관리 =====
+    // ===== 푸터 =====
     async function loadFooter() {
       const keys = ['footer_owner','footer_phone','footer_email','footer_address','footer_business','footer_text'];
       const { data } = await db.from('settings').select('key, value').in('key', keys);
@@ -937,7 +867,7 @@
       }
     });
 
-    // ===== 배너 관리 =====
+    // ===== 배너 =====
     let currentBannerId = null;
     async function loadBanner() {
       const { data, error } = await db.from('banners').select('*').order('id', { ascending: false }).limit(1).maybeSingle();
@@ -1025,7 +955,7 @@
       }
     });
 
-    // ===== 배송비 설정 =====
+    // ===== 배송비 =====
     async function loadShippingSetting() {
       const { data } = await db.from('settings').select('value').eq('key', 'shipping_fee').maybeSingle();
       document.getElementById('global-shipping').value = data ? (data.value || 0) : 0;
@@ -1215,7 +1145,7 @@
       });
     }
 
-    // ===== 주문 목록 =====
+    // ===== 주문 =====
     let currentOrders = [];
 
     async function loadOrders(filterNum) {
@@ -1430,7 +1360,7 @@
       });
     }
 
-    // ===== 회원 관리 =====
+    // ===== 회원 =====
     let allMembers = [];
 
     async function loadMembers() {
