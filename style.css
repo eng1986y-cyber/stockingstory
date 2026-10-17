@@ -7,51 +7,23 @@ body {
   min-height: 100vh;
 }
 
-/* ⭐ 다크 테마 (body.dark) */
-body.dark {
-  background: #0a0a0a;
-  color: #e5e7eb;
-}
+body.dark { background: #0a0a0a; color: #e5e7eb; }
 body.dark a { color: #e5e7eb; }
 
-header {
-  background: #fff;
-  padding: 16px 20px;
-  border-bottom: 1px solid #eee;
-}
-body.dark header {
-  background: #0f0f0f;
-  border-bottom-color: #222;
-}
+header { background: #fff; padding: 16px 20px; border-bottom: 1px solid #eee; }
+body.dark header { background: #0f0f0f; border-bottom-color: #222; }
 header a { text-decoration: none; color: #222; }
 body.dark header a { color: #e5e7eb; }
 
 main { max-width: 1400px; margin: 20px auto; padding: 0 16px; }
 
-/* 그리드/카드 */
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
 
-.card {
-  background: #fff;
-  border-radius: 8px;
-  overflow: hidden;
-  text-decoration: none;
-  color: inherit;
-}
-body.dark .card {
-  background: #151515;
-  border: 1px solid #222;
-  border-radius: 12px;
-}
+.card { background: #fff; border-radius: 8px; overflow: hidden; text-decoration: none; color: inherit; }
+body.dark .card { background: #151515; border: 1px solid #222; border-radius: 12px; }
 @media (hover: hover) {
-  .card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,.08);
-  }
-  body.dark .card:hover {
-    border-color: #333;
-    box-shadow: 0 4px 16px rgba(0,0,0,.4);
-  }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+  body.dark .card:hover { border-color: #333; box-shadow: 0 4px 16px rgba(0,0,0,.4); }
 }
 .card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block; }
 .card-body { padding: 10px; }
@@ -60,103 +32,40 @@ body.dark .card-body h3 { color: #e5e7eb; }
 .price { color: #e53935; font-weight: 700; margin-top: 4px; }
 body.dark .price { color: #ef4444; }
 
-/* 상세 */
-.detail-wrap {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-}
-body.dark .detail-wrap {
-  background: #151515;
-  border: 1px solid #222;
-  border-radius: 12px;
-}
+.detail-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; background: #fff; padding: 20px; border-radius: 8px; }
+body.dark .detail-wrap { background: #151515; border: 1px solid #222; border-radius: 12px; }
 .main-img { width: 100%; border-radius: 6px; }
 .info h2 { margin-bottom: 8px; }
 body.dark .info h2 { color: #fff; }
 .info .price { font-size: 22px; margin: 12px 0; }
-.buy-btn {
-  width: 100%;
-  padding: 12px;
-  background: #222;
-  color: #fff;
-  border: 0;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-top: 16px;
-}
+.buy-btn { width: 100%; padding: 12px; background: #222; color: #fff; border: 0; border-radius: 6px; cursor: pointer; margin-top: 16px; }
 .detail-images img { width: 100%; display: block; margin-top: 8px; }
 
-/* 폼 */
-form {
-  display: grid;
-  gap: 10px;
-  background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  max-width: 500px;
+form { display: grid; gap: 10px; background: #fff; padding: 20px; border-radius: 8px; max-width: 500px; }
+body.dark form { background: #151515; border: 1px solid #222; border-radius: 12px; }
+form input, form textarea, form select {
+  padding: 10px; border: 1px solid #ddd; border-radius: 6px;
+  font-size: 14px; font-family: inherit;
 }
-body.dark form {
-  background: #151515;
-  border: 1px solid #222;
-  border-radius: 12px;
+body.dark form input, body.dark form textarea, body.dark form select {
+  background: #0f0f0f; border-color: #2a2a2a; color: #e5e7eb;
 }
-form input,
-form textarea,
-form select {
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-  font-family: inherit;
-}
-body.dark form input,
-body.dark form textarea,
-body.dark form select {
-  background: #0f0f0f;
-  border-color: #2a2a2a;
-  color: #e5e7eb;
-}
-body.dark form input:focus,
-body.dark form textarea:focus,
-body.dark form select:focus {
-  outline: none;
-  border-color: #555;
+body.dark form input:focus, body.dark form textarea:focus, body.dark form select:focus {
+  outline: none; border-color: #555;
   box-shadow: 0 0 0 3px rgba(255,255,255,.05);
 }
-body.dark form input::placeholder,
-body.dark form textarea::placeholder { color: #555; }
+body.dark form input::placeholder, body.dark form textarea::placeholder { color: #555; }
 form textarea { min-height: 80px; resize: vertical; }
-form button {
-  padding: 12px;
-  background: #222;
-  color: #fff;
-  border: 0;
-  border-radius: 6px;
-  cursor: pointer;
-  font-family: inherit;
-}
-body.dark form button {
-  background: #e5e7eb;
-  color: #111;
-  font-weight: 600;
-}
+form button { padding: 12px; background: #222; color: #fff; border: 0; border-radius: 6px; cursor: pointer; font-family: inherit; }
+body.dark form button { background: #e5e7eb; color: #111; font-weight: 600; }
 
-/* 이미지 복사 방지 */
 img {
-  -webkit-user-drag: none;
-  user-drag: none;
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
-  pointer-events: none;
+  -webkit-user-drag: none; user-drag: none;
+  user-select: none; -webkit-user-select: none;
+  -webkit-touch-callout: none; pointer-events: none;
 }
 a img { pointer-events: auto; }
 
-/* 스크롤바 */
 body.dark ::-webkit-scrollbar { width: 10px; }
 body.dark ::-webkit-scrollbar-track { background: #0a0a0a; }
 body.dark ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 5px; }

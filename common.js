@@ -1,39 +1,29 @@
 // ===== 공통 유틸 =====
 
-// ⭐ 페이지 판별 (index만 밝은 톤, 나머지 다크)
+// ⭐ 페이지 판별
 const _pathName = location.pathname.split('/').pop().replace('.html','') || 'index';
 const _isIndex = (_pathName === '' || _pathName === 'index');
-const _isDark = !_isIndex;
+const _isAdmin = (_pathName === 'admin' || _pathName === 'edit');
+const _isDark = !_isIndex && !_isAdmin;
 
-// 다크 테마면 body에 클래스 추가
 if (_isDark) {
   document.documentElement.style.background = '#0a0a0a';
-  window.addEventListener('DOMContentLoaded', () => {
-    document.body.classList.add('dark');
-  });
 }
 
 // 좌우 흔들림 + 이미지 복사 방지
 (function() {
   const style = document.createElement('style');
   style.textContent = `
-    html {
-      overflow-y: scroll !important;
-      overflow-x: hidden !important;
-    }
+    html { overflow-y: scroll !important; overflow-x: hidden !important; }
     body {
       overflow-x: hidden !important;
       margin: 0 !important;
-      width: 100% !important;
-      max-width: 100% !important;
+      width: 100% !important; max-width: 100% !important;
     }
     #app-header, #app-header * { box-sizing: border-box; }
     #app-header a, #app-header button, #app-header span {
-      white-space: nowrap;
-      flex-shrink: 0;
+      white-space: nowrap; flex-shrink: 0;
     }
-
-    /* 이미지 복사/드래그 방지 */
     img {
       -webkit-user-drag: none !important;
       user-drag: none !important;
@@ -44,38 +34,25 @@ if (_isDark) {
     }
     a img { pointer-events: auto !important; }
 
-    /* 플로팅 스크롤 버튼 */
     #scroll-btns {
       position: fixed;
       left: 50%;
       transform: translateX(calc(700px + 16px));
       bottom: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      z-index: 900;
+      display: flex; flex-direction: column; gap: 8px; z-index: 900;
     }
     #scroll-btns button {
-      width: 44px; height: 44px;
-      border-radius: 50%;
-      border: 1px solid #ddd;
-      background: #fff;
-      color: #222;
-      font-size: 18px;
-      font-weight: 700;
-      cursor: pointer;
+      width: 44px; height: 44px; border-radius: 50%;
+      border: 1px solid #ddd; background: #fff; color: #222;
+      font-size: 18px; font-weight: 700; cursor: pointer;
       box-shadow: 0 2px 8px rgba(0,0,0,.12);
       display: flex; align-items: center; justify-content: center;
-      padding: 0; line-height: 1;
-      transition: background .15s, transform .1s;
+      padding: 0; line-height: 1; transition: background .15s, transform .1s;
     }
     #scroll-btns button:hover { background: #f0f0f0; }
     #scroll-btns button:active { transform: scale(.92); }
-
     body.dark #scroll-btns button {
-      border-color: #333;
-      background: #1a1a1a;
-      color: #e5e7eb;
+      border-color: #333; background: #1a1a1a; color: #e5e7eb;
       box-shadow: 0 2px 8px rgba(0,0,0,.5);
     }
     body.dark #scroll-btns button:hover { background: #2a2a2a; }
@@ -88,61 +65,33 @@ if (_isDark) {
       #scroll-btns button { width: 40px; height: 40px; font-size: 16px; }
     }
 
-    /* Footer */
     #app-footer {
-      margin-top: 40px;
-      padding: 24px 16px;
-      background: #fafafa;
-      border-top: 1px solid #eee;
-      color: #666;
-      font-size: 13px;
-      line-height: 1.8;
+      margin-top: 40px; padding: 24px 16px;
+      background: #fafafa; border-top: 1px solid #eee;
+      color: #666; font-size: 13px; line-height: 1.8;
     }
     body.dark #app-footer {
-      background: #0f0f0f;
-      border-top-color: #1f1f1f;
-      color: #888;
+      background: #0f0f0f; border-top-color: #1f1f1f; color: #888;
     }
-    #app-footer .footer-inner {
-      max-width: 1400px;
-      margin: 0 auto;
-      text-align: center;
-    }
-    #app-footer .footer-title {
-      font-weight: 700;
-      font-size: 14px;
-      color: #333;
-      margin-bottom: 8px;
-    }
+    #app-footer .footer-inner { max-width: 1400px; margin: 0 auto; text-align: center; }
+    #app-footer .footer-title { font-weight: 700; font-size: 14px; color: #333; margin-bottom: 8px; }
     body.dark #app-footer .footer-title { color: #ccc; }
-    #app-footer .footer-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px 16px;
-      justify-content: center;
-    }
+    #app-footer .footer-row { display: flex; flex-wrap: wrap; gap: 6px 16px; justify-content: center; }
     #app-footer .footer-item { color: #666; }
     body.dark #app-footer .footer-item { color: #888; }
     #app-footer .footer-text {
-      margin-top: 12px;
-      padding-top: 12px;
+      margin-top: 12px; padding-top: 12px;
       border-top: 1px dashed #ddd;
-      font-size: 12px;
-      color: #999;
-      white-space: pre-wrap;
-      max-width: 800px;
-      margin-left: auto;
-      margin-right: auto;
+      font-size: 12px; color: #999;
+      white-space: pre-wrap; max-width: 800px;
+      margin-left: auto; margin-right: auto;
     }
-    body.dark #app-footer .footer-text {
-      border-top-color: #222;
-      color: #555;
-    }
+    body.dark #app-footer .footer-text { border-top-color: #222; color: #555; }
   `;
   document.head.appendChild(style);
 })();
 
-// 이미지 복사 방지 이벤트
+// 이미지 복사 방지
 document.addEventListener('contextmenu', (e) => {
   if (e.target.tagName === 'IMG') e.preventDefault();
 });
@@ -156,12 +105,6 @@ document.addEventListener('copy', (e) => {
     e.preventDefault();
   }
 });
-document.addEventListener('keydown', (e) => {
-  if ((e.ctrlKey || e.metaKey) && ['c','x','s','u'].includes(e.key.toLowerCase())) {
-    const sel = window.getSelection();
-    if (!sel || sel.toString().length === 0) e.preventDefault();
-  }
-});
 
 // 연락처 자동 하이픈
 document.addEventListener('input', (e) => {
@@ -169,7 +112,6 @@ document.addEventListener('input', (e) => {
   if (el.tagName !== 'INPUT') return;
   const isPhone = (el.name && /phone/i.test(el.name)) || (el.id && /phone/i.test(el.id));
   if (!isPhone) return;
-
   const num = el.value.replace(/[^0-9]/g, '').slice(0, 11);
   if (num.length < 4) el.value = num;
   else if (num.length < 7) el.value = num.slice(0,3) + '-' + num.slice(3);
@@ -194,14 +136,12 @@ function createScrollButtons() {
     <button id="btn-scroll-bottom" title="맨 아래로">▼</button>
   `;
   document.body.appendChild(wrap);
-
   document.getElementById('btn-scroll-top').addEventListener('click', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
   document.getElementById('btn-scroll-bottom').addEventListener('click', () => {
     window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
   });
-
   const updateVisibility = () => {
     const canScroll = document.documentElement.scrollHeight > window.innerHeight + 50;
     wrap.style.display = canScroll ? 'flex' : 'none';
@@ -337,38 +277,26 @@ async function verifyMemberStatus() {
   } catch (e) { return true; }
 }
 
-// ===== 헤더 렌더 (페이지 자동 감지) =====
+// ===== 헤더 렌더 =====
 let _headerRendered = false;
 function renderHeader(current) {
   const wrap = document.getElementById('app-header');
   if (!wrap) return;
 
   const isDark = _isDark;
-
-  // 색상 팔레트
   const theme = isDark ? {
-    headerBg: '#0f0f0f',
-    borderColor: '#222',
-    textColor: '#e5e7eb',
+    headerBg: '#0f0f0f', borderColor: '#222',
     logoColor: '#fff',
-    btnBg: '#1a1a1a',
-    btnBgActive: '#e5e7eb',
-    btnText: '#e5e7eb',
-    btnTextActive: '#111',
-    btnBorder: '#333',
-    btnBorderActive: '#e5e7eb',
+    btnBg: '#1a1a1a', btnBgActive: '#e5e7eb',
+    btnText: '#e5e7eb', btnTextActive: '#111',
+    btnBorder: '#333', btnBorderActive: '#e5e7eb',
     nameColor: '#888',
   } : {
-    headerBg: '#fff',
-    borderColor: '#eee',
-    textColor: '#222',
+    headerBg: '#fff', borderColor: '#eee',
     logoColor: '#222',
-    btnBg: '#fff',
-    btnBgActive: '#222',
-    btnText: '#222',
-    btnTextActive: '#fff',
-    btnBorder: '#ddd',
-    btnBorderActive: '#222',
+    btnBg: '#fff', btnBgActive: '#222',
+    btnText: '#222', btnTextActive: '#fff',
+    btnBorder: '#ddd', btnBorderActive: '#222',
     nameColor: '#555',
   };
 
@@ -392,23 +320,15 @@ function renderHeader(current) {
   const siteName = cached.site_name || '🛍️ 심플몰';
 
   const btnStyle = (active) => `
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 8px 14px;
-    min-width: 76px;
-    height: 36px;
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 8px 14px; min-width: 76px; height: 36px;
     background: ${active ? theme.btnBgActive : theme.btnBg};
     color: ${active ? theme.btnTextActive : theme.btnText};
     border: 1px solid ${active ? theme.btnBorderActive : theme.btnBorder};
-    border-radius: 6px;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 500;
-    white-space: nowrap;
-    box-sizing: border-box;
-    flex-shrink: 0;
-    transition: all .15s;
+    border-radius: 6px; text-decoration: none;
+    font-size: 14px; font-weight: 500;
+    white-space: nowrap; box-sizing: border-box;
+    flex-shrink: 0; transition: all .15s;
   `;
 
   const userBtns = m
@@ -444,7 +364,6 @@ function renderHeader(current) {
   `;
 
   _headerRendered = true;
-
   const cart = JSON.parse(localStorage.getItem('cart') || '[]');
   const cc = document.getElementById('cart-count');
   if (cc) cc.textContent = cart.length;
@@ -462,7 +381,6 @@ function renderHeader(current) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // 다크 테마 클래스 적용
   if (_isDark) document.body.classList.add('dark');
 
   applyPhoneAttrs();
@@ -474,12 +392,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const isOk = await verifyMemberStatus();
   if (!isOk) return;
 
-  const path = location.pathname.split('/').pop().replace('.html', '') || 'index';
   const map = {
     'index': 'home', 'login': 'login', 'signup': 'signup',
     'cart': 'cart', 'orders': 'orders', 'product': 'product', 'mypage': 'mypage',
   };
-  const current = map[path] || 'home';
+  const current = map[_pathName] || 'home';
 
   if (document.getElementById('app-header')) {
     renderHeader(current);

@@ -7,77 +7,56 @@
   <link rel="stylesheet" href="style.css">
   <script src="common.js"></script>
   <style>
-    html, body {
-      background: #f4f6f8 !important;
-      color: #1f2937 !important;
-    }
+    html, body { background: #f4f6f8 !important; color: #1f2937 !important; }
     * { box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      margin: 0;
-    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; }
     .admin-header {
-      background: #ffffff !important;
-      border-bottom: 1px solid #e5e7eb;
-      padding: 16px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      background: #fff !important; border-bottom: 1px solid #e5e7eb;
+      padding: 16px 24px; display: flex; justify-content: space-between;
+      align-items: center; position: sticky; top: 0; z-index: 100;
     }
-    .admin-header .logo {
-      font-size: 18px; font-weight: 700; color: #111827 !important;
-      text-decoration: none; letter-spacing: -0.3px;
-    }
+    .admin-header .logo { font-size: 18px; font-weight: 700; color: #111827 !important; text-decoration: none; }
     .admin-header .logo .badge {
       background: #111827; color: #fff; font-size: 11px; font-weight: 600;
-      padding: 3px 8px; border-radius: 4px; margin-left: 8px; vertical-align: middle;
+      padding: 3px 8px; border-radius: 4px; margin-left: 8px;
     }
     .admin-header .logout-btn {
       padding: 8px 16px; background: #f3f4f6; color: #374151;
-      border: 1px solid #e5e7eb; border-radius: 6px; cursor: pointer;
-      font-size: 13px; font-weight: 500; transition: all .15s; font-family: inherit;
+      border: 1px solid #e5e7eb; border-radius: 6px;
+      cursor: pointer; font-size: 13px; font-weight: 500; font-family: inherit;
     }
-    .admin-header .logout-btn:hover { background: #e5e7eb; color: #111827; }
+    .admin-header .logout-btn:hover { background: #e5e7eb; }
 
     .admin-layout { display: flex; gap: 24px; max-width: 1600px; margin: 0 auto; padding: 24px; }
     .admin-sidebar { width: 200px; flex-shrink: 0; position: sticky; top: 88px; height: fit-content; }
-    .admin-sidebar .nav-group { background: #ffffff; border-radius: 10px; padding: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+    .admin-sidebar .nav-group { background: #fff; border-radius: 10px; padding: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
     .admin-sidebar .nav-item {
       display: flex; align-items: center; gap: 10px;
       padding: 10px 12px; border-radius: 6px; cursor: pointer;
       color: #4b5563; font-size: 14px; font-weight: 500;
-      transition: all .15s; border: 0; background: none; width: 100%;
-      text-align: left; font-family: inherit;
+      border: 0; background: none; width: 100%; text-align: left; font-family: inherit;
     }
     .admin-sidebar .nav-item:hover { background: #f3f4f6; color: #111827; }
-    .admin-sidebar .nav-item.active { background: #111827; color: #ffffff; }
-    .admin-sidebar .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+    .admin-sidebar .nav-item.active { background: #111827; color: #fff; }
 
     .admin-content { flex: 1; min-width: 0; }
     .admin-section { display: none; }
-    .admin-section.active { display: block; animation: fadeIn .2s ease; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .admin-section.active { display: block; }
+    .page-title { font-size: 22px; font-weight: 700; color: #111827; margin: 0 0 6px; }
+    .page-subtitle { font-size: 13px; color: #6b7280; margin: 0 0 20px; }
 
-    .page-title { font-size: 22px; font-weight: 700; color: #111827 !important; margin: 0 0 6px; letter-spacing: -0.5px; }
-    .page-subtitle { font-size: 13px; color: #6b7280 !important; margin: 0 0 20px; }
-
-    .card { background: #ffffff !important; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,.04); margin-bottom: 16px; }
-    .card-title { font-size: 15px; font-weight: 600; color: #111827 !important; margin: 0 0 16px; display: flex; align-items: center; gap: 8px; }
+    .card { background: #fff !important; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,.04); margin-bottom: 16px; }
+    .card-title { font-size: 15px; font-weight: 600; color: #111827; margin: 0 0 16px; }
     .card-title .hint { font-size: 12px; font-weight: 400; color: #9ca3af; }
 
     .input, .card input, .card textarea {
-      width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px;
-      font-size: 14px; font-family: inherit; color: #111827 !important;
-      background: #ffffff !important; transition: all .15s; box-sizing: border-box;
+      width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb;
+      border-radius: 8px; font-size: 14px; font-family: inherit;
+      color: #111827 !important; background: #fff !important;
+      box-sizing: border-box;
     }
-    .card input:focus, .card textarea:focus {
-      outline: none; border-color: #111827;
-      box-shadow: 0 0 0 3px rgba(17,24,39,.08);
-    }
-    .card input[readonly] { background: #f9fafb !important; color: #6b7280 !important; cursor: not-allowed; }
+    .card input:focus, .card textarea:focus { outline: none; border-color: #111827; box-shadow: 0 0 0 3px rgba(17,24,39,.08); }
+    .card input[readonly] { background: #f9fafb !important; color: #6b7280 !important; }
     .card textarea { resize: vertical; min-height: 70px; }
 
     .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
@@ -88,11 +67,11 @@
     .btn {
       padding: 10px 18px; border-radius: 8px; border: 0; cursor: pointer;
       font-size: 14px; font-weight: 600; font-family: inherit;
-      transition: all .15s; display: inline-flex; align-items: center; justify-content: center;
-      gap: 6px; text-decoration: none;
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 6px; text-decoration: none; transition: all .15s;
     }
     .btn-primary { background: #111827; color: #fff; }
-    .btn-primary:hover { background: #1f2937; transform: translateY(-1px); }
+    .btn-primary:hover { background: #1f2937; }
     .btn-success { background: #059669; color: #fff; }
     .btn-success:hover { background: #047857; }
     .btn-danger { background: #dc2626; color: #fff; }
@@ -108,52 +87,37 @@
     .product-layout { display: flex; gap: 16px; align-items: flex-start; }
     .product-left { flex: 0 0 460px; max-width: 100%; }
     .product-right { flex: 1 1 auto; min-width: 0; }
-
     #admin-list { display: grid; grid-template-columns: 1fr; gap: 8px; }
 
-    .product-item { background: #fff !important; border: 1px solid #f3f4f6; border-radius: 10px; overflow: hidden; transition: all .15s; }
+    .product-item { background: #fff; border: 1px solid #f3f4f6; border-radius: 10px; overflow: hidden; }
     .product-item:hover { border-color: #e5e7eb; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
     .product-summary { padding: 12px; display: flex; align-items: center; gap: 12px; cursor: pointer; }
-    .product-summary img { width: 44px; height: 44px; object-fit: cover; border-radius: 8px; flex-shrink: 0; background: #f3f4f6; }
+    .product-summary img { width: 44px; height: 44px; object-fit: cover; border-radius: 8px; background: #f3f4f6; }
     .product-summary .info { flex: 1; min-width: 0; }
-    .product-summary .name { font-size: 14px; font-weight: 600; color: #111827 !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .product-summary .name { font-size: 14px; font-weight: 600; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .product-summary .price { color: #e53935; font-weight: 700; font-size: 13px; margin-top: 2px; }
     .product-arrow { color: #9ca3af; font-size: 12px; transition: transform .2s; }
-    .product-detail {
-      display: none; padding: 0 12px 12px; font-size: 13px; line-height: 1.7;
-      color: #4b5563 !important; border-top: 1px solid #f3f4f6;
-    }
+    .product-detail { display: none; padding: 0 12px 12px; font-size: 13px; line-height: 1.7; color: #4b5563; border-top: 1px solid #f3f4f6; }
     .product-detail .line { padding-top: 10px; }
     .product-detail .label { color: #9ca3af; margin-right: 4px; }
     .product-detail .actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 10px; }
 
-    .order-item {
-      background: #fff !important; border-radius: 10px; border-left: 4px solid #f59e0b;
-      overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.04); margin-bottom: 8px;
-    }
+    .order-item { background: #fff; border-radius: 10px; border-left: 4px solid #f59e0b; margin-bottom: 8px; }
     .order-summary { padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px; cursor: pointer; flex-wrap: wrap; }
-    .order-status-badge { color: #fff; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+    .order-status-badge { color: #fff; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
     .order-num { font-size: 13px; color: #1976d2; font-weight: 600; }
-    .order-detail { display: none; padding: 0 16px 16px; font-size: 13px; line-height: 1.8; color: #374151 !important; border-top: 1px solid #f3f4f6; }
+    .order-detail { display: none; padding: 0 16px 16px; font-size: 13px; line-height: 1.8; color: #374151; border-top: 1px solid #f3f4f6; }
 
-    .member-item {
-      background: #fff !important; padding: 14px 16px; border-radius: 10px;
-      box-shadow: 0 1px 3px rgba(0,0,0,.04); display: flex; justify-content: space-between;
-      align-items: center; gap: 10px; flex-wrap: wrap;
-    }
+    .member-item { background: #fff; padding: 14px 16px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
     .member-status-badge { padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; color: #fff; }
 
     #admin-pagination { display: flex; justify-content: center; gap: 6px; margin-top: 14px; flex-wrap: wrap; }
-
-    .preview-box { margin-top: 12px; padding: 12px; background: #f9fafb !important; border-radius: 8px; border: 1px dashed #e5e7eb; }
+    .preview-box { margin-top: 12px; padding: 12px; background: #f9fafb; border-radius: 8px; border: 1px dashed #e5e7eb; }
     .preview-box .preview-label { font-size: 12px; color: #6b7280; margin-bottom: 6px; }
 
-    .login-wrap {
-      max-width: 380px; margin: 80px auto; background: #fff !important;
-      padding: 32px; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,.06);
-    }
-    .login-wrap h2 { font-size: 22px; font-weight: 700; color: #111827 !important; margin: 0 0 6px; letter-spacing: -0.5px; }
-    .login-wrap p.sub { font-size: 13px; color: #6b7280 !important; margin: 0 0 24px; }
+    .login-wrap { max-width: 380px; margin: 80px auto; background: #fff; padding: 32px; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,.06); }
+    .login-wrap h2 { font-size: 22px; font-weight: 700; color: #111827; margin: 0 0 6px; }
+    .login-wrap p.sub { font-size: 13px; color: #6b7280; margin: 0 0 24px; }
     .login-wrap form { display: grid; gap: 10px; }
     .login-wrap input {
       padding: 12px 14px; border: 1px solid #e5e7eb; border-radius: 8px;
@@ -163,9 +127,8 @@
     .login-wrap input:focus { outline: none; border-color: #111827; box-shadow: 0 0 0 3px rgba(17,24,39,.08); }
     .login-wrap button {
       padding: 12px; background: #111827; color: #fff; border: 0; border-radius: 8px;
-      cursor: pointer; font-size: 14px; font-weight: 600; font-family: inherit; margin-top: 4px;
+      cursor: pointer; font-size: 14px; font-weight: 600; font-family: inherit;
     }
-    .login-wrap button:hover { background: #1f2937; }
 
     @media (max-width: 1000px) {
       .admin-layout { flex-direction: column; padding: 16px; }
@@ -175,16 +138,9 @@
       .product-layout { flex-direction: column; }
       .product-left { flex: 1 1 auto; }
     }
-    @media (max-width: 600px) {
-      .admin-header { padding: 12px 16px; }
-      .admin-layout { padding: 12px; gap: 16px; }
-      .card { padding: 16px; border-radius: 10px; }
-      .page-title { font-size: 18px; }
-    }
   </style>
 </head>
 <body>
-  <!-- 로그인 -->
   <div id="login-screen" style="display:none;">
     <div class="login-wrap">
       <h2>관리자 로그인</h2>
@@ -198,7 +154,6 @@
     </div>
   </div>
 
-  <!-- 관리자 -->
   <div id="admin-screen" style="display:none;">
     <header class="admin-header">
       <a href="index.html" class="logo">🛍️ 심플몰 <span class="badge">ADMIN</span></a>
@@ -208,16 +163,14 @@
     <div class="admin-layout">
       <aside class="admin-sidebar">
         <div class="nav-group">
-          <button class="nav-item active" data-tab="products"><span class="nav-icon">📦</span> 상품</button>
-          <button class="nav-item" data-tab="orders"><span class="nav-icon">🧾</span> 주문</button>
-          <button class="nav-item" data-tab="members"><span class="nav-icon">👥</span> 회원</button>
-          <button class="nav-item" data-tab="settings"><span class="nav-icon">⚙️</span> 사이트 설정</button>
+          <button class="nav-item active" data-tab="products">📦 상품</button>
+          <button class="nav-item" data-tab="orders">🧾 주문</button>
+          <button class="nav-item" data-tab="members">👥 회원</button>
+          <button class="nav-item" data-tab="settings">⚙️ 사이트 설정</button>
         </div>
       </aside>
 
       <div class="admin-content">
-
-        <!-- 상품 -->
         <section id="tab-products" class="admin-section active">
           <h1 class="page-title">상품 관리</h1>
           <p class="page-subtitle">상품을 등록하고 목록을 관리합니다</p>
@@ -231,11 +184,11 @@
                   <input name="name" placeholder="상품명" required>
                   <input name="price" type="number" placeholder="가격" required>
                   <input name="main_image" placeholder="메인 이미지 URL" required>
-                  <input name="colors" placeholder="색상 (쉼표: 빨강,파랑)">
-                  <input name="sizes" placeholder="사이즈 (쉼표: S,M,L)">
+                  <input name="colors" placeholder="색상 (쉼표)">
+                  <input name="sizes" placeholder="사이즈 (쉼표)">
                   <input name="hem_option" placeholder="밑단선택 (쉼표)">
                   <input name="other_option" placeholder="기타옵션 (쉼표)">
-                  <input name="min_qty" type="number" min="1" value="6" placeholder="최소 주문수량 (기본 6)">
+                  <input name="min_qty" type="number" min="1" value="1" placeholder="최소 주문수량 (기본 1)">
                   <textarea name="detail_images" class="full" placeholder="상세 이미지 URL (줄바꿈)"></textarea>
                   <button type="submit" class="btn btn-primary full">상품 등록</button>
                 </form>
@@ -253,28 +206,23 @@
           </div>
         </section>
 
-        <!-- 주문 -->
         <section id="tab-orders" class="admin-section">
           <h1 class="page-title">주문 관리</h1>
           <p class="page-subtitle">주문 내역을 확인하고 상태를 변경합니다</p>
-
           <div class="card">
             <div class="card-title">🔍 주문 검색</div>
             <div class="form-row">
-              <input id="order-search" placeholder="주문번호로 검색 (예: ORD-251016-A3F9)" style="text-transform:uppercase;">
+              <input id="order-search" placeholder="주문번호로 검색" style="text-transform:uppercase;">
               <button id="order-search-btn" class="btn btn-primary" style="flex:0 0 auto;">검색</button>
               <button id="order-reset-btn" class="btn btn-secondary" style="flex:0 0 auto;">전체</button>
             </div>
           </div>
-
           <div id="order-list">로딩중...</div>
         </section>
 
-        <!-- 회원 -->
         <section id="tab-members" class="admin-section">
           <h1 class="page-title">회원 관리</h1>
           <p class="page-subtitle">회원 정보를 조회하고 제재할 수 있습니다</p>
-
           <div class="card">
             <div class="card-title">🔍 회원 검색</div>
             <div class="form-row">
@@ -283,11 +231,9 @@
               <button id="member-reset-btn" class="btn btn-secondary" style="flex:0 0 auto;">전체</button>
             </div>
           </div>
-
           <div id="member-list">로딩중...</div>
         </section>
 
-        <!-- 설정 -->
         <section id="tab-settings" class="admin-section">
           <h1 class="page-title">사이트 설정</h1>
           <p class="page-subtitle">로고, 배너, 푸터, 배송비를 관리합니다</p>
@@ -295,8 +241,8 @@
           <div class="card">
             <div class="card-title">🏷️ 로고 / 사이트명</div>
             <div class="form-grid" style="grid-template-columns: 1fr;">
-              <input id="logo-site-name" placeholder="사이트명 (텍스트 로고, 예: 🛍️ 심플몰)">
-              <input id="logo-image-url" placeholder="로고 이미지 URL (입력 시 이미지가 우선)">
+              <input id="logo-site-name" placeholder="사이트명">
+              <input id="logo-image-url" placeholder="로고 이미지 URL">
               <div class="form-row">
                 <button id="logo-save-btn" class="btn btn-primary">등록/수정</button>
                 <button id="logo-delete-btn" class="btn btn-danger">삭제</button>
@@ -350,7 +296,6 @@
             <p id="shipping-msg" class="msg"></p>
           </div>
         </section>
-
       </div>
     </div>
   </div>
@@ -361,7 +306,6 @@
       "https://alpdhgcipjeekzrpxlbh.supabase.co",
       "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya"
     );
-    // admin은 다크 클래스 강제 제거
     document.addEventListener('DOMContentLoaded', () => {
       document.body.classList.remove('dark');
       document.documentElement.classList.remove('dark');
@@ -421,7 +365,7 @@
       showLogin();
     });
 
-    // ===== 로고 =====
+    // 로고
     let currentLogoId = null;
     async function loadLogo() {
       const { data, error } = await db.from('logos').select('*').order('id', { ascending: false }).limit(1).maybeSingle();
@@ -431,8 +375,7 @@
       const imgUrlInput = document.getElementById('logo-image-url');
       if (error || !data) {
         preview.style.display = 'none';
-        siteNameInput.value = '';
-        imgUrlInput.value = '';
+        siteNameInput.value = ''; imgUrlInput.value = '';
         currentLogoId = null;
         return;
       }
@@ -446,7 +389,6 @@
         preview.style.display = 'none';
       }
     }
-
     document.getElementById('logo-save-btn').addEventListener('click', async () => {
       const msg = document.getElementById('logo-msg');
       const siteName = document.getElementById('logo-site-name').value.trim();
@@ -461,14 +403,12 @@
       let error;
       if (currentLogoId) {
         ({ error } = await db.from('logos').update({
-          site_name: siteName || null,
-          image_url: imageUrl || null,
+          site_name: siteName || null, image_url: imageUrl || null,
           updated_at: new Date().toISOString(),
         }).eq('id', currentLogoId));
       } else {
         const res = await db.from('logos').insert({
-          site_name: siteName || null,
-          image_url: imageUrl || null,
+          site_name: siteName || null, image_url: imageUrl || null,
         }).select().single();
         error = res.error;
         if (res.data) currentLogoId = res.data.id;
@@ -483,7 +423,6 @@
         setTimeout(() => msg.textContent = '', 2000);
       }
     });
-
     document.getElementById('logo-delete-btn').addEventListener('click', async () => {
       const msg = document.getElementById('logo-msg');
       if (!currentLogoId) {
@@ -492,8 +431,6 @@
         return;
       }
       if (!confirm('로고를 삭제할까요?')) return;
-      msg.className = 'msg';
-      msg.textContent = '삭제 중...';
       const { error } = await db.from('logos').delete().eq('id', currentLogoId);
       if (error) {
         msg.className = 'msg error';
@@ -509,7 +446,7 @@
       }
     });
 
-    // ===== 푸터 =====
+    // 푸터
     async function loadFooter() {
       const keys = ['footer_owner','footer_phone','footer_email','footer_address','footer_business','footer_text'];
       const { data } = await db.from('settings').select('key, value').in('key', keys);
@@ -522,7 +459,6 @@
       document.getElementById('footer-business').value = map.footer_business || '';
       document.getElementById('footer-text').value = map.footer_text || '';
     }
-
     document.getElementById('save-footer').addEventListener('click', async () => {
       const msg = document.getElementById('footer-msg');
       msg.className = 'msg';
@@ -547,7 +483,7 @@
       }
     });
 
-    // ===== 배너 =====
+    // 배너
     let currentBannerId = null;
     async function loadBanner() {
       const { data, error } = await db.from('banners').select('*').order('id', { ascending: false }).limit(1).maybeSingle();
@@ -557,8 +493,7 @@
       const linkUrl = document.getElementById('banner-link-url');
       if (error || !data) {
         preview.style.display = 'none';
-        imgUrl.value = '';
-        linkUrl.value = '';
+        imgUrl.value = ''; linkUrl.value = '';
         currentBannerId = null;
         return;
       }
@@ -572,7 +507,6 @@
         preview.style.display = 'none';
       }
     }
-
     document.getElementById('banner-save-btn').addEventListener('click', async () => {
       const msg = document.getElementById('banner-msg');
       const imageUrl = document.getElementById('banner-image-url').value.trim();
@@ -587,14 +521,12 @@
       let error;
       if (currentBannerId) {
         ({ error } = await db.from('banners').update({
-          image_url: imageUrl,
-          link_url: linkUrl || null,
+          image_url: imageUrl, link_url: linkUrl || null,
           updated_at: new Date().toISOString(),
         }).eq('id', currentBannerId));
       } else {
         const res = await db.from('banners').insert({
-          image_url: imageUrl,
-          link_url: linkUrl || null,
+          image_url: imageUrl, link_url: linkUrl || null,
         }).select().single();
         error = res.error;
         if (res.data) currentBannerId = res.data.id;
@@ -609,7 +541,6 @@
         setTimeout(() => msg.textContent = '', 2000);
       }
     });
-
     document.getElementById('banner-delete-btn').addEventListener('click', async () => {
       const msg = document.getElementById('banner-msg');
       if (!currentBannerId) {
@@ -618,8 +549,6 @@
         return;
       }
       if (!confirm('배너를 삭제할까요?')) return;
-      msg.className = 'msg';
-      msg.textContent = '삭제 중...';
       const { error } = await db.from('banners').delete().eq('id', currentBannerId);
       if (error) {
         msg.className = 'msg error';
@@ -635,7 +564,8 @@
       }
     });
 
-    // ===== 배송비 =====    async function loadShippingSetting() {
+    // 배송비
+    async function loadShippingSetting() {
       const { data } = await db.from('settings').select('value').eq('key', 'shipping_fee').maybeSingle();
       document.getElementById('global-shipping').value = data ? (data.value || 0) : 0;
     }
@@ -655,7 +585,7 @@
       }
     });
 
-    // ===== 상품 등록 =====
+    // 상품 등록
     const form = document.getElementById('product-form');
     const msg = document.getElementById('msg');
     const listEl = document.getElementById('admin-list');
@@ -677,7 +607,7 @@
         sizes: parseList(form.sizes.value),
         hem_option: parseList(form.hem_option.value),
         other_option: parseList(form.other_option.value),
-        min_qty: Number(form.min_qty.value) || 6,
+        min_qty: Number(form.min_qty.value) || 1,
       });
 
       if (error) {
@@ -687,13 +617,12 @@
         msg.className = 'msg success';
         msg.textContent = '✅ 등록 완료!';
         form.reset();
-        // 리셋 후 min_qty 기본값 재설정
-        form.min_qty.value = 6;
+        form.min_qty.value = 1;
         loadAdminList();
       }
     });
 
-    // ===== 상품 목록 =====
+    // 상품 목록
     let allProducts = [];
     let currentPage = 1;
     const PER_PAGE = 10;
@@ -736,7 +665,7 @@
               ${(p.sizes && p.sizes.length) ? `<div><span class="label">사이즈</span>${p.sizes.join(', ')}</div>` : ''}
               ${(p.hem_option && p.hem_option.length) ? `<div><span class="label">밑단</span>${p.hem_option.join(', ')}</div>` : ''}
               ${(p.other_option && p.other_option.length) ? `<div><span class="label">기타</span>${p.other_option.join(', ')}</div>` : ''}
-              <div><span class="label">최소주문수량</span>${p.min_qty || 6}개</div>
+              <div><span class="label">최소주문수량</span>${p.min_qty || 1}개</div>
             </div>
             <div class="actions">
               <a href="product.html?id=${p.id}" target="_blank" class="btn btn-secondary btn-sm">보기</a>
@@ -768,30 +697,21 @@
           const p = allProducts.find(x => String(x.id) === String(btn.dataset.id));
           if (!p) return;
           if (!confirm(`"${p.name}" 을 복사해서 새로 등록할까요?`)) return;
-
           btn.disabled = true;
           btn.textContent = '...';
-
           const { error } = await db.from('products').insert({
             product_code: p.product_code ? p.product_code + '-C' : null,
             name: p.name + ' (복사)',
-            price: p.price,
-            main_image: p.main_image,
+            price: p.price, main_image: p.main_image,
             detail_images: p.detail_images || [],
-            colors: p.colors || [],
-            sizes: p.sizes || [],
-            hem_option: p.hem_option || [],
-            other_option: p.other_option || [],
-            min_qty: p.min_qty || 6,
+            colors: p.colors || [], sizes: p.sizes || [],
+            hem_option: p.hem_option || [], other_option: p.other_option || [],
+            min_qty: p.min_qty || 1,
           });
-
           if (error) {
             alert('❌ 복사 실패: ' + error.message);
-            btn.disabled = false;
-            btn.textContent = '복사';
-          } else {
-            loadAdminList();
-          }
+            btn.disabled = false; btn.textContent = '복사';
+          } else loadAdminList();
         });
       });
 
@@ -818,7 +738,6 @@
       }
       html += `<button class="btn btn-secondary btn-sm page-nav" data-page="${currentPage+1}" ${currentPage===totalPages?'disabled':''} style="${currentPage===totalPages?'opacity:.4;cursor:not-allowed;':''}">다음</button>`;
       el.innerHTML = html;
-
       el.querySelectorAll('.page-num, .page-nav').forEach(btn => {
         btn.addEventListener('click', () => {
           if (btn.disabled) return;
@@ -828,14 +747,12 @@
       });
     }
 
-    // ===== 주문 =====
+    // 주문
     let currentOrders = [];
-
     async function loadOrders(filterNum) {
       const el = document.getElementById('order-list');
       let query = db.from('orders').select('*').order('created_at', { ascending: false });
       if (filterNum) query = query.eq('order_number', filterNum);
-
       const { data, error } = await query;
       if (error) { el.innerHTML = '<p>' + error.message + '</p>'; return; }
       if (!data || data.length === 0) { el.innerHTML = '<p style="text-align:center; color:#9ca3af; padding:20px;">주문이 없습니다</p>'; return; }
@@ -859,7 +776,7 @@
                 <span class="order-num">${num}</span>
                 <span style="font-size:14px;"><b>${first.customer_name}</b></span>
                 <span style="font-size:13px; color:#6b7280;">${items.length}건</span>
-                <span style="font-size:14px; font-weight:700; color:#e53935; white-space:nowrap;">${totalAll.toLocaleString()}원</span>
+                <span style="font-size:14px; font-weight:700; color:#e53935;">${totalAll.toLocaleString()}원</span>
               </div>
               <span class="product-arrow">▼</span>
             </div>
@@ -872,28 +789,13 @@
                 <hr style="border:0; border-top:1px dashed #e5e7eb; margin:10px 0;">
                 ${items.map(o => `
                   <div style="padding:6px 0; border-bottom:1px dashed #f3f4f6;">
-                    <b>${o.product_name}</b>
-                    ${o.product_code ? `<span class="label">[${o.product_code}]</span>` : ''}
-                    × ${o.quantity} = <b style="color:#e53935;">${Number(o.total_price).toLocaleString()}원</b>
-                    ${o.selected_color ? `<br><span class="label">색상</span>${o.selected_color}` : ''}
-                    ${o.selected_size ? ` <span class="label">사이즈</span>${o.selected_size}` : ''}
-                    ${o.selected_hem ? `<br><span class="label">밑단</span>${o.selected_hem}` : ''}
-                    ${o.selected_other ? `<br><span class="label">기타</span>${o.selected_other}` : ''}
+                    <b>${o.product_name}</b> × ${o.quantity} = <b style="color:#e53935;">${Number(o.total_price).toLocaleString()}원</b>
                     <div style="margin-top:6px;">
                       <button class="order-edit btn btn-primary btn-sm" data-id="${o.id}">수정</button>
                       <button class="order-del btn btn-danger btn-sm" data-id="${o.id}">삭제</button>
                     </div>
                   </div>
                 `).join('')}
-                <div style="margin-top:12px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-                  <span class="label">대표 상태 변경</span>
-                  <select class="group-status-select" data-ids="${items.map(o => o.id).join(',')}" style="padding:6px 10px; border:1px solid #e5e7eb; border-radius:6px; font-family:inherit;">
-                    ${['입금대기','입금완료','배송중','완료','취소'].map(s => `<option ${s === first.status ? 'selected' : ''}>${s}</option>`).join('')}
-                  </select>
-                </div>
-                <div style="color:#9ca3af; font-size:12px; margin-top:8px;">
-                  ${new Date(first.created_at).toLocaleString('ko-KR')}
-                </div>
               </div>
             </div>
           </div>
@@ -913,25 +815,6 @@
           }
         });
       });
-
-      el.querySelectorAll('.group-status-select').forEach(sel => {
-        sel.addEventListener('click', (e) => e.stopPropagation());
-        sel.addEventListener('change', async () => {
-          const ids = sel.dataset.ids.split(',');
-          const { error } = await db.from('orders').update({ status: sel.value }).in('id', ids);
-          if (error) alert('상태 변경 실패: ' + error.message);
-          else loadOrders();
-        });
-      });
-
-      el.querySelectorAll('.order-edit').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const order = currentOrders.find(x => String(x.id) === String(btn.dataset.id));
-          if (order) showOrderEditModal(order);
-        });
-      });
-
       el.querySelectorAll('.order-del').forEach(btn => {
         btn.addEventListener('click', async (e) => {
           e.stopPropagation();
@@ -956,96 +839,8 @@
       loadOrders();
     });
 
-    // ===== 주문 수정 모달 =====
-    function showOrderEditModal(o) {
-      const modal = document.createElement('div');
-      modal.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:1000; padding:10px;`;
-      modal.innerHTML = `
-        <div style="background:#fff; padding:24px; border-radius:12px; width:100%; max-width:460px; max-height:90vh; overflow-y:auto; color:#1f2937;">
-          <h2 style="margin:0 0 16px; font-size:18px; color:#111827;">주문 수정 (${o.order_number || o.id})</h2>
-          <form id="order-edit-form" style="display:grid; gap:10px; background:none; padding:0; border:0; max-width:none;">
-            <label style="font-size:13px; font-weight:600; color:#374151;">상품명</label>
-            <input name="product_name" value="${o.product_name}" required style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit; background:#fff; color:#111827;">
-            <label style="font-size:13px; font-weight:600; color:#374151;">제품번호</label>
-            <input name="product_code" value="${o.product_code || ''}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit; background:#fff; color:#111827;">
-            <label style="font-size:13px; font-weight:600; color:#374151;">상품 가격</label>
-            <input name="product_price" type="number" value="${o.product_price}" required style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit; background:#fff; color:#111827;">
-            <label style="font-size:13px; font-weight:600; color:#374151;">수량</label>
-            <input name="quantity" type="number" min="1" value="${o.quantity}" required style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit; background:#fff; color:#111827;">
-            <label style="font-size:13px; font-weight:600; color:#374151;">배송비</label>
-            <input name="shipping_fee" type="number" min="0" value="${o.shipping_fee || 0}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit; background:#fff; color:#111827;">
-            <label style="font-size:13px; font-weight:600; color:#374151;">주문자 이름</label>
-            <input name="customer_name" value="${o.customer_name}" required style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit; background:#fff; color:#111827;">
-            <label style="font-size:13px; font-weight:600; color:#374151;">연락처</label>
-            <input name="customer_phone" type="tel" inputmode="numeric" value="${o.customer_phone}" required style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit; background:#fff; color:#111827;">
-            <label style="font-size:13px; font-weight:600; color:#374151;">우편번호</label>
-            <input name="postcode" value="${o.postcode || ''}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit; background:#fff; color:#111827;">
-            <label style="font-size:13px; font-weight:600; color:#374151;">주소</label>
-            <input name="address" value="${o.address || ''}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit; background:#fff; color:#111827;">
-            <label style="font-size:13px; font-weight:600; color:#374151;">상세주소</label>
-            <input name="address_detail" value="${o.address_detail || ''}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit; background:#fff; color:#111827;">
-            <label style="font-size:13px; font-weight:600; color:#374151;">입금자명</label>
-            <input name="depositor_name" value="${o.depositor_name}" required style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit; background:#fff; color:#111827;">
-            <label style="font-size:13px; font-weight:600; color:#374151;">색상</label>
-            <input name="selected_color" value="${o.selected_color || ''}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit; background:#fff; color:#111827;">
-            <label style="font-size:13px; font-weight:600; color:#374151;">사이즈</label>
-            <input name="selected_size" value="${o.selected_size || ''}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit; background:#fff; color:#111827;">
-            <label style="font-size:13px; font-weight:600; color:#374151;">밑단선택</label>
-            <input name="selected_hem" value="${o.selected_hem || ''}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit; background:#fff; color:#111827;">
-            <label style="font-size:13px; font-weight:600; color:#374151;">기타옵션</label>
-            <input name="selected_other" value="${o.selected_other || ''}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit; background:#fff; color:#111827;">
-            <label style="font-size:13px; font-weight:600; color:#374151;">요청사항</label>
-            <textarea name="memo" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; min-height:60px; font-family:inherit; background:#fff; color:#111827;">${o.memo || ''}</textarea>
-            <label style="font-size:13px; font-weight:600; color:#374151;">상태</label>
-            <select name="status" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit; background:#fff; color:#111827;">
-              ${['입금대기','입금완료','배송중','완료','취소'].map(s => `<option ${s === o.status ? 'selected' : ''}>${s}</option>`).join('')}
-            </select>
-            <div style="display:flex; gap:8px; margin-top:10px;">
-              <button type="submit" class="btn btn-primary" style="flex:1;">저장</button>
-              <button type="button" id="cancel-edit" class="btn btn-secondary" style="flex:1;">취소</button>
-            </div>
-          </form>
-        </div>
-      `;
-      document.body.appendChild(modal);
-      modal.querySelector('#cancel-edit').onclick = () => modal.remove();
-      modal.querySelector('#order-edit-form').addEventListener('submit', async (ev) => {
-        ev.preventDefault();
-        const f = ev.target;
-        const qty = Number(f.quantity.value);
-        const price = Number(f.product_price.value);
-        const ship = Number(f.shipping_fee.value) || 0;
-
-        const { error } = await db.from('orders').update({
-          product_name: f.product_name.value.trim(),
-          product_code: f.product_code.value.trim() || null,
-          product_price: price,
-          quantity: qty,
-          total_price: price * qty + ship,
-          shipping_fee: ship,
-          customer_name: f.customer_name.value.trim(),
-          customer_phone: f.customer_phone.value.trim(),
-          depositor_name: f.depositor_name.value.trim(),
-          address: f.address.value.trim(),
-          address_detail: f.address_detail.value.trim(),
-          postcode: f.postcode.value.trim(),
-          selected_color: f.selected_color.value.trim() || null,
-          selected_size: f.selected_size.value.trim() || null,
-          selected_hem: f.selected_hem.value.trim() || null,
-          selected_other: f.selected_other.value.trim() || null,
-          memo: f.memo.value.trim(),
-          status: f.status.value,
-        }).eq('id', o.id);
-
-        if (error) { alert('❌ 수정 실패: ' + error.message); return; }
-        modal.remove();
-        loadOrders();
-      });
-    }
-
-    // ===== 회원 =====
+    // 회원
     let allMembers = [];
-
     async function loadMembers() {
       const el = document.getElementById('member-list');
       const { data, error } = await db.from('members').select('*').order('created_at', { ascending: false });
@@ -1063,8 +858,7 @@
         list = allMembers.filter(m =>
           (m.username && m.username.toLowerCase().includes(f)) ||
           (m.name && m.name.toLowerCase().includes(f)) ||
-          (m.phone && m.phone.includes(f)) ||
-          (m.email && m.email.toLowerCase().includes(f))
+          (m.phone && m.phone.includes(f))
         );
       }
       if (list.length === 0) {
@@ -1085,8 +879,6 @@
               <div style="color:#6b7280; margin-top:4px; font-size:13px;">
                 ${m.phone || '-'}${m.email ? ` · ${m.email}` : ''}
               </div>
-              ${m.address ? `<div style="color:#9ca3af; margin-top:2px; font-size:12px;">[${m.postcode || ''}] ${m.address} ${m.address_detail || ''}</div>` : ''}
-              ${m.memo ? `<div style="color:#9ca3af; margin-top:2px; font-size:12px;">메모: ${m.memo}</div>` : ''}
             </div>
             <div style="display:flex; gap:6px;">
               <button class="member-edit-btn btn btn-primary btn-sm" data-id="${m.id}">수정</button>
@@ -1106,7 +898,7 @@
         btn.addEventListener('click', async () => {
           const m = allMembers.find(x => String(x.id) === String(btn.dataset.id));
           if (!m) return;
-          if (!confirm(`"${m.name}" 회원을 완전히 삭제할까요?\n(복구 불가)`)) return;
+          if (!confirm(`"${m.name}" 회원을 완전히 삭제할까요?`)) return;
           const { error } = await db.from('members').delete().eq('id', m.id);
           if (error) alert('삭제 실패: ' + error.message);
           else { alert('✅ 회원이 삭제되었습니다.'); loadMembers(); }
@@ -1121,39 +913,28 @@
       document.getElementById('member-search').value = '';
       renderMembers();
     });
-    document.getElementById('member-search').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') renderMembers(document.getElementById('member-search').value.trim());
-    });
 
     function showMemberEditModal(m) {
       const modal = document.createElement('div');
       modal.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:1000; padding:10px;`;
       modal.innerHTML = `
-        <div style="background:#fff; padding:24px; border-radius:12px; width:100%; max-width:480px; max-height:90vh; overflow-y:auto; color:#1f2937;">
-          <h2 style="margin:0 0 16px; font-size:18px; color:#111827;">회원 정보 (ID: ${m.id})</h2>
-          <form id="member-edit-form" style="display:grid; gap:10px; background:none; padding:0; border:0; max-width:none;">
-            <label style="font-size:13px; font-weight:600; color:#374151;">아이디</label>
-            <input name="username" value="${m.username || ''}" readonly style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; background:#f9fafb; color:#6b7280; font-family:inherit;">
-            <label style="font-size:13px; font-weight:600; color:#374151;">비밀번호</label>
-            <input name="password" value="${m.password || ''}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit; background:#fff; color:#111827;">
-            <label style="font-size:13px; font-weight:600; color:#374151;">이름</label>
-            <input name="name" value="${m.name || ''}" required style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit; background:#fff; color:#111827;">
-            <label style="font-size:13px; font-weight:600; color:#374151;">연락처</label>
-            <input name="phone" type="tel" inputmode="numeric" value="${m.phone || ''}" required style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit; background:#fff; color:#111827;">
-            <label style="font-size:13px; font-weight:600; color:#374151;">이메일</label>
-            <input name="email" type="email" value="${m.email || ''}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit; background:#fff; color:#111827;">
-            <label style="font-size:13px; font-weight:600; color:#374151;">우편번호</label>
-            <input name="postcode" value="${m.postcode || ''}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit; background:#fff; color:#111827;">
-            <label style="font-size:13px; font-weight:600; color:#374151;">주소</label>
-            <input name="address" value="${m.address || ''}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit; background:#fff; color:#111827;">
-            <label style="font-size:13px; font-weight:600; color:#374151;">상세주소</label>
-            <input name="address_detail" value="${m.address_detail || ''}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit; background:#fff; color:#111827;">
-            <label style="font-size:13px; font-weight:600; color:#374151;">회원 상태</label>
-            <select name="status" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit; background:#fff; color:#111827;">
+        <div style="background:#fff; padding:24px; border-radius:12px; width:100%; max-width:480px; max-height:90vh; overflow-y:auto;">
+          <h2 style="margin:0 0 16px; font-size:18px;">회원 정보</h2>
+          <form id="member-edit-form" style="display:grid; gap:10px;">
+            <label style="font-size:13px; font-weight:600;">아이디</label>
+            <input name="username" value="${m.username || ''}" readonly style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; background:#f9fafb;">
+            <label style="font-size:13px; font-weight:600;">비밀번호</label>
+            <input name="password" value="${m.password || ''}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px;">
+            <label style="font-size:13px; font-weight:600;">이름</label>
+            <input name="name" value="${m.name || ''}" required style="padding:10px; border:1px solid #e5e7eb; border-radius:8px;">
+            <label style="font-size:13px; font-weight:600;">연락처</label>
+            <input name="phone" value="${m.phone || ''}" required style="padding:10px; border:1px solid #e5e7eb; border-radius:8px;">
+            <label style="font-size:13px; font-weight:600;">이메일</label>
+            <input name="email" value="${m.email || ''}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px;">
+            <label style="font-size:13px; font-weight:600;">회원 상태</label>
+            <select name="status" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px;">
               ${['정상','정지','탈퇴'].map(s => `<option ${s === (m.status || '정상') ? 'selected' : ''}>${s}</option>`).join('')}
             </select>
-            <label style="font-size:13px; font-weight:600; color:#374151;">관리자 메모</label>
-            <textarea name="memo" placeholder="제재 사유 등" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; min-height:60px; font-family:inherit; background:#fff; color:#111827;">${m.memo || ''}</textarea>
             <div style="display:flex; gap:8px; margin-top:10px;">
               <button type="submit" class="btn btn-primary" style="flex:1;">저장</button>
               <button type="button" id="cancel-edit" class="btn btn-secondary" style="flex:1;">취소</button>
@@ -1166,18 +947,13 @@
       modal.querySelector('#member-edit-form').addEventListener('submit', async (ev) => {
         ev.preventDefault();
         const f = ev.target;
-        const updates = {
+        const { error } = await db.from('members').update({
           password: f.password.value,
           name: f.name.value.trim(),
           phone: f.phone.value.trim(),
           email: f.email.value.trim() || null,
-          postcode: f.postcode.value.trim() || null,
-          address: f.address.value.trim() || null,
-          address_detail: f.address_detail.value.trim() || null,
           status: f.status.value,
-          memo: f.memo.value.trim() || null,
-        };
-        const { error } = await db.from('members').update(updates).eq('id', m.id);
+        }).eq('id', m.id);
         if (error) { alert('❌ 저장 실패: ' + error.message); return; }
         alert('✅ 저장 완료!');
         modal.remove();

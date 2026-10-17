@@ -9,54 +9,26 @@
   <style>
     html, body { background: #f4f6f8 !important; color: #1f2937 !important; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; }
-    .edit-header {
-      background: #fff; border-bottom: 1px solid #e5e7eb;
-      padding: 16px 24px;
-    }
+    .edit-header { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 16px 24px; }
     .edit-header a { color: #111827; text-decoration: none; font-weight: 700; font-size: 18px; }
     .edit-wrap { max-width: 900px; margin: 40px auto; padding: 0 16px; }
-    .edit-title { font-size: 22px; font-weight: 700; color: #111827; margin: 0 0 20px; letter-spacing: -0.5px; }
-    .login-wrap {
-      max-width: 380px; margin: 80px auto; background: #fff;
-      padding: 32px; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,.06);
-    }
+    .edit-title { font-size: 22px; font-weight: 700; color: #111827; margin: 0 0 20px; }
+    .login-wrap { max-width: 380px; margin: 80px auto; background: #fff; padding: 32px; border-radius: 12px; }
     .login-wrap h2 { font-size: 22px; font-weight: 700; color: #111827; margin: 0 0 6px; }
     .login-wrap form { display: grid; gap: 10px; }
-    .login-wrap input {
-      padding: 12px 14px; border: 1px solid #e5e7eb; border-radius: 8px;
-      font-size: 14px; font-family: inherit;
-    }
-    .login-wrap input:focus { outline: none; border-color: #111827; box-shadow: 0 0 0 3px rgba(17,24,39,.08); }
-    .login-wrap button {
-      padding: 12px; background: #111827; color: #fff; border: 0; border-radius: 8px;
-      cursor: pointer; font-size: 14px; font-weight: 600; font-family: inherit;
-    }
-    .form-card {
-      background: #fff; border-radius: 12px; padding: 24px;
-      box-shadow: 0 1px 3px rgba(0,0,0,.04);
-    }
-    .form-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;
-    }
+    .login-wrap input { padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; font-family: inherit; }
+    .login-wrap button { padding: 12px; background: #111827; color: #fff; border: 0; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; }
+    .form-card { background: #fff; border-radius: 12px; padding: 24px; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
     .form-grid .full { grid-column: 1 / -1; }
     .form-grid input, .form-grid textarea {
       width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px;
-      font-size: 14px; font-family: inherit; color: #111827;
-      background: #fff; box-sizing: border-box; transition: all .15s;
-    }
-    .form-grid input:focus, .form-grid textarea:focus {
-      outline: none; border-color: #111827; box-shadow: 0 0 0 3px rgba(17,24,39,.08);
+      font-size: 14px; font-family: inherit; color: #111827; box-sizing: border-box;
     }
     .form-grid textarea { resize: vertical; min-height: 60px; }
-    .btn {
-      padding: 12px; border-radius: 8px; border: 0; cursor: pointer;
-      font-size: 14px; font-weight: 600; font-family: inherit;
-      text-decoration: none; display: inline-block; text-align: center;
-    }
+    .btn { padding: 12px; border-radius: 8px; border: 0; cursor: pointer; font-size: 14px; font-weight: 600; font-family: inherit; text-decoration: none; display: inline-block; text-align: center; }
     .btn-primary { background: #111827; color: #fff; flex: 1; }
-    .btn-primary:hover { background: #1f2937; }
     .btn-secondary { background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; flex: 1; }
-    .btn-secondary:hover { background: #e5e7eb; }
     .actions { display: flex; gap: 8px; grid-column: 1 / -1; margin-top: 10px; }
     .msg { font-size: 13px; font-weight: 600; margin-top: 12px; }
     .msg.success { color: #059669; }
@@ -64,9 +36,7 @@
   </style>
 </head>
 <body>
-  <header class="edit-header">
-    <a href="index.html">🛍️ 심플몰 - 상품 수정</a>
-  </header>
+  <header class="edit-header"><a href="index.html">🛍️ 심플몰 - 상품 수정</a></header>
 
   <div id="login-screen" style="display:none;">
     <div class="login-wrap">
@@ -93,10 +63,8 @@
           <input name="sizes" placeholder="사이즈 (쉼표)">
           <input name="hem_option" placeholder="밑단선택 (쉼표)">
           <input name="other_option" placeholder="기타옵션 (쉼표)">
-          <input name="min_qty" type="number" min="1" placeholder="최소 주문수량 (기본 6)">
-
+          <input name="min_qty" type="number" min="1" placeholder="최소 주문수량 (기본 1)">
           <textarea name="detail_images" class="full" placeholder="상세 이미지 URL (줄바꿈)"></textarea>
-
           <div class="actions">
             <button type="submit" class="btn btn-primary">수정 완료</button>
             <a href="admin.html" class="btn btn-secondary">취소</a>
@@ -113,7 +81,6 @@
       "https://alpdhgcipjeekzrpxlbh.supabase.co",
       "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya"
     );
-    // admin은 밝은 톤 강제
     document.addEventListener('DOMContentLoaded', () => {
       document.body.classList.remove('dark');
       document.documentElement.classList.remove('dark');
@@ -146,7 +113,6 @@
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       loginMsg.textContent = '로그인 중...';
-      loginMsg.className = 'msg';
       const { error } = await db.auth.signInWithPassword({
         email: loginForm.email.value.trim(),
         password: loginForm.password.value,
@@ -161,7 +127,6 @@
       if (!id) { msg.textContent = '❌ 상품 ID가 없습니다.'; return; }
       const { data, error } = await db.from('products').select('*').eq('id', id).single();
       if (error || !data) { msg.textContent = '❌ 상품을 불러올 수 없습니다.'; return; }
-
       form.product_code.value = data.product_code || '';
       form.name.value = data.name;
       form.price.value = data.price;
@@ -171,13 +136,12 @@
       form.sizes.value = (data.sizes || []).join(',');
       form.hem_option.value = (data.hem_option || []).join(',');
       form.other_option.value = (data.other_option || []).join(',');
-      form.min_qty.value = data.min_qty || 6;
+      form.min_qty.value = data.min_qty || 1;
     }
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const detail_images = form.detail_images.value.split('\n').map(s => s.trim()).filter(Boolean);
-
       msg.textContent = '수정 중...';
       msg.className = 'msg';
 
@@ -191,7 +155,7 @@
         sizes: parseList(form.sizes.value),
         hem_option: parseList(form.hem_option.value),
         other_option: parseList(form.other_option.value),
-        min_qty: Number(form.min_qty.value) || 6,
+        min_qty: Number(form.min_qty.value) || 1,
       }).eq('id', id);
 
       if (error) {
