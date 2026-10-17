@@ -6,6 +6,18 @@
   <title>상품 상세 - 심플몰</title>
   <link rel="stylesheet" href="style.css">
   <script src="common.js"></script>
+  <style>
+    /* ⭐ 수량 인풋의 상하 화살표(spinner) 제거 */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+  </style>
 </head>
 <body>
   <div id="app-header"></div>
@@ -145,7 +157,7 @@
       const shareEl = document.getElementById('share-btn');
       if (shareEl) shareEl.onclick = () => shareProduct(data);
 
-      // ⭐ 옵션 변경 시 자동 추가
+      // 옵션 변경 시 자동 추가
       detailEl.querySelectorAll('select[data-opt-name]').forEach(sel => {
         sel.addEventListener('change', () => handleOptionChange());
       });
@@ -156,25 +168,20 @@
       renderSelectedItems();
     }
 
-    // ⭐ 옵션 변경 시 자동으로 아래에 추가
+    // 옵션 변경 시 자동으로 아래에 추가
     function handleOptionChange() {
       const detailEl = document.getElementById('product-detail');
       const selects = detailEl.querySelectorAll('select[data-opt-name]');
       const vals = {};
       selects.forEach(s => { vals[s.dataset.optName] = s.value; });
 
-      // 모든 select 가 비어있으면 아무것도 안 함
       const anySelected = Object.values(vals).some(v => v);
       if (!anySelected) return;
 
-      // 옵션이 하나라도 선택되면, 나머지 옵션도 다 선택됐는지 확인
+      // 옵션이 여러 개면 전부 선택돼야 추가
       const allRequired = Array.from(selects).every(s => s.value);
-      if (!allRequired) {
-        // 일부만 선택된 상태에서는 자동 추가 안 함
-        return;
-      }
+      if (!allRequired) return;
 
-      // 현재 값으로 옵션 조합 생성
       const item = {
         color: vals.color || null,
         size: vals.size || null,
@@ -183,7 +190,7 @@
         qty: 1,
       };
 
-      // ⭐ 같은 옵션 있으면 +1
+      // 같은 옵션 있으면 +1
       const dupIdx = selectedItems.findIndex(it =>
         it.color === item.color &&
         it.size === item.size &&
@@ -197,13 +204,12 @@
         selectedItems.push(item);
       }
 
-      // 선택 초기화
       selects.forEach(s => { s.value = ''; });
 
       renderSelectedItems();
     }
 
-    // ⭐ 선택된 옵션 리스트 렌더 (네이버 스타일)
+    // 선택된 옵션 리스트 렌더
     function renderSelectedItems() {
       const el = document.getElementById('selected-items');
       if (!el) return;
@@ -319,7 +325,7 @@
       `;
     }
 
-    // ⭐ 공유
+    // 공유
     async function shareProduct(p) {
       const url = `${location.origin}${location.pathname}?id=${p.id}`;
       const shareData = {
@@ -339,7 +345,7 @@
       }
     }
 
-    // ⭐ 주문 처리
+    // 주문 처리
     function handleOrder(mode) {
       const p = currentProduct;
       if (!p) return;
@@ -352,7 +358,7 @@
       const totalQty = selectedItems.reduce((s, it) => s + it.qty, 0);
 
       if (mode === 'cart') {
-        // ⭐ 장바구니 담기는 min_qty 무시, 1개라도 담기 가능
+        // 장바구니 담기는 min_qty 무시
         const cart = JSON.parse(localStorage.getItem('cart') || '[]');
         let merged = 0, added = 0;
 
@@ -394,7 +400,7 @@
         return;
       }
 
-      // ⭐ 바로 구매: 총 수량이 min_qty 이상이어야 함
+      // 바로 구매: 총 수량 min_qty 이상
       if (MIN_QTY > 1 && totalQty < MIN_QTY) {
         alert(`구매가능최소수량은 ${MIN_QTY}개입니다. 기타옵션 및 기타제품 추가해주시기 바랍니다.\n(현재: ${totalQty}개)`);
         return;

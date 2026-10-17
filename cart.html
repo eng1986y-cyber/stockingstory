@@ -6,6 +6,18 @@
   <title>장바구니 - 심플몰</title>
   <link rel="stylesheet" href="style.css">
   <script src="common.js"></script>
+  <style>
+    /* ⭐ 수량 인풋의 상하 화살표(spinner) 제거 */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+  </style>
 </head>
 <body>
   <div id="app-header"></div>
@@ -27,7 +39,6 @@
     const summaryEl = document.getElementById('cart-summary');
 
     let globalShipping = 0;
-    let productMinQtys = {};
 
     function getCart() { return JSON.parse(localStorage.getItem('cart') || '[]'); }
     function saveCart(cart) { localStorage.setItem('cart', JSON.stringify(cart)); }
@@ -41,35 +52,7 @@
       globalShipping = data ? Number(data.value) || 0 : 0;
     }
 
-    // ⭐ 상품별 최소수량 로드
-    async function loadProductMinQtys(cart) {
-      if (cart.length === 0) return;
-      const ids = [...new Set(cart.map(it => it.product_id))];
-      const { data } = await db.from('products').select('id, min_qty').in('id', ids);
-      productMinQtys = {};
-      (data || []).forEach(p => { productMinQtys[p.id] = Number(p.min_qty) || 1; });
-    }
-
-    // ⭐ 주문 검증:
-    // - 총 수량이 1개 이상이면 OK
-    // - 단일 상품의 min_qty(>1)가 총 수량보다 크면 안 됨
-    function validateOrder(cart) {
-      const totalQty = cart.reduce((s, it) => s + it.quantity, 0);
-      if (totalQty < 1) {
-        return { ok: false, msg: '주문할 상품이 없습니다.' };
-      }
-      // 단일 상품이고 min_qty > 1이면 그 수량 이상 필요
-      if (cart.length === 1) {
-        const minQ = productMinQtys[cart[0].product_id] || 1;
-        if (minQ > 1 && totalQty < minQ) {
-          return {
-            ok: false,
-            msg: `구매가능최소수량은 ${minQ}개입니다. 기타옵션 및 기타제품 추가해주시기 바랍니다.\n(현재: ${totalQty}개, ${minQ - totalQty}개 부족)`
-          };
-        }
-      }
-      return { ok: true };
-    }
+    const TOTAL_MIN = 6;
 
     function render() {
       const cart = getCart();
@@ -116,12 +99,15 @@
       const subTotal = cart.reduce((s, it) => s + it.product_price * it.quantity, 0);
       const total = subTotal + globalShipping;
       const totalQty = cart.reduce((s, it) => s + it.quantity, 0);
+      const canOrder = totalQty >= TOTAL_MIN;
 
       summaryEl.style.display = 'block';
       summaryEl.innerHTML = `
         <div style="background:#151515; border:1px solid #222; padding:20px; border-radius:12px; text-align:right; font-size:14px; line-height:1.8; color:#e5e7eb;">
-          <div style="color:#888; font-size:12px; text-align:left; margin-bottom:12px; padding:8px 12px; background:#0f0f0f; border-radius:6px;">
-            📦 총 <b style="color:#e5e7eb;">${totalQty}개</b> 상품
+          <div style="color:#888; font-size:12px; text-align:left; margin-bottom:12px; padding:8px 12px; background:#0f0f0f; border-radius:6px; border-left:3px solid ${canOrder ? '#10b981' : '#f59e0b'};">
+            📦 주문 규칙: 총 ${TOTAL_MIN}개 이상 주문해야 합니다.<br>
+            현재 총 <b style="color:${canOrder ? '#10b981' : '#f59e0b'};">${totalQty}개</b>
+            ${canOrder ? ' <span style="color:#10b981;">✅ 주문 가능</span>' : ` <span style="color:#f59e0b;">(${TOTAL_MIN - totalQty}개 부족)</span>`}
           </div>
           <div>상품 합계: <b>${subTotal.toLocaleString()}원</b></div>
           <div>배송비: <b>${globalShipping > 0 ? globalShipping.toLocaleString() + '원' : '무료'}</b></div>
@@ -130,8 +116,8 @@
             총 합계: <b style="color:#ef4444; font-size:22px;">${total.toLocaleString()}원</b>
           </p>
           <button id="checkout-btn"
-            style="padding:14px 28px; background:#e5e7eb; color:#111; border:0; border-radius:8px; cursor:pointer; font-weight:600; font-size:15px; font-family:inherit;">
-            주문하기
+            style="padding:14px 28px; background:${canOrder ? '#e5e7eb' : '#333'}; color:${canOrder ? '#111' : '#777'}; border:0; border-radius:8px; cursor:${canOrder ? 'pointer' : 'not-allowed'}; font-weight:600; font-size:15px; font-family:inherit;">
+            ${canOrder ? '주문하기' : `최소 ${TOTAL_MIN}개 이상 주문 (현재 ${totalQty}개)`}
           </button>
         </div>
       `;
@@ -180,13 +166,16 @@
         });
       });
 
-      document.getElementById('checkout-btn').onclick = () => showCheckoutModal(cart);
+      document.getElementById('checkout-btn').onclick = () => {
+        if (!canOrder) {
+          alert(`구매가능최소수량은 ${TOTAL_MIN}개입니다. 기타옵션 및 기타제품 추가해주시기 바랍니다.\n(현재: ${totalQty}개)`);
+          return;
+        }
+        showCheckoutModal(cart);
+      };
     }
 
     function showCheckoutModal(cart) {
-      const v = validateOrder(cart);
-      if (!v.ok) { alert(v.msg); return; }
-
       const subTotal = cart.reduce((s, it) => s + it.product_price * it.quantity, 0);
       const total = subTotal + globalShipping;
       const m = getMember();
@@ -308,8 +297,6 @@
 
     (async () => {
       await loadShipping();
-      const cart = getCart();
-      await loadProductMinQtys(cart);
       render();
     })();
   </script>
