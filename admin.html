@@ -812,10 +812,10 @@
       if (error) { el.innerHTML = '<p style="color:#dc2626;">' + error.message + '</p>'; return; }
       allOrdersRaw = data || [];
 
-      // 주문번호 기준 그룹화
+      // 주문번호 기준 그룹화 (주문번호가 없으면 고유 id로 그룹화)
       const groups = {};
       allOrdersRaw.forEach(o => {
-        const key = o.order_number || `no_num_${o.id}`;
+        const key = o.order_number || `single_${o.id}`;
         if (!groups[key]) groups[key] = [];
         groups[key].push(o);
       });
@@ -827,8 +827,9 @@
         const f = filterText.toLowerCase();
         entries = entries.filter(([num, items]) => {
           const first = items[0];
+          const orderNumText = first.order_number || '';
           return (
-            num.toLowerCase().includes(f) ||
+            orderNumText.toLowerCase().includes(f) ||
             (first.customer_name || '').toLowerCase().includes(f) ||
             (first.depositor_name || '').toLowerCase().includes(f) ||
             (first.customer_phone || '').includes(f) ||
@@ -842,8 +843,10 @@
         return;
       }
 
-      el.innerHTML = entries.map(([num, items]) => {
+      el.innerHTML = entries.map(([key, items]) => {
         const first = items[0];
+        const realOrderNum = first.order_number; // 실제 주문번호 (null일 수 있음)
+        const displayNum = realOrderNum || `(주문번호 없음)`; // 화면 표시용
         const totalAll = items.reduce((s, o) => s + Number(o.total_price || 0), 0);
         const totalQty = items.reduce((s, o) => s + Number(o.quantity || 0), 0);
         const dateStr = new Date(first.created_at).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' }).replace('. ', '/').replace('.', '');
@@ -852,7 +855,7 @@
         return `
           <div class="row-item">
             <span class="badge" style="background:${statusColor(first.status)};">${first.status || '-'}</span>
-            <span class="order-num">${num}</span>
+            <span class="order-num">${displayNum}</span>
             <span class="row-sep">|</span>
             <span><b class="row-strong">${first.customer_name || '-'}</b> <span class="row-muted">(${first.customer_phone || '-'})</span></span>
             <span class="row-sep">|</span>
@@ -861,8 +864,8 @@
             <span class="row-muted">${dateStr}</span>
             ${first.tracking_number ? `<span class="row-sep">|</span><span class="row-muted">🚚 ${first.courier || ''} ${first.tracking_number}</span>` : ''}
             <div class="row-actions">
-              <button class="btn btn-primary btn-sm order-edit" data-num="${num}">수정</button>
-              <button class="btn btn-danger btn-sm order-del" data-num="${num}">삭제</button>
+              <button class="btn btn-primary btn-sm order-edit" data-key="${key}">수정</button>
+              <button class="btn btn-danger btn-sm order-del" data-key="${key}">삭제</button>
             </div>
           </div>
         `;
@@ -870,17 +873,30 @@
 
       el.querySelectorAll('.order-edit').forEach(btn => {
         btn.addEventListener('click', () => {
-          const num = btn.dataset.num;
-          const items = groups[num];
-          if (items && items.length) showOrderEditModal(num, items);
+          const key = btn.dataset.key;
+          const items = groups[key];
+          if (items && items.length) showOrderEditModal(key, items);
         });
       });
 
       el.querySelectorAll('.order-del').forEach(btn => {
         btn.addEventListener('click', async () => {
-          const num = btn.dataset.num;
-          if (!confirm(`주문번호 "${num}" 의 모든 항목을 삭제할까요?`)) return;
-          const { error } = await db.from('orders').delete().eq('order_number', num);
+          const key = btn.dataset.key;
+          const items = groups[key];
+          const first = items[0];
+          const label = first.order_number ? `주문번호 "${first.order_number}"` : `해당 주문(ID: ${first.id})`;
+          
+          if (!confirm(`${label} 의 모든 항목을 삭제할까요?`)) return;
+          
+          let error;
+          if (first.order_number) {
+            // 주문번호가 있으면 주문번호로 전체 삭제
+            ({ error } = await db.from('orders').delete().eq('order_number', first.order_number));
+          } else {
+            // 주문번호가 없으면 해당 단일 ID로만 삭제
+            ({ error } = await db.from('orders').delete().eq('id', first.id));
+          }
+
           if (error) alert('삭제 실패: ' + error.message);
           else { alert('✅ 주문이 삭제되었습니다.'); loadOrders(document.getElementById('order-search').value.trim() || null); }
         });
@@ -891,16 +907,18 @@
       return { '입금대기':'#f59e0b', '입금완료':'#059669', '배송중':'#1976d2', '완료':'#6b7280', '취소':'#dc2626' }[s] || '#9ca3af';
     }
 
-    // ⭐ 주문 전체 수정 모달 (주문의 첫 번째 행 기준으로 대표 정보 수정, 모든 행에 반영)
-    function showOrderEditModal(orderNumber, items) {
+    // ⭐ 주문 전체 수정 모달 (ID 기반 수정으로 변경)
+    function showOrderEditModal(key, items) {
       const first = items[0];
+      const realOrderNum = first.order_number;
+      const displayNum = realOrderNum || `(주문번호 없음)`;
       const totalAll = items.reduce((s, o) => s + Number(o.total_price || 0), 0);
 
       const modal = document.createElement('div');
       modal.className = 'modal-backdrop';
       modal.innerHTML = `
         <div class="modal-box">
-          <h2>주문 수정 (${orderNumber})</h2>
+          <h2>주문 수정 (${displayNum})</h2>
           <p style="font-size:12px; color:#6b7280; margin:0 0 16px;">주문의 공통 정보를 수정합니다. 저장 시 주문번호에 속한 모든 상품 행에 반영됩니다.</p>
           <form id="order-edit-form" class="modal-form">
             <label>주문 상태</label>
@@ -964,7 +982,16 @@
           courier: f.courier.value.trim() || null,
           tracking_number: f.tracking_number.value.trim() || null,
         };
-        const { error } = await db.from('orders').update(updates).eq('order_number', orderNumber);
+        
+        let error;
+        if (realOrderNum) {
+          // 주문번호가 있으면 주문번호 기준 전체 업데이트
+          ({ error } = await db.from('orders').update(updates).eq('order_number', realOrderNum));
+        } else {
+          // 주문번호가 없으면 단일 ID 기준 업데이트
+          ({ error } = await db.from('orders').update(updates).eq('id', first.id));
+        }
+
         if (error) { alert('❌ 저장 실패: ' + error.message); return; }
         alert('✅ 주문이 수정되었습니다.');
         modal.remove();
