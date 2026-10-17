@@ -8,11 +8,8 @@
   <script src="common.js"></script>
   <style>
     html, body { background: #f4f6f8 !important; color: #1f2937 !important; }
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; transition: none !important; animation: none !important; transform: none !important; box-shadow: none !important; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; }
-    
-    /* ⭐ 애니메이션, 호버 효과 전부 제거 */
-    * { transition: none !important; animation: none !important; transform: none !important; box-shadow: none !important; }
     
     .admin-header {
       background: #fff !important; border-bottom: 1px solid #e5e7eb;
@@ -83,20 +80,24 @@
     .msg.success { color: #059669; }
     .msg.error { color: #dc2626; }
 
+    /* ⭐ 상품 등록 & 목록 좌우 배치 */
     .product-layout { display: flex; gap: 16px; align-items: flex-start; }
     .product-left { flex: 0 0 460px; max-width: 100%; }
-    .product-right { flex: 1 1 auto; min-width: 0; }
-    #admin-list { display: grid; grid-template-columns: 1fr; gap: 10px; }
-
-    /* ⭐ 상품/주문/회원 카드 전부 심플하게 (테두리 + 회색배경) */
-    .product-item, .order-item, .member-item {
-      background: #f9fafb !important; 
-      border: 1px solid #e5e7eb; 
-      border-radius: 8px; 
-      overflow: hidden;
+    .product-right { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+    
+    /* ⭐ 우측 등록된 상품 카드 (높이 고정, 내부 스크롤) */
+    #admin-list-wrap {
+      background: #f9fafb;
+      border-radius: 8px;
+      padding: 12px;
+      flex: 1;
+      overflow-y: auto;
     }
+    #admin-list { display: grid; grid-template-columns: 1fr; gap: 8px; }
+
+    .product-item { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
     .product-summary { padding: 12px; display: flex; align-items: center; gap: 12px; cursor: pointer; }
-    .product-summary img { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; background: #fff; border: 1px solid #e5e7eb; }
+    .product-summary img { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; background: #f3f4f6; border: 1px solid #e5e7eb; }
     .product-summary .info { flex: 1; min-width: 0; }
     .product-summary .name { font-size: 14px; font-weight: 600; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .product-summary .price { color: #e53935; font-weight: 700; font-size: 13px; margin-top: 2px; }
@@ -106,14 +107,19 @@
     .product-detail .label { color: #9ca3af; margin-right: 4px; }
     .product-detail .actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 12px; }
 
-    /* 주문 카드 */
-    .order-summary { padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px; cursor: pointer; flex-wrap: wrap; }
+    /* ⭐ 주문 목록 (1줄 요약 카드) */
+    .order-item {
+      background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
+      padding: 12px 16px; margin-bottom: 8px;
+      display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    .order-item-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; flex-wrap: wrap; font-size: 13px; }
     .order-status-badge { color: #fff; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-    .order-num { font-size: 13px; color: #1976d2; font-weight: 600; }
-    .order-detail { display: none; padding: 16px; font-size: 13px; line-height: 1.8; color: #374151; border-top: 1px solid #e5e7eb; background: #fff; }
+    .order-num { color: #1976d2; font-weight: 600; }
+    .order-item-right { display: flex; gap: 6px; }
 
     /* 회원 카드 */
-    .member-item { padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .member-item { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
     .member-status-badge { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; color: #fff; }
 
     #admin-pagination { display: flex; justify-content: center; gap: 6px; margin-top: 14px; flex-wrap: wrap; }
@@ -141,6 +147,7 @@
       .admin-sidebar .nav-item { flex: 1; min-width: 100px; justify-content: center; }
       .product-layout { flex-direction: column; }
       .product-left { flex: 1 1 auto; }
+      #admin-list-wrap { max-height: 500px; }
     }
   </style>
 </head>
@@ -178,13 +185,14 @@
       </aside>
 
       <div class="admin-content">
+        <!-- 상품 -->
         <section id="tab-products" class="admin-section active">
           <h1 class="page-title">상품 관리</h1>
           <p class="page-subtitle">상품을 등록하고 목록을 관리합니다</p>
 
           <div class="product-layout">
             <div class="product-left">
-              <div class="card">
+              <div class="card" id="product-register-card">
                 <div class="card-title">📝 새 상품 등록</div>
                 <form id="product-form" class="form-grid">
                   <input name="product_code" placeholder="제품번호">
@@ -204,15 +212,18 @@
             </div>
 
             <div class="product-right">
-              <div class="card">
+              <div class="card" style="display:flex; flex-direction:column; margin-bottom:0;">
                 <div class="card-title">📋 등록된 상품 <span id="product-count" class="hint"></span></div>
-                <div id="admin-list">로딩중...</div>
+                <div id="admin-list-wrap">
+                  <div id="admin-list">로딩중...</div>
+                </div>
                 <div id="admin-pagination"></div>
               </div>
             </div>
           </div>
         </section>
 
+        <!-- 주문 -->
         <section id="tab-orders" class="admin-section">
           <h1 class="page-title">주문 관리</h1>
           <p class="page-subtitle">주문 내역을 확인하고 상태를 변경합니다</p>
@@ -227,6 +238,7 @@
           <div id="order-list">로딩중...</div>
         </section>
 
+        <!-- 회원 -->
         <section id="tab-members" class="admin-section">
           <h1 class="page-title">회원 관리</h1>
           <p class="page-subtitle">회원 정보를 조회하고 제재할 수 있습니다</p>
@@ -241,6 +253,7 @@
           <div id="member-list">로딩중...</div>
         </section>
 
+        <!-- 설정 -->
         <section id="tab-settings" class="admin-section">
           <h1 class="page-title">사이트 설정</h1>
           <p class="page-subtitle">로고, 배너, 푸터, 배송비를 관리합니다</p>
@@ -324,6 +337,29 @@
     const adminScreen = document.getElementById('admin-screen');
     const loginForm = document.getElementById('login-form');
     const loginMsg = document.getElementById('login-msg');
+
+    // ⭐ 카드 높이 맞추기 로직
+    function matchCardHeights() {
+      const layout = document.querySelector('.product-layout');
+      if (!layout) return;
+      if (window.innerWidth <= 1000) {
+        document.getElementById('admin-list-wrap').style.maxHeight = '500px';
+        return;
+      }
+      const leftCard = document.getElementById('product-register-card');
+      const rightWrap = document.getElementById('admin-list-wrap');
+      const pag = document.getElementById('admin-pagination');
+      
+      // 좌측 카드의 전체 높이에서 우측 카드의 타이틀+페이지네이션+패딩 높이를 뺌
+      const leftHeight = leftCard.offsetHeight;
+      const rightCard = rightWrap.parentElement;
+      const title = rightCard.querySelector('.card-title').offsetHeight;
+      const pagHeight = pag.offsetHeight;
+      
+      const available = leftHeight - title - pagHeight - 60; // 60은 패딩 마진 등
+      rightWrap.style.maxHeight = Math.max(available, 200) + 'px';
+    }
+    window.addEventListener('resize', matchCardHeights);
 
     document.querySelectorAll('.admin-sidebar .nav-item').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -629,7 +665,7 @@
       }
     });
 
-    // 상품 목록
+    // 상품 목록 (10개씩 페이징)
     let allProducts = [];
     let currentPage = 1;
     const PER_PAGE = 10;
@@ -648,6 +684,7 @@
       currentPage = 1;
       document.getElementById('product-count').textContent = `총 ${data.length}개`;
       renderProducts();
+      setTimeout(matchCardHeights, 50);
     }
 
     function renderProducts() {
@@ -737,7 +774,7 @@
 
     function renderPagination(totalPages) {
       const el = document.getElementById('admin-pagination');
-      if (totalPages <= 1) { el.innerHTML = ''; return; }
+      if (totalPages <= 1) { el.innerHTML = ''; setTimeout(matchCardHeights, 20); return; }
       let html = '';
       html += `<button class="btn btn-secondary btn-sm page-nav" data-page="${currentPage-1}" ${currentPage===1?'disabled':''} style="${currentPage===1?'opacity:.4;cursor:not-allowed;':''}">이전</button>`;
       for (let i = 1; i <= totalPages; i++) {
@@ -745,16 +782,19 @@
       }
       html += `<button class="btn btn-secondary btn-sm page-nav" data-page="${currentPage+1}" ${currentPage===totalPages?'disabled':''} style="${currentPage===totalPages?'opacity:.4;cursor:not-allowed;':''}">다음</button>`;
       el.innerHTML = html;
+
       el.querySelectorAll('.page-num, .page-nav').forEach(btn => {
         btn.addEventListener('click', () => {
           if (btn.disabled) return;
           currentPage = Number(btn.dataset.page);
           renderProducts();
+          document.getElementById('admin-list-wrap').scrollTop = 0;
         });
       });
+      setTimeout(matchCardHeights, 20);
     }
 
-    // ⭐ 주문 (디자인 심플하게)
+    // ⭐ 주문 목록 (1줄 요약 카드)
     let currentOrders = [];
     async function loadOrders(filterNum) {
       const el = document.getElementById('order-list');
@@ -775,60 +815,29 @@
       el.innerHTML = Object.entries(groups).map(([num, items]) => {
         const first = items[0];
         const totalAll = items.reduce((s, o) => s + Number(o.total_price || 0), 0);
+        const dateStr = new Date(first.created_at).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' }).replace('. ', '/').replace('.', '');
+        
         return `
           <div class="order-item">
-            <div class="order-summary">
-              <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0; flex-wrap:wrap;">
-                <span class="order-status-badge" style="background:${statusColor(first.status)};">${first.status}</span>
-                <span class="order-num">${num}</span>
-                <span style="font-size:14px;"><b>${first.customer_name}</b></span>
-                <span style="font-size:13px; color:#6b7280;">${items.length}건</span>
-                <span style="font-size:14px; font-weight:700; color:#e53935;">${totalAll.toLocaleString()}원</span>
-              </div>
-              <span class="product-arrow">▼</span>
+            <div class="order-item-left">
+              <span class="order-status-badge" style="background:${statusColor(first.status)};">${first.status}</span>
+              <span class="order-num">${num}</span>
+              <b>${first.customer_name}</b> <span style="color:#9ca3af;">(${items.length}건)</span>
+              <span style="color:#e53935; font-weight:700; margin-left:auto;">${totalAll.toLocaleString()}원</span>
+              <span style="color:#9ca3af; font-size:12px;">${dateStr}</span>
             </div>
-            <div class="order-detail">
-              <div style="padding-top:4px;">
-                <div><span class="label">연락처</span>${first.customer_phone}</div>
-                <div><span class="label">주소</span>${first.postcode ? `[${first.postcode}] ` : ''}${first.address || ''} ${first.address_detail || ''}</div>
-                <div><span class="label">입금자명</span><b>${first.depositor_name}</b></div>
-                ${first.memo ? `<div><span class="label">요청</span>${first.memo}</div>` : ''}
-                <hr style="border:0; border-top:1px dashed #e5e7eb; margin:10px 0;">
-                ${items.map(o => `
-                  <div style="padding:6px 0; border-bottom:1px dashed #f3f4f6;">
-                    <b>${o.product_name}</b> × ${o.quantity} = <b style="color:#e53935;">${Number(o.total_price).toLocaleString()}원</b>
-                    <div style="margin-top:6px;">
-                      <button class="order-edit btn btn-primary btn-sm" data-id="${o.id}">수정</button>
-                      <button class="order-del btn btn-danger btn-sm" data-id="${o.id}">삭제</button>
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
+            <div class="order-item-right">
+              <button class="order-edit btn btn-primary btn-sm" data-id="${first.id}">수정</button>
             </div>
           </div>
         `;
       }).join('');
 
-      el.querySelectorAll('.order-summary').forEach(sum => {
-        sum.addEventListener('click', () => {
-          const detail = sum.nextElementSibling;
-          const arrow = sum.querySelector('.product-arrow');
-          if (detail.style.display === 'none' || !detail.style.display) {
-            detail.style.display = 'block';
-            arrow.style.transform = 'rotate(180deg)';
-          } else {
-            detail.style.display = 'none';
-            arrow.style.transform = 'rotate(0deg)';
-          }
-        });
-      });
-      el.querySelectorAll('.order-del').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-          e.stopPropagation();
-          if (!confirm('주문을 삭제할까요?')) return;
-          const { error } = await db.from('orders').delete().eq('id', btn.dataset.id);
-          if (error) alert('삭제 실패: ' + error.message);
-          else loadOrders();
+      // ⭐ 주문 수정 이벤트 (order_number로 그룹화된 첫 번째 항목 기준)
+      el.querySelectorAll('.order-edit').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const order = currentOrders.find(x => String(x.id) === String(btn.dataset.id));
+          if (order) showOrderEditModal(order);
         });
       });
     }
@@ -845,6 +854,42 @@
       document.getElementById('order-search').value = '';
       loadOrders();
     });
+
+    // 주문 수정 모달
+    function showOrderEditModal(o) {
+      const modal = document.createElement('div');
+      modal.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:1000; padding:10px;`;
+      modal.innerHTML = `
+        <div style="background:#fff; padding:24px; border-radius:12px; width:100%; max-width:460px; max-height:90vh; overflow-y:auto;">
+          <h2 style="margin:0 0 16px; font-size:18px; color:#111827;">주문 수정 (${o.order_number || o.id})</h2>
+          <form id="order-edit-form" style="display:grid; gap:10px; background:none; padding:0; border:0; max-width:none;">
+            <label style="font-size:13px; font-weight:600; color:#374151;">상태 변경</label>
+            <select name="status" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit; background:#fff;">
+              ${['입금대기','입금완료','배송중','완료','취소'].map(s => `<option ${s === o.status ? 'selected' : ''}>${s}</option>`).join('')}
+            </select>
+            <div style="display:flex; gap:8px; margin-top:10px;">
+              <button type="submit" class="btn btn-primary" style="flex:1;">상태 저장</button>
+              <button type="button" id="cancel-edit" class="btn btn-secondary" style="flex:1;">취소</button>
+            </div>
+          </form>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      modal.querySelector('#cancel-edit').onclick = () => modal.remove();
+      
+      modal.querySelector('#order-edit-form').addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        const f = ev.target;
+        const { error } = await db.from('orders').update({
+          status: f.status.value,
+        }).eq('id', o.id);
+
+        if (error) { alert('❌ 저장 실패: ' + error.message); return; }
+        alert('✅ 상태가 변경되었습니다.');
+        modal.remove();
+        loadOrders();
+      });
+    }
 
     // 회원
     let allMembers = [];
