@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="style.css">
   <script src="common.js"></script>
   <style>
-    .mypage-wrap { max-width: 500px; margin: 40px auto; padding: 0 16px; }
+    .mypage-wrap { max-width: 600px; margin: 40px auto; padding: 0 16px; }
     .mypage-title {
       font-size: 22px;
       font-weight: 700;
@@ -21,6 +21,7 @@
       background: #fff;
       padding: 24px;
       border-radius: 8px;
+      margin-bottom: 32px;
     }
     body.dark .mypage-form {
       background: #151515;
@@ -71,6 +72,75 @@
     }
     .mypage-form button:hover { background: #02b151; }
     #msg { margin-top: 12px; font-weight: 600; text-align: center; }
+
+    /* ⭐ 주문 내역 스타일 */
+    .order-history-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #222;
+    }
+    body.dark .order-history-title { color: #fff; }
+    .order-history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .history-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 16px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #222;
+    }
+    body.dark .history-card {
+      background: #151515;
+      border-color: #222;
+      color: #e5e7eb;
+    }
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #eee;
+    }
+    body.dark .history-header { border-bottom-color: #222; }
+    .history-date { font-size: 12px; color: #888; }
+    .history-status {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 4px;
+      color: #fff;
+    }
+    .history-order-num {
+      font-weight: 700;
+      color: #1976d2;
+      font-size: 13px;
+      margin-bottom: 8px;
+      display: block;
+    }
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+    .history-item .name { font-weight: 500; }
+    .history-item .qty { color: #888; }
+    .history-total {
+      text-align: right;
+      font-weight: 700;
+      color: #e53935;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed #eee;
+    }
+    body.dark .history-total { border-top-color: #222; color: #ef4444; }
   </style>
 </head>
 <body>
@@ -107,6 +177,12 @@
         <button type="submit">저장</button>
       </form>
       <p id="msg"></p>
+
+      <!-- ⭐ 내 주문 내역 섹션 추가 -->
+      <h2 class="order-history-title">내 주문내역</h2>
+      <div id="order-history-list" class="order-history-list">
+        <p style="color:#888; font-size:14px;">주문 내역을 불러오는 중입니다...</p>
+      </div>
     </div>
   </main>
 
@@ -121,11 +197,16 @@
   <script>
     const form = document.getElementById('mypage-form');
     const msg = document.getElementById('msg');
+    const historyListEl = document.getElementById('order-history-list');
 
     let member = JSON.parse(localStorage.getItem('member') || 'null');
     if (!member || !member.id) {
       alert('로그인이 필요합니다.');
       location.href = 'login.html';
+    }
+
+    function statusColor(s) {
+      return { '입금대기':'#f59e0b', '입금완료':'#059669', '배송중':'#1976d2', '완료':'#6b7280', '취소':'#dc2626' }[s] || '#9ca3af';
     }
 
     async function loadFromServer() {
@@ -147,6 +228,80 @@
       form.postcode.value = data.postcode || '';
       form.address.value = data.address || '';
       form.address_detail.value = data.address_detail || '';
+
+      // ⭐ 회원 정보 로드 후 주문 내역도 함께 로드
+      loadOrderHistory(data);
+    }
+
+    // ⭐ 내 주문 내역 로드 함수
+    async function loadOrderHistory(m) {
+      historyListEl.innerHTML = '<p style="color:#888; font-size:14px;">주문 내역을 불러오는 중입니다...</p>';
+      
+      // 주문자 이름과 연락처를 기준으로 주문 내역 조회
+      const { data, error } = await db.from('orders')
+        .select('*')
+        .or(`and(customer_name.eq.${m.name},customer_phone.eq.${m.phone}),and(customer_name.eq.${m.name},depositor_name.eq.${m.name})`)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        // OR 조건 검색이 실패할 경우(데이터 형식 등)를 대비해 단순 이름으로 재조회
+        const fallbackRes = await db.from('orders').select('*').eq('customer_name', m.name).order('created_at', { ascending: false });
+        if (fallbackRes.error || !fallbackRes.data || fallbackRes.data.length === 0) {
+          historyListEl.innerHTML = '<p style="color:#888; font-size:14px;">주문 내역이 없습니다.</p>';
+          return;
+        }
+        renderHistory(fallbackRes.data);
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        historyListEl.innerHTML = '<p style="color:#888; font-size:14px;">주문 내역이 없습니다.</p>';
+        return;
+      }
+
+      renderHistory(data);
+    }
+
+    // 주문 내역 화면에 그리기
+    function renderHistory(orders) {
+      // 주문번호(또는 고유ID) 기준 그룹화
+      const groups = {};
+      orders.forEach(o => {
+        const key = o.order_number || `single_${o.id}`;
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(o);
+      });
+
+      const entries = Object.entries(groups);
+
+      historyListEl.innerHTML = entries.map(([key, items]) => {
+        const first = items[0];
+        const totalAll = items.reduce((s, o) => s + Number(o.total_price || 0), 0);
+        const dateStr = new Date(first.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        const displayNum = first.order_number || `(번호 없음)`;
+
+        return `
+          <div class="history-card">
+            <div class="history-header">
+              <span class="history-date">${dateStr}</span>
+              <span class="history-status" style="background:${statusColor(first.status)};">${first.status || '-'}</span>
+            </div>
+            <span class="history-order-num">${displayNum}</span>
+            ${items.map(o => `
+              <div class="history-item">
+                <span class="name">${o.product_name} <span class="qty">x ${o.quantity}</span></span>
+                <span>${Number(o.total_price).toLocaleString()}원</span>
+              </div>
+            `).join('')}
+            <div class="history-total">총 결제금액: ${totalAll.toLocaleString()}원</div>
+            ${(first.courier || first.tracking_number) ? `
+              <div style="margin-top:10px; font-size:12px; color:#888; background:#f9fafb; padding:8px; border-radius:4px;">
+                🚚 ${first.courier || '택배사 미정'} | ${first.tracking_number || '운송장 없음'}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
     }
 
     loadFromServer();
@@ -182,6 +337,10 @@
       form.password.value = '';
       msg.style.color = '#10b981';
       msg.textContent = '✅ 저장 완료!';
+      
+      // 정보 수정 시 주문 내역도 다시 로드 (이름 등이 바뀌었을 수 있으므로)
+      loadOrderHistory(member);
+      
       setTimeout(() => msg.textContent = '', 2000);
     });
   </script>

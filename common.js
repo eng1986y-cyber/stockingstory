@@ -328,8 +328,9 @@ function renderHeader(current) {
     : `<a href="login.html" data-nav="login" style="${btnStyle(current === 'login')}">로그인</a>
        <a href="signup.html" data-nav="signup" style="${btnStyle(current === 'signup')}">회원가입</a>`;
 
+  // ⭐ 사용자 이름을 메뉴 버튼 바로 위, 가운데 정렬 (PC/모바일 공통)
   const nameRow = `
-    <div class="header-name-row" style="text-align:right; font-size:13px; color:${theme.nameColor}; margin-bottom:6px; min-height:18px; line-height:18px;">
+    <div class="header-name-row" style="text-align:center; font-size:13px; color:${theme.nameColor}; margin-bottom:8px; min-height:18px; line-height:18px; font-weight:500;">
       ${m ? `${m.name}님` : ''}
     </div>
   `;
