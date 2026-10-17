@@ -314,7 +314,12 @@ function renderHeader(current) {
     : `<a href="login.html" data-nav="login" style="${btnStyle(current === 'login')}">로그인</a>
        <a href="signup.html" data-nav="signup" style="${btnStyle(current === 'signup')}">회원가입</a>`;
 
-  const nameRow = m ? `<div class="header-name-row" style="text-align:right; font-size:13px; color:${theme.nameColor}; margin-bottom:6px;">${m.name}님</div>` : '';
+  // ⭐ 로그인 안 했을 때도 빈 공간을 차지하도록 min-height 부여 (튕김 방지)
+  const nameRow = `
+    <div class="header-name-row" style="text-align:right; font-size:13px; color:${theme.nameColor}; margin-bottom:6px; min-height:18px; line-height:18px;">
+      ${m ? `${m.name}님` : ''}
+    </div>
+  `;
 
   const logoHtml = logoImageUrl
     ? `<a href="index.html" style="display:inline-block;"><img src="${logoImageUrl}" alt="${siteName}" style="height:40px; max-width:240px; object-fit:contain; display:block; margin:0 auto;"></a>`
