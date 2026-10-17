@@ -10,13 +10,41 @@ if (_isDark) {
   document.documentElement.style.background = '#0a0a0a';
 }
 
-// 이미지 복사 방지 + 레이아웃 안정화 (스크롤바 강제로 인한 흔들림 방지)
+// 이미지 복사 방지 + 스크롤바 강제 고정 (화면 흔들림 원천 차단)
 (function() {
   const style = document.createElement('style');
   style.textContent = `
-    /* ⭐ 페이지 이동 시 좌우 흔들림(스크롤바 유무 차이) 완전 방지 */
-    html { overflow-y: scroll; } 
-    
+    /* ⭐ 스크롤바 강제로 항상 표시 (페이지 이동 시 좌우 흔들림 100% 방지) */
+    html { 
+      overflow-y: scroll !important; 
+      overflow-x: hidden !important;
+    }
+    body {
+      margin: 0;
+      overflow-x: hidden;
+      width: 100%;
+    }
+
+    /* ⭐ 데이터 로딩 중 화면 가리는 스피너 (불필요한 '로딩중...' 텍스트 방지) */
+    .page-loader {
+      position: fixed; inset: 0;
+      background: #0a0a0a;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.2s ease;
+    }
+    .page-loader.hide {
+      opacity: 0; pointer-events: none;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid rgba(255,255,255,0.1);
+      border-top-color: #e5e7eb;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
     /* 이미지 복사/드래그 방지 */
     img {
       -webkit-user-drag: none !important;
@@ -30,54 +58,31 @@ if (_isDark) {
 
     /* 플로팅 스크롤 버튼 */
     #scroll-btns {
-      position: fixed;
-      left: 50%;
-      transform: translateX(calc(700px + 16px));
-      bottom: 20px;
-      display: flex; flex-direction: column; gap: 8px; z-index: 900;
+      position: fixed; left: 50%; transform: translateX(calc(700px + 16px));
+      bottom: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 900;
     }
     #scroll-btns button {
       width: 44px; height: 44px; border-radius: 50%;
       border: 1px solid #ddd; background: #fff; color: #222;
-      font-size: 18px; font-weight: 700; cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,.12);
-      display: flex; align-items: center; justify-content: center;
-      padding: 0; line-height: 1;
+      font-size: 18px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.12);
+      display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1;
     }
     body.dark #scroll-btns button {
-      border-color: #333; background: #1a1a1a; color: #e5e7eb;
-      box-shadow: 0 2px 8px rgba(0,0,0,.5);
+      border-color: #333; background: #1a1a1a; color: #e5e7eb; box-shadow: 0 2px 8px rgba(0,0,0,.5);
     }
+    @media (max-width: 1450px) { #scroll-btns { left: auto; right: 16px; transform: none; } }
+    @media (max-width: 768px) { #scroll-btns { right: 12px; bottom: 12px; } #scroll-btns button { width: 40px; height: 40px; font-size: 16px; } }
 
-    @media (max-width: 1450px) {
-      #scroll-btns { left: auto; right: 16px; transform: none; }
-    }
-    @media (max-width: 768px) {
-      #scroll-btns { right: 12px; bottom: 12px; }
-      #scroll-btns button { width: 40px; height: 40px; font-size: 16px; }
-    }
-
-    #app-footer {
-      margin-top: 40px; padding: 24px 16px;
-      background: #fafafa; border-top: 1px solid #eee;
-      color: #666; font-size: 13px; line-height: 1.8;
-    }
-    body.dark #app-footer {
-      background: #0f0f0f; border-top-color: #1f1f1f; color: #888;
-    }
+    /* Footer */
+    #app-footer { margin-top: 40px; padding: 24px 16px; background: #fafafa; border-top: 1px solid #eee; color: #666; font-size: 13px; line-height: 1.8; }
+    body.dark #app-footer { background: #0f0f0f; border-top-color: #1f1f1f; color: #888; }
     #app-footer .footer-inner { max-width: 1400px; margin: 0 auto; text-align: center; }
     #app-footer .footer-title { font-weight: 700; font-size: 14px; color: #333; margin-bottom: 8px; }
     body.dark #app-footer .footer-title { color: #ccc; }
     #app-footer .footer-row { display: flex; flex-wrap: wrap; gap: 6px 16px; justify-content: center; }
     #app-footer .footer-item { color: #666; }
     body.dark #app-footer .footer-item { color: #888; }
-    #app-footer .footer-text {
-      margin-top: 12px; padding-top: 12px;
-      border-top: 1px dashed #ddd;
-      font-size: 12px; color: #999;
-      white-space: pre-wrap; max-width: 800px;
-      margin-left: auto; margin-right: auto;
-    }
+    #app-footer .footer-text { margin-top: 12px; padding-top: 12px; border-top: 1px dashed #ddd; font-size: 12px; color: #999; white-space: pre-wrap; max-width: 800px; margin-left: auto; margin-right: auto; }
     body.dark #app-footer .footer-text { border-top-color: #222; color: #555; }
   `;
   document.head.appendChild(style);
@@ -169,8 +174,7 @@ async function refreshLogoCache() {
   const client = getSupabaseClient();
   if (!client) return;
   try {
-    const { data } = await client.from('logos').select('*')
-      .order('id', { ascending: false }).limit(1).maybeSingle();
+    const { data } = await client.from('logos').select('*').order('id', { ascending: false }).limit(1).maybeSingle();
     if (data) setCachedLogo({ image_url: data.image_url || '', site_name: data.site_name || '' });
     else setCachedLogo({ image_url: '', site_name: '' });
   } catch (e) {}
@@ -180,8 +184,7 @@ async function refreshFooterCache() {
   const client = getSupabaseClient();
   if (!client) return;
   try {
-    const { data } = await client.from('settings').select('key, value')
-      .in('key', ['footer_owner','footer_phone','footer_email','footer_address','footer_business','footer_text']);
+    const { data } = await client.from('settings').select('key, value').in('key', ['footer_owner','footer_phone','footer_email','footer_address','footer_business','footer_text']);
     const obj = {};
     (data || []).forEach(row => { obj[row.key] = row.value || ''; });
     setCachedFooter(obj);
@@ -269,19 +272,11 @@ function renderHeader(current) {
 
   const isDark = _isDark;
   const theme = isDark ? {
-    headerBg: '#0f0f0f', borderColor: '#222',
-    logoColor: '#fff',
-    btnBg: '#1a1a1a', btnBgActive: '#e5e7eb',
-    btnText: '#e5e7eb', btnTextActive: '#111',
-    btnBorder: '#333', btnBorderActive: '#e5e7eb',
-    nameColor: '#888',
+    headerBg: '#0f0f0f', borderColor: '#222', logoColor: '#fff',
+    btnBg: '#1a1a1a', btnBgActive: '#e5e7eb', btnText: '#e5e7eb', btnTextActive: '#111', btnBorder: '#333', btnBorderActive: '#e5e7eb', nameColor: '#888',
   } : {
-    headerBg: '#fff', borderColor: '#eee',
-    logoColor: '#222',
-    btnBg: '#fff', btnBgActive: '#222',
-    btnText: '#222', btnTextActive: '#fff',
-    btnBorder: '#ddd', btnBorderActive: '#222',
-    nameColor: '#555',
+    headerBg: '#fff', borderColor: '#eee', logoColor: '#222',
+    btnBg: '#fff', btnBgActive: '#222', btnText: '#222', btnTextActive: '#fff', btnBorder: '#ddd', btnBorderActive: '#222', nameColor: '#555',
   };
 
   if (_headerRendered && wrap.querySelector('header')) {
@@ -309,25 +304,17 @@ function renderHeader(current) {
     background: ${active ? theme.btnBgActive : theme.btnBg};
     color: ${active ? theme.btnTextActive : theme.btnText};
     border: 1px solid ${active ? theme.btnBorderActive : theme.btnBorder};
-    border-radius: 6px; text-decoration: none;
-    font-size: 14px; font-weight: 500;
-    white-space: nowrap; box-sizing: border-box;
-    flex-shrink: 0;
+    border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500;
+    white-space: nowrap; box-sizing: border-box; flex-shrink: 0;
   `;
 
   const userBtns = m
-    ? `
-      <a href="mypage.html" data-nav="mypage" style="${btnStyle(current === 'mypage')}">내정보</a>
-      <a href="#" id="logout-btn" style="${btnStyle(false)}">로그아웃</a>
-    `
-    : `
-      <a href="login.html" data-nav="login" style="${btnStyle(current === 'login')}">로그인</a>
-      <a href="signup.html" data-nav="signup" style="${btnStyle(current === 'signup')}">회원가입</a>
-    `;
+    ? `<a href="mypage.html" data-nav="mypage" style="${btnStyle(current === 'mypage')}">내정보</a>
+       <a href="#" id="logout-btn" style="${btnStyle(false)}">로그아웃</a>`
+    : `<a href="login.html" data-nav="login" style="${btnStyle(current === 'login')}">로그인</a>
+       <a href="signup.html" data-nav="signup" style="${btnStyle(current === 'signup')}">회원가입</a>`;
 
-  const nameRow = m
-    ? `<div class="header-name-row" style="text-align:right; font-size:13px; color:${theme.nameColor}; margin-bottom:6px;">${m.name}님</div>`
-    : '';
+  const nameRow = m ? `<div class="header-name-row" style="text-align:right; font-size:13px; color:${theme.nameColor}; margin-bottom:6px;">${m.name}님</div>` : '';
 
   const logoHtml = logoImageUrl
     ? `<a href="index.html" style="display:inline-block;"><img src="${logoImageUrl}" alt="${siteName}" style="height:40px; max-width:240px; object-fit:contain; display:block; margin:0 auto;"></a>`
@@ -365,8 +352,14 @@ function renderHeader(current) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  if (_isDark) document.body.classList.add('dark');
+  // ⭐ 데이터 로드 중 화면 덜컹거림 방지용 로더 추가
+  const loader = document.createElement('div');
+  loader.className = 'page-loader';
+  if (!_isDark) loader.style.background = '#f8f8f8';
+  loader.innerHTML = '<div class="spinner"></div>';
+  document.body.appendChild(loader);
 
+  if (_isDark) document.body.classList.add('dark');
   applyPhoneAttrs();
   new MutationObserver(applyPhoneAttrs).observe(document.body, { childList: true, subtree: true });
 
@@ -376,13 +369,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   const isOk = await verifyMemberStatus();
   if (!isOk) return;
 
-  const map = {
-    'index': 'home', 'login': 'login', 'signup': 'signup',
-    'cart': 'cart', 'orders': 'orders', 'product': 'product', 'mypage': 'mypage',
-  };
+  const map = { 'index': 'home', 'login': 'login', 'signup': 'signup', 'cart': 'cart', 'orders': 'orders', 'product': 'product', 'mypage': 'mypage' };
   const current = map[_pathName] || 'home';
 
-  if (document.getElementById('app-header')) {
-    renderHeader(current);
-  }
+  if (document.getElementById('app-header')) renderHeader(current);
+
+  // ⭐ 페이지 로딩 완료 후 스피너 제거 (0.3초 뒤 부드럽게)
+  setTimeout(() => {
+    loader.classList.add('hide');
+    setTimeout(() => loader.remove(), 300);
+  }, 300);
 });
