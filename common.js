@@ -25,6 +25,20 @@ if (_isDark) {
       width: 100%;
     }
 
+    /* ⭐ 상단 네비게이션 반응형 정렬 (PC는 우측, 모바일은 중앙) */
+    .header-nav-wrap {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end; /* PC 기본: 오른쪽 정렬 */
+    }
+    @media (max-width: 768px) {
+      .header-nav-wrap {
+        justify-content: center; /* 모바일: 가운데 정렬 */
+      }
+    }
+
     /* ⭐ 데이터 로딩 중 화면 가리는 스피너 (불필요한 '로딩중...' 텍스트 방지) */
     .page-loader {
       position: fixed; inset: 0;
@@ -324,13 +338,13 @@ function renderHeader(current) {
     ? `<a href="index.html" style="display:inline-block;"><img src="${logoImageUrl}" alt="${siteName}" style="height:40px; max-width:240px; object-fit:contain; display:block; margin:0 auto;"></a>`
     : `<a href="index.html" style="font-size:22px; font-weight:700; color:${theme.logoColor}; text-decoration:none; display:inline-block;">${siteName}</a>`;
 
-  // ⭐ 모바일/PC 모두 버튼 가운데 정렬 (justify-content: center)
   wrap.innerHTML = `
     <header style="background:${theme.headerBg}; border-bottom:1px solid ${theme.borderColor}; padding:14px 16px;">
       <div style="max-width:1400px; margin:0 auto;">
         <div style="margin-bottom:12px; text-align:center;">${logoHtml}</div>
         ${nameRow}
-        <div class="header-nav-wrap" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:center;">
+        <!-- header-nav-wrap 클래스를 통해 PC는 우측, 모바일은 중앙 정렬 적용 -->
+        <div class="header-nav-wrap">
           <a href="cart.html" data-nav="cart" style="${btnStyle(current === 'cart')}">장바구니 <span id="cart-count" style="margin-left:4px;">0</span></a>
           <a href="orders.html" data-nav="orders" style="${btnStyle(current === 'orders')}">주문조회</a>
           ${userBtns}
