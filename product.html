@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="style.css">
   <script src="common.js"></script>
   <style>
-    /* ⭐ 수량 인풋의 상하 화살표(spinner) 제거 */
+    /* 수량 인풋 화살표 제거 */
     input[type=number]::-webkit-inner-spin-button,
     input[type=number]::-webkit-outer-spin-button {
       -webkit-appearance: none;
@@ -72,11 +72,11 @@
       const hemOptions = data.hem_option || [];
       const otherOptions = data.other_option || [];
 
-      // 옵션 그룹별 select 생성
+      // 옵션 셀렉트박스 생성 헬퍼
       function buildSelect(name, label, options) {
         if (!options.length) return '';
         return `
-          <div style="margin-bottom:8px;">
+          <div>
             <label style="font-size:13px; font-weight:600; color:#ccc; display:block; margin-bottom:4px;">${label}</label>
             <select data-opt-name="${name}"
               style="width:100%; padding:10px 12px; background:#0f0f0f; border:1px solid #2a2a2a; border-radius:8px; color:#e5e7eb; font-family:inherit; font-size:14px;">
@@ -87,12 +87,20 @@
         `;
       }
 
-      const optionSelectsHtml = [
-        buildSelect('color', '색상', colors),
-        buildSelect('size', '사이즈', sizes),
-        buildSelect('hem', '밑단선택', hemOptions),
-        buildSelect('other', '기타옵션', otherOptions),
-      ].join('');
+      // ⭐ 2열 배치
+      const row1 = (colors.length || sizes.length) ? `
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+          ${buildSelect('color', '색상', colors)}
+          ${buildSelect('size', '사이즈', sizes)}
+        </div>
+      ` : '';
+
+      const row2 = (hemOptions.length || otherOptions.length) ? `
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+          ${buildSelect('hem', '밑단선택', hemOptions)}
+          ${buildSelect('other', '기타옵션', otherOptions)}
+        </div>
+      ` : '';
 
       const shareBtn = `
         <button id="share-btn"
@@ -130,7 +138,10 @@
                 <div style="margin-top:12px; font-size:13px; font-weight:600; color:#fff; margin-bottom:8px;">
                   옵션 선택 (필수) <span style="color:#ef4444;">*</span>
                 </div>
-                ${optionSelectsHtml}
+
+                ${row1}
+                ${row2}
+
                 <div id="selected-items" style="margin-top:12px;"></div>
               </div>
 
@@ -178,7 +189,6 @@
       const anySelected = Object.values(vals).some(v => v);
       if (!anySelected) return;
 
-      // 옵션이 여러 개면 전부 선택돼야 추가
       const allRequired = Array.from(selects).every(s => s.value);
       if (!allRequired) return;
 
@@ -269,14 +279,12 @@
         </div>
       `;
 
-      // X 삭제
       el.querySelectorAll('.item-del').forEach(btn => {
         btn.addEventListener('click', () => {
           selectedItems.splice(Number(btn.dataset.idx), 1);
           renderSelectedItems();
         });
       });
-      // 수량 -
       el.querySelectorAll('.qty-minus').forEach(btn => {
         btn.addEventListener('click', () => {
           const idx = Number(btn.dataset.idx);
@@ -286,7 +294,6 @@
           }
         });
       });
-      // 수량 +
       el.querySelectorAll('.qty-plus').forEach(btn => {
         btn.addEventListener('click', () => {
           const idx = Number(btn.dataset.idx);
@@ -294,7 +301,6 @@
           renderSelectedItems();
         });
       });
-      // 수량 input
       el.querySelectorAll('.qty-input-item').forEach(inp => {
         inp.addEventListener('change', () => {
           const idx = Number(inp.dataset.idx);
@@ -325,27 +331,19 @@
       `;
     }
 
-    // 공유
     async function shareProduct(p) {
       const url = `${location.origin}${location.pathname}?id=${p.id}`;
-      const shareData = {
-        title: p.name,
-        text: `${p.name} - ${Number(p.price).toLocaleString()}원`,
-        url: url,
-      };
+      const shareData = { title: p.name, text: `${p.name} - ${Number(p.price).toLocaleString()}원`, url };
       if (navigator.share) {
         try { await navigator.share(shareData); } catch (e) {}
       } else {
         try {
           await navigator.clipboard.writeText(url);
           alert('✅ 상품 링크가 복사되었습니다.\n' + url);
-        } catch (e) {
-          prompt('아래 링크를 복사하세요:', url);
-        }
+        } catch (e) { prompt('아래 링크를 복사하세요:', url); }
       }
     }
 
-    // 주문 처리
     function handleOrder(mode) {
       const p = currentProduct;
       if (!p) return;
@@ -358,7 +356,6 @@
       const totalQty = selectedItems.reduce((s, it) => s + it.qty, 0);
 
       if (mode === 'cart') {
-        // 장바구니 담기는 min_qty 무시
         const cart = JSON.parse(localStorage.getItem('cart') || '[]');
         let merged = 0, added = 0;
 
@@ -375,16 +372,9 @@
             merged++;
           } else {
             cart.push({
-              product_id: p.id,
-              product_code: p.product_code || '',
-              product_name: p.name,
-              product_price: p.price,
-              main_image: p.main_image,
-              quantity: sel.qty,
-              selected_color: sel.color,
-              selected_size: sel.size,
-              selected_hem: sel.hem,
-              selected_other: sel.other,
+              product_id: p.id, product_code: p.product_code || '', product_name: p.name,
+              product_price: p.price, main_image: p.main_image, quantity: sel.qty,
+              selected_color: sel.color, selected_size: sel.size, selected_hem: sel.hem, selected_other: sel.other,
             });
             added++;
           }
@@ -400,22 +390,15 @@
         return;
       }
 
-      // 바로 구매: 총 수량 min_qty 이상
       if (MIN_QTY > 1 && totalQty < MIN_QTY) {
-        alert(`구매가능최소수량은 ${MIN_QTY}개입니다. 기타옵션 및 기타제품 추가해주시기 바랍니다. 현재제품을 장바구니에담고 계속쇼핑해주세요.\n(현재: ${totalQty}개)`);
+        alert(`구매가능최소수량은 ${MIN_QTY}개입니다. 기타옵션 및 기타제품 추가해주시기 바랍니다.\n(현재: ${totalQty}개)`);
         return;
       }
 
       const items = selectedItems.map(sel => ({
-        product_id: p.id,
-        product_code: p.product_code || '',
-        product_name: p.name,
-        product_price: p.price,
-        quantity: sel.qty,
-        selected_color: sel.color,
-        selected_size: sel.size,
-        selected_hem: sel.hem,
-        selected_other: sel.other,
+        product_id: p.id, product_code: p.product_code || '', product_name: p.name,
+        product_price: p.price, quantity: sel.qty,
+        selected_color: sel.color, selected_size: sel.size, selected_hem: sel.hem, selected_other: sel.other,
       }));
 
       showCheckoutModal(items);
@@ -471,26 +454,15 @@
         const orderNumber = generateOrderNumber();
 
         const rows = items.map((it, idx) => ({
-          order_number: orderNumber,
-          product_id: it.product_id,
-          product_code: it.product_code,
-          product_name: it.product_name,
-          product_price: it.product_price,
-          quantity: it.quantity,
+          order_number: orderNumber, product_id: it.product_id, product_code: it.product_code,
+          product_name: it.product_name, product_price: it.product_price, quantity: it.quantity,
           total_price: idx === 0 ? it.product_price * it.quantity + globalShipping : it.product_price * it.quantity,
-          customer_name: f.customer_name.value.trim(),
-          customer_phone: f.customer_phone.value.trim(),
-          depositor_name: f.depositor_name.value.trim(),
-          memo: f.memo.value.trim(),
-          address: f.address.value.trim(),
-          address_detail: f.address_detail.value.trim(),
-          postcode: f.postcode.value.trim(),
-          selected_color: it.selected_color,
-          selected_size: it.selected_size,
-          selected_hem: it.selected_hem,
-          selected_other: it.selected_other,
-          shipping_fee: idx === 0 ? globalShipping : 0,
-          status: '입금대기',
+          customer_name: f.customer_name.value.trim(), customer_phone: f.customer_phone.value.trim(),
+          depositor_name: f.depositor_name.value.trim(), memo: f.memo.value.trim(),
+          address: f.address.value.trim(), address_detail: f.address_detail.value.trim(), postcode: f.postcode.value.trim(),
+          selected_color: it.selected_color, selected_size: it.selected_size,
+          selected_hem: it.selected_hem, selected_other: it.selected_other,
+          shipping_fee: idx === 0 ? globalShipping : 0, status: '입금대기',
         }));
 
         const { error } = await db.from('orders').insert(rows);
@@ -505,10 +477,8 @@
     function generateOrderNumber() {
       const d = new Date();
       const ymd = d.getFullYear().toString().slice(-2) +
-        String(d.getMonth()+1).padStart(2,'0') +
-        String(d.getDate()).padStart(2,'0');
-      const rand = Math.random().toString(36).slice(2,6).toUpperCase();
-      return `ORD-${ymd}-${rand}`;
+        String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
+      return `ORD-${ymd}-${Math.random().toString(36).slice(2,6).toUpperCase()}`;
     }
 
     function showOrderComplete(modal, orderNumber, total) {
