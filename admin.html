@@ -10,7 +10,7 @@
     html, body { background: #f4f6f8 !important; color: #1f2937 !important; }
     * { box-sizing: border-box; transition: none !important; animation: none !important; transform: none !important; box-shadow: none !important; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; }
-    
+
     .admin-header {
       background: #fff !important; border-bottom: 1px solid #e5e7eb;
       padding: 16px 24px; display: flex; justify-content: space-between;
@@ -18,7 +18,7 @@
     }
     .admin-header-left { display: flex; align-items: center; gap: 16px; }
     .admin-header .logo { font-size: 18px; font-weight: 700; color: #111827 !important; letter-spacing: 0.5px; cursor: default; }
-    .admin-header .main-btn { 
+    .admin-header .main-btn {
       padding: 6px 12px; background: #fff; color: #374151; border: 1px solid #d1d5db;
       border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500; font-family: inherit;
       text-decoration: none;
@@ -99,50 +99,37 @@
     .product-detail .label { color: #9ca3af; margin-right: 4px; }
     .product-detail .actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 12px; }
 
-    /* 주문 카드 */
-    .order-item {
+    /* ⭐ 주문/회원 - 한 줄(row) 컴팩트 레이아웃 */
+    .row-list { display: flex; flex-direction: column; gap: 8px; }
+    .row-item {
       background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
-      padding: 16px; margin-bottom: 10px;
+      padding: 12px 14px; display: flex; align-items: center; gap: 12px;
+      flex-wrap: wrap; font-size: 13px; color: #374151;
     }
-    .order-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
-    .order-top-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .order-status-badge { color: #fff; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; }
-    .order-num { color: #1976d2; font-weight: 700; font-size: 14px; }
-    .order-date { color: #9ca3af; font-size: 12px; }
-    .order-top-right { display: flex; gap: 6px; }
+    .row-item .row-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .row-item .row-actions { display: flex; gap: 6px; flex-shrink: 0; margin-left: auto; }
 
-    .order-body { background: #f9fafb; padding: 12px; border-radius: 6px; font-size: 13px; line-height: 1.8; color: #374151; margin-bottom: 12px; }
-    .order-body .row { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-bottom: 4px; }
-    .order-body .label { color: #6b7280; font-weight: 600; width: 70px; flex-shrink: 0; }
-    .order-body .addr { 
-      display: inline-block; max-width: 100%; 
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
-      vertical-align: bottom;
-    }
+    .badge { padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; color: #fff; white-space: nowrap; }
+    .order-num { color: #1976d2; font-weight: 700; font-size: 13px; white-space: nowrap; }
+    .row-strong { font-weight: 600; color: #111827; }
+    .row-muted { color: #9ca3af; font-size: 12px; }
+    .row-total { color: #e53935; font-weight: 700; font-size: 13px; white-space: nowrap; }
+    .row-sep { color: #d1d5db; }
 
-    .order-products { border-top: 1px dashed #e5e7eb; padding-top: 12px; }
-    .order-product-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; padding: 6px 0; border-bottom: 1px dashed #f3f4f6; flex-wrap: wrap; gap: 8px; }
-    .order-product-row:last-child { border-bottom: 0; }
-    .order-total { text-align: right; font-size: 15px; font-weight: 700; margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb; }
-
-    /* 회원 카드 */
-    .member-item {
-      background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
-      padding: 16px; margin-bottom: 10px;
+    /* 모달 */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 10px; }
+    .modal-box { background: #fff; padding: 24px; border-radius: 12px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; }
+    .modal-box h2 { margin: 0 0 16px; font-size: 18px; color: #111827; }
+    .modal-box .modal-form { display: grid; gap: 10px; }
+    .modal-box label { font-size: 13px; font-weight: 600; color: #374151; }
+    .modal-box input, .modal-box select, .modal-box textarea {
+      padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px;
+      font-family: inherit; font-size: 14px; width: 100%; box-sizing: border-box;
+      background: #fff; color: #111827;
     }
-    .member-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
-    .member-top-left { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 15px; }
-    .member-top-right { display: flex; gap: 6px; }
-    .member-status-badge { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; color: #fff; }
-    
-    .member-body { background: #f9fafb; padding: 12px; border-radius: 6px; font-size: 13px; line-height: 1.8; color: #374151; }
-    .member-body .row { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-bottom: 4px; }
-    .member-body .label { color: #6b7280; font-weight: 600; width: 60px; flex-shrink: 0; }
-    .member-body .addr { 
-      display: inline-block; max-width: 100%; 
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
-      vertical-align: bottom;
-    }
+    .modal-box input[readonly] { background: #f9fafb; color: #6b7280; }
+    .modal-box .modal-actions { display: flex; gap: 8px; margin-top: 10px; }
+    .modal-box .modal-actions > * { flex: 1; }
 
     #admin-pagination { display: flex; justify-content: center; gap: 6px; margin-top: 14px; flex-wrap: wrap; }
     .preview-box { margin-top: 12px; padding: 12px; background: #f9fafb; border-radius: 8px; border: 1px dashed #e5e7eb; }
@@ -170,6 +157,8 @@
       .product-layout { flex-direction: column; }
       .product-left { flex: 1 1 auto; }
       #admin-list-wrap { max-height: 500px; }
+      .row-item { padding: 10px 12px; }
+      .row-item .row-main { font-size: 12px; }
     }
   </style>
 </head>
@@ -248,22 +237,22 @@
         <!-- 주문 -->
         <section id="tab-orders" class="admin-section">
           <h1 class="page-title">주문 관리</h1>
-          <p class="page-subtitle">주문 내역을 확인하고 상태를 변경합니다</p>
+          <p class="page-subtitle">주문 내역을 한 눈에 확인하고, 전체 내용을 수정/삭제합니다</p>
           <div class="card">
             <div class="card-title">🔍 주문 검색</div>
             <div class="form-row">
-              <input id="order-search" placeholder="주문번호 / 구매자 / 수취인 / 연락처 / 운송장번호 검색">
+              <input id="order-search" placeholder="주문번호 / 구매자 / 입금자 / 연락처 / 운송장번호 검색">
               <button id="order-search-btn" class="btn btn-primary" style="flex:0 0 auto;">검색</button>
               <button id="order-reset-btn" class="btn btn-secondary" style="flex:0 0 auto;">전체</button>
             </div>
           </div>
-          <div id="order-list">로딩중...</div>
+          <div id="order-list" class="row-list">로딩중...</div>
         </section>
 
         <!-- 회원 -->
         <section id="tab-members" class="admin-section">
           <h1 class="page-title">회원 관리</h1>
-          <p class="page-subtitle">회원 정보를 조회하고 제재할 수 있습니다</p>
+          <p class="page-subtitle">회원 정보를 한 눈에 확인하고, 전체 내용을 수정/삭제합니다</p>
           <div class="card">
             <div class="card-title">🔍 회원 검색</div>
             <div class="form-row">
@@ -272,7 +261,7 @@
               <button id="member-reset-btn" class="btn btn-secondary" style="flex:0 0 auto;">전체</button>
             </div>
           </div>
-          <div id="member-list">로딩중...</div>
+          <div id="member-list" class="row-list">로딩중...</div>
         </section>
 
         <!-- 설정 -->
@@ -360,7 +349,6 @@
     const loginForm = document.getElementById('login-form');
     const loginMsg = document.getElementById('login-msg');
 
-    // 카드 높이 맞추기
     function matchCardHeights() {
       const layout = document.querySelector('.product-layout');
       if (!layout) return;
@@ -371,12 +359,10 @@
       const leftCard = document.getElementById('product-register-card');
       const rightWrap = document.getElementById('admin-list-wrap');
       const pag = document.getElementById('admin-pagination');
-      
       const leftHeight = leftCard.offsetHeight;
       const rightCard = rightWrap.parentElement;
       const title = rightCard.querySelector('.card-title').offsetHeight;
       const pagHeight = pag.offsetHeight;
-      
       const available = leftHeight - title - pagHeight - 60;
       rightWrap.style.maxHeight = Math.max(available, 200) + 'px';
     }
@@ -429,7 +415,7 @@
       showLogin();
     });
 
-    // 로고
+    // ===== 로고 =====
     let currentLogoId = null;
     async function loadLogo() {
       const { data, error } = await db.from('logos').select('*').order('id', { ascending: false }).limit(1).maybeSingle();
@@ -510,7 +496,7 @@
       }
     });
 
-    // 푸터
+    // ===== 푸터 =====
     async function loadFooter() {
       const keys = ['footer_owner','footer_phone','footer_email','footer_address','footer_business','footer_text'];
       const { data } = await db.from('settings').select('key, value').in('key', keys);
@@ -547,7 +533,7 @@
       }
     });
 
-    // 배너
+    // ===== 배너 =====
     let currentBannerId = null;
     async function loadBanner() {
       const { data, error } = await db.from('banners').select('*').order('id', { ascending: false }).limit(1).maybeSingle();
@@ -628,7 +614,7 @@
       }
     });
 
-    // 배송비
+    // ===== 배송비 =====
     async function loadShippingSetting() {
       const { data } = await db.from('settings').select('value').eq('key', 'shipping_fee').maybeSingle();
       document.getElementById('global-shipping').value = data ? (data.value || 0) : 0;
@@ -649,7 +635,7 @@
       }
     });
 
-    // 상품 등록
+    // ===== 상품 등록 =====
     const form = document.getElementById('product-form');
     const msg = document.getElementById('msg');
     const listEl = document.getElementById('admin-list');
@@ -670,7 +656,7 @@
         colors: parseList(form.colors.value),
         sizes: parseList(form.sizes.value),
         hem_option: parseList(form.hem_option.value),
-        other_options: parseList(form.other_option.value), // 주의: 컬럼명 확인 필요 (other_option)
+        other_options: parseList(form.other_option.value),
         other_option: parseList(form.other_option.value),
         min_qty: Number(form.min_qty.value) || 1,
       });
@@ -687,7 +673,7 @@
       }
     });
 
-    // 상품 목록 (10개씩 페이징)
+    // ===== 상품 목록 =====
     let allProducts = [];
     let currentPage = 1;
     const PER_PAGE = 10;
@@ -816,93 +802,67 @@
       setTimeout(matchCardHeights, 20);
     }
 
-    // ⭐ 주문 목록 (다중 검색 & 운송장 정보 표시)
-    let currentOrders = [];
+    // ===== ⭐ 주문 관리 (한 줄 보기 + 전체 수정/삭제) =====
     let allOrdersRaw = [];
 
     async function loadOrders(filterText) {
       const el = document.getElementById('order-list');
-      let data = allOrdersRaw;
+      el.innerHTML = '로딩중...';
+      const { data, error } = await db.from('orders').select('*').order('created_at', { ascending: false });
+      if (error) { el.innerHTML = '<p style="color:#dc2626;">' + error.message + '</p>'; return; }
+      allOrdersRaw = data || [];
 
-      // 데이터가 없거나 새로고침일 경우 서버에서 가져옴
-      if (data.length === 0) {
-        const { data: fetched, error } = await db.from('orders').select('*').order('created_at', { ascending: false });
-        if (error) { el.innerHTML = '<p>' + error.message + '</p>'; return; }
-        allOrdersRaw = fetched || [];
-        data = allOrdersRaw;
-      }
-
-      // 검색어 필터링 (클라이언트 단에서 필터링)
-      if (filterText) {
-        const f = filterText.toLowerCase();
-        data = data.filter(o => 
-          (o.order_number && o.order_number.toLowerCase().includes(f)) ||
-          (o.customer_name && o.customer_name.toLowerCase().includes(f)) ||
-          (o.depositor_name && o.depositor_name.toLowerCase().includes(f)) ||
-          (o.customer_phone && o.customer_phone.includes(f)) ||
-          (o.tracking_number && o.tracking_number.includes(f))
-        );
-      }
-
-      if (!data || data.length === 0) { el.innerHTML = '<p style="text-align:center; color:#9ca3af; padding:20px;">주문이 없습니다</p>'; return; }
-
+      // 주문번호 기준 그룹화
       const groups = {};
-      data.forEach(o => {
+      allOrdersRaw.forEach(o => {
         const key = o.order_number || `no_num_${o.id}`;
         if (!groups[key]) groups[key] = [];
         groups[key].push(o);
       });
-      currentOrders = data;
 
-      el.innerHTML = Object.entries(groups).map(([num, items]) => {
+      let entries = Object.entries(groups);
+
+      // 검색 필터
+      if (filterText) {
+        const f = filterText.toLowerCase();
+        entries = entries.filter(([num, items]) => {
+          const first = items[0];
+          return (
+            num.toLowerCase().includes(f) ||
+            (first.customer_name || '').toLowerCase().includes(f) ||
+            (first.depositor_name || '').toLowerCase().includes(f) ||
+            (first.customer_phone || '').includes(f) ||
+            (first.tracking_number || '').includes(f)
+          );
+        });
+      }
+
+      if (entries.length === 0) {
+        el.innerHTML = '<p style="text-align:center; color:#9ca3af; padding:20px;">주문이 없습니다</p>';
+        return;
+      }
+
+      el.innerHTML = entries.map(([num, items]) => {
         const first = items[0];
         const totalAll = items.reduce((s, o) => s + Number(o.total_price || 0), 0);
+        const totalQty = items.reduce((s, o) => s + Number(o.quantity || 0), 0);
         const dateStr = new Date(first.created_at).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' }).replace('. ', '/').replace('.', '');
-        
-        // 운송장 정보 렌더링
-        const trackingHtml = (first.courier || first.tracking_number) ? `
-          <div class="row" style="margin-top:8px; padding-top:8px; border-top:1px dashed #e5e7eb;">
-            <span class="label" style="color:#1976d2;">배송정보</span> 
-            택배사: <b>${first.courier || '-'}</b> / 운송장: <b style="color:#1976d2;">${first.tracking_number || '-'}</b>
-          </div>
-        ` : '';
+        const itemCount = items.length;
 
         return `
-          <div class="order-item">
-            <div class="order-top">
-              <div class="order-top-left">
-                <span class="order-status-badge" style="background:${statusColor(first.status)};">${first.status}</span>
-                <span class="order-num">${num}</span>
-                <span class="order-date">${dateStr}</span>
-              </div>
-              <div class="order-top-right">
-                <button class="order-edit btn btn-primary btn-sm" data-id="${first.id}">수정</button>
-                <button class="order-del btn btn-danger btn-sm" data-id="${first.id}">삭제</button>
-              </div>
-            </div>
-
-            <div class="order-body">
-              <div class="row"><span class="label">주문자</span> ${first.customer_name} (${first.customer_phone})</div>
-              <div class="row"><span class="label">입금자명</span> ${first.depositor_name}</div>
-              <div class="row"><span class="label">주소</span> <span class="addr" title="${first.postcode || ''} ${first.address || ''} ${first.address_detail || ''}">[${first.postcode || ''}] ${first.address || ''} ${first.address_detail || ''}</span></div>
-              ${first.memo ? `<div class="row"><span class="label">요청</span> ${first.memo}</div>` : ''}
-              ${trackingHtml}
-            </div>
-
-            <div class="order-products">
-              ${items.map(o => `
-                <div class="order-product-row">
-                  <div>
-                    <b>${o.product_name}</b> 
-                    ${o.selected_color ? `[${o.selected_color}/${o.selected_size || ''}]` : ''}
-                    ${o.selected_hem ? ` (${o.selected_hem})` : ''}
-                    ${(o.selected_extras && o.selected_extras.length) ? `+${o.selected_extras.join(',')}` : ''}
-                    <span style="color:#6b7280;"> x ${o.quantity}</span>
-                  </div>
-                  <div style="font-weight:600;">${Number(o.total_price).toLocaleString()}원</div>
-                </div>
-              `).join('')}
-              <div class="order-total">총 결제 금액: <span style="color:#e53935;">${totalAll.toLocaleString()}원</span></div>
+          <div class="row-item">
+            <span class="badge" style="background:${statusColor(first.status)};">${first.status || '-'}</span>
+            <span class="order-num">${num}</span>
+            <span class="row-sep">|</span>
+            <span><b class="row-strong">${first.customer_name || '-'}</b> <span class="row-muted">(${first.customer_phone || '-'})</span></span>
+            <span class="row-sep">|</span>
+            <span class="row-muted">${itemCount}건 · ${totalQty}개 · <b class="row-total">${totalAll.toLocaleString()}원</b></span>
+            <span class="row-sep">|</span>
+            <span class="row-muted">${dateStr}</span>
+            ${first.tracking_number ? `<span class="row-sep">|</span><span class="row-muted">🚚 ${first.courier || ''} ${first.tracking_number}</span>` : ''}
+            <div class="row-actions">
+              <button class="btn btn-primary btn-sm order-edit" data-num="${num}">수정</button>
+              <button class="btn btn-danger btn-sm order-del" data-num="${num}">삭제</button>
             </div>
           </div>
         `;
@@ -910,18 +870,19 @@
 
       el.querySelectorAll('.order-edit').forEach(btn => {
         btn.addEventListener('click', () => {
-          const order = currentOrders.find(x => String(x.id) === String(btn.dataset.id));
-          if (order) showOrderEditModal(order);
+          const num = btn.dataset.num;
+          const items = groups[num];
+          if (items && items.length) showOrderEditModal(num, items);
         });
       });
 
       el.querySelectorAll('.order-del').forEach(btn => {
         btn.addEventListener('click', async () => {
-          if (!confirm('해당 주문을 삭제할까요?')) return;
-          const order = currentOrders.find(x => String(x.id) === String(btn.dataset.id));
-          const { error } = await db.from('orders').delete().eq('order_number', order.order_number);
+          const num = btn.dataset.num;
+          if (!confirm(`주문번호 "${num}" 의 모든 항목을 삭제할까요?`)) return;
+          const { error } = await db.from('orders').delete().eq('order_number', num);
           if (error) alert('삭제 실패: ' + error.message);
-          else { allOrdersRaw = []; loadOrders(); }
+          else { alert('✅ 주문이 삭제되었습니다.'); loadOrders(document.getElementById('order-search').value.trim() || null); }
         });
       });
     }
@@ -930,75 +891,109 @@
       return { '입금대기':'#f59e0b', '입금완료':'#059669', '배송중':'#1976d2', '완료':'#6b7280', '취소':'#dc2626' }[s] || '#9ca3af';
     }
 
-    document.getElementById('order-search-btn').addEventListener('click', () => {
-      const txt = document.getElementById('order-search').value.trim();
-      loadOrders(txt || null);
-    });
-    document.getElementById('order-reset-btn').addEventListener('click', () => {
-      document.getElementById('order-search').value = '';
-      allOrdersRaw = [];
-      loadOrders();
-    });
-    // 엔터키 검색 지원
-    document.getElementById('order-search').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') document.getElementById('order-search-btn').click();
-    });
+    // ⭐ 주문 전체 수정 모달 (주문의 첫 번째 행 기준으로 대표 정보 수정, 모든 행에 반영)
+    function showOrderEditModal(orderNumber, items) {
+      const first = items[0];
+      const totalAll = items.reduce((s, o) => s + Number(o.total_price || 0), 0);
 
-    // ⭐ 주문 수정 모달 (운송장, 택배사 추가)
-    function showOrderEditModal(o) {
       const modal = document.createElement('div');
-      modal.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:1000; padding:10px;`;
+      modal.className = 'modal-backdrop';
       modal.innerHTML = `
-        <div style="background:#fff; padding:24px; border-radius:12px; width:100%; max-width:460px; max-height:90vh; overflow-y:auto;">
-          <h2 style="margin:0 0 16px; font-size:18px; color:#111827;">주문 수정 (${o.order_number || o.id})</h2>
-          <form id="order-edit-form" style="display:grid; gap:10px; background:none; padding:0; border:0; max-width:none;">
-            <label style="font-size:13px; font-weight:600; color:#374151;">주문 상태</label>
-            <select name="status" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit; background:#fff;">
-              ${['입금대기','입금완료','배송중','완료','취소'].map(s => `<option ${s === o.status ? 'selected' : ''}>${s}</option>`).join('')}
+        <div class="modal-box">
+          <h2>주문 수정 (${orderNumber})</h2>
+          <p style="font-size:12px; color:#6b7280; margin:0 0 16px;">주문의 공통 정보를 수정합니다. 저장 시 주문번호에 속한 모든 상품 행에 반영됩니다.</p>
+          <form id="order-edit-form" class="modal-form">
+            <label>주문 상태</label>
+            <select name="status">
+              ${['입금대기','입금완료','배송중','완료','취소'].map(s => `<option ${s === first.status ? 'selected' : ''}>${s}</option>`).join('')}
             </select>
 
-            <label style="font-size:13px; font-weight:600; color:#374151; margin-top:8px;">택배사</label>
-            <input name="courier" value="${o.courier || ''}" placeholder="예: CJ대한통운, 우체국택배" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit;">
+            <label>주문자 이름</label>
+            <input name="customer_name" value="${first.customer_name || ''}" required>
 
-            <label style="font-size:13px; font-weight:600; color:#374151;">운송장 번호</label>
-            <input name="tracking_number" value="${o.tracking_number || ''}" placeholder="숫자만 입력" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; font-family:inherit;">
+            <label>연락처</label>
+            <input name="customer_phone" type="tel" value="${first.customer_phone || ''}" required>
 
-            <div style="display:flex; gap:8px; margin-top:16px;">
-              <button type="submit" class="btn btn-primary" style="flex:1;">저장</button>
-              <button type="button" id="cancel-edit" class="btn btn-secondary" style="flex:1;">취소</button>
+            <label>입금자명</label>
+            <input name="depositor_name" value="${first.depositor_name || ''}">
+
+            <label>우편번호</label>
+            <input name="postcode" value="${first.postcode || ''}">
+
+            <label>주소</label>
+            <input name="address" value="${first.address || ''}">
+
+            <label>상세주소</label>
+            <input name="address_detail" value="${first.address_detail || ''}">
+
+            <label>요청사항</label>
+            <textarea name="memo" style="min-height:60px;">${first.memo || ''}</textarea>
+
+            <label>택배사</label>
+            <input name="courier" value="${first.courier || ''}" placeholder="예: CJ대한통운">
+
+            <label>운송장 번호</label>
+            <input name="tracking_number" value="${first.tracking_number || ''}" placeholder="숫자만 입력">
+
+            <div style="font-size:13px; color:#374151; background:#f9fafb; padding:10px; border-radius:8px; margin-top:6px;">
+              상품 ${items.length}건 · 총 수량 ${items.reduce((s,o)=>s+Number(o.quantity||0),0)}개 · <b style="color:#e53935;">총액 ${totalAll.toLocaleString()}원</b>
+            </div>
+
+            <div class="modal-actions">
+              <button type="submit" class="btn btn-primary">저장</button>
+              <button type="button" id="cancel-edit" class="btn btn-secondary">취소</button>
             </div>
           </form>
         </div>
       `;
       document.body.appendChild(modal);
       modal.querySelector('#cancel-edit').onclick = () => modal.remove();
-      
+
       modal.querySelector('#order-edit-form').addEventListener('submit', async (ev) => {
         ev.preventDefault();
         const f = ev.target;
-        const { error } = await db.from('orders').update({
+        const updates = {
           status: f.status.value,
+          customer_name: f.customer_name.value.trim(),
+          customer_phone: f.customer_phone.value.trim(),
+          depositor_name: f.depositor_name.value.trim(),
+          postcode: f.postcode.value.trim() || null,
+          address: f.address.value.trim() || null,
+          address_detail: f.address_detail.value.trim() || null,
+          memo: f.memo.value.trim() || null,
           courier: f.courier.value.trim() || null,
           tracking_number: f.tracking_number.value.trim() || null,
-        }).eq('order_number', o.order_number);
-
+        };
+        const { error } = await db.from('orders').update(updates).eq('order_number', orderNumber);
         if (error) { alert('❌ 저장 실패: ' + error.message); return; }
-        alert('✅ 수정이 완료되었습니다.');
+        alert('✅ 주문이 수정되었습니다.');
         modal.remove();
-        allOrdersRaw = [];
-        loadOrders();
+        loadOrders(document.getElementById('order-search').value.trim() || null);
       });
     }
 
-    // 회원
+    document.getElementById('order-search-btn').addEventListener('click', () => {
+      const txt = document.getElementById('order-search').value.trim();
+      loadOrders(txt || null);
+    });
+    document.getElementById('order-reset-btn').addEventListener('click', () => {
+      document.getElementById('order-search').value = '';
+      loadOrders();
+    });
+    document.getElementById('order-search').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') document.getElementById('order-search-btn').click();
+    });
+
+    // ===== ⭐ 회원 관리 (한 줄 보기 + 전체 수정/삭제) =====
     let allMembers = [];
-    async function loadMembers() {
+
+    async function loadMembers(filterText) {
       const el = document.getElementById('member-list');
+      el.innerHTML = '로딩중...';
       const { data, error } = await db.from('members').select('*').order('created_at', { ascending: false });
-      if (error) { el.innerHTML = '<p>불러오기 실패</p>'; return; }
-      if (!data || data.length === 0) { el.innerHTML = '<p style="text-align:center; color:#9ca3af; padding:20px;">회원이 없습니다</p>'; return; }
-      allMembers = data;
-      renderMembers();
+      if (error) { el.innerHTML = '<p style="color:#dc2626;">불러오기 실패: ' + error.message + '</p>'; return; }
+      allMembers = data || [];
+      renderMembers(filterText);
     }
 
     function renderMembers(filterText) {
@@ -1009,52 +1004,48 @@
         list = allMembers.filter(m =>
           (m.username && m.username.toLowerCase().includes(f)) ||
           (m.name && m.name.toLowerCase().includes(f)) ||
-          (m.phone && m.phone.includes(f))
+          (m.phone && m.phone.includes(f)) ||
+          (m.email && m.email.toLowerCase().includes(f))
         );
       }
       if (list.length === 0) {
         el.innerHTML = '<p style="text-align:center; color:#9ca3af; padding:20px;">해당하는 회원이 없습니다</p>';
         return;
       }
+
       el.innerHTML = list.map(m => {
         const status = m.status || '정상';
-        const statusColor = status === '정상' ? '#059669' : status === '정지' ? '#f59e0b' : '#dc2626';
+        const sc = status === '정상' ? '#059669' : status === '정지' ? '#f59e0b' : '#dc2626';
         return `
-          <div class="member-item">
-            <div class="member-top">
-              <div class="member-top-left">
-                <b>${m.name || '-'}</b>
-                <span style="color:#9ca3af; font-size:12px;">(${m.username || '-'})</span>
-                <span class="member-status-badge" style="background:${statusColor};">${status}</span>
-              </div>
-              <div class="member-top-right">
-                <button class="member-edit-btn btn btn-primary btn-sm" data-id="${m.id}">수정</button>
-                <button class="member-del-btn btn btn-danger btn-sm" data-id="${m.id}">삭제</button>
-              </div>
-            </div>
-            <div class="member-body">
-              <div class="row"><span class="label">연락처</span> ${m.phone || '-'}</div>
-              <div class="row"><span class="label">이메일</span> ${m.email || '-'}</div>
-              <div class="row"><span class="label">주소</span> <span class="addr" title="[${m.postcode || ''}] ${m.address || ''} ${m.address_detail || ''}">[${m.postcode || ''}] ${m.address || ''} ${m.address_detail || ''}</span></div>
+          <div class="row-item">
+            <span class="badge" style="background:${sc};">${status}</span>
+            <span><b class="row-strong">${m.name || '-'}</b> <span class="row-muted">(${m.username || '-'})</span></span>
+            <span class="row-sep">|</span>
+            <span class="row-muted">📞 ${m.phone || '-'}</span>
+            ${m.email ? `<span class="row-sep">|</span><span class="row-muted">✉️ ${m.email}</span>` : ''}
+            <div class="row-actions">
+              <button class="btn btn-primary btn-sm member-edit" data-id="${m.id}">수정</button>
+              <button class="btn btn-danger btn-sm member-del" data-id="${m.id}">삭제</button>
             </div>
           </div>
         `;
       }).join('');
 
-      el.querySelectorAll('.member-edit-btn').forEach(btn => {
+      el.querySelectorAll('.member-edit').forEach(btn => {
         btn.addEventListener('click', () => {
           const m = allMembers.find(x => String(x.id) === String(btn.dataset.id));
           if (m) showMemberEditModal(m);
         });
       });
-      el.querySelectorAll('.member-del-btn').forEach(btn => {
+
+      el.querySelectorAll('.member-del').forEach(btn => {
         btn.addEventListener('click', async () => {
           const m = allMembers.find(x => String(x.id) === String(btn.dataset.id));
           if (!m) return;
-          if (!confirm(`"${m.name}" 회원을 완전히 삭제할까요?`)) return;
+          if (!confirm(`"${m.name}" (${m.username}) 회원을 완전히 삭제할까요?`)) return;
           const { error } = await db.from('members').delete().eq('id', m.id);
           if (error) alert('삭제 실패: ' + error.message);
-          else { alert('✅ 회원이 삭제되었습니다.'); loadMembers(); }
+          else { alert('✅ 회원이 삭제되었습니다.'); loadMembers(document.getElementById('member-search').value.trim() || null); }
         });
       });
     }
@@ -1066,37 +1057,57 @@
       document.getElementById('member-search').value = '';
       renderMembers();
     });
+    document.getElementById('member-search').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') document.getElementById('member-search-btn').click();
+    });
 
+    // ⭐ 회원 전체 정보 수정 모달
     function showMemberEditModal(m) {
       const modal = document.createElement('div');
-      modal.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:1000; padding:10px;`;
+      modal.className = 'modal-backdrop';
       modal.innerHTML = `
-        <div style="background:#fff; padding:24px; border-radius:12px; width:100%; max-width:480px; max-height:90vh; overflow-y:auto;">
-          <h2 style="margin:0 0 16px; font-size:18px;">회원 정보 수정</h2>
-          <form id="member-edit-form" style="display:grid; gap:10px;">
-            <label style="font-size:13px; font-weight:600;">아이디</label>
-            <input name="username" value="${m.username || ''}" readonly style="padding:10px; border:1px solid #e5e7eb; border-radius:8px; background:#f9fafb;">
-            <label style="font-size:13px; font-weight:600;">비밀번호</label>
-            <input name="password" value="${m.password || ''}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px;">
-            <label style="font-size:13px; font-weight:600;">이름</label>
-            <input name="name" value="${m.name || ''}" required style="padding:10px; border:1px solid #e5e7eb; border-radius:8px;">
-            <label style="font-size:13px; font-weight:600;">연락처</label>
-            <input name="phone" value="${m.phone || ''}" required style="padding:10px; border:1px solid #e5e7eb; border-radius:8px;">
-            <label style="font-size:13px; font-weight:600;">이메일</label>
-            <input name="email" value="${m.email || ''}" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px;">
-            <label style="font-size:13px; font-weight:600;">회원 상태</label>
-            <select name="status" style="padding:10px; border:1px solid #e5e7eb; border-radius:8px;">
+        <div class="modal-box">
+          <h2>회원 정보 수정 (${m.username || '-'})</h2>
+          <form id="member-edit-form" class="modal-form">
+            <label>아이디 (변경 불가)</label>
+            <input name="username" value="${m.username || ''}" readonly>
+
+            <label>비밀번호</label>
+            <input name="password" value="${m.password || ''}">
+
+            <label>이름</label>
+            <input name="name" value="${m.name || ''}" required>
+
+            <label>연락처</label>
+            <input name="phone" type="tel" value="${m.phone || ''}" required>
+
+            <label>이메일</label>
+            <input name="email" type="email" value="${m.email || ''}">
+
+            <label>우편번호</label>
+            <input name="postcode" value="${m.postcode || ''}">
+
+            <label>주소</label>
+            <input name="address" value="${m.address || ''}">
+
+            <label>상세주소</label>
+            <input name="address_detail" value="${m.address_detail || ''}">
+
+            <label>회원 상태</label>
+            <select name="status">
               ${['정상','정지','탈퇴'].map(s => `<option ${s === (m.status || '정상') ? 'selected' : ''}>${s}</option>`).join('')}
             </select>
-            <div style="display:flex; gap:8px; margin-top:10px;">
-              <button type="submit" class="btn btn-primary" style="flex:1;">저장</button>
-              <button type="button" id="cancel-edit" class="btn btn-secondary" style="flex:1;">취소</button>
+
+            <div class="modal-actions">
+              <button type="submit" class="btn btn-primary">저장</button>
+              <button type="button" id="cancel-edit" class="btn btn-secondary">취소</button>
             </div>
           </form>
         </div>
       `;
       document.body.appendChild(modal);
       modal.querySelector('#cancel-edit').onclick = () => modal.remove();
+
       modal.querySelector('#member-edit-form').addEventListener('submit', async (ev) => {
         ev.preventDefault();
         const f = ev.target;
@@ -1105,12 +1116,15 @@
           name: f.name.value.trim(),
           phone: f.phone.value.trim(),
           email: f.email.value.trim() || null,
+          postcode: f.postcode.value.trim() || null,
+          address: f.address.value.trim() || null,
+          address_detail: f.address_detail.value.trim() || null,
           status: f.status.value,
         }).eq('id', m.id);
         if (error) { alert('❌ 저장 실패: ' + error.message); return; }
         alert('✅ 저장 완료!');
         modal.remove();
-        loadMembers();
+        loadMembers(document.getElementById('member-search').value.trim() || null);
       });
     }
 
