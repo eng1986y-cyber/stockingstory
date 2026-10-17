@@ -22,10 +22,10 @@
   <script>
     const params = new URLSearchParams(location.search);
     const id = params.get('id');
-    let MIN_QTY = 1;
+    let MIN_QTY = 6;
     let currentProduct = null;
     let globalShipping = 0;
-    let selectedItems = [];   // ⭐ 선택한 옵션 목록
+    let selectedItems = [];
 
     function getMember() {
       try { return JSON.parse(localStorage.getItem('member') || 'null'); }
@@ -36,9 +36,6 @@
       const { data } = await db.from('settings').select('value').eq('key', 'shipping_fee').maybeSingle();
       globalShipping = data ? Number(data.value) || 0 : 0;
     }
-
-    const inputStyle = 'width:100%; padding:10px 12px; background:#0f0f0f; border:1px solid #2a2a2a; border-radius:8px; color:#e5e7eb; font-family:inherit; font-size:14px;';
-    const labelStyle = 'font-size:13px; font-weight:600; color:#ccc; display:block; margin-bottom:4px;';
 
     async function loadProduct() {
       const detailEl = document.getElementById('product-detail');
@@ -63,49 +60,28 @@
       const hemOptions = data.hem_option || [];
       const otherOptions = data.other_option || [];
 
-      const colorSel = colors.length ? `
-        <div style="margin-bottom:8px;">
-          <label style="${labelStyle}">색상</label>
-          <select id="opt-color" style="${inputStyle}">
-            <option value="">색상 선택</option>
-            ${colors.map(c => `<option>${c}</option>`).join('')}
-          </select>
-        </div>
-      ` : '';
+      // 옵션 그룹별 select 생성
+      function buildSelect(name, label, options) {
+        if (!options.length) return '';
+        return `
+          <div style="margin-bottom:8px;">
+            <label style="font-size:13px; font-weight:600; color:#ccc; display:block; margin-bottom:4px;">${label}</label>
+            <select data-opt-name="${name}"
+              style="width:100%; padding:10px 12px; background:#0f0f0f; border:1px solid #2a2a2a; border-radius:8px; color:#e5e7eb; font-family:inherit; font-size:14px;">
+              <option value="">${label} 선택</option>
+              ${options.map(o => `<option value="${o}">${o}</option>`).join('')}
+            </select>
+          </div>
+        `;
+      }
 
-      const sizeSel = sizes.length ? `
-        <div style="margin-bottom:8px;">
-          <label style="${labelStyle}">사이즈</label>
-          <select id="opt-size" style="${inputStyle}">
-            <option value="">사이즈 선택</option>
-            ${sizes.map(s => `<option>${s}</option>`).join('')}
-          </select>
-        </div>
-      ` : '';
+      const optionSelectsHtml = [
+        buildSelect('color', '색상', colors),
+        buildSelect('size', '사이즈', sizes),
+        buildSelect('hem', '밑단선택', hemOptions),
+        buildSelect('other', '기타옵션', otherOptions),
+      ].join('');
 
-      const hemSel = hemOptions.length ? `
-        <div style="margin-bottom:8px;">
-          <label style="${labelStyle}">밑단선택</label>
-          <select id="opt-hem" style="${inputStyle}">
-            <option value="">밑단선택</option>
-            ${hemOptions.map(h => `<option>${h}</option>`).join('')}
-          </select>
-        </div>
-      ` : '';
-
-      const otherSel = otherOptions.length ? `
-        <div style="margin-bottom:8px;">
-          <label style="${labelStyle}">기타옵션</label>
-          <select id="opt-other" style="${inputStyle}">
-            <option value="">기타옵션</option>
-            ${otherOptions.map(o => `<option>${o}</option>`).join('')}
-          </select>
-        </div>
-      ` : '';
-
-      const hasOptions = colors.length || sizes.length || hemOptions.length || otherOptions.length;
-
-      // ⭐ 공유 버튼
       const shareBtn = `
         <button id="share-btn"
           style="padding:8px 12px; background:#222; color:#e5e7eb; border:1px solid #333; border-radius:8px; cursor:pointer; font-size:13px; font-family:inherit;">
@@ -113,20 +89,6 @@
         </button>
       `;
 
-      // ⭐ 옵션 선택 영역 (네이버 스타일)
-      const optionBox = hasOptions ? `
-        <div style="background:#0f0f0f; border:1px solid #222; border-radius:8px; padding:12px; margin-top:12px;">
-          <div style="font-size:13px; font-weight:600; color:#fff; margin-bottom:8px;">옵션 선택</div>
-          ${colorSel}${sizeSel}${hemSel}${otherSel}
-          <button id="add-option-btn"
-            style="width:100%; padding:10px; background:#1a1a1a; color:#e5e7eb; border:1px solid #333; border-radius:8px; cursor:pointer; font-weight:600; font-size:13px; font-family:inherit; margin-top:4px;">
-            + 옵션 추가
-          </button>
-        </div>
-        <div id="selected-items" style="margin-top:12px;"></div>
-      ` : '';
-
-      // ⭐ 최소수량 안내 (min_qty > 1 인 경우만)
       const minQtyNotice = MIN_QTY > 1 ? `
         <div style="margin-top:12px; padding:10px 12px; background:#1a1a1a; border:1px solid #333; border-radius:8px; font-size:12px; color:#f59e0b; line-height:1.6;">
           ⚠️ 최소 주문 수량은 <b>${MIN_QTY}개</b>입니다. 옵션 및 기타 제품을 추가해주시기 바랍니다.
@@ -153,7 +115,11 @@
                 <p style="margin:0 0 16px;">${shippingLabel}</p>
 
                 ${minQtyNotice}
-                ${optionBox}
+                <div style="margin-top:12px; font-size:13px; font-weight:600; color:#fff; margin-bottom:8px;">
+                  옵션 선택 (필수) <span style="color:#ef4444;">*</span>
+                </div>
+                ${optionSelectsHtml}
+                <div id="selected-items" style="margin-top:12px;"></div>
               </div>
 
               <div style="margin-top:20px;">
@@ -177,48 +143,12 @@
 
       // 공유 버튼
       const shareEl = document.getElementById('share-btn');
-      if (shareEl) {
-        shareEl.onclick = () => shareProduct(data);
-      }
+      if (shareEl) shareEl.onclick = () => shareProduct(data);
 
-      // 옵션 추가
-      const addBtn = document.getElementById('add-option-btn');
-      if (addBtn) {
-        addBtn.onclick = () => {
-          const color = document.getElementById('opt-color');
-          const size = document.getElementById('opt-size');
-          const hem = document.getElementById('opt-hem');
-          const other = document.getElementById('opt-other');
-          const colorV = color ? color.value : null;
-          const sizeV = size ? size.value : null;
-          const hemV = hem ? hem.value : null;
-          const otherV = other ? other.value : null;
-
-          // 아무것도 선택 안 하면 알림
-          if (!colorV && !sizeV && !hemV && !otherV) {
-            alert('옵션을 선택하세요.');
-            return;
-          }
-
-          // 같은 옵션 중복 체크
-          const dup = selectedItems.find(it =>
-            it.color === colorV && it.size === sizeV && it.hem === hemV && it.other === otherV
-          );
-          if (dup) {
-            alert('이미 추가된 옵션입니다.');
-            return;
-          }
-
-          selectedItems.push({ color: colorV, size: sizeV, hem: hemV, other: otherV, qty: 1 });
-          renderSelectedItems();
-
-          // 선택 초기화
-          if (color) color.value = '';
-          if (size) size.value = '';
-          if (hem) hem.value = '';
-          if (other) other.value = '';
-        };
-      }
+      // ⭐ 옵션 변경 시 자동 추가
+      detailEl.querySelectorAll('select[data-opt-name]').forEach(sel => {
+        sel.addEventListener('change', () => handleOptionChange());
+      });
 
       document.getElementById('cart-btn').addEventListener('click', () => handleOrder('cart'));
       document.getElementById('buy-btn').addEventListener('click', () => handleOrder('single'));
@@ -226,7 +156,54 @@
       renderSelectedItems();
     }
 
-    // ⭐ 선택된 옵션 리스트 렌더
+    // ⭐ 옵션 변경 시 자동으로 아래에 추가
+    function handleOptionChange() {
+      const detailEl = document.getElementById('product-detail');
+      const selects = detailEl.querySelectorAll('select[data-opt-name]');
+      const vals = {};
+      selects.forEach(s => { vals[s.dataset.optName] = s.value; });
+
+      // 모든 select 가 비어있으면 아무것도 안 함
+      const anySelected = Object.values(vals).some(v => v);
+      if (!anySelected) return;
+
+      // 옵션이 하나라도 선택되면, 나머지 옵션도 다 선택됐는지 확인
+      const allRequired = Array.from(selects).every(s => s.value);
+      if (!allRequired) {
+        // 일부만 선택된 상태에서는 자동 추가 안 함
+        return;
+      }
+
+      // 현재 값으로 옵션 조합 생성
+      const item = {
+        color: vals.color || null,
+        size: vals.size || null,
+        hem: vals.hem || null,
+        other: vals.other || null,
+        qty: 1,
+      };
+
+      // ⭐ 같은 옵션 있으면 +1
+      const dupIdx = selectedItems.findIndex(it =>
+        it.color === item.color &&
+        it.size === item.size &&
+        it.hem === item.hem &&
+        it.other === item.other
+      );
+
+      if (dupIdx >= 0) {
+        selectedItems[dupIdx].qty += 1;
+      } else {
+        selectedItems.push(item);
+      }
+
+      // 선택 초기화
+      selects.forEach(s => { s.value = ''; });
+
+      renderSelectedItems();
+    }
+
+    // ⭐ 선택된 옵션 리스트 렌더 (네이버 스타일)
     function renderSelectedItems() {
       const el = document.getElementById('selected-items');
       if (!el) return;
@@ -237,47 +214,73 @@
         return;
       }
 
-      el.innerHTML = selectedItems.map((it, idx) => {
-        const opts = [];
-        if (it.color) opts.push(it.color);
-        if (it.size) opts.push(it.size);
-        if (it.hem) opts.push(it.hem);
-        if (it.other) opts.push(it.other);
-        const label = opts.length ? opts.join(' / ') : '기본';
+      el.innerHTML = `
+        <div style="background:#0f0f0f; border:1px solid #222; border-radius:8px; overflow:hidden;">
+          ${selectedItems.map((it, idx) => {
+            const opts = [];
+            if (it.color) opts.push(it.color);
+            if (it.size) opts.push(it.size);
+            if (it.hem) opts.push(it.hem);
+            if (it.other) opts.push(it.other);
+            const label = opts.length ? opts.join(' / ') : '기본';
+            const lineTotal = it.qty * currentProduct.price;
 
-        return `
-          <div style="background:#0f0f0f; border:1px solid #222; border-radius:8px; padding:10px 12px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
-            <div style="font-size:13px; color:#e5e7eb; flex:1; min-width:100px;">
-              ${label}
-            </div>
-            <div style="display:flex; align-items:center; gap:4px;">
-              <button class="qty-minus" data-idx="${idx}"
-                style="width:28px; height:28px; background:#1a1a1a; color:#e5e7eb; border:1px solid #333; border-radius:4px; cursor:pointer; font-weight:700; font-size:14px; font-family:inherit;">
-                −
-              </button>
-              <input type="number" class="qty-input-item" data-idx="${idx}" value="${it.qty}" min="1"
-                style="width:48px; padding:4px; background:#0f0f0f; border:1px solid #2a2a2a; border-radius:4px; color:#e5e7eb; text-align:center; font-family:inherit;">
-              <button class="qty-plus" data-idx="${idx}"
-                style="width:28px; height:28px; background:#1a1a1a; color:#e5e7eb; border:1px solid #333; border-radius:4px; cursor:pointer; font-weight:700; font-size:14px; font-family:inherit;">
-                +
-              </button>
-              <button class="qty-del" data-idx="${idx}"
-                style="width:28px; height:28px; background:#7f1d1d; color:#fff; border:0; border-radius:4px; cursor:pointer; font-weight:700; font-size:14px; font-family:inherit; margin-left:4px;">
-                ×
-              </button>
-            </div>
+            return `
+              <div style="padding:12px; ${idx > 0 ? 'border-top:1px solid #222;' : ''}">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                  <span style="font-size:14px; color:#e5e7eb; font-weight:500;">${label}</span>
+                  <button class="item-del" data-idx="${idx}"
+                    style="background:none; border:0; color:#888; cursor:pointer; font-size:16px; padding:0; line-height:1;">
+                    ✕
+                  </button>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <div style="display:inline-flex; align-items:center; border:1px solid #333; border-radius:4px; overflow:hidden; background:#151515;">
+                    <button class="qty-minus" data-idx="${idx}"
+                      style="width:32px; height:32px; background:none; color:#e5e7eb; border:0; cursor:pointer; font-size:16px; font-weight:700; font-family:inherit;">
+                      −
+                    </button>
+                    <input type="number" class="qty-input-item" data-idx="${idx}" value="${it.qty}" min="1"
+                      style="width:44px; padding:0; background:none; border:0; color:#e5e7eb; text-align:center; font-family:inherit; height:32px; border-left:1px solid #333; border-right:1px solid #333;">
+                    <button class="qty-plus" data-idx="${idx}"
+                      style="width:32px; height:32px; background:none; color:#e5e7eb; border:0; cursor:pointer; font-size:16px; font-weight:700; font-family:inherit;">
+                      +
+                    </button>
+                  </div>
+                  <span style="font-size:15px; font-weight:700; color:#fff;">${lineTotal.toLocaleString()}원</span>
+                </div>
+              </div>
+            `;
+          }).join('')}
+          <div style="padding:12px; background:#151515; border-top:1px solid #222; display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:14px; color:#ccc;">
+              총 <b style="color:#e5e7eb;">${selectedItems.reduce((s, it) => s + it.qty, 0)}개</b>
+            </span>
+            <span style="font-size:16px; font-weight:700;">
+              총 금액 <b style="color:#ef4444;">${selectedItems.reduce((s, it) => s + it.qty * currentProduct.price, 0).toLocaleString()}원</b>
+            </span>
           </div>
-        `;
-      }).join('');
+        </div>
+      `;
 
-      // 수량 +/-
-      el.querySelectorAll('.qty-minus').forEach(btn => {
+      // X 삭제
+      el.querySelectorAll('.item-del').forEach(btn => {
         btn.addEventListener('click', () => {
-          const idx = Number(btn.dataset.idx);
-          if (selectedItems[idx].qty > 1) selectedItems[idx].qty--;
+          selectedItems.splice(Number(btn.dataset.idx), 1);
           renderSelectedItems();
         });
       });
+      // 수량 -
+      el.querySelectorAll('.qty-minus').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.dataset.idx);
+          if (selectedItems[idx].qty > 1) {
+            selectedItems[idx].qty--;
+            renderSelectedItems();
+          }
+        });
+      });
+      // 수량 +
       el.querySelectorAll('.qty-plus').forEach(btn => {
         btn.addEventListener('click', () => {
           const idx = Number(btn.dataset.idx);
@@ -285,16 +288,11 @@
           renderSelectedItems();
         });
       });
+      // 수량 input
       el.querySelectorAll('.qty-input-item').forEach(inp => {
         inp.addEventListener('change', () => {
           const idx = Number(inp.dataset.idx);
           selectedItems[idx].qty = Math.max(1, Number(inp.value) || 1);
-          renderSelectedItems();
-        });
-      });
-      el.querySelectorAll('.qty-del').forEach(btn => {
-        btn.addEventListener('click', () => {
-          selectedItems.splice(Number(btn.dataset.idx), 1);
           renderSelectedItems();
         });
       });
@@ -307,21 +305,21 @@
       if (!el) return;
       const totalQty = selectedItems.reduce((s, it) => s + it.qty, 0);
       const sub = selectedItems.reduce((s, it) => s + it.qty * currentProduct.price, 0);
-      const sum = sub + globalShipping;
 
       if (totalQty === 0) {
         el.innerHTML = '';
         return;
       }
 
+      const sum = sub + globalShipping;
       el.innerHTML = `
-        총 ${totalQty}개 · 상품: ${sub.toLocaleString()}원<br>
+        상품: ${sub.toLocaleString()}원<br>
         배송비: ${globalShipping > 0 ? globalShipping.toLocaleString() + '원' : '무료'}<br>
         <span style="font-size:17px;">합계: ${sum.toLocaleString()}원</span>
       `;
     }
 
-    // ⭐ 공유 기능
+    // ⭐ 공유
     async function shareProduct(p) {
       const url = `${location.origin}${location.pathname}?id=${p.id}`;
       const shareData = {
@@ -329,15 +327,9 @@
         text: `${p.name} - ${Number(p.price).toLocaleString()}원`,
         url: url,
       };
-
       if (navigator.share) {
-        try {
-          await navigator.share(shareData);
-        } catch (e) {
-          // 사용자가 취소한 경우 무시
-        }
+        try { await navigator.share(shareData); } catch (e) {}
       } else {
-        // 폴백: URL 복사
         try {
           await navigator.clipboard.writeText(url);
           alert('✅ 상품 링크가 복사되었습니다.\n' + url);
@@ -347,32 +339,22 @@
       }
     }
 
-    // ⭐ 주문/장바구니 처리
+    // ⭐ 주문 처리
     function handleOrder(mode) {
       const p = currentProduct;
       if (!p) return;
 
       if (selectedItems.length === 0) {
-        if (MIN_QTY > 1) {
-          alert(`구매가능최소수량은 ${MIN_QTY}개입니다. 기타옵션 및 기타제품 추가해주시기 바랍니다.`);
-        } else {
-          alert('옵션을 선택해주세요.');
-        }
+        alert('옵션을 선택해주세요.');
         return;
       }
 
       const totalQty = selectedItems.reduce((s, it) => s + it.qty, 0);
 
-      // 최소 수량 체크 (min_qty > 1 인 경우만)
-      if (MIN_QTY > 1 && totalQty < MIN_QTY) {
-        alert(`구매가능최소수량은 ${MIN_QTY}개입니다. 기타옵션 및 기타제품 추가해주시기 바랍니다.`);
-        return;
-      }
-
       if (mode === 'cart') {
+        // ⭐ 장바구니 담기는 min_qty 무시, 1개라도 담기 가능
         const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-        let addedCount = 0;
-        let mergedCount = 0;
+        let merged = 0, added = 0;
 
         selectedItems.forEach(sel => {
           const dupIdx = cart.findIndex(it =>
@@ -382,11 +364,9 @@
             it.selected_hem === sel.hem &&
             it.selected_other === sel.other
           );
-
           if (dupIdx >= 0) {
-            // ⭐ 중복이면 수량만 추가
             cart[dupIdx].quantity += sel.qty;
-            mergedCount++;
+            merged++;
           } else {
             cart.push({
               product_id: p.id,
@@ -400,23 +380,26 @@
               selected_hem: sel.hem,
               selected_other: sel.other,
             });
-            addedCount++;
+            added++;
           }
         });
 
         localStorage.setItem('cart', JSON.stringify(cart));
-
         let msg = '✅ 장바구니에 담았습니다!';
-        if (mergedCount > 0) msg = `✅ 장바구니에 추가되었습니다.\n(중복 ${mergedCount}개 옵션은 수량이 합산됨)`;
+        if (merged > 0) msg = `✅ 장바구니에 추가되었습니다.\n(중복 ${merged}개 옵션은 수량이 합산됨)`;
         alert(msg);
-
         if (document.getElementById('app-header')) renderHeader('product');
         selectedItems = [];
         renderSelectedItems();
         return;
       }
 
-      // 바로 구매
+      // ⭐ 바로 구매: 총 수량이 min_qty 이상이어야 함
+      if (MIN_QTY > 1 && totalQty < MIN_QTY) {
+        alert(`구매가능최소수량은 ${MIN_QTY}개입니다. 기타옵션 및 기타제품 추가해주시기 바랍니다.\n(현재: ${totalQty}개)`);
+        return;
+      }
+
       const items = selectedItems.map(sel => ({
         product_id: p.id,
         product_code: p.product_code || '',
@@ -436,6 +419,9 @@
       const subTotal = items.reduce((s, it) => s + it.product_price * it.quantity, 0);
       const total = subTotal + globalShipping;
       const m = getMember();
+
+      const inputStyle = 'width:100%; padding:10px 12px; background:#0f0f0f; border:1px solid #2a2a2a; border-radius:8px; color:#e5e7eb; font-family:inherit; font-size:14px;';
+      const labelStyle = 'font-size:13px; font-weight:600; color:#ccc; display:block; margin-bottom:4px;';
 
       const modal = document.createElement('div');
       modal.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.75); display:flex; align-items:center; justify-content:center; z-index:1000; padding:10px;`;
@@ -536,9 +522,7 @@
           <br>예금주: <b>홍길동</b><br>
           입금액: <b>${total.toLocaleString()}원</b>
         </div>
-        <p style="font-size:12px; color:#666; margin-bottom:16px;">
-          주문번호를 꼭 저장해두세요.
-        </p>
+        <p style="font-size:12px; color:#666; margin-bottom:16px;">주문번호를 꼭 저장해두세요.</p>
         <button onclick="location.href='index.html'" style="width:100%; padding:12px; background:#e5e7eb; color:#111; border:0; border-radius:8px; cursor:pointer; font-weight:600; font-family:inherit;">메인으로</button>
       `;
       modal.querySelector('#copy-order-number').onclick = () => {
