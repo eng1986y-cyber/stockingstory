@@ -314,7 +314,6 @@ function renderHeader(current) {
     : `<a href="login.html" data-nav="login" style="${btnStyle(current === 'login')}">로그인</a>
        <a href="signup.html" data-nav="signup" style="${btnStyle(current === 'signup')}">회원가입</a>`;
 
-  // ⭐ 로그인 안 했을 때도 빈 공간을 차지하도록 min-height 부여 (튕김 방지)
   const nameRow = `
     <div class="header-name-row" style="text-align:right; font-size:13px; color:${theme.nameColor}; margin-bottom:6px; min-height:18px; line-height:18px;">
       ${m ? `${m.name}님` : ''}
@@ -325,12 +324,13 @@ function renderHeader(current) {
     ? `<a href="index.html" style="display:inline-block;"><img src="${logoImageUrl}" alt="${siteName}" style="height:40px; max-width:240px; object-fit:contain; display:block; margin:0 auto;"></a>`
     : `<a href="index.html" style="font-size:22px; font-weight:700; color:${theme.logoColor}; text-decoration:none; display:inline-block;">${siteName}</a>`;
 
+  // ⭐ 모바일/PC 모두 버튼 가운데 정렬 (justify-content: center)
   wrap.innerHTML = `
     <header style="background:${theme.headerBg}; border-bottom:1px solid ${theme.borderColor}; padding:14px 16px;">
       <div style="max-width:1400px; margin:0 auto;">
         <div style="margin-bottom:12px; text-align:center;">${logoHtml}</div>
         ${nameRow}
-        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:flex-end;">
+        <div class="header-nav-wrap" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:center;">
           <a href="cart.html" data-nav="cart" style="${btnStyle(current === 'cart')}">장바구니 <span id="cart-count" style="margin-left:4px;">0</span></a>
           <a href="orders.html" data-nav="orders" style="${btnStyle(current === 'orders')}">주문조회</a>
           ${userBtns}
