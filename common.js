@@ -10,20 +10,14 @@ if (_isDark) {
   document.documentElement.style.background = '#0a0a0a';
 }
 
-// 좌우 흔들림 + 이미지 복사 방지
+// 이미지 복사 방지 + 레이아웃 안정화 (스크롤바 강제로 인한 흔들림 방지)
 (function() {
   const style = document.createElement('style');
   style.textContent = `
-    html { overflow-y: scroll !important; overflow-x: hidden !important; }
-    body {
-      overflow-x: hidden !important;
-      margin: 0 !important;
-      width: 100% !important; max-width: 100% !important;
-    }
-    #app-header, #app-header * { box-sizing: border-box; }
-    #app-header a, #app-header button, #app-header span {
-      white-space: nowrap; flex-shrink: 0;
-    }
+    /* ⭐ 페이지 이동 시 좌우 흔들림(스크롤바 유무 차이) 완전 방지 */
+    html { overflow-y: scroll; } 
+    
+    /* 이미지 복사/드래그 방지 */
     img {
       -webkit-user-drag: none !important;
       user-drag: none !important;
@@ -34,6 +28,7 @@ if (_isDark) {
     }
     a img { pointer-events: auto !important; }
 
+    /* 플로팅 스크롤 버튼 */
     #scroll-btns {
       position: fixed;
       left: 50%;
@@ -47,15 +42,12 @@ if (_isDark) {
       font-size: 18px; font-weight: 700; cursor: pointer;
       box-shadow: 0 2px 8px rgba(0,0,0,.12);
       display: flex; align-items: center; justify-content: center;
-      padding: 0; line-height: 1; transition: background .15s, transform .1s;
+      padding: 0; line-height: 1;
     }
-    #scroll-btns button:hover { background: #f0f0f0; }
-    #scroll-btns button:active { transform: scale(.92); }
     body.dark #scroll-btns button {
       border-color: #333; background: #1a1a1a; color: #e5e7eb;
       box-shadow: 0 2px 8px rgba(0,0,0,.5);
     }
-    body.dark #scroll-btns button:hover { background: #2a2a2a; }
 
     @media (max-width: 1450px) {
       #scroll-btns { left: auto; right: 16px; transform: none; }
@@ -97,13 +89,6 @@ document.addEventListener('contextmenu', (e) => {
 });
 document.addEventListener('dragstart', (e) => {
   if (e.target.tagName === 'IMG') e.preventDefault();
-});
-document.addEventListener('copy', (e) => {
-  const sel = window.getSelection();
-  if (sel && sel.anchorNode && sel.anchorNode.parentElement &&
-      sel.anchorNode.parentElement.tagName === 'IMG') {
-    e.preventDefault();
-  }
 });
 
 // 연락처 자동 하이픈
@@ -149,7 +134,6 @@ function createScrollButtons() {
   updateVisibility();
   window.addEventListener('resize', updateVisibility);
   new MutationObserver(updateVisibility).observe(document.body, { childList: true, subtree: true });
-  window.addEventListener('scroll', updateVisibility, { passive: true });
 }
 
 function getCachedLogo() {
@@ -328,7 +312,7 @@ function renderHeader(current) {
     border-radius: 6px; text-decoration: none;
     font-size: 14px; font-weight: 500;
     white-space: nowrap; box-sizing: border-box;
-    flex-shrink: 0; transition: all .15s;
+    flex-shrink: 0;
   `;
 
   const userBtns = m
