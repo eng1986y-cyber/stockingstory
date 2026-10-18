@@ -23,10 +23,9 @@ if (_isDark) {
       margin: 0;
       overflow-x: hidden;
       width: 100%;
-      /* ⭐ fixed 헤더에 콘텐츠가 가려지지 않도록 상단 여백 확보 (PC 기준 여백 확장) */
+      /* ⭐ fixed 헤더에 콘텐츠가 가려지지 않도록 상단 여백 확보 (PC 기준) */
       padding-top: 160px !important; 
     }
-    /* ⭐ 모바일 환경에서는 헤더 영역이 줄바꿈 등으로 높이가 변할 수 있으므로 여백을 더 넉넉하게 줍니다. */
     @media (max-width: 768px) {
       body {
         padding-top: 165px !important; 
@@ -331,7 +330,6 @@ function renderHeader(current) {
   const m = member ? JSON.parse(member) : null;
   const cached = getCachedLogo();
   const logoImageUrl = cached.image_url || '';
-  // 사이트명 기본값
   const siteName = cached.site_name || '스타킹스토리 심플라이프';
 
   const btnStyle = (active) => `
@@ -344,12 +342,23 @@ function renderHeader(current) {
     white-space: nowrap; box-sizing: border-box; flex-shrink: 0;
   `;
 
+  // ⭐ 모바일에서는 텍스트 대신 아이콘을 보여주기 위한 클래스 추가
   const userBtns = m
-    ? `<a href="mypage.html" data-nav="mypage" style="${btnStyle(current === 'mypage')}">내정보</a>
-       <a href="myorders.html" data-nav="myorders" style="${btnStyle(current === 'myorders')}">주문내역</a>
-       <a href="#" id="logout-btn" style="${btnStyle(false)}">로그아웃</a>`
-    : `<a href="login.html" data-nav="login" style="${btnStyle(current === 'login')}">로그인</a>
-       <a href="signup.html" data-nav="signup" style="${btnStyle(current === 'signup')}">회원가입</a>`;
+    ? `<a href="mypage.html" data-nav="mypage" style="${btnStyle(current === 'mypage')}">
+         <span class="pc-text">내정보</span><span class="mobile-icon" style="display:none;">👤</span>
+       </a>
+       <a href="myorders.html" data-nav="myorders" style="${btnStyle(current === 'myorders')}">
+         <span class="pc-text">주문내역</span><span class="mobile-icon" style="display:none;">📦</span>
+       </a>
+       <a href="#" id="logout-btn" style="${btnStyle(false)}">
+         <span class="pc-text">로그아웃</span><span class="mobile-icon" style="display:none;">🚪</span>
+       </a>`
+    : `<a href="login.html" data-nav="login" style="${btnStyle(current === 'login')}">
+         <span class="pc-text">로그인</span><span class="mobile-icon" style="display:none;">🔑</span>
+       </a>
+       <a href="signup.html" data-nav="signup" style="${btnStyle(current === 'signup')}">
+         <span class="pc-text">회원가입</span><span class="mobile-icon" style="display:none;">✍️</span>
+       </a>`;
 
   const nameRow = `
     <div class="header-name-row" style="text-align:center; font-size:13px; color:${theme.nameColor}; margin-bottom:12px; min-height:18px; line-height:18px; font-weight:500;">
@@ -362,13 +371,25 @@ function renderHeader(current) {
     : `<a href="index.html" style="font-size:22px; font-weight:700; color:${theme.logoColor}; text-decoration:none; display:inline-block;">${siteName}</a>`;
 
   wrap.innerHTML = `
+    <style>
+      /* ⭐ 모바일에서 텍스트 숨기고 아이콘 표시 */
+      @media (max-width: 768px) {
+        .pc-text { display: none !important; }
+        .mobile-icon { display: inline-block !important; font-size: 18px; }
+      }
+    </style>
     <header style="background:${theme.headerBg}; border-bottom:1px solid ${theme.borderColor}; padding:14px 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.08);">
       <div style="max-width:1400px; margin:0 auto;">
         <div style="margin-bottom:12px; text-align:center;">${logoHtml}</div>
         ${nameRow}
         <div class="header-nav-wrap">
-          <a href="cart.html" data-nav="cart" style="${btnStyle(current === 'cart')}">장바구니 <span id="cart-count" style="margin-left:4px;">0</span></a>
-          <a href="orders.html" data-nav="orders" style="${btnStyle(current === 'orders')}">주문조회</a>
+          <a href="cart.html" data-nav="cart" style="${btnStyle(current === 'cart')}">
+            <span class="pc-text">장바구니 <span id="cart-count" style="margin-left:4px;">0</span></span>
+            <span class="mobile-icon" style="display:none;">🛒 <span id="cart-count-mobile" style="font-size:12px;">0</span></span>
+          </a>
+          <a href="orders.html" data-nav="orders" style="${btnStyle(current === 'orders')}">
+            <span class="pc-text">주문조회</span><span class="mobile-icon" style="display:none;">🔍</span>
+          </a>
           ${userBtns}
         </div>
       </div>
@@ -376,9 +397,13 @@ function renderHeader(current) {
   `;
 
   _headerRendered = true;
+  
+  // 장바구니 개수 업데이트 (PC용, 모바일용 둘 다)
   const cart = JSON.parse(localStorage.getItem('cart') || '[]');
   const cc = document.getElementById('cart-count');
+  const ccm = document.getElementById('cart-count-mobile');
   if (cc) cc.textContent = cart.length;
+  if (ccm) ccm.textContent = cart.length;
 
   const lb = document.getElementById('logout-btn');
   if (lb) {
