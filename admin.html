@@ -60,22 +60,34 @@
     .card textarea { resize: vertical; min-height: 70px; }
 
     /* 상품 등록: 가로 스크롤 없이 화면 너비에 맞춰 자동 줄바꿈 */
-    #product-register-card { min-width: 0; }
-    #product-form {
-      display: grid;
-      grid-template-columns: repeat(11, minmax(0, 1fr));
-      gap: 6px;
-      align-items: start;
-      width: 100%;
-      overflow: visible;
-      padding-bottom: 0;
+    #product-register-card { min-width: 0; width: 100%; }
+    /* 다른 공통 CSS의 form 스타일이 등록 폼 너비를 줄이지 못하게 고정 */
+    #product-register-card > #product-form {
+      display: grid !important;
+      grid-template-columns: repeat(11, minmax(0, 1fr)) !important;
+      gap: 8px;
+      align-items: stretch;
+      width: 100% !important;
+      max-width: none !important;
+      min-width: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: visible !important;
+      box-sizing: border-box;
     }
-    #product-form input,
-    #product-form textarea,
-    #product-form button { width: 100%; min-width: 0; box-sizing: border-box; }
-    #product-form input { min-height: 42px; padding: 8px 6px; font-size: 12px; }
-    #product-form textarea { min-height: 42px; height: 42px; padding: 8px 6px; font-size: 12px; resize: vertical; }
-    #product-form button { min-height: 42px; padding: 8px 5px; font-size: 12px; white-space: nowrap; }
+    #product-register-card > #product-form input,
+    #product-register-card > #product-form textarea,
+    #product-register-card > #product-form button {
+      display: block;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      margin: 0 !important;
+      box-sizing: border-box;
+    }
+    #product-register-card > #product-form input { min-height: 42px; padding: 8px 7px; font-size: 12px; }
+    #product-register-card > #product-form textarea { min-height: 42px; height: 42px; padding: 8px 7px; font-size: 12px; resize: vertical; }
+    #product-register-card > #product-form button { min-height: 42px; padding: 8px 5px; font-size: 12px; white-space: nowrap; }
 
     .form-row { display: flex; gap: 8px; flex-wrap: wrap; }
     .form-row > * { flex: 1; min-width: 150px; }
@@ -198,9 +210,10 @@
       .row-item { padding: 10px 12px; }
       .row-item .row-main { font-size: 12px; }
       
-      #product-form { grid-template-columns: repeat(2, minmax(0, 1fr)); overflow: visible; }
-      #product-form textarea, #product-form button { grid-column: 1 / -1; }
-      #product-form textarea { height: 64px; }
+      #product-register-card > #product-form { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+      #product-register-card > #product-form textarea,
+      #product-register-card > #product-form button { grid-column: 1 / -1; }
+      #product-register-card > #product-form textarea { height: 64px; }
       .list-controls { display: flex; flex-direction: column; align-items: center; }
       .list-search { max-width: 560px; min-width: 0; width: 100%; margin-inline: auto; }
       .bulk-actions { width: 100%; justify-content: flex-end; }
