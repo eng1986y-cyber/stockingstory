@@ -151,6 +151,9 @@
     .prod-detail-text { font-size: 11px; color: #6b7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .prod-price { font-weight: 700; color: #e53935; font-size: 14px; white-space: nowrap; text-align: right; min-width: 0; padding: 0 12px; box-sizing: border-box; }
     .prod-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+    .admin-list-pagination { display:flex; justify-content:center; align-items:center; gap:6px; flex-wrap:wrap; width:100%; margin:14px 0 4px; }
+    .admin-list-pagination button { min-width:34px; min-height:32px; }
+    .admin-list-pagination button:disabled { opacity:.35; cursor:not-allowed; }
     #admin-pagination {
       display: flex; justify-content: center; align-items: center; gap: 6px;
       margin-top: 14px; flex-wrap: wrap; width: 100%;
@@ -327,6 +330,7 @@
             </div>
           </div>
           <div id="order-list" class="row-list">로딩중...</div>
+          <div id="order-pagination" class="admin-list-pagination"></div>
         </section>
 
         <!-- 회원 -->
@@ -342,6 +346,7 @@
             </div>
           </div>
           <div id="member-list" class="row-list">로딩중...</div>
+          <div id="member-pagination" class="admin-list-pagination"></div>
         </section>
 
         <!-- 설정 -->
@@ -1056,10 +1061,35 @@
       });
     }
 
+    // 주문/회원 목록 공통 페이지 처리: 페이지당 10개, 최대 10페이지
+    const secondaryListPages = { orders: 1, members: 1 };
+    function paginateRenderedList(listId, paginationId, type) {
+      const listEl = document.getElementById(listId);
+      const pager = document.getElementById(paginationId);
+      const rows = Array.from(listEl.children).filter(node => node.classList.contains('row-item'));
+      const totalPages = Math.min(Math.ceil(rows.length / 10), 10);
+      if (!totalPages) { pager.innerHTML = ''; return; }
+      let page = Math.min(Math.max(secondaryListPages[type] || 1, 1), totalPages);
+      secondaryListPages[type] = page;
+      rows.forEach((row, index) => { row.style.display = (index >= (page - 1) * 10 && index < page * 10) ? '' : 'none'; });
+      if (totalPages <= 1) { pager.innerHTML = ''; return; }
+      let html = `<button type="button" class="btn btn-secondary btn-sm" data-page="${page-1}" ${page===1?'disabled':''}>← 이전</button>`;
+      for (let i=1; i<=totalPages; i++) html += `<button type="button" class="btn btn-sm ${i===page?'btn-primary':'btn-secondary'}" data-page="${i}">${i}</button>`;
+      html += `<button type="button" class="btn btn-secondary btn-sm" data-page="${page+1}" ${page===totalPages?'disabled':''}>다음 →</button>`;
+      pager.innerHTML = html;
+      pager.querySelectorAll('button').forEach(button => button.addEventListener('click', () => {
+        if (button.disabled) return;
+        secondaryListPages[type] = Number(button.dataset.page);
+        paginateRenderedList(listId, paginationId, type);
+        pager.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }));
+    }
+
     // ===== ⭐ 주문 관리 =====
     let allOrdersRaw = [];
 
     async function loadOrders(filterText) {
+      secondaryListPages.orders = 1;
       const el = document.getElementById('order-list');
       el.innerHTML = '로딩중...';
       const { data, error } = await db.from('orders').select('*').order('created_at', { ascending: false });
@@ -1095,7 +1125,7 @@
         return;
       }
 
-      el.innerHTML = entries.map(([key, items]) => {
+      el.innerHTML = entries.slice(0, 100).map(([key, items]) => {
         const first = items[0];
         const realOrderNum = first.order_number;
         const displayNum = realOrderNum || `(주문번호 없음)`;
@@ -1122,6 +1152,7 @@
           </div>
         `;
       }).join('');
+      paginateRenderedList('order-list', 'order-pagination', 'orders');
 
       el.querySelectorAll('.order-edit').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1271,6 +1302,7 @@
     }
 
     function renderMembers(filterText) {
+      secondaryListPages.members = 1;
       const el = document.getElementById('member-list');
       let list = allMembers;
       if (filterText) {
@@ -1287,7 +1319,7 @@
         return;
       }
 
-      el.innerHTML = list.map(m => {
+      el.innerHTML = list.slice(0, 100).map(m => {
         const status = m.status || '정상';
         const sc = status === '정상' ? '#059669' : status === '정지' ? '#f59e0b' : '#dc2626';
         return `
@@ -1304,6 +1336,7 @@
           </div>
         `;
       }).join('');
+      paginateRenderedList('member-list', 'member-pagination', 'members');
 
       el.querySelectorAll('.member-edit').forEach(btn => {
         btn.addEventListener('click', () => {
