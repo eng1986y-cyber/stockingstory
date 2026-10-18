@@ -7,14 +7,20 @@
   <link rel="stylesheet" href="style.css">
   <script src="common.js"></script>
   <style>
-    /* ⭐ 전체 컨테이너 넓이 통일 */
-    .mypage-wrap { max-width: 700px; margin: 40px auto; padding: 0 16px; box-sizing: border-box; }
+    /* ⭐ 전체 컨테이너 넓이 통일 및 여백 정리 */
+    .mypage-wrap { 
+      max-width: 640px; 
+      margin: 40px auto; 
+      padding: 0 16px; 
+      box-sizing: border-box; 
+    }
     
     .mypage-title {
       font-size: 22px;
       font-weight: 700;
       margin-bottom: 16px;
       color: #222;
+      padding: 0 4px; /* ⭐ 제목도 카드와 라인 맞춤 */
     }
     body.dark .mypage-title { color: #fff; }
     
@@ -113,6 +119,7 @@
       font-weight: 700;
       margin-bottom: 16px;
       color: #222;
+      padding: 0 4px; /* ⭐ 제목도 카드와 라인 맞춤 */
     }
     body.dark .order-history-title { color: #fff; }
     
@@ -316,22 +323,18 @@
       form.address.value = data.address || '';
       form.address_detail.value = data.address_detail || '';
 
-      // ⭐ 회원 정보 로드 후 주문 내역도 함께 로드
       loadOrderHistory(data);
     }
 
-    // ⭐ 내 주문 내역 로드 함수
     async function loadOrderHistory(m) {
       historyListEl.innerHTML = '<p style="color:#888; font-size:14px;">주문 내역을 불러오는 중입니다...</p>';
       
-      // 주문자 이름과 연락처를 기준으로 주문 내역 조회
       const { data, error } = await db.from('orders')
         .select('*')
         .or(`and(customer_name.eq.${m.name},customer_phone.eq.${m.phone}),and(customer_name.eq.${m.name},depositor_name.eq.${m.name})`)
         .order('created_at', { ascending: false });
 
       if (error) {
-        // OR 조건 검색이 실패할 경우를 대비해 단순 이름으로 재조회
         const fallbackRes = await db.from('orders').select('*').eq('customer_name', m.name).order('created_at', { ascending: false });
         if (fallbackRes.error || !fallbackRes.data || fallbackRes.data.length === 0) {
           historyListEl.innerHTML = '<p style="color:#888; font-size:14px;">주문 내역이 없습니다.</p>';
@@ -349,7 +352,6 @@
       renderHistory(data);
     }
 
-    // 주문 내역 화면에 그리기
     function renderHistory(orders) {
       const groups = {};
       orders.forEach(o => {
