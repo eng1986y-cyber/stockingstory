@@ -25,6 +25,13 @@ if (_isDark) {
       width: 100%;
     }
 
+    /* ⭐ 상단 헤더 고정 (sticky) */
+    #app-header {
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 1000 !important;
+    }
+
     /* ⭐ 상단 네비게이션 반응형 정렬 (PC는 우측, 모바일은 중앙) */
     .header-nav-wrap {
       display: flex;
@@ -310,7 +317,7 @@ function renderHeader(current) {
   const m = member ? JSON.parse(member) : null;
   const cached = getCachedLogo();
   const logoImageUrl = cached.image_url || '';
-  const siteName = cached.site_name || '🛍️ 심플몰';
+  const siteName = cached.site_name || '스타킹스토리 심플라이프';
 
   const btnStyle = (active) => `
     display: inline-flex; align-items: center; justify-content: center;
