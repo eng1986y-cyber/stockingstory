@@ -108,20 +108,24 @@
     #admin-list-wrap { background: #f9fafb; border-radius: 8px; padding: 12px; overflow: visible; }
     #admin-list { display: flex; flex-direction: column; gap: 8px; }
 
-    /* ⭐⭐⭐ 상품 한 줄(Row) 레이아웃 - 주문 목록 스타일 적용 ⭐⭐⭐ */
+    /* ⭐⭐⭐ 상품 한 줄(Row) 레이아웃 - 체크박스 맨 앞 고정 ⭐⭐⭐ */
     .product-row {
       background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
       padding: 12px 14px; display: flex; align-items: center; gap: 12px;
-      flex-wrap: wrap; font-size: 13px; color: #374151; width: 100%;
+      flex-wrap: nowrap; font-size: 13px; color: #374151; width: 100%;
     }
     .product-row:hover { border-color: #d1d5db; }
+    
+    /* ⭐ 체크박스 + 이미지 + 정보 묶음 (왼쪽 고정) */
+    .prod-left-wrap {
+      display: flex; align-items: center; gap: 12px;
+      flex: 1 1 auto; min-width: 0; /* 넘치면 말줄임표 적용되도록 */
+    }
     
     .product-check { width: 18px; height: 18px; cursor: pointer; accent-color: #111827; flex-shrink: 0; }
     .product-row img { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; background: #f3f4f6; border: 1px solid #e5e7eb; flex-shrink: 0; }
     
-    /* ⭐ 상품 정보 영역 (넘치면 말줄임표, 공간 남으면 차지) */
-    .prod-info { flex: 1 1 200px; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
-    
+    .prod-info { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
     .prod-name-wrap { display: flex; align-items: center; gap: 6px; width: 100%; overflow: hidden; }
     .prod-name { font-size: 14px; font-weight: 600; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .prod-code { font-size: 11px; color: #9ca3af; background: #f3f4f6; padding: 2px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; }
@@ -129,8 +133,12 @@
     .prod-detail-text { font-size: 12px; color: #6b7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .prod-detail-text span { color: #d1d5db; margin: 0 4px; }
     
-    /* ⭐ 가격 및 버튼 영역 (주문 목록처럼 우측 정렬) */
-    .prod-price { font-weight: 700; color: #e53935; font-size: 14px; white-space: nowrap; flex-shrink: 0; margin-left: auto; }
+    /* ⭐ 가격 및 버튼 영역 (오른쪽 고정) */
+    .prod-right-wrap {
+      display: flex; align-items: center; gap: 16px;
+      flex-shrink: 0; margin-left: auto;
+    }
+    .prod-price { font-weight: 700; color: #e53935; font-size: 14px; white-space: nowrap; }
     .prod-actions { display: flex; gap: 4px; flex-shrink: 0; }
 
     #admin-pagination { display: flex; justify-content: center; gap: 6px; margin-top: 14px; flex-wrap: wrap; }
@@ -190,11 +198,10 @@
       .row-item { padding: 10px 12px; }
       .row-item .row-main { font-size: 12px; }
       
-      /* 모바일 상품 목록 */
+      /* 모바일에서는 상품 목록 한 줄 배치를 풀고 아래로 내림 */
       .product-row { flex-wrap: wrap; }
-      .prod-info { flex: 1 1 100%; order: 3; margin-top: 4px; }
-      .prod-price { order: 4; margin-left: 0; padding: 0; margin-top: 4px; }
-      .prod-actions { order: 5; width: 100%; justify-content: flex-end; margin-top: 8px; }
+      .prod-left-wrap { flex: 1 1 100%; }
+      .prod-right-wrap { width: 100%; justify-content: space-between; margin-top: 8px; margin-left: 0; }
     }
   </style>
 </head>
@@ -705,7 +712,7 @@
       }
     });
 
-    // ===== 상품 목록 (⭐ 한 줄 레이아웃 + 검색/선택/수정) =====
+    // ===== 상품 목록 (⭐ 체크박스 맨 앞, 우측 가격/버튼 배치) =====
     let allProducts = [];
     let filteredProducts = [];
     let currentPage = 1;
@@ -762,26 +769,29 @@
 
         const isChecked = selectedProductIds.has(String(p.id));
 
+        // ⭐ 체크박스 + 이미지 + 정보를 하나의 div(prod-left-wrap)로 묶음
         return `
           <div class="product-row">
-            <input type="checkbox" class="product-check" data-id="${p.id}" ${isChecked ? 'checked' : ''}>
-            <img src="${p.main_image}" alt="">
-            
-            <div class="prod-info">
-              <div class="prod-name-wrap">
-                <span class="prod-name">${p.name}</span>
-                ${p.product_code ? `<span class="prod-code">${p.product_code}</span>` : ''}
+            <div class="prod-left-wrap">
+              <input type="checkbox" class="product-check" data-id="${p.id}" ${isChecked ? 'checked' : ''}>
+              <img src="${p.main_image}" alt="">
+              <div class="prod-info">
+                <div class="prod-name-wrap">
+                  <span class="prod-name">${p.name}</span>
+                  ${p.product_code ? `<span class="prod-code">${p.product_code}</span>` : ''}
+                </div>
+                <div class="prod-detail-text">${detailStr}</div>
               </div>
-              <div class="prod-detail-text">${detailStr}</div>
             </div>
             
-            <div class="prod-price">${Number(p.price).toLocaleString()}원</div>
-            
-            <div class="prod-actions">
-              <a href="product.html?id=${p.id}" target="_blank" class="btn btn-secondary btn-sm">보기</a>
-              <button class="btn btn-primary btn-sm edit-btn" data-id="${p.id}">수정</button>
-              <button class="btn btn-success btn-sm copy-btn" data-id="${p.id}">복제</button>
-              <button class="btn btn-danger btn-sm del-btn" data-id="${p.id}">삭제</button>
+            <div class="prod-right-wrap">
+              <div class="prod-price">${Number(p.price).toLocaleString()}원</div>
+              <div class="prod-actions">
+                <a href="product.html?id=${p.id}" target="_blank" class="btn btn-secondary btn-sm">보기</a>
+                <button class="btn btn-primary btn-sm edit-btn" data-id="${p.id}">수정</button>
+                <button class="btn btn-success btn-sm copy-btn" data-id="${p.id}">복제</button>
+                <button class="btn btn-danger btn-sm del-btn" data-id="${p.id}">삭제</button>
+              </div>
             </div>
           </div>
         `;
