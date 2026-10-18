@@ -23,13 +23,13 @@ if (_isDark) {
       margin: 0;
       overflow-x: hidden;
       width: 100%;
-      /* ⭐ fixed 헤더에 콘텐츠가 가려지지 않도록 상단 여백 확보 (PC 기준) */
-      padding-top: 135px !important; 
+      /* ⭐ fixed 헤더에 콘텐츠가 가려지지 않도록 상단 여백 확보 (PC 기준 여백 확장) */
+      padding-top: 160px !important; 
     }
     /* ⭐ 모바일 환경에서는 헤더 영역이 줄바꿈 등으로 높이가 변할 수 있으므로 여백을 더 넉넉하게 줍니다. */
     @media (max-width: 768px) {
       body {
-        padding-top: 155px !important; 
+        padding-top: 165px !important; 
       }
     }
 
