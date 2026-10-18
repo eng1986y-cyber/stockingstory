@@ -14,14 +14,65 @@
       box-sizing: border-box; 
     }
     
+    /* ⭐ 타이틀 및 상단 컨트롤 (전체선택, 선택삭제) */
+    .myorders-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding: 0 4px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
     .order-history-title {
       font-size: 22px;
       font-weight: 700;
-      margin-bottom: 16px;
       color: #222;
-      padding: 0 4px;
+      margin: 0;
     }
     body.dark .order-history-title { color: #fff; }
+    
+    .bulk-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #4b5563;
+    }
+    body.dark .bulk-actions { color: #9ca3af; }
+
+    .bulk-actions label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    
+    .bulk-actions input[type="checkbox"] {
+      width: 18px; height: 18px; cursor: pointer; accent-color: #10b981;
+    }
+    
+    .btn-delete-selected {
+      padding: 6px 12px;
+      background: #ef4444;
+      color: #fff;
+      border: 0;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      opacity: 0.5;
+      pointer-events: none;
+      transition: opacity 0.15s;
+    }
+    .btn-delete-selected.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .btn-delete-selected:hover { background: #dc2626; }
     
     .order-history-list {
       display: flex;
@@ -30,6 +81,20 @@
       width: 100%;
     }
     
+    /* ⭐ 카드 레이아웃 변경 (체크박스 영역 추가) */
+    .history-card-wrap {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      width: 100%;
+    }
+    
+    .history-check {
+      width: 22px; height: 22px; cursor: pointer; accent-color: #10b981;
+      margin-top: 20px; /* 카드 상단 패딩에 맞춤 */
+      flex-shrink: 0;
+    }
+
     .history-card {
       background: #fff;
       border: 1px solid #e5e7eb;
@@ -40,12 +105,15 @@
       color: #222;
       box-sizing: border-box;
       width: 100%;
+      flex: 1;
+      min-width: 0;
     }
     body.dark .history-card {
       background: #151515;
       border-color: #222;
       color: #e5e7eb;
     }
+    
     .history-header {
       display: flex;
       justify-content: space-between;
@@ -134,6 +202,31 @@
       border-top-color: #333;
       color: #ef4444;
     }
+    
+    /* ⭐ 단독 삭제 버튼 */
+    .btn-delete-single {
+      margin-top: 16px;
+      width: 100%;
+      padding: 8px;
+      background: #fff;
+      color: #ef4444;
+      border: 1px solid #ef4444;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    body.dark .btn-delete-single {
+      background: #151515;
+      color: #ef4444;
+      border-color: #ef4444;
+    }
+    .btn-delete-single:hover {
+      background: #ef4444;
+      color: #fff;
+    }
   </style>
 </head>
 <body>
@@ -141,7 +234,18 @@
 
   <main>
     <div class="myorders-wrap">
-      <h2 class="order-history-title">내 주문내역</h2>
+      
+      <!-- ⭐ 타이틀 + 전체선택/선택삭제 컨트롤 -->
+      <div class="myorders-header">
+        <h2 class="order-history-title">내 주문내역</h2>
+        <div class="bulk-actions">
+          <label>
+            <input type="checkbox" id="check-all-orders"> 전체 선택
+          </label>
+          <button type="button" id="delete-selected-btn" class="btn-delete-selected">선택 삭제</button>
+        </div>
+      </div>
+
       <div id="order-history-list" class="order-history-list">
         <p style="color:#888; font-size:14px;">주문 내역을 불러오는 중입니다...</p>
       </div>
@@ -158,6 +262,8 @@
 
   <script>
     const historyListEl = document.getElementById('order-history-list');
+    const checkAllEl = document.getElementById('check-all-orders');
+    const deleteSelectedBtn = document.getElementById('delete-selected-btn');
 
     let member = JSON.parse(localStorage.getItem('member') || 'null');
     if (!member || !member.id) {
@@ -165,45 +271,73 @@
       location.href = 'login.html';
     }
 
+    let currentGroups = {}; // { order_number: [items...] }
+    let selectedKeys = new Set(); // 선택된 주문번호(또는 single_id)
+
     function statusColor(s) {
       return { '입금대기':'#f59e0b', '입금완료':'#059669', '배송중':'#1976d2', '완료':'#6b7280', '취소':'#dc2626' }[s] || '#9ca3af';
     }
 
+    function updateBulkActions() {
+      // 전체 선택 상태 업데이트
+      const total = Object.keys(currentGroups).length;
+      const selectedCount = selectedKeys.size;
+
+      if (total === 0) {
+        checkAllEl.checked = false;
+        checkAllEl.disabled = true;
+      } else {
+        checkAllEl.disabled = false;
+        checkAllEl.checked = (selectedCount === total);
+      }
+
+      // 선택 삭제 버튼 활성화
+      if (selectedCount > 0) {
+        deleteSelectedBtn.classList.add('active');
+        deleteSelectedBtn.textContent = `선택 삭제 (${selectedCount})`;
+      } else {
+        deleteSelectedBtn.classList.remove('active');
+        deleteSelectedBtn.textContent = '선택 삭제';
+      }
+    }
+
     async function loadOrderHistory() {
       historyListEl.innerHTML = '<p style="color:#888; font-size:14px;">주문 내역을 불러오는 중입니다...</p>';
+      selectedKeys.clear();
       
       const { data, error } = await db.from('orders')
         .select('*')
         .or(`and(customer_name.eq.${member.name},customer_phone.eq.${member.phone}),and(customer_name.eq.${member.name},depositor_name.eq.${member.name})`)
         .order('created_at', { ascending: false });
 
+      let orders = [];
       if (error) {
         const fallbackRes = await db.from('orders').select('*').eq('customer_name', member.name).order('created_at', { ascending: false });
-        if (fallbackRes.error || !fallbackRes.data || fallbackRes.data.length === 0) {
-          historyListEl.innerHTML = '<p style="color:#888; font-size:14px;">주문 내역이 없습니다.</p>';
-          return;
-        }
-        renderHistory(fallbackRes.data);
+        orders = fallbackRes.data;
+      } else {
+        orders = data;
+      }
+
+      if (!orders || orders.length === 0) {
+        historyListEl.innerHTML = '<p style="color:#888; font-size:14px; text-align:center;">주문 내역이 없습니다.</p>';
+        currentGroups = {};
+        updateBulkActions();
         return;
       }
 
-      if (!data || data.length === 0) {
-        historyListEl.innerHTML = '<p style="color:#888; font-size:14px;">주문 내역이 없습니다.</p>';
-        return;
-      }
-
-      renderHistory(data);
-    }
-
-    function renderHistory(orders) {
-      const groups = {};
+      // 주문번호 기준 그룹화
+      currentGroups = {};
       orders.forEach(o => {
         const key = o.order_number || `single_${o.id}`;
-        if (!groups[key]) groups[key] = [];
-        groups[key].push(o);
+        if (!currentGroups[key]) currentGroups[key] = [];
+        currentGroups[key].push(o);
       });
 
-      const entries = Object.entries(groups);
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const entries = Object.entries(currentGroups);
 
       historyListEl.innerHTML = entries.map(([key, items]) => {
         const first = items[0];
@@ -216,83 +350,188 @@
         let shippingTotal = 0;
         
         items.forEach(o => {
-          // 배송비가 total_price에 포함되어 있는지 여부에 따라 계산 (기존 데이터 호환)
-          // DB 설계상 첫번째 아이템의 total_price에 배송비가 합산되어 있음
           const rowTotal = Number(o.total_price || 0);
           const rowShip = Number(o.shipping_fee || 0);
-          
           productTotal += (rowTotal - rowShip);
           shippingTotal += rowShip;
         });
         
-        // 만약 shipping_fee 컬럼이 비어있어서 0으로 나오는데 배송비가 필요한 경우를 대비
-        // (이전 데이터 중 shipping_fee가 0인데 실제로는 배송비가 있었던 경우는 어쩔 수 없이 상품가로 취급됨)
-        
         const totalAll = productTotal + shippingTotal;
+        const isChecked = selectedKeys.has(key);
 
         return `
-          <div class="history-card">
-            <div class="history-header">
-              <span class="history-date">${dateStr}</span>
-              <span class="history-status" style="background:${statusColor(first.status)};">${first.status || '-'}</span>
-            </div>
-            <span class="history-order-num">${displayNum}</span>
-            
-            <div>
-              ${items.map(o => {
-                const opts = [];
-                if (o.selected_color) opts.push(`색상: ${o.selected_color}`);
-                if (o.selected_size) opts.push(`사이즈: ${o.selected_size}`);
-                if (o.selected_hem) opts.push(`밑단: ${o.selected_hem}`);
-                if (o.selected_other) opts.push(`기타: ${o.selected_other}`);
-                const optStr = opts.length ? opts.join(' | ') : '기본 옵션';
-                
-                // 해당 상품의 순수 금액 (배송비 제외)
-                const itemPrice = Number(o.total_price) - Number(o.shipping_fee || 0);
+          <div class="history-card-wrap">
+            <input type="checkbox" class="history-check" data-key="${key}" ${isChecked ? 'checked' : ''}>
+            <div class="history-card">
+              <div class="history-header">
+                <span class="history-date">${dateStr}</span>
+                <span class="history-status" style="background:${statusColor(first.status)};">${first.status || '-'}</span>
+              </div>
+              <span class="history-order-num">${displayNum}</span>
+              
+              <div>
+                ${items.map(o => {
+                  const opts = [];
+                  if (o.selected_color) opts.push(`색상: ${o.selected_color}`);
+                  if (o.selected_size) opts.push(`사이즈: ${o.selected_size}`);
+                  if (o.selected_hem) opts.push(`밑단: ${o.selected_hem}`);
+                  if (o.selected_other) opts.push(`기타: ${o.selected_other}`);
+                  const optStr = opts.length ? opts.join(' | ') : '기본 옵션';
+                  const itemPrice = Number(o.total_price) - Number(o.shipping_fee || 0);
 
-                return `
-                  <div class="history-product-item">
-                    <div class="history-item-main">
-                      <span class="name">${o.product_name} <span class="qty">x ${o.quantity}</span></span>
-                      <span>${itemPrice.toLocaleString()}원</span>
+                  return `
+                    <div class="history-product-item">
+                      <div class="history-item-main">
+                        <span class="name">${o.product_name} <span class="qty">x ${o.quantity}</span></span>
+                        <span>${itemPrice.toLocaleString()}원</span>
+                      </div>
+                      <div class="history-item-detail">${optStr}</div>
                     </div>
-                    <div class="history-item-detail">
-                      ${optStr}
-                    </div>
+                  `;
+                }).join('')}
+              </div>
+
+              <div class="history-info-box">
+                <div>📍 <b>배송지:</b> ${fullAddress || '주소 정보 없음'}</div>
+                ${first.memo ? `<div style="margin-top:4px;">📝 <b>요청사항:</b> ${first.memo}</div>` : ''}
+                ${(first.courier || first.tracking_number) ? `
+                  <div style="margin-top:8px; padding-top:8px; border-top:1px dashed #ddd; color:#1976d2;">
+                    🚚 <b>배송정보:</b> ${first.courier || '택배사 미정'} | ${first.tracking_number || '운송장 없음'}
                   </div>
-                `;
-              }).join('')}
-            </div>
+                ` : ''}
+              </div>
 
-            <div class="history-info-box">
-              <div>📍 <b>배송지:</b> ${fullAddress || '주소 정보 없음'}</div>
-              ${first.memo ? `<div style="margin-top:4px;">📝 <b>요청사항:</b> ${first.memo}</div>` : ''}
-              ${(first.courier || first.tracking_number) ? `
-                <div style="margin-top:8px; padding-top:8px; border-top:1px dashed #ddd; color:#1976d2;">
-                  🚚 <b>배송정보:</b> ${first.courier || '택배사 미정'} | ${first.tracking_number || '운송장 없음'}
+              <!-- ⭐ 결제 금액 상세 -->
+              <div class="history-price-summary">
+                <div class="price-row">
+                  <span>상품 금액</span>
+                  <span>${productTotal.toLocaleString()}원</span>
                 </div>
-              ` : ''}
-            </div>
+                <div class="price-row">
+                  <span>배송비</span>
+                  <span>${shippingTotal > 0 ? shippingTotal.toLocaleString() + '원' : '무료'}</span>
+                </div>
+                <div class="price-row total">
+                  <span>총 결제금액</span>
+                  <span>${totalAll.toLocaleString()}원</span>
+                </div>
+              </div>
 
-            <!-- ⭐ 결제 금액 상세 (상품금액 + 배송비 = 총액) -->
-            <div class="history-price-summary">
-              <div class="price-row">
-                <span>상품 금액</span>
-                <span>${productTotal.toLocaleString()}원</span>
-              </div>
-              <div class="price-row">
-                <span>배송비</span>
-                <span>${shippingTotal > 0 ? shippingTotal.toLocaleString() + '원' : '무료'}</span>
-              </div>
-              <div class="price-row total">
-                <span>총 결제금액</span>
-                <span>${totalAll.toLocaleString()}원</span>
-              </div>
+              <!-- ⭐ 단독 삭제 버튼 -->
+              <button type="button" class="btn-delete-single" data-key="${key}">이 주문 삭제</button>
             </div>
           </div>
         `;
       }).join('');
+
+      bindEvents();
+      updateBulkActions();
     }
+
+    function bindEvents() {
+      // 개별 체크박스
+      historyListEl.querySelectorAll('.history-check').forEach(cb => {
+        cb.addEventListener('change', () => {
+          const key = cb.dataset.key;
+          if (cb.checked) selectedKeys.add(key);
+          else selectedKeys.delete(key);
+          updateBulkActions();
+        });
+      });
+
+      // 단독 삭제 버튼
+      historyListEl.querySelectorAll('.btn-delete-single').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const key = btn.dataset.key;
+          const items = currentGroups[key];
+          if (!items) return;
+          const first = items[0];
+          const label = first.order_number ? `주문번호 "${first.order_number}"` : `해당 주문`;
+          
+          if (!confirm(`${label} 을(를) 삭제할까요?\n삭제된 내역은 복구할 수 없습니다.`)) return;
+
+          btn.disabled = true;
+          btn.textContent = '삭제 중...';
+
+          let error;
+          if (first.order_number) {
+            ({ error } = await db.from('orders').delete().eq('order_number', first.order_number));
+          } else {
+            ({ error } = await db.from('orders').delete().eq('id', first.id));
+          }
+
+          if (error) {
+            alert('❌ 삭제 실패: ' + error.message);
+            btn.disabled = false;
+            btn.textContent = '이 주문 삭제';
+            return;
+          }
+
+          alert('✅ 주문이 삭제되었습니다.');
+          loadOrderHistory();
+        });
+      });
+    }
+
+    // ⭐ 전체 선택 토글
+    checkAllEl.addEventListener('change', () => {
+      if (checkAllEl.checked) {
+        Object.keys(currentGroups).forEach(key => selectedKeys.add(key));
+      } else {
+        selectedKeys.clear();
+      }
+      // 모든 체크박스 UI 업데이트
+      historyListEl.querySelectorAll('.history-check').forEach(cb => {
+        cb.checked = checkAllEl.checked;
+      });
+      updateBulkActions();
+    });
+
+    // ⭐ 선택 삭제
+    deleteSelectedBtn.addEventListener('click', async () => {
+      if (selectedKeys.size === 0) return;
+      
+      if (!confirm(`선택한 ${selectedKeys.size}건의 주문을 삭제할까요?\n삭제된 내역은 복구할 수 없습니다.`)) return;
+
+      deleteSelectedBtn.disabled = true;
+      deleteSelectedBtn.textContent = '삭제 중...';
+
+      // 주문번호 / 단일 ID 분리
+      const orderNumbers = [];
+      const singleIds = [];
+
+      selectedKeys.forEach(key => {
+        const items = currentGroups[key];
+        if (!items || !items.length) return;
+        const first = items[0];
+        if (first.order_number) orderNumbers.push(first.order_number);
+        else singleIds.push(first.id);
+      });
+
+      let hasError = false;
+      let errorMsg = '';
+
+      // 1. 주문번호로 일괄 삭제
+      if (orderNumbers.length > 0) {
+        const { error } = await db.from('orders').delete().in('order_number', orderNumbers);
+        if (error) { hasError = true; errorMsg += error.message + '\n'; }
+      }
+
+      // 2. 단일 ID로 삭제
+      if (singleIds.length > 0) {
+        const { error } = await db.from('orders').delete().in('id', singleIds);
+        if (error) { hasError = true; errorMsg += error.message + '\n'; }
+      }
+
+      deleteSelectedBtn.disabled = false;
+
+      if (hasError) {
+        alert('❌ 일부 삭제 실패:\n' + errorMsg);
+      } else {
+        alert('✅ 선택한 주문이 삭제되었습니다.');
+      }
+      loadOrderHistory();
+    });
 
     loadOrderHistory();
   </script>
