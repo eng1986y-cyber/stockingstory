@@ -10,7 +10,7 @@ if (_isDark) {
   document.documentElement.style.background = '#0a0a0a';
 }
 
-// 이미지 복사 방지 + 스크롤바 강제 고정 (화면 흔들림 원천 차단) + ⭐ 헤더 상단 고정
+// 이미지 복사 방지 + 스크롤바 강제 고정 (화면 흔들림 원천 차단)
 (function() {
   const style = document.createElement('style');
   style.textContent = `
@@ -25,39 +25,26 @@ if (_isDark) {
       width: 100%;
     }
 
-    /* ⭐ [핵심] 상단 헤더 영역 무조건 화면 최상단 고정 */
-    #app-header {
-      position: -webkit-sticky !important;
-      position: sticky !important;
-      top: 0 !important;
-      z-index: 99999 !important;
-      width: 100% !important;
-      /* 부모 요소에 의해 고정이 풀리는 현상 방지 */
-      transform: none !important;
-      -webkit-transform: none !important;
-      margin-bottom: 0 !important;
-    }
-
     /* ⭐ 상단 네비게이션 반응형 정렬 (PC는 우측, 모바일은 중앙) */
     .header-nav-wrap {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
       align-items: center;
-      justify-content: flex-end;
+      justify-content: flex-end; /* PC 기본: 오른쪽 정렬 */
     }
     @media (max-width: 768px) {
       .header-nav-wrap {
-        justify-content: center;
+        justify-content: center; /* 모바일: 가운데 정렬 */
       }
     }
 
-    /* ⭐ 데이터 로딩 중 화면 가리는 스피너 */
+    /* ⭐ 데이터 로딩 중 화면 가리는 스피너 (불필요한 '로딩중...' 텍스트 방지) */
     .page-loader {
       position: fixed; inset: 0;
       background: #0a0a0a;
       display: flex; align-items: center; justify-content: center;
-      z-index: 99999;
+      z-index: 9999;
       transition: opacity 0.2s ease;
     }
     .page-loader.hide {
@@ -323,8 +310,7 @@ function renderHeader(current) {
   const m = member ? JSON.parse(member) : null;
   const cached = getCachedLogo();
   const logoImageUrl = cached.image_url || '';
-  // 사이트명 기본값 변경
-  const siteName = cached.site_name || '스타킹스토리 심플라이프';
+  const siteName = cached.site_name || '🛍️ 심플몰';
 
   const btnStyle = (active) => `
     display: inline-flex; align-items: center; justify-content: center;
@@ -336,6 +322,7 @@ function renderHeader(current) {
     white-space: nowrap; box-sizing: border-box; flex-shrink: 0;
   `;
 
+  // ⭐ [내정보] 옆에 [주문내역] 버튼 추가! (새창 띄우지 않고 현재 창에서 이동)
   const userBtns = m
     ? `<a href="mypage.html" data-nav="mypage" style="${btnStyle(current === 'mypage')}">내정보</a>
        <a href="myorders.html" data-nav="myorders" style="${btnStyle(current === 'myorders')}">주문내역</a>
@@ -353,9 +340,8 @@ function renderHeader(current) {
     ? `<a href="index.html" style="display:inline-block;"><img src="${logoImageUrl}" alt="${siteName}" style="height:40px; max-width:240px; object-fit:contain; display:block; margin:0 auto;"></a>`
     : `<a href="index.html" style="font-size:22px; font-weight:700; color:${theme.logoColor}; text-decoration:none; display:inline-block;">${siteName}</a>`;
 
-  // ⭐ 헤더에 배경색과 하단 테두리를 주어 스크롤 시 내용이 겹쳐 보이지 않게 함
   wrap.innerHTML = `
-    <header style="background:${theme.headerBg}; border-bottom:1px solid ${theme.borderColor}; padding:14px 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+    <header style="background:${theme.headerBg}; border-bottom:1px solid ${theme.borderColor}; padding:14px 16px;">
       <div style="max-width:1400px; margin:0 auto;">
         <div style="margin-bottom:12px; text-align:center;">${logoHtml}</div>
         ${nameRow}
