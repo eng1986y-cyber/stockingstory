@@ -64,7 +64,7 @@
     /* 다른 공통 CSS의 form 스타일이 등록 폼 너비를 줄이지 못하게 고정 */
     #product-register-card > #product-form {
       display: grid !important;
-      grid-template-columns: repeat(11, minmax(0, 1fr)) !important;
+      grid-template-columns: 0.9fr 1.2fr 0.55fr 2fr 0.9fr 0.9fr 1fr 0.9fr 0.5fr 2fr 0.5fr !important;
       gap: 8px;
       align-items: stretch;
       width: 100% !important;
@@ -87,7 +87,9 @@
     }
     #product-register-card > #product-form input { min-height: 42px; padding: 8px 7px; font-size: 12px; }
     #product-register-card > #product-form textarea { min-height: 42px; height: 42px; padding: 8px 7px; font-size: 12px; resize: vertical; }
-    #product-register-card > #product-form button { min-height: 42px; padding: 8px 5px; font-size: 12px; white-space: nowrap; }
+    #product-register-card > #product-form input[name="price"] { padding-left: 4px; padding-right: 4px; }
+    #product-register-card > #product-form input[name="min_qty"] { padding-left: 3px; padding-right: 3px; }
+    #product-register-card > #product-form button { min-height: 42px; padding: 6px 2px; font-size: 10px; white-space: nowrap; }
 
     .form-row { display: flex; gap: 8px; flex-wrap: wrap; }
     .form-row > * { flex: 1; min-width: 150px; }
@@ -211,9 +213,8 @@
       .row-item .row-main { font-size: 12px; }
       
       #product-register-card > #product-form { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
-      #product-register-card > #product-form textarea,
+      #product-register-card > #product-form input[name="detail_images"],
       #product-register-card > #product-form button { grid-column: 1 / -1; }
-      #product-register-card > #product-form textarea { height: 64px; }
       .list-controls { display: flex; flex-direction: column; align-items: center; }
       .list-search { max-width: 560px; min-width: 0; width: 100%; margin-inline: auto; }
       .bulk-actions { width: 100%; justify-content: flex-end; }
@@ -278,7 +279,7 @@
                 <input name="hem_option" placeholder="밑단선택 (쉼표)">
                 <input name="other_option" placeholder="기타옵션 (쉼표)">
                 <input name="min_qty" type="number" min="1" value="1" placeholder="최소 주문수량 (기본 1)">
-                <textarea name="detail_images" placeholder="상세 이미지 URL (줄바꿈)"></textarea>
+                <input name="detail_images" type="text" placeholder="상세 이미지 URL">
                 <button type="submit" class="btn btn-primary">상품 등록</button>
               </form>
               <p id="msg" class="msg"></p>
@@ -702,7 +703,7 @@
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const detail_images = form.detail_images.value.split('\n').map(s => s.trim()).filter(Boolean);
+      const detail_images = form.detail_images.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
       msg.className = 'msg';
       msg.textContent = '등록 중...';
 
@@ -914,7 +915,7 @@
             <input name="hem_option" placeholder="밑단선택 (쉼표)" value="${(p.hem_option || []).join(',')}">
             <input name="other_option" placeholder="기타옵션 (쉼표)" value="${(p.other_option || []).join(',')}">
             <input name="min_qty" type="number" min="1" placeholder="최소 주문수량" value="${p.min_qty || 1}">
-            <textarea name="detail_images" placeholder="상세 이미지 URL (줄바꿈)" style="grid-column: 1 / -1; min-height: 70px;">${(p.detail_images || []).join('\n')}</textarea>
+            <input name="detail_images" type="text" placeholder="상세 이미지 URL" style="grid-column: 1 / -1;" value="${(p.detail_images || []).join(', ')}">
             
             <div class="modal-actions" style="grid-column: 1 / -1;">
               <button type="submit" class="btn btn-primary">수정 완료</button>
@@ -929,7 +930,7 @@
       modal.querySelector('#product-edit-form').addEventListener('submit', async (ev) => {
         ev.preventDefault();
         const f = ev.target;
-        const detail_images = f.detail_images.value.split('\n').map(s => s.trim()).filter(Boolean);
+        const detail_images = f.detail_images.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
         
         const submitBtn = f.querySelector('button[type="submit"]');
         submitBtn.disabled = true;
