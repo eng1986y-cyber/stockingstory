@@ -133,7 +133,9 @@
     }
     .btn-bulk-del.active { opacity: 1; pointer-events: auto; }
     #admin-list-wrap { background: #f9fafb; border-radius: 8px; padding: 10px; overflow-x: auto; }
-    #admin-list { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+    #admin-list { display: flex; flex-direction: column; gap: 7px; min-width: 0; min-height: 338px; }
+    /* 목록 항목이 1~4개여도 5개가 표시될 때의 영역 높이를 유지 */
+    #admin-list-wrap { min-height: 360px; box-sizing: border-box; }
     .product-row {
       background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
       padding: 8px 10px; display: grid;
@@ -178,7 +180,7 @@
     }
 
     /* 주문/회원 컴팩트 레이아웃 */
-    .row-list { display: flex; flex-direction: column; gap: 8px; }
+    .row-list { display: flex; flex-direction: column; gap: 8px; min-height: 420px; box-sizing: border-box; }
     .row-item {
       background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
       padding: 12px 14px; display: flex; align-items: center; gap: 12px;
