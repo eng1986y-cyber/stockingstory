@@ -322,13 +322,14 @@ function renderHeader(current) {
     white-space: nowrap; box-sizing: border-box; flex-shrink: 0;
   `;
 
+  // ⭐ [내정보] 옆에 [주문내역] 버튼 추가!
   const userBtns = m
     ? `<a href="mypage.html" data-nav="mypage" style="${btnStyle(current === 'mypage')}">내정보</a>
+       <a href="myorders.html" target="_blank" data-nav="myorders" style="${btnStyle(current === 'myorders')}">주문내역</a>
        <a href="#" id="logout-btn" style="${btnStyle(false)}">로그아웃</a>`
     : `<a href="login.html" data-nav="login" style="${btnStyle(current === 'login')}">로그인</a>
        <a href="signup.html" data-nav="signup" style="${btnStyle(current === 'signup')}">회원가입</a>`;
 
-  // ⭐ 메뉴 버튼들 바로 위, 가운데 정렬 (PC/모바일 공통)
   const nameRow = `
     <div class="header-name-row" style="text-align:center; font-size:13px; color:${theme.nameColor}; margin-bottom:12px; min-height:18px; line-height:18px; font-weight:500;">
       ${m ? `${m.name}님` : ''}
@@ -344,7 +345,6 @@ function renderHeader(current) {
       <div style="max-width:1400px; margin:0 auto;">
         <div style="margin-bottom:12px; text-align:center;">${logoHtml}</div>
         ${nameRow}
-        <!-- header-nav-wrap 클래스를 통해 PC는 우측, 모바일은 중앙 정렬 적용 -->
         <div class="header-nav-wrap">
           <a href="cart.html" data-nav="cart" style="${btnStyle(current === 'cart')}">장바구니 <span id="cart-count" style="margin-left:4px;">0</span></a>
           <a href="orders.html" data-nav="orders" style="${btnStyle(current === 'orders')}">주문조회</a>
@@ -372,7 +372,6 @@ function renderHeader(current) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // ⭐ 데이터 로드 중 화면 덜컹거림 방지용 로더 추가
   const loader = document.createElement('div');
   loader.className = 'page-loader';
   if (!_isDark) loader.style.background = '#f8f8f8';
@@ -389,12 +388,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const isOk = await verifyMemberStatus();
   if (!isOk) return;
 
-  const map = { 'index': 'home', 'login': 'login', 'signup': 'signup', 'cart': 'cart', 'orders': 'orders', 'product': 'product', 'mypage': 'mypage' };
+  const map = { 'index': 'home', 'login': 'login', 'signup': 'signup', 'cart': 'cart', 'orders': 'orders', 'product': 'product', 'mypage': 'mypage', 'myorders': 'myorders' };
   const current = map[_pathName] || 'home';
 
   if (document.getElementById('app-header')) renderHeader(current);
 
-  // ⭐ 페이지 로딩 완료 후 스피너 제거 (0.3초 뒤 부드럽게)
   setTimeout(() => {
     loader.classList.add('hide');
     setTimeout(() => loader.remove(), 300);
