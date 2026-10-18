@@ -63,8 +63,8 @@
     #product-register-card { min-width: 0; }
     #product-form {
       display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 10px;
+      grid-template-columns: repeat(11, minmax(0, 1fr));
+      gap: 6px;
       align-items: start;
       width: 100%;
       overflow: visible;
@@ -73,9 +73,9 @@
     #product-form input,
     #product-form textarea,
     #product-form button { width: 100%; min-width: 0; box-sizing: border-box; }
-    #product-form input { min-height: 42px; }
-    #product-form textarea { min-height: 42px; height: 42px; resize: vertical; }
-    #product-form button { min-height: 42px; white-space: nowrap; }
+    #product-form input { min-height: 42px; padding: 8px 6px; font-size: 12px; }
+    #product-form textarea { min-height: 42px; height: 42px; padding: 8px 6px; font-size: 12px; resize: vertical; }
+    #product-form button { min-height: 42px; padding: 8px 5px; font-size: 12px; white-space: nowrap; }
 
     .form-row { display: flex; gap: 8px; flex-wrap: wrap; }
     .form-row > * { flex: 1; min-width: 150px; }
@@ -188,10 +188,6 @@
     .modal-box input[readonly] { background: #f9fafb; color: #6b7280; }
     .modal-box .modal-actions { display: flex; gap: 8px; margin-top: 10px; }
     .modal-box .modal-actions > * { flex: 1; }
-
-    @media (min-width: 1001px) and (max-width: 1250px) {
-      #product-form { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    }
 
     @media (max-width: 1000px) {
       .admin-layout { flex-direction: column; padding: 16px; }
