@@ -227,7 +227,31 @@
       .admin-layout { padding: 10px; }
       .card { padding: 14px; }
     }
-  </style>
+  
+    /* 화면 오른쪽 가장자리에 고정되는 위/아래 이동 버튼 */
+    .edge-scroll-controls {
+      position: fixed;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 9999;
+    }
+    .edge-scroll-controls button {
+      width: 44px; height: 44px; border-radius: 50%;
+      border: 1px solid #d1d5db; background: rgba(255,255,255,.96);
+      color: #222; font-size: 19px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+    .edge-scroll-controls button:hover { background: #f3f4f6; }
+    @media (max-width: 600px) {
+      .edge-scroll-controls { right: 8px; }
+      .edge-scroll-controls button { width: 38px; height: 38px; font-size: 17px; }
+    }
+</style>
 </head>
 <body>
   <div id="login-screen" style="display:none;">
@@ -742,7 +766,7 @@
     let allProducts = [];
     let filteredProducts = [];
     let currentPage = 1;
-    const PER_PAGE = 10;
+    const PER_PAGE = 5;
     const MAX_PAGES = 10;
     let selectedProductIds = new Set();
 
@@ -1061,17 +1085,19 @@
       });
     }
 
-    // 주문/회원 목록 공통 페이지 처리: 페이지당 10개, 최대 10페이지
+    // 주문/회원 목록 공통 페이지 처리: 페이지당 5개, 최대 10페이지
     const secondaryListPages = { orders: 1, members: 1 };
     function paginateRenderedList(listId, paginationId, type) {
       const listEl = document.getElementById(listId);
       const pager = document.getElementById(paginationId);
       const rows = Array.from(listEl.children).filter(node => node.classList.contains('row-item'));
-      const totalPages = Math.min(Math.ceil(rows.length / 10), 10);
+      const ITEMS_PER_PAGE = 5;
+      const MAX_LIST_PAGES = 10;
+      const totalPages = Math.min(Math.ceil(rows.length / ITEMS_PER_PAGE), MAX_LIST_PAGES);
       if (!totalPages) { pager.innerHTML = ''; return; }
       let page = Math.min(Math.max(secondaryListPages[type] || 1, 1), totalPages);
       secondaryListPages[type] = page;
-      rows.forEach((row, index) => { row.style.display = (index >= (page - 1) * 10 && index < page * 10) ? '' : 'none'; });
+      rows.forEach((row, index) => { row.style.display = (index >= (page - 1) * ITEMS_PER_PAGE && index < page * ITEMS_PER_PAGE) ? '' : 'none'; });
       if (totalPages <= 1) { pager.innerHTML = ''; return; }
       let html = `<button type="button" class="btn btn-secondary btn-sm" data-page="${page-1}" ${page===1?'disabled':''}>← 이전</button>`;
       for (let i=1; i<=totalPages; i++) html += `<button type="button" class="btn btn-sm ${i===page?'btn-primary':'btn-secondary'}" data-page="${i}">${i}</button>`;
@@ -1435,6 +1461,19 @@
     }
 
     checkSession();
+  </script>
+
+  <div class="edge-scroll-controls" aria-label="페이지 위아래 이동">
+    <button type="button" id="edge-scroll-up" aria-label="맨 위로 이동" title="맨 위로">▲</button>
+    <button type="button" id="edge-scroll-down" aria-label="맨 아래로 이동" title="맨 아래로">▼</button>
+  </div>
+  <script>
+    document.getElementById('edge-scroll-up').addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    document.getElementById('edge-scroll-down').addEventListener('click', () => {
+      window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+    });
   </script>
 </body>
 </html>
