@@ -7,7 +7,9 @@
   <link rel="stylesheet" href="style.css">
   <script src="common.js"></script>
   <style>
-    .mypage-wrap { max-width: 600px; margin: 40px auto; padding: 0 16px; }
+    /* ⭐ 전체 컨테이너 넓이 통일 (박스 사이즈 계산 오류 방지) */
+    .mypage-wrap { max-width: 600px; margin: 40px auto; padding: 0 16px; box-sizing: border-box; }
+    
     .mypage-title {
       font-size: 22px;
       font-weight: 700;
@@ -15,6 +17,7 @@
       color: #222;
     }
     body.dark .mypage-title { color: #fff; }
+    
     .mypage-form {
       display: grid;
       gap: 10px;
@@ -22,6 +25,8 @@
       padding: 24px;
       border-radius: 8px;
       margin-bottom: 32px;
+      box-sizing: border-box; /* ⭐ 넓이 꽉 차게 */
+      width: 100%;
     }
     body.dark .mypage-form {
       background: #151515;
@@ -39,6 +44,8 @@
       border-radius: 6px;
       font-size: 14px;
       font-family: inherit;
+      box-sizing: border-box; /* ⭐ 넓이 꽉 차게 */
+      width: 100%;
     }
     body.dark .mypage-form input {
       background: #0f0f0f;
@@ -71,7 +78,7 @@
       font-family: inherit;
     }
     .mypage-form button:hover { background: #02b151; }
-    #msg { margin-top: 12px; font-weight: 600; text-align: center; }
+    #msg { margin-top: 12px; font-weight: 600; text-align: center; margin-bottom: 24px; }
 
     /* ⭐ 주문 내역 스타일 */
     .order-history-title {
@@ -81,19 +88,24 @@
       color: #222;
     }
     body.dark .order-history-title { color: #fff; }
+    
     .order-history-list {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 16px;
+      width: 100%;
     }
+    
     .history-card {
       background: #fff;
       border: 1px solid #e5e7eb;
       border-radius: 8px;
-      padding: 16px;
+      padding: 20px;
       font-size: 14px;
       line-height: 1.6;
       color: #222;
+      box-sizing: border-box; /* ⭐ 넓이 꽉 차게 */
+      width: 100%;
     }
     body.dark .history-card {
       background: #151515;
@@ -109,7 +121,8 @@
       border-bottom: 1px solid #eee;
     }
     body.dark .history-header { border-bottom-color: #222; }
-    .history-date { font-size: 12px; color: #888; }
+    
+    .history-date { font-size: 13px; color: #888; }
     .history-status {
       font-size: 12px;
       font-weight: 600;
@@ -120,25 +133,54 @@
     .history-order-num {
       font-weight: 700;
       color: #1976d2;
-      font-size: 13px;
-      margin-bottom: 8px;
+      font-size: 15px;
+      margin-bottom: 12px;
       display: block;
     }
-    .history-item {
+    body.dark .history-order-num { color: #60a5fa; }
+
+    .history-product-item {
+      padding: 10px 0;
+      border-bottom: 1px dashed #eee;
+    }
+    body.dark .history-product-item { border-bottom-color: #222; }
+    .history-product-item:last-child { border-bottom: none; }
+
+    .history-item-main {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 6px;
-      font-size: 13px;
+      margin-bottom: 4px;
+      font-size: 14px;
     }
-    .history-item .name { font-weight: 500; }
-    .history-item .qty { color: #888; }
+    .history-item-main .name { font-weight: 600; }
+    .history-item-main .qty { color: #888; margin-left: 4px; font-weight: normal; font-size: 13px; }
+    
+    .history-item-detail {
+      font-size: 13px;
+      color: #6b7280;
+      line-height: 1.5;
+    }
+    body.dark .history-item-detail { color: #9ca3af; }
+
+    .history-info-box {
+      margin-top: 16px;
+      background: #f9fafb;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: #4b5563;
+      line-height: 1.6;
+    }
+    body.dark .history-info-box { background: #0f0f0f; color: #9ca3af; }
+    
     .history-total {
       text-align: right;
       font-weight: 700;
+      font-size: 15px;
       color: #e53935;
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px dashed #eee;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #eee;
     }
     body.dark .history-total { border-top-color: #222; color: #ef4444; }
   </style>
@@ -178,7 +220,7 @@
       </form>
       <p id="msg"></p>
 
-      <!-- ⭐ 내 주문 내역 섹션 추가 -->
+      <!-- ⭐ 내 주문 내역 섹션 -->
       <h2 class="order-history-title">내 주문내역</h2>
       <div id="order-history-list" class="order-history-list">
         <p style="color:#888; font-size:14px;">주문 내역을 불러오는 중입니다...</p>
@@ -244,7 +286,7 @@
         .order('created_at', { ascending: false });
 
       if (error) {
-        // OR 조건 검색이 실패할 경우(데이터 형식 등)를 대비해 단순 이름으로 재조회
+        // OR 조건 검색이 실패할 경우를 대비해 단순 이름으로 재조회
         const fallbackRes = await db.from('orders').select('*').eq('customer_name', m.name).order('created_at', { ascending: false });
         if (fallbackRes.error || !fallbackRes.data || fallbackRes.data.length === 0) {
           historyListEl.innerHTML = '<p style="color:#888; font-size:14px;">주문 내역이 없습니다.</p>';
@@ -262,7 +304,7 @@
       renderHistory(data);
     }
 
-    // 주문 내역 화면에 그리기
+    // 주문 내역 화면에 그리기 (상세 옵션 추가)
     function renderHistory(orders) {
       // 주문번호(또는 고유ID) 기준 그룹화
       const groups = {};
@@ -280,6 +322,9 @@
         const dateStr = new Date(first.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
         const displayNum = first.order_number || `(번호 없음)`;
 
+        // ⭐ 주소 조합
+        const fullAddress = `${first.postcode ? `[${first.postcode}] ` : ''}${first.address || ''} ${first.address_detail || ''}`.trim();
+
         return `
           <div class="history-card">
             <div class="history-header">
@@ -287,18 +332,43 @@
               <span class="history-status" style="background:${statusColor(first.status)};">${first.status || '-'}</span>
             </div>
             <span class="history-order-num">${displayNum}</span>
-            ${items.map(o => `
-              <div class="history-item">
-                <span class="name">${o.product_name} <span class="qty">x ${o.quantity}</span></span>
-                <span>${Number(o.total_price).toLocaleString()}원</span>
-              </div>
-            `).join('')}
+            
+            <!-- 상품 리스트 및 옵션 상세 -->
+            <div>
+              ${items.map(o => {
+                const opts = [];
+                if (o.selected_color) opts.push(`색상: ${o.selected_color}`);
+                if (o.selected_size) opts.push(`사이즈: ${o.selected_size}`);
+                if (o.selected_hem) opts.push(`밑단: ${o.selected_hem}`);
+                if (o.selected_other) opts.push(`기타: ${o.selected_other}`);
+                const optStr = opts.length ? opts.join(' | ') : '기본 옵션';
+
+                return `
+                  <div class="history-product-item">
+                    <div class="history-item-main">
+                      <span class="name">${o.product_name} <span class="qty">x ${o.quantity}</span></span>
+                      <span>${Number(o.total_price).toLocaleString()}원</span>
+                    </div>
+                    <div class="history-item-detail">
+                      ${optStr}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+
+            <!-- 배송지 및 요청사항 정보 -->
+            <div class="history-info-box">
+              <div>📍 <b>배송지:</b> ${fullAddress || '주소 정보 없음'}</div>
+              ${first.memo ? `<div style="margin-top:4px;">📝 <b>요청사항:</b> ${first.memo}</div>` : ''}
+              ${(first.courier || first.tracking_number) ? `
+                <div style="margin-top:8px; padding-top:8px; border-top:1px dashed #ddd; color:#1976d2;">
+                  🚚 <b>배송정보:</b> ${first.courier || '택배사 미정'} | ${first.tracking_number || '운송장 없음'}
+                </div>
+              ` : ''}
+            </div>
+
             <div class="history-total">총 결제금액: ${totalAll.toLocaleString()}원</div>
-            ${(first.courier || first.tracking_number) ? `
-              <div style="margin-top:10px; font-size:12px; color:#888; background:#f9fafb; padding:8px; border-radius:4px;">
-                🚚 ${first.courier || '택배사 미정'} | ${first.tracking_number || '운송장 없음'}
-              </div>
-            ` : ''}
           </div>
         `;
       }).join('');
