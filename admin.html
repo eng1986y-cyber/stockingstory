@@ -59,8 +59,19 @@
     .card input[readonly] { background: #f9fafb !important; color: #6b7280 !important; }
     .card textarea { resize: vertical; min-height: 70px; }
 
-    /* ⭐ 상품 등록 폼 1열 배치 */
-    .form-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+    /* ⭐ 상품 등록 폼 1열(세로) 완벽 배치 */
+    #product-form { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 10px; 
+    }
+    #product-form input,
+    #product-form textarea,
+    #product-form button {
+      width: 100%;
+    }
+
+    /* ⭐ 상품 목록 컨트롤용 (form-row는 여기서만 사용) */
     .form-row { display: flex; gap: 8px; flex-wrap: wrap; }
     .form-row > * { flex: 1; min-width: 150px; }
 
@@ -249,7 +260,7 @@
             <!-- 1. 새 상품 등록 카드 (1열 배치) -->
             <div class="card" id="product-register-card">
               <div class="card-title">📝 새 상품 등록</div>
-              <form id="product-form" class="form-grid">
+              <form id="product-form">
                 <input name="product_code" placeholder="제품번호">
                 <input name="name" placeholder="상품명" required>
                 <input name="price" type="number" placeholder="가격" required>
@@ -259,8 +270,8 @@
                 <input name="hem_option" placeholder="밑단선택 (쉼표)">
                 <input name="other_option" placeholder="기타옵션 (쉼표)">
                 <input name="min_qty" type="number" min="1" value="1" placeholder="최소 주문수량 (기본 1)">
-                <textarea name="detail_images" class="full" placeholder="상세 이미지 URL (줄바꿈)"></textarea>
-                <button type="submit" class="btn btn-primary full">상품 등록</button>
+                <textarea name="detail_images" placeholder="상세 이미지 URL (줄바꿈)"></textarea>
+                <button type="submit" class="btn btn-primary">상품 등록</button>
               </form>
               <p id="msg" class="msg"></p>
             </div>
@@ -330,7 +341,7 @@
 
           <div class="card">
             <div class="card-title">🏷️ 로고 / 사이트명</div>
-            <div class="form-grid" style="grid-template-columns: 1fr;">
+            <div style="display: grid; gap: 10px;">
               <input id="logo-site-name" placeholder="사이트명">
               <input id="logo-image-url" placeholder="로고 이미지 URL">
               <div class="form-row">
@@ -347,7 +358,7 @@
 
           <div class="card">
             <div class="card-title">📄 사이트 하단 정보 (Footer)</div>
-            <div class="form-grid" style="grid-template-columns: 1fr;">
+            <div style="display: grid; gap: 10px;">
               <input id="footer-owner" placeholder="상호명 / 대표자">
               <input id="footer-phone" placeholder="연락처">
               <input id="footer-email" placeholder="이메일">
@@ -361,7 +372,7 @@
 
           <div class="card">
             <div class="card-title">🖼️ 배너 이미지</div>
-            <div class="form-grid" style="grid-template-columns: 1fr;">
+            <div style="display: grid; gap: 10px;">
               <input id="banner-image-url" placeholder="배너 이미지 URL">
               <input id="banner-link-url" placeholder="클릭 시 이동할 링크 URL (선택)">
               <div class="form-row">
@@ -866,7 +877,7 @@
       modal.innerHTML = `
         <div class="modal-box" style="max-width: 600px;">
           <h2>상품 수정</h2>
-          <form id="product-edit-form" class="modal-form form-grid" style="grid-template-columns: 1fr 1fr;">
+          <form id="product-edit-form" class="modal-form" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
             <input name="product_code" placeholder="제품번호" value="${p.product_code || ''}">
             <input name="name" placeholder="상품명" value="${p.name}" required>
             <input name="price" type="number" placeholder="가격" value="${p.price}" required>
@@ -876,7 +887,7 @@
             <input name="hem_option" placeholder="밑단선택 (쉼표)" value="${(p.hem_option || []).join(',')}">
             <input name="other_option" placeholder="기타옵션 (쉼표)" value="${(p.other_option || []).join(',')}">
             <input name="min_qty" type="number" min="1" placeholder="최소 주문수량" value="${p.min_qty || 1}">
-            <textarea name="detail_images" class="full" placeholder="상세 이미지 URL (줄바꿈)" style="grid-column: 1 / -1;">${(p.detail_images || []).join('\n')}</textarea>
+            <textarea name="detail_images" placeholder="상세 이미지 URL (줄바꿈)" style="grid-column: 1 / -1; min-height: 70px;">${(p.detail_images || []).join('\n')}</textarea>
             
             <div class="modal-actions" style="grid-column: 1 / -1;">
               <button type="submit" class="btn btn-primary">수정 완료</button>
