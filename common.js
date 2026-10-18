@@ -322,10 +322,10 @@ function renderHeader(current) {
     white-space: nowrap; box-sizing: border-box; flex-shrink: 0;
   `;
 
-  // ⭐ [내정보] 옆에 [주문내역] 버튼 추가!
+  // ⭐ [내정보] 옆에 [주문내역] 버튼 추가! (새창 띄우지 않고 현재 창에서 이동)
   const userBtns = m
     ? `<a href="mypage.html" data-nav="mypage" style="${btnStyle(current === 'mypage')}">내정보</a>
-       <a href="myorders.html" target="_blank" data-nav="myorders" style="${btnStyle(current === 'myorders')}">주문내역</a>
+       <a href="myorders.html" data-nav="myorders" style="${btnStyle(current === 'myorders')}">주문내역</a>
        <a href="#" id="logout-btn" style="${btnStyle(false)}">로그아웃</a>`
     : `<a href="login.html" data-nav="login" style="${btnStyle(current === 'login')}">로그인</a>
        <a href="signup.html" data-nav="signup" style="${btnStyle(current === 'signup')}">회원가입</a>`;

@@ -15,26 +15,25 @@
       box-sizing: border-box; 
     }
     
-    .mypage-title, .order-history-title {
+    .mypage-title {
       font-size: 22px;
       font-weight: 700;
       margin-bottom: 16px;
       color: #222;
       padding: 0 4px;
     }
-    .order-history-title { margin-top: 40px; font-size: 20px; }
-    body.dark .mypage-title, body.dark .order-history-title { color: #fff; }
+    body.dark .mypage-title { color: #fff; }
     
-    /* ⭐ [내 정보] 폼 카드 (주문내역 카드와 넓이 100% 일치) */
+    /* ⭐ [내 정보] 폼 카드 */
     .mypage-form {
       background: #fff;
       padding: 20px;
       border-radius: 8px;
       border: 1px solid #e5e7eb;
-      margin-bottom: 0; /* 아래 주문내역과의 간격은 타이틀 margin-top으로 조절 */
+      margin-bottom: 32px;
       box-sizing: border-box;
       width: 100%;
-      display: block; /* ⭐ Grid 버그 방지를 위해 Block으로 변경 */
+      display: block;
     }
     body.dark .mypage-form {
       background: #151515;
@@ -42,7 +41,7 @@
       border-radius: 12px;
     }
 
-    /* ⭐ 내부 2열 그리드 (이 안에서만 2열 적용) */
+    /* ⭐ 내부 2열 그리드 */
     .form-grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -50,7 +49,7 @@
     }
     @media (max-width: 768px) {
       .form-grid-2 {
-        grid-template-columns: 1fr; /* 모바일은 1열로 변경 */
+        grid-template-columns: 1fr;
         gap: 10px;
       }
     }
@@ -114,119 +113,6 @@
     .mypage-form button[type="submit"]:hover { background: #02b151; }
     
     #msg { margin-top: 12px; margin-bottom: 0; font-weight: 600; text-align: center; min-height: 20px; }
-
-    /* ⭐⭐⭐ 주문 내역 카드 디자인 ⭐⭐⭐ */
-    .order-history-list {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      width: 100%;
-    }
-    
-    .history-card {
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      padding: 20px; /* 내 정보 폼과 패딩 동일 */
-      font-size: 14px;
-      line-height: 1.6;
-      color: #222;
-      box-sizing: border-box;
-      width: 100%;
-    }
-    body.dark .history-card {
-      background: #151515;
-      border-color: #222;
-      color: #e5e7eb;
-    }
-    .history-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid #eee;
-    }
-    body.dark .history-header { border-bottom-color: #222; }
-    
-    .history-date { font-size: 13px; color: #888; }
-    .history-status {
-      font-size: 12px;
-      font-weight: 600;
-      padding: 4px 10px;
-      border-radius: 4px;
-      color: #fff;
-    }
-    .history-order-num {
-      font-weight: 700;
-      color: #1976d2;
-      font-size: 15px;
-      margin-bottom: 12px;
-      display: block;
-    }
-    body.dark .history-order-num { color: #60a5fa; }
-
-    .history-product-item {
-      padding: 10px 0;
-      border-bottom: 1px dashed #eee;
-    }
-    body.dark .history-product-item { border-bottom-color: #222; }
-    .history-product-item:last-child { border-bottom: none; }
-
-    .history-item-main {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 4px;
-      font-size: 14px;
-    }
-    .history-item-main .name { font-weight: 600; }
-    .history-item-main .qty { color: #888; margin-left: 4px; font-weight: normal; font-size: 13px; }
-    
-    .history-item-detail {
-      font-size: 13px;
-      color: #6b7280;
-      line-height: 1.5;
-    }
-    body.dark .history-item-detail { color: #9ca3af; }
-
-    .history-info-box {
-      margin-top: 16px;
-      background: #f9fafb;
-      padding: 12px;
-      border-radius: 6px;
-      font-size: 13px;
-      color: #4b5563;
-      line-height: 1.6;
-    }
-    body.dark .history-info-box { background: #0f0f0f; color: #9ca3af; }
-    
-    /* ⭐ 결제 금액 상세 (배송비 포함) */
-    .history-price-summary {
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid #eee;
-      font-size: 14px;
-      color: #4b5563;
-    }
-    body.dark .history-price-summary { border-top-color: #222; color: #9ca3af; }
-    
-    .history-price-summary .price-row {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 4px;
-    }
-    .history-price-summary .price-row.total {
-      margin-top: 8px;
-      padding-top: 8px;
-      border-top: 1px dashed #ddd;
-      font-weight: 700;
-      font-size: 16px;
-      color: #e53935;
-    }
-    body.dark .history-price-summary .price-row.total {
-      border-top-color: #333;
-      color: #ef4444;
-    }
   </style>
 </head>
 <body>
@@ -236,7 +122,7 @@
     <div class="mypage-wrap">
       <h2 class="mypage-title">내 정보</h2>
       
-      <!-- ⭐ 내 정보 폼 -->
+      <!-- ⭐ 내 정보 폼 (주문내역은 헤더의 '주문내역' 버튼을 통해 이동) -->
       <form id="mypage-form" class="mypage-form">
         <div class="form-grid-2">
           <div class="form-group">
@@ -283,13 +169,6 @@
         <button type="submit">저장</button>
       </form>
       <p id="msg"></p>
-
-      <!-- ⭐ 내 주문 내역 (화면 하단에 이어서 표시) -->
-      <h2 class="order-history-title">내 주문내역</h2>
-      <div id="order-history-list" class="order-history-list">
-        <p style="color:#888; font-size:14px;">주문 내역을 불러오는 중입니다...</p>
-      </div>
-      
     </div>
   </main>
 
@@ -304,16 +183,11 @@
   <script>
     const form = document.getElementById('mypage-form');
     const msg = document.getElementById('msg');
-    const historyListEl = document.getElementById('order-history-list');
 
     let member = JSON.parse(localStorage.getItem('member') || 'null');
     if (!member || !member.id) {
       alert('로그인이 필요합니다.');
       location.href = 'login.html';
-    }
-
-    function statusColor(s) {
-      return { '입금대기':'#f59e0b', '입금완료':'#059669', '배송중':'#1976d2', '완료':'#6b7280', '취소':'#dc2626' }[s] || '#9ca3af';
     }
 
     async function loadFromServer() {
@@ -335,127 +209,6 @@
       form.postcode.value = data.postcode || '';
       form.address.value = data.address || '';
       form.address_detail.value = data.address_detail || '';
-
-      loadOrderHistory(data);
-    }
-
-    async function loadOrderHistory(m) {
-      historyListEl.innerHTML = '<p style="color:#888; font-size:14px;">주문 내역을 불러오는 중입니다...</p>';
-      
-      const { data, error } = await db.from('orders')
-        .select('*')
-        .or(`and(customer_name.eq.${m.name},customer_phone.eq.${m.phone}),and(customer_name.eq.${m.name},depositor_name.eq.${m.name})`)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        const fallbackRes = await db.from('orders').select('*').eq('customer_name', m.name).order('created_at', { ascending: false });
-        if (fallbackRes.error || !fallbackRes.data || fallbackRes.data.length === 0) {
-          historyListEl.innerHTML = '<p style="color:#888; font-size:14px;">주문 내역이 없습니다.</p>';
-          return;
-        }
-        renderHistory(fallbackRes.data);
-        return;
-      }
-
-      if (!data || data.length === 0) {
-        historyListEl.innerHTML = '<p style="color:#888; font-size:14px;">주문 내역이 없습니다.</p>';
-        return;
-      }
-
-      renderHistory(data);
-    }
-
-    function renderHistory(orders) {
-      const groups = {};
-      orders.forEach(o => {
-        const key = o.order_number || `single_${o.id}`;
-        if (!groups[key]) groups[key] = [];
-        groups[key].push(o);
-      });
-
-      const entries = Object.entries(groups);
-
-      historyListEl.innerHTML = entries.map(([key, items]) => {
-        const first = items[0];
-        const dateStr = new Date(first.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
-        const displayNum = first.order_number || `(번호 없음)`;
-        const fullAddress = `${first.postcode ? `[${first.postcode}] ` : ''}${first.address || ''} ${first.address_detail || ''}`.trim();
-
-        // ⭐ 상품 총액과 배송비 분리 계산
-        let productTotal = 0;
-        let shippingTotal = 0;
-        
-        items.forEach(o => {
-          const rowTotal = Number(o.total_price || 0);
-          const rowShip = Number(o.shipping_fee || 0);
-          productTotal += (rowTotal - rowShip);
-          shippingTotal += rowShip;
-        });
-        
-        const totalAll = productTotal + shippingTotal;
-
-        return `
-          <div class="history-card">
-            <div class="history-header">
-              <span class="history-date">${dateStr}</span>
-              <span class="history-status" style="background:${statusColor(first.status)};">${first.status || '-'}</span>
-            </div>
-            <span class="history-order-num">${displayNum}</span>
-            
-            <div>
-              ${items.map(o => {
-                const opts = [];
-                if (o.selected_color) opts.push(`색상: ${o.selected_color}`);
-                if (o.selected_size) opts.push(`사이즈: ${o.selected_size}`);
-                if (o.selected_hem) opts.push(`밑단: ${o.selected_hem}`);
-                if (o.selected_other) opts.push(`기타: ${o.selected_other}`);
-                const optStr = opts.length ? opts.join(' | ') : '기본 옵션';
-                
-                // 해당 상품의 순수 금액 (배송비 제외)
-                const itemPrice = Number(o.total_price) - Number(o.shipping_fee || 0);
-
-                return `
-                  <div class="history-product-item">
-                    <div class="history-item-main">
-                      <span class="name">${o.product_name} <span class="qty">x ${o.quantity}</span></span>
-                      <span>${itemPrice.toLocaleString()}원</span>
-                    </div>
-                    <div class="history-item-detail">
-                      ${optStr}
-                    </div>
-                  </div>
-                `;
-              }).join('')}
-            </div>
-
-            <div class="history-info-box">
-              <div>📍 <b>배송지:</b> ${fullAddress || '주소 정보 없음'}</div>
-              ${first.memo ? `<div style="margin-top:4px;">📝 <b>요청사항:</b> ${first.memo}</div>` : ''}
-              ${(first.courier || first.tracking_number) ? `
-                <div style="margin-top:8px; padding-top:8px; border-top:1px dashed #ddd; color:#1976d2;">
-                  🚚 <b>배송정보:</b> ${first.courier || '택배사 미정'} | ${first.tracking_number || '운송장 없음'}
-                </div>
-              ` : ''}
-            </div>
-
-            <!-- ⭐ 결제 금액 상세 (상품금액 + 배송비 = 총액) -->
-            <div class="history-price-summary">
-              <div class="price-row">
-                <span>상품 금액</span>
-                <span>${productTotal.toLocaleString()}원</span>
-              </div>
-              <div class="price-row">
-                <span>배송비</span>
-                <span>${shippingTotal > 0 ? shippingTotal.toLocaleString() + '원' : '무료'}</span>
-              </div>
-              <div class="price-row total">
-                <span>총 결제금액</span>
-                <span>${totalAll.toLocaleString()}원</span>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
     }
 
     loadFromServer();
@@ -491,8 +244,6 @@
       form.password.value = '';
       msg.style.color = '#10b981';
       msg.textContent = '✅ 저장 완료!';
-      
-      loadOrderHistory(member);
       
       setTimeout(() => msg.textContent = '', 2000);
     });
