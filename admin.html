@@ -59,22 +59,24 @@
     .card input[readonly] { background: #f9fafb !important; color: #6b7280 !important; }
     .card textarea { resize: vertical; min-height: 70px; }
 
-    /* ⭐ 상품 등록 폼 1열(세로) 완벽 배치 */
-    #product-form { 
-      display: flex; 
-      flex-direction: column; 
-      gap: 10px; 
+    /* 상품 등록: 데스크톱에서는 한 줄 가로 배치, 작은 화면에서는 자동 줄바꿈 */
+    #product-register-card { min-width: 0; }
+    #product-form {
+      display: grid;
+      grid-template-columns: repeat(10, minmax(145px, 1fr));
+      gap: 8px;
+      align-items: start;
+      overflow-x: auto;
+      padding-bottom: 4px;
     }
     #product-form input,
     #product-form textarea,
-    #product-form button {
-      width: 100%;
-    }
+    #product-form button { width: 100%; min-width: 0; }
+    #product-form textarea { min-height: 42px; height: 42px; resize: vertical; }
+    #product-form button { min-height: 42px; white-space: nowrap; }
 
-    /* ⭐ 상품 목록 컨트롤용 (form-row는 여기서만 사용) */
     .form-row { display: flex; gap: 8px; flex-wrap: wrap; }
     .form-row > * { flex: 1; min-width: 150px; }
-
     .btn {
       padding: 10px 18px; border-radius: 8px; border: 0; cursor: pointer;
       font-size: 14px; font-weight: 600; font-family: inherit;
@@ -85,74 +87,55 @@
     .btn-success { background: #059669; color: #fff; }
     .btn-danger { background: #dc2626; color: #fff; }
     .btn-secondary { background: #fff; color: #374151; border: 1px solid #e5e7eb; }
-    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .btn-sm { padding: 6px 9px; font-size: 12px; white-space: nowrap; }
 
     .msg { font-size: 13px; font-weight: 600; margin-top: 12px; }
     .msg.success { color: #059669; }
     .msg.error { color: #dc2626; }
-
-    /* ⭐ 상품 등록 & 목록 레이아웃 (상하 배치) */
     .product-layout { display: flex; flex-direction: column; gap: 16px; }
-    
-    /* ⭐ 상품 목록 컨트롤 (검색/일괄삭제) */
+
     .list-controls {
       display: flex; justify-content: space-between; align-items: center;
       margin-bottom: 12px; flex-wrap: wrap; gap: 10px;
     }
     .list-search {
-      display: flex; gap: 6px; flex: 1; min-width: 200px; max-width: 400px;
+      display: flex; gap: 6px; flex: 1; min-width: 240px; max-width: 560px;
     }
-    .list-search input { padding: 8px 12px; font-size: 13px; }
+    .list-search input { padding: 8px 12px; font-size: 13px; min-width: 0; }
     .list-search button { padding: 8px 14px; font-size: 13px; flex-shrink: 0; }
-    
     .bulk-actions { display: flex; align-items: center; gap: 8px; font-size: 13px; }
-    .bulk-actions label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600; color: #374151; }
+    .bulk-actions label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600; color: #374151; white-space: nowrap; }
     .bulk-actions input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #111827; }
-    
     .btn-bulk-del {
       padding: 8px 12px; background: #dc2626; color: #fff; border: 0; border-radius: 6px;
-      font-size: 12px; font-weight: 600; cursor: pointer; opacity: 0.5; pointer-events: none;
+      font-size: 12px; font-weight: 600; cursor: pointer; opacity: 0.5; pointer-events: none; white-space: nowrap;
     }
     .btn-bulk-del.active { opacity: 1; pointer-events: auto; }
-
-    /* ⭐ 스크롤 제거 */
-    #admin-list-wrap { background: #f9fafb; border-radius: 8px; padding: 12px; overflow: visible; }
-    #admin-list { display: flex; flex-direction: column; gap: 8px; }
-
-    /* ⭐⭐⭐ 상품 한 줄(Row) 레이아웃 - 체크박스 맨 앞 고정 ⭐⭐⭐ */
+    #admin-list-wrap { background: #f9fafb; border-radius: 8px; padding: 10px; overflow-x: auto; }
+    #admin-list { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
     .product-row {
       background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
-      padding: 12px 14px; display: flex; align-items: center; gap: 12px;
-      flex-wrap: nowrap; font-size: 13px; color: #374151; width: 100%;
+      padding: 8px 10px; display: grid;
+      grid-template-columns: 20px 42px minmax(180px, 1fr) 95px auto;
+      align-items: center; gap: 10px; font-size: 13px; color: #374151; width: 100%;
+      min-width: 720px;
     }
     .product-row:hover { border-color: #d1d5db; }
-    
-    /* ⭐ 체크박스 + 이미지 + 정보 묶음 (왼쪽 고정) */
-    .prod-left-wrap {
-      display: flex; align-items: center; gap: 12px;
-      flex: 1 1 auto; min-width: 0; /* 넘치면 말줄임표 적용되도록 */
+    .product-check { width: 18px; height: 18px; cursor: pointer; accent-color: #111827; margin: 0; }
+    .product-row img { width: 42px; height: 42px; object-fit: cover; border-radius: 6px; background: #f3f4f6; border: 1px solid #e5e7eb; }
+    .prod-info { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+    .prod-name-wrap { display: flex; align-items: center; gap: 6px; min-width: 0; }
+    .prod-name { font-size: 13px; font-weight: 700; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+    .prod-code { font-size: 11px; color: #6b7280; background: #f3f4f6; padding: 2px 5px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
+    .prod-detail-text { font-size: 11px; color: #6b7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .prod-price { font-weight: 700; color: #e53935; font-size: 13px; white-space: nowrap; text-align: right; }
+    .prod-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+    #admin-pagination {
+      display: flex; justify-content: center; align-items: center; gap: 6px;
+      margin-top: 14px; flex-wrap: wrap; width: 100%;
     }
-    
-    .product-check { width: 18px; height: 18px; cursor: pointer; accent-color: #111827; flex-shrink: 0; }
-    .product-row img { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; background: #f3f4f6; border: 1px solid #e5e7eb; flex-shrink: 0; }
-    
-    .prod-info { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
-    .prod-name-wrap { display: flex; align-items: center; gap: 6px; width: 100%; overflow: hidden; }
-    .prod-name { font-size: 14px; font-weight: 600; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .prod-code { font-size: 11px; color: #9ca3af; background: #f3f4f6; padding: 2px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; }
-    
-    .prod-detail-text { font-size: 12px; color: #6b7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .prod-detail-text span { color: #d1d5db; margin: 0 4px; }
-    
-    /* ⭐ 가격 및 버튼 영역 (오른쪽 고정) */
-    .prod-right-wrap {
-      display: flex; align-items: center; gap: 16px;
-      flex-shrink: 0; margin-left: auto;
-    }
-    .prod-price { font-weight: 700; color: #e53935; font-size: 14px; white-space: nowrap; }
-    .prod-actions { display: flex; gap: 4px; flex-shrink: 0; }
-
-    #admin-pagination { display: flex; justify-content: center; gap: 6px; margin-top: 14px; flex-wrap: wrap; }
+    #admin-pagination button { min-width: 34px; min-height: 32px; }
+    #admin-pagination button:disabled { opacity: .35; cursor: not-allowed; }
     .preview-box { margin-top: 12px; padding: 12px; background: #f9fafb; border-radius: 8px; border: 1px dashed #e5e7eb; }
     .preview-box .preview-label { font-size: 12px; color: #6b7280; margin-bottom: 6px; }
 
@@ -209,10 +192,16 @@
       .row-item { padding: 10px 12px; }
       .row-item .row-main { font-size: 12px; }
       
-      /* 모바일에서는 상품 목록 한 줄 배치를 풀고 아래로 내림 */
-      .product-row { flex-wrap: wrap; }
-      .prod-left-wrap { flex: 1 1 100%; }
-      .prod-right-wrap { width: 100%; justify-content: space-between; margin-top: 8px; margin-left: 0; }
+      #product-form { grid-template-columns: repeat(2, minmax(0, 1fr)); overflow: visible; }
+      #product-form textarea { grid-column: 1 / -1; height: 64px; }
+      #product-form button { grid-column: 1 / -1; }
+      .list-controls { align-items: stretch; }
+      .list-search { max-width: none; min-width: 0; width: 100%; }
+      .bulk-actions { justify-content: flex-end; }
+      #admin-list-wrap { padding: 6px; }
+      .product-row { min-width: 700px; }
+      .admin-layout { padding: 10px; }
+      .card { padding: 14px; }
     }
   </style>
 </head>
@@ -776,33 +765,29 @@
         if (p.hem_option && p.hem_option.length) opts.push(`밑단: ${p.hem_option.join(',')}`);
         if (p.other_option && p.other_option.length) opts.push(`기타: ${p.other_option.join(',')}`);
         opts.push(`최소: ${p.min_qty || 1}개`);
-        const detailStr = opts.join(' <span>|</span> ');
+        if (p.detail_images && p.detail_images.length) opts.push(`상세이미지: ${p.detail_images.length}장`);
+        const detailStr = opts.join('  ·  ');
 
         const isChecked = selectedProductIds.has(String(p.id));
 
         // ⭐ 체크박스 + 이미지 + 정보를 하나의 div(prod-left-wrap)로 묶음
         return `
           <div class="product-row">
-            <div class="prod-left-wrap">
-              <input type="checkbox" class="product-check" data-id="${p.id}" ${isChecked ? 'checked' : ''}>
-              <img src="${p.main_image}" alt="">
-              <div class="prod-info">
-                <div class="prod-name-wrap">
-                  <span class="prod-name">${p.name}</span>
-                  ${p.product_code ? `<span class="prod-code">${p.product_code}</span>` : ''}
-                </div>
-                <div class="prod-detail-text">${detailStr}</div>
+            <input type="checkbox" class="product-check" data-id="${p.id}" aria-label="상품 선택" ${isChecked ? 'checked' : ''}>
+            <img src="${p.main_image || ''}" alt="${p.name || '상품 이미지'}" loading="lazy">
+            <div class="prod-info">
+              <div class="prod-name-wrap" title="${p.name || ''}">
+                <span class="prod-name">${p.name || '(상품명 없음)'}</span>
+                ${p.product_code ? `<span class="prod-code" title="제품번호: ${p.product_code}">${p.product_code}</span>` : ''}
               </div>
+              <div class="prod-detail-text" title="${detailStr.replace(/"/g, '&quot;')}">${detailStr || '옵션 정보 없음'}</div>
             </div>
-            
-            <div class="prod-right-wrap">
-              <div class="prod-price">${Number(p.price).toLocaleString()}원</div>
-              <div class="prod-actions">
-                <a href="product.html?id=${p.id}" target="_blank" class="btn btn-secondary btn-sm">보기</a>
-                <button class="btn btn-primary btn-sm edit-btn" data-id="${p.id}">수정</button>
-                <button class="btn btn-success btn-sm copy-btn" data-id="${p.id}">복제</button>
-                <button class="btn btn-danger btn-sm del-btn" data-id="${p.id}">삭제</button>
-              </div>
+            <div class="prod-price">${Number(p.price || 0).toLocaleString()}원</div>
+            <div class="prod-actions">
+              <a href="product.html?id=${p.id}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">보기</a>
+              <button class="btn btn-primary btn-sm edit-btn" data-id="${p.id}">수정</button>
+              <button class="btn btn-success btn-sm copy-btn" data-id="${p.id}">복제</button>
+              <button class="btn btn-danger btn-sm del-btn" data-id="${p.id}">삭제</button>
             </div>
           </div>
         `;
@@ -1007,11 +992,11 @@
       const el = document.getElementById('admin-pagination');
       if (totalPages <= 1) { el.innerHTML = ''; return; }
       let html = '';
-      html += `<button class="btn btn-secondary btn-sm page-nav" data-page="${currentPage-1}" ${currentPage===1?'disabled':''} style="${currentPage===1?'opacity:.4;cursor:not-allowed;':''}">이전</button>`;
+      html += `<button type="button" class="btn btn-secondary btn-sm page-nav" data-page="${currentPage-1}" ${currentPage===1?'disabled':''} aria-label="이전 페이지">← 이전</button>`;
       for (let i = 1; i <= totalPages; i++) {
         html += `<button class="btn btn-sm page-num ${i===currentPage?'btn-primary':'btn-secondary'}" data-page="${i}">${i}</button>`;
       }
-      html += `<button class="btn btn-secondary btn-sm page-nav" data-page="${currentPage+1}" ${currentPage===totalPages?'disabled':''} style="${currentPage===totalPages?'opacity:.4;cursor:not-allowed;':''}">다음</button>`;
+      html += `<button type="button" class="btn btn-secondary btn-sm page-nav" data-page="${currentPage+1}" ${currentPage===totalPages?'disabled':''} aria-label="다음 페이지">다음 →</button>`;
       el.innerHTML = html;
 
       el.querySelectorAll('.page-num, .page-nav').forEach(btn => {
