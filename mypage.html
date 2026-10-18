@@ -20,19 +20,20 @@
       font-weight: 700;
       margin-bottom: 16px;
       color: #222;
-      padding: 0 4px; /* ⭐ 제목도 카드와 라인 맞춤 */
+      padding: 0 4px;
     }
     body.dark .mypage-title { color: #fff; }
     
+    /* ⭐ 폼 바깥 껍데기 (주문내역 카드와 똑같은 디자인) */
     .mypage-form {
-      display: grid;
-      gap: 10px;
       background: #fff;
-      padding: 24px;
+      padding: 20px;
       border-radius: 8px;
+      border: 1px solid #e5e7eb;
       margin-bottom: 32px;
       box-sizing: border-box;
       width: 100%;
+      display: block; /* ⭐ Grid 대신 Block으로 변경하여 넓이 100% 보장 */
     }
     body.dark .mypage-form {
       background: #151515;
@@ -40,7 +41,7 @@
       border-radius: 12px;
     }
 
-    /* ⭐ 2열 배치 그리드 */
+    /* ⭐ 내부 2열 그리드 (이 안에서만 2열 적용) */
     .form-grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -95,9 +96,9 @@
       box-shadow: 0 0 0 3px rgba(255,255,255,.05);
     }
 
-    /* ⭐ 저장 버튼 전체 영역 차지 */
+    /* ⭐ 저장 버튼 */
     .mypage-form button[type="submit"] {
-      grid-column: 1 / -1;
+      width: 100%;
       padding: 14px;
       background: #03c75a;
       color: #fff;
@@ -107,11 +108,11 @@
       font-weight: 600;
       font-size: 15px;
       font-family: inherit;
-      margin-top: 10px;
+      margin-top: 24px; /* 그리드 아래 여백 */
     }
     .mypage-form button[type="submit"]:hover { background: #02b151; }
     
-    #msg { margin-top: 12px; font-weight: 600; text-align: center; margin-bottom: 24px; }
+    #msg { margin-top: -16px; margin-bottom: 24px; font-weight: 600; text-align: center; }
 
     /* ⭐ 주문 내역 스타일 */
     .order-history-title {
@@ -119,7 +120,7 @@
       font-weight: 700;
       margin-bottom: 16px;
       color: #222;
-      padding: 0 4px; /* ⭐ 제목도 카드와 라인 맞춤 */
+      padding: 0 4px;
     }
     body.dark .order-history-title { color: #fff; }
     
@@ -226,48 +227,52 @@
     <div class="mypage-wrap">
       <h2 class="mypage-title">내 정보</h2>
       
-      <!-- ⭐ 2열 그리드 폼 적용 -->
-      <form id="mypage-form" class="mypage-form form-grid-2">
-        <div class="form-group">
-          <label>아이디 (변경 불가)</label>
-          <input name="username" readonly>
+      <!-- ⭐ 폼 껍데기 -->
+      <form id="mypage-form" class="mypage-form">
+        <!-- ⭐ 2열 그리드 내부 래퍼 -->
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label>아이디 (변경 불가)</label>
+            <input name="username" readonly>
+          </div>
+          
+          <div class="form-group">
+            <label>비밀번호</label>
+            <input name="password" type="password" placeholder="변경 시 입력">
+          </div>
+
+          <div class="form-group">
+            <label>이름</label>
+            <input name="name" required>
+          </div>
+
+          <div class="form-group">
+            <label>연락처</label>
+            <input name="phone" type="tel" inputmode="numeric" required>
+          </div>
+
+          <div class="form-group">
+            <label>이메일</label>
+            <input name="email" type="email">
+          </div>
+
+          <div class="form-group">
+            <label>우편번호</label>
+            <input name="postcode">
+          </div>
+
+          <div class="form-group">
+            <label>주소</label>
+            <input name="address">
+          </div>
+
+          <div class="form-group">
+            <label>상세주소</label>
+            <input name="address_detail">
+          </div>
         </div>
         
-        <div class="form-group">
-          <label>비밀번호</label>
-          <input name="password" type="password" placeholder="변경 시 입력">
-        </div>
-
-        <div class="form-group">
-          <label>이름</label>
-          <input name="name" required>
-        </div>
-
-        <div class="form-group">
-          <label>연락처</label>
-          <input name="phone" type="tel" inputmode="numeric" required>
-        </div>
-
-        <div class="form-group">
-          <label>이메일</label>
-          <input name="email" type="email">
-        </div>
-
-        <div class="form-group">
-          <label>우편번호</label>
-          <input name="postcode">
-        </div>
-
-        <div class="form-group">
-          <label>주소</label>
-          <input name="address">
-        </div>
-
-        <div class="form-group">
-          <label>상세주소</label>
-          <input name="address_detail">
-        </div>
-
+        <!-- 저장 버튼은 그리드 밖으로 뺌 -->
         <button type="submit">저장</button>
       </form>
       <p id="msg"></p>
