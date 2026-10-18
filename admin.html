@@ -59,7 +59,8 @@
     .card input[readonly] { background: #f9fafb !important; color: #6b7280 !important; }
     .card textarea { resize: vertical; min-height: 70px; }
 
-    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+    /* ⭐ 상품 등록 폼 가로 배치 (3열) */
+    .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
     .form-grid .full { grid-column: 1 / -1; }
     .form-row { display: flex; gap: 8px; flex-wrap: wrap; }
     .form-row > * { flex: 1; min-width: 150px; }
@@ -80,10 +81,8 @@
     .msg.success { color: #059669; }
     .msg.error { color: #dc2626; }
 
-    /* ⭐ 상품 등록 & 목록 레이아웃 */
-    .product-layout { display: flex; gap: 16px; align-items: flex-start; }
-    .product-left { flex: 0 0 460px; max-width: 100%; }
-    .product-right { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+    /* ⭐ 상품 등록 & 목록 레이아웃 (상하 배치) */
+    .product-layout { display: flex; flex-direction: column; gap: 16px; }
     
     /* ⭐ 상품 목록 컨트롤 (검색/일괄삭제) */
     .list-controls {
@@ -91,7 +90,7 @@
       margin-bottom: 12px; flex-wrap: wrap; gap: 10px;
     }
     .list-search {
-      display: flex; gap: 6px; flex: 1; min-width: 200px;
+      display: flex; gap: 6px; flex: 1; min-width: 200px; max-width: 400px;
     }
     .list-search input { padding: 8px 12px; font-size: 13px; }
     .list-search button { padding: 8px 14px; font-size: 13px; flex-shrink: 0; }
@@ -122,7 +121,7 @@
     
     .prod-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
     .prod-name-wrap { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-    .prod-name { font-size: 14px; font-weight: 600; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px; }
+    .prod-name { font-size: 14px; font-weight: 600; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 400px; }
     .prod-code { font-size: 11px; color: #9ca3af; background: #f3f4f6; padding: 2px 6px; border-radius: 4px; }
     
     .prod-detail-text { font-size: 12px; color: #6b7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -185,9 +184,10 @@
       .admin-sidebar { width: 100%; position: static; }
       .admin-sidebar .nav-group { display: flex; flex-wrap: wrap; gap: 4px; }
       .admin-sidebar .nav-item { flex: 1; min-width: 100px; justify-content: center; }
-      .product-layout { flex-direction: column; }
-      .product-left { flex: 1 1 auto; }
-      #admin-list-wrap { max-height: 500px; }
+      
+      /* ⭐ 모바일에서는 상품 등록 폼을 1열로 */
+      .form-grid { grid-template-columns: 1fr; }
+      
       .row-item { padding: 10px 12px; }
       .row-item .row-main { font-size: 12px; }
       
@@ -237,52 +237,53 @@
           <h1 class="page-title">상품 관리</h1>
           <p class="page-subtitle">상품을 등록하고 목록을 관리합니다</p>
 
+          <!-- ⭐ 상하 배치: 등록 폼 -> 목록 -->
           <div class="product-layout">
-            <div class="product-left">
-              <div class="card" id="product-register-card">
-                <div class="card-title">📝 새 상품 등록</div>
-                <form id="product-form" class="form-grid">
-                  <input name="product_code" placeholder="제품번호">
-                  <input name="name" placeholder="상품명" required>
-                  <input name="price" type="number" placeholder="가격" required>
-                  <input name="main_image" placeholder="메인 이미지 URL" required>
-                  <input name="colors" placeholder="색상 (쉼표)">
-                  <input name="sizes" placeholder="사이즈 (쉼표)">
-                  <input name="hem_option" placeholder="밑단선택 (쉼표)">
-                  <input name="other_option" placeholder="기타옵션 (쉼표)">
-                  <input name="min_qty" type="number" min="1" value="1" placeholder="최소 주문수량 (기본 1)">
-                  <textarea name="detail_images" class="full" placeholder="상세 이미지 URL (줄바꿈)"></textarea>
-                  <button type="submit" class="btn btn-primary full">상품 등록</button>
-                </form>
-                <p id="msg" class="msg"></p>
-              </div>
+            
+            <!-- 1. 새 상품 등록 카드 (가로 배치) -->
+            <div class="card" id="product-register-card">
+              <div class="card-title">📝 새 상품 등록</div>
+              <form id="product-form" class="form-grid">
+                <input name="product_code" placeholder="제품번호">
+                <input name="name" placeholder="상품명" required>
+                <input name="price" type="number" placeholder="가격" required>
+                <input name="main_image" placeholder="메인 이미지 URL" required>
+                <input name="colors" placeholder="색상 (쉼표)">
+                <input name="sizes" placeholder="사이즈 (쉼표)">
+                <input name="hem_option" placeholder="밑단선택 (쉼표)">
+                <input name="other_option" placeholder="기타옵션 (쉼표)">
+                <input name="min_qty" type="number" min="1" value="1" placeholder="최소 주문수량 (기본 1)">
+                <textarea name="detail_images" class="full" placeholder="상세 이미지 URL (줄바꿈)"></textarea>
+                <button type="submit" class="btn btn-primary full">상품 등록</button>
+              </form>
+              <p id="msg" class="msg"></p>
             </div>
 
-            <div class="product-right">
-              <div class="card" style="display:flex; flex-direction:column; margin-bottom:0;">
-                <div class="card-title">📋 등록된 상품 <span id="product-count" class="hint"></span></div>
-                
-                <!-- ⭐ 검색 및 일괄 액션 컨트롤 -->
-                <div class="list-controls">
-                  <div class="list-search">
-                    <input id="product-search" placeholder="상품명 / 제품번호 검색">
-                    <button id="product-search-btn" class="btn btn-primary">검색</button>
-                    <button id="product-reset-btn" class="btn btn-secondary">전체</button>
-                  </div>
-                  <div class="bulk-actions">
-                    <label>
-                      <input type="checkbox" id="check-all-products"> 전체 선택
-                    </label>
-                    <button type="button" id="bulk-del-btn" class="btn-bulk-del">선택 삭제</button>
-                  </div>
+            <!-- 2. 등록된 상품 목록 카드 -->
+            <div class="card" style="display:flex; flex-direction:column; margin-bottom:0;">
+              <div class="card-title">📋 등록된 상품 <span id="product-count" class="hint"></span></div>
+              
+              <!-- ⭐ 검색 및 일괄 액션 컨트롤 -->
+              <div class="list-controls">
+                <div class="list-search">
+                  <input id="product-search" placeholder="상품명 / 제품번호 검색">
+                  <button id="product-search-btn" class="btn btn-primary">검색</button>
+                  <button id="product-reset-btn" class="btn btn-secondary">전체</button>
                 </div>
-
-                <div id="admin-list-wrap">
-                  <div id="admin-list">로딩중...</div>
+                <div class="bulk-actions">
+                  <label>
+                    <input type="checkbox" id="check-all-products"> 전체 선택
+                  </label>
+                  <button type="button" id="bulk-del-btn" class="btn-bulk-del">선택 삭제</button>
                 </div>
-                <div id="admin-pagination"></div>
               </div>
+
+              <div id="admin-list-wrap">
+                <div id="admin-list">로딩중...</div>
+              </div>
+              <div id="admin-pagination"></div>
             </div>
+            
           </div>
         </section>
 
@@ -401,25 +402,9 @@
     const loginForm = document.getElementById('login-form');
     const loginMsg = document.getElementById('login-msg');
 
-    function matchCardHeights() {
-      const layout = document.querySelector('.product-layout');
-      if (!layout) return;
-      if (window.innerWidth <= 1000) {
-        document.getElementById('admin-list-wrap').style.maxHeight = '500px';
-        return;
-      }
-      const leftCard = document.getElementById('product-register-card');
-      const rightWrap = document.getElementById('admin-list-wrap');
-      const pag = document.getElementById('admin-pagination');
-      const leftHeight = leftCard.offsetHeight;
-      const rightCard = rightWrap.parentElement;
-      const title = rightCard.querySelector('.card-title').offsetHeight;
-      const controls = rightCard.querySelector('.list-controls').offsetHeight;
-      const pagHeight = pag.offsetHeight;
-      const available = leftHeight - title - controls - pagHeight - 80;
-      rightWrap.style.maxHeight = Math.max(available, 200) + 'px';
-    }
-    window.addEventListener('resize', matchCardHeights);
+    // 레이아웃이 상하로 변경되었으므로 matchCardHeights 함수는 필요 없어졌지만,
+    // 혹시 모를 오류 방지를 위해 빈 함수로 둡니다.
+    function matchCardHeights() {}
 
     document.querySelectorAll('.admin-sidebar .nav-item').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -1004,7 +989,7 @@
     // 페이지네이션
     function renderPagination(totalPages) {
       const el = document.getElementById('admin-pagination');
-      if (totalPages <= 1) { el.innerHTML = ''; setTimeout(matchCardHeights, 20); return; }
+      if (totalPages <= 1) { el.innerHTML = ''; return; }
       let html = '';
       html += `<button class="btn btn-secondary btn-sm page-nav" data-page="${currentPage-1}" ${currentPage===1?'disabled':''} style="${currentPage===1?'opacity:.4;cursor:not-allowed;':''}">이전</button>`;
       for (let i = 1; i <= totalPages; i++) {
@@ -1021,7 +1006,6 @@
           document.getElementById('admin-list-wrap').scrollTop = 0;
         });
       });
-      setTimeout(matchCardHeights, 20);
     }
 
     // ===== ⭐ 주문 관리 =====
