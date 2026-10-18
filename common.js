@@ -23,12 +23,13 @@ if (_isDark) {
       margin: 0;
       overflow-x: hidden;
       width: 100%;
-      /* ⭐ fixed 헤더에 콘텐츠가 가려지지 않도록 상단 여백 확보 (헤더 높이에 맞춤) */
+      /* ⭐ fixed 헤더에 콘텐츠가 가려지지 않도록 상단 여백 확보 (PC 기준) */
       padding-top: 135px !important; 
     }
+    /* ⭐ 모바일 환경에서는 헤더 영역이 줄바꿈 등으로 높이가 변할 수 있으므로 여백을 더 넉넉하게 줍니다. */
     @media (max-width: 768px) {
       body {
-        padding-top: 125px !important; /* 모바일은 헤더 높이가 약간 다를 수 있음 */
+        padding-top: 155px !important; 
       }
     }
 
@@ -39,7 +40,7 @@ if (_isDark) {
       left: 0 !important;
       width: 100% !important;
       z-index: 99999 !important;
-      background: #fff; /* 헤더 배경색 (다크모드 대응은 아래에서) */
+      background: #fff;
     }
     body.dark #app-header {
       background: #0f0f0f;
@@ -330,7 +331,7 @@ function renderHeader(current) {
   const m = member ? JSON.parse(member) : null;
   const cached = getCachedLogo();
   const logoImageUrl = cached.image_url || '';
-  // 사이트명 기본값 변경
+  // 사이트명 기본값
   const siteName = cached.site_name || '스타킹스토리 심플라이프';
 
   const btnStyle = (active) => `
@@ -360,7 +361,6 @@ function renderHeader(current) {
     ? `<a href="index.html" style="display:inline-block;"><img src="${logoImageUrl}" alt="${siteName}" style="height:40px; max-width:240px; object-fit:contain; display:block; margin:0 auto;"></a>`
     : `<a href="index.html" style="font-size:22px; font-weight:700; color:${theme.logoColor}; text-decoration:none; display:inline-block;">${siteName}</a>`;
 
-  // ⭐ 스크롤 시 밑에 내용이 비치지 않도록 배경색과 테두리/그림자를 확실하게 줍니다.
   wrap.innerHTML = `
     <header style="background:${theme.headerBg}; border-bottom:1px solid ${theme.borderColor}; padding:14px 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.08);">
       <div style="max-width:1400px; margin:0 auto;">
