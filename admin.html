@@ -80,35 +80,84 @@
     .msg.success { color: #059669; }
     .msg.error { color: #dc2626; }
 
-    /* 상품 등록 & 목록 */
+    /* ⭐ 상품 등록 & 목록 레이아웃 */
     .product-layout { display: flex; gap: 16px; align-items: flex-start; }
     .product-left { flex: 0 0 460px; max-width: 100%; }
     .product-right { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+    
+    /* ⭐ 상품 목록 컨트롤 (검색/일괄삭제) */
+    .list-controls {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 12px; flex-wrap: wrap; gap: 10px;
+    }
+    .list-search {
+      display: flex; gap: 6px; flex: 1; min-width: 200px;
+    }
+    .list-search input { padding: 8px 12px; font-size: 13px; }
+    .list-search button { padding: 8px 14px; font-size: 13px; flex-shrink: 0; }
+    
+    .bulk-actions { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+    .bulk-actions label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600; color: #374151; }
+    .bulk-actions input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #111827; }
+    
+    .btn-bulk-del {
+      padding: 8px 12px; background: #dc2626; color: #fff; border: 0; border-radius: 6px;
+      font-size: 12px; font-weight: 600; cursor: pointer; opacity: 0.5; pointer-events: none;
+    }
+    .btn-bulk-del.active { opacity: 1; pointer-events: auto; }
+
     #admin-list-wrap { background: #f9fafb; border-radius: 8px; padding: 12px; flex: 1; overflow-y: auto; }
-    #admin-list { display: grid; grid-template-columns: 1fr; gap: 8px; }
+    #admin-list { display: flex; flex-direction: column; gap: 8px; }
 
-    .product-item { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
-    .product-summary { padding: 12px; display: flex; align-items: center; gap: 12px; cursor: pointer; }
-    .product-summary img { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; background: #f3f4f6; border: 1px solid #e5e7eb; }
-    .product-summary .info { flex: 1; min-width: 0; }
-    .product-summary .name { font-size: 14px; font-weight: 600; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .product-summary .price { color: #e53935; font-weight: 700; font-size: 13px; margin-top: 2px; }
-    .product-arrow { color: #9ca3af; font-size: 12px; }
-    .product-detail { display: none; padding: 12px; font-size: 13px; line-height: 1.7; color: #4b5563; border-top: 1px solid #e5e7eb; background: #fff; }
-    .product-detail .line { padding-top: 4px; }
-    .product-detail .label { color: #9ca3af; margin-right: 4px; }
-    .product-detail .actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 12px; }
+    /* ⭐ 상품 한 줄(Row) 아이템 */
+    .product-row {
+      background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
+      padding: 10px 14px; display: flex; align-items: center; gap: 12px;
+      font-size: 13px; color: #374151;
+    }
+    .product-row:hover { border-color: #d1d5db; }
+    
+    .product-check { width: 18px; height: 18px; cursor: pointer; accent-color: #111827; flex-shrink: 0; }
+    .product-row img { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; background: #f3f4f6; border: 1px solid #e5e7eb; flex-shrink: 0; }
+    
+    .prod-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+    .prod-name-wrap { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .prod-name { font-size: 14px; font-weight: 600; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px; }
+    .prod-code { font-size: 11px; color: #9ca3af; background: #f3f4f6; padding: 2px 6px; border-radius: 4px; }
+    
+    .prod-detail-text { font-size: 12px; color: #6b7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .prod-detail-text span { color: #d1d5db; margin: 0 4px; }
+    
+    .prod-price { font-weight: 700; color: #e53935; font-size: 14px; white-space: nowrap; margin-left: auto; padding: 0 12px; }
+    
+    .prod-actions { display: flex; gap: 4px; flex-shrink: 0; }
 
-    /* ⭐ 주문/회원 - 한 줄(row) 컴팩트 레이아웃 */
+    #admin-pagination { display: flex; justify-content: center; gap: 6px; margin-top: 14px; flex-wrap: wrap; }
+    .preview-box { margin-top: 12px; padding: 12px; background: #f9fafb; border-radius: 8px; border: 1px dashed #e5e7eb; }
+    .preview-box .preview-label { font-size: 12px; color: #6b7280; margin-bottom: 6px; }
+
+    .login-wrap { max-width: 380px; margin: 80px auto; background: #fff; padding: 32px; border-radius: 12px; border: 1px solid #e5e7eb; }
+    .login-wrap h2 { font-size: 22px; font-weight: 700; color: #111827; margin: 0 0 6px; }
+    .login-wrap p.sub { font-size: 13px; color: #6b7280; margin: 0 0 24px; }
+    .login-wrap form { display: grid; gap: 10px; }
+    .login-wrap input {
+      padding: 12px 14px; border: 1px solid #e5e7eb; border-radius: 8px;
+      font-size: 14px; font-family: inherit; width: 100%; box-sizing: border-box;
+      background: #fff !important; color: #111827 !important;
+    }
+    .login-wrap button {
+      padding: 12px; background: #111827; color: #fff; border: 0; border-radius: 8px;
+      cursor: pointer; font-size: 14px; font-weight: 600; font-family: inherit;
+    }
+
+    /* 주문/회원 컴팩트 레이아웃 */
     .row-list { display: flex; flex-direction: column; gap: 8px; }
     .row-item {
       background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
       padding: 12px 14px; display: flex; align-items: center; gap: 12px;
       flex-wrap: wrap; font-size: 13px; color: #374151;
     }
-    .row-item .row-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .row-item .row-actions { display: flex; gap: 6px; flex-shrink: 0; margin-left: auto; }
-
     .badge { padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; color: #fff; white-space: nowrap; }
     .order-num { color: #1976d2; font-weight: 700; font-size: 13px; white-space: nowrap; }
     .row-strong { font-weight: 600; color: #111827; }
@@ -131,24 +180,6 @@
     .modal-box .modal-actions { display: flex; gap: 8px; margin-top: 10px; }
     .modal-box .modal-actions > * { flex: 1; }
 
-    #admin-pagination { display: flex; justify-content: center; gap: 6px; margin-top: 14px; flex-wrap: wrap; }
-    .preview-box { margin-top: 12px; padding: 12px; background: #f9fafb; border-radius: 8px; border: 1px dashed #e5e7eb; }
-    .preview-box .preview-label { font-size: 12px; color: #6b7280; margin-bottom: 6px; }
-
-    .login-wrap { max-width: 380px; margin: 80px auto; background: #fff; padding: 32px; border-radius: 12px; border: 1px solid #e5e7eb; }
-    .login-wrap h2 { font-size: 22px; font-weight: 700; color: #111827; margin: 0 0 6px; }
-    .login-wrap p.sub { font-size: 13px; color: #6b7280; margin: 0 0 24px; }
-    .login-wrap form { display: grid; gap: 10px; }
-    .login-wrap input {
-      padding: 12px 14px; border: 1px solid #e5e7eb; border-radius: 8px;
-      font-size: 14px; font-family: inherit; width: 100%; box-sizing: border-box;
-      background: #fff !important; color: #111827 !important;
-    }
-    .login-wrap button {
-      padding: 12px; background: #111827; color: #fff; border: 0; border-radius: 8px;
-      cursor: pointer; font-size: 14px; font-weight: 600; font-family: inherit;
-    }
-
     @media (max-width: 1000px) {
       .admin-layout { flex-direction: column; padding: 16px; }
       .admin-sidebar { width: 100%; position: static; }
@@ -159,6 +190,11 @@
       #admin-list-wrap { max-height: 500px; }
       .row-item { padding: 10px 12px; }
       .row-item .row-main { font-size: 12px; }
+      
+      .product-row { flex-wrap: wrap; }
+      .prod-info { flex: 1 1 100%; order: 3; }
+      .prod-price { order: 4; margin-left: 0; padding: 0; }
+      .prod-actions { order: 5; width: 100%; justify-content: flex-end; margin-top: 4px; }
     }
   </style>
 </head>
@@ -225,6 +261,22 @@
             <div class="product-right">
               <div class="card" style="display:flex; flex-direction:column; margin-bottom:0;">
                 <div class="card-title">📋 등록된 상품 <span id="product-count" class="hint"></span></div>
+                
+                <!-- ⭐ 검색 및 일괄 액션 컨트롤 -->
+                <div class="list-controls">
+                  <div class="list-search">
+                    <input id="product-search" placeholder="상품명 / 제품번호 검색">
+                    <button id="product-search-btn" class="btn btn-primary">검색</button>
+                    <button id="product-reset-btn" class="btn btn-secondary">전체</button>
+                  </div>
+                  <div class="bulk-actions">
+                    <label>
+                      <input type="checkbox" id="check-all-products"> 전체 선택
+                    </label>
+                    <button type="button" id="bulk-del-btn" class="btn-bulk-del">선택 삭제</button>
+                  </div>
+                </div>
+
                 <div id="admin-list-wrap">
                   <div id="admin-list">로딩중...</div>
                 </div>
@@ -362,8 +414,9 @@
       const leftHeight = leftCard.offsetHeight;
       const rightCard = rightWrap.parentElement;
       const title = rightCard.querySelector('.card-title').offsetHeight;
+      const controls = rightCard.querySelector('.list-controls').offsetHeight;
       const pagHeight = pag.offsetHeight;
-      const available = leftHeight - title - pagHeight - 60;
+      const available = leftHeight - title - controls - pagHeight - 80;
       rightWrap.style.maxHeight = Math.max(available, 200) + 'px';
     }
     window.addEventListener('resize', matchCardHeights);
@@ -672,79 +725,115 @@
       }
     });
 
-    // ===== 상품 목록 =====
+    // ===== 상품 목록 (⭐ 한 줄 레이아웃 + 검색/선택/수정) =====
     let allProducts = [];
+    let filteredProducts = [];
     let currentPage = 1;
     const PER_PAGE = 10;
     const MAX_PAGES = 10;
+    let selectedProductIds = new Set();
 
     async function loadAdminList() {
       const { data, error } = await db.from('products').select('*').order('created_at', { ascending: false });
       if (error) { listEl.innerHTML = '<p>불러오기 실패</p>'; return; }
-      if (!data || data.length === 0) {
-        listEl.innerHTML = '<p style="text-align:center; color:#9ca3af; padding:20px;">등록된 상품이 없습니다</p>';
-        document.getElementById('admin-pagination').innerHTML = '';
-        document.getElementById('product-count').textContent = '';
-        return;
+      
+      allProducts = data || [];
+      document.getElementById('product-count').textContent = `총 ${allProducts.length}개`;
+      
+      const searchText = document.getElementById('product-search').value.trim();
+      applySearch(searchText);
+    }
+
+    function applySearch(text) {
+      if (!text) {
+        filteredProducts = allProducts;
+      } else {
+        const f = text.toLowerCase();
+        filteredProducts = allProducts.filter(p =>
+          (p.name && p.name.toLowerCase().includes(f)) ||
+          (p.product_code && p.product_code.toLowerCase().includes(f))
+        );
       }
-      allProducts = data;
       currentPage = 1;
-      document.getElementById('product-count').textContent = `총 ${data.length}개`;
+      selectedProductIds.clear();
       renderProducts();
-      setTimeout(matchCardHeights, 50);
     }
 
     function renderProducts() {
-      const totalPages = Math.min(Math.ceil(allProducts.length / PER_PAGE), MAX_PAGES);
+      const totalPages = Math.min(Math.ceil(filteredProducts.length / PER_PAGE), MAX_PAGES);
       const start = (currentPage - 1) * PER_PAGE;
-      const items = allProducts.slice(start, start + PER_PAGE);
+      const items = filteredProducts.slice(start, start + PER_PAGE);
 
-      listEl.innerHTML = items.map(p => `
-        <div class="product-item">
-          <div class="product-summary">
+      if (filteredProducts.length === 0) {
+        listEl.innerHTML = '<p style="text-align:center; color:#9ca3af; padding:20px;">조건에 맞는 상품이 없습니다</p>';
+        document.getElementById('admin-pagination').innerHTML = '';
+        updateBulkBtn();
+        return;
+      }
+
+      listEl.innerHTML = items.map(p => {
+        const opts = [];
+        if (p.colors && p.colors.length) opts.push(`색상: ${p.colors.join(',')}`);
+        if (p.sizes && p.sizes.length) opts.push(`사이즈: ${p.sizes.join(',')}`);
+        if (p.hem_option && p.hem_option.length) opts.push(`밑단: ${p.hem_option.join(',')}`);
+        if (p.other_option && p.other_option.length) opts.push(`기타: ${p.other_option.join(',')}`);
+        opts.push(`최소: ${p.min_qty || 1}개`);
+        const detailStr = opts.join(' <span>|</span> ');
+
+        const isChecked = selectedProductIds.has(String(p.id));
+
+        return `
+          <div class="product-row">
+            <input type="checkbox" class="product-check" data-id="${p.id}" ${isChecked ? 'checked' : ''}>
             <img src="${p.main_image}" alt="">
-            <div class="info">
-              <div class="name">${p.name}</div>
-              <div class="price">${Number(p.price).toLocaleString()}원</div>
+            
+            <div class="prod-info">
+              <div class="prod-name-wrap">
+                <span class="prod-name">${p.name}</span>
+                ${p.product_code ? `<span class="prod-code">${p.product_code}</span>` : ''}
+              </div>
+              <div class="prod-detail-text">${detailStr}</div>
             </div>
-            <span class="product-arrow">▼</span>
-          </div>
-          <div class="product-detail">
-            <div class="line">
-              ${p.product_code ? `<div><span class="label">제품번호</span>${p.product_code}</div>` : ''}
-              ${(p.colors && p.colors.length) ? `<div><span class="label">색상</span>${p.colors.join(', ')}</div>` : ''}
-              ${(p.sizes && p.sizes.length) ? `<div><span class="label">사이즈</span>${p.sizes.join(', ')}</div>` : ''}
-              ${(p.hem_option && p.hem_option.length) ? `<div><span class="label">밑단</span>${p.hem_option.join(', ')}</div>` : ''}
-              ${(p.other_option && p.other_option.length) ? `<div><span class="label">기타</span>${p.other_option.join(', ')}</div>` : ''}
-              <div><span class="label">최소주문수량</span>${p.min_qty || 1}개</div>
-            </div>
-            <div class="actions">
+            
+            <div class="prod-price">${Number(p.price).toLocaleString()}원</div>
+            
+            <div class="prod-actions">
               <a href="product.html?id=${p.id}" target="_blank" class="btn btn-secondary btn-sm">보기</a>
-              <a href="edit.html?id=${p.id}" class="btn btn-primary btn-sm">수정</a>
-              <button class="copy-btn btn btn-success btn-sm" data-id="${p.id}">복사</button>
-              <button class="del-btn btn btn-danger btn-sm" data-id="${p.id}">삭제</button>
+              <button class="btn btn-primary btn-sm edit-btn" data-id="${p.id}">수정</button>
+              <button class="btn btn-success btn-sm copy-btn" data-id="${p.id}">복제</button>
+              <button class="btn btn-danger btn-sm del-btn" data-id="${p.id}">삭제</button>
             </div>
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
 
-      listEl.querySelectorAll('.product-summary').forEach(sum => {
-        sum.addEventListener('click', () => {
-          const detail = sum.nextElementSibling;
-          const arrow = sum.querySelector('.product-arrow');
-          if (detail.style.display === 'none' || !detail.style.display) {
-            detail.style.display = 'block';
-            arrow.style.transform = 'rotate(180deg)';
-          } else {
-            detail.style.display = 'none';
-            arrow.style.transform = 'rotate(0deg)';
-          }
+      bindProductEvents();
+      renderPagination(totalPages);
+      updateBulkBtn();
+    }
+
+    function bindProductEvents() {
+      // 체크박스
+      listEl.querySelectorAll('.product-check').forEach(cb => {
+        cb.addEventListener('change', () => {
+          const id = String(cb.dataset.id);
+          if (cb.checked) selectedProductIds.add(id);
+          else selectedProductIds.delete(id);
+          updateBulkBtn();
         });
       });
 
+      // 수정 버튼 (팝업)
+      listEl.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const p = allProducts.find(x => String(x.id) === String(btn.dataset.id));
+          if (p) showProductEditModal(p);
+        });
+      });
+
+      // 복제 버튼
       listEl.querySelectorAll('.copy-btn').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-          e.stopPropagation();
+        btn.addEventListener('click', async () => {
           const p = allProducts.find(x => String(x.id) === String(btn.dataset.id));
           if (!p) return;
           if (!confirm(`"${p.name}" 을 복사해서 새로 등록할까요?`)) return;
@@ -761,24 +850,158 @@
           });
           if (error) {
             alert('❌ 복사 실패: ' + error.message);
-            btn.disabled = false; btn.textContent = '복사';
+            btn.disabled = false; btn.textContent = '복제';
           } else loadAdminList();
         });
       });
 
+      // 단독 삭제 버튼
       listEl.querySelectorAll('.del-btn').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-          e.stopPropagation();
+        btn.addEventListener('click', async () => {
           if (!confirm('정말 삭제할까요?')) return;
           const { error } = await db.from('products').delete().eq('id', btn.dataset.id);
           if (error) alert('삭제 실패: ' + error.message);
-          else loadAdminList();
+          else {
+            selectedProductIds.delete(String(btn.dataset.id));
+            loadAdminList();
+          }
         });
       });
-
-      renderPagination(totalPages);
     }
 
+    // ⭐ 상품 수정 팝업 모달
+    function showProductEditModal(p) {
+      const modal = document.createElement('div');
+      modal.className = 'modal-backdrop';
+      modal.innerHTML = `
+        <div class="modal-box" style="max-width: 600px;">
+          <h2>상품 수정</h2>
+          <form id="product-edit-form" class="modal-form form-grid" style="grid-template-columns: 1fr 1fr;">
+            <input name="product_code" placeholder="제품번호" value="${p.product_code || ''}">
+            <input name="name" placeholder="상품명" value="${p.name}" required>
+            <input name="price" type="number" placeholder="가격" value="${p.price}" required>
+            <input name="main_image" placeholder="메인 이미지 URL" value="${p.main_image}" required>
+            <input name="colors" placeholder="색상 (쉼표)" value="${(p.colors || []).join(',')}">
+            <input name="sizes" placeholder="사이즈 (쉼표)" value="${(p.sizes || []).join(',')}">
+            <input name="hem_option" placeholder="밑단선택 (쉼표)" value="${(p.hem_option || []).join(',')}">
+            <input name="other_option" placeholder="기타옵션 (쉼표)" value="${(p.other_option || []).join(',')}">
+            <input name="min_qty" type="number" min="1" placeholder="최소 주문수량" value="${p.min_qty || 1}">
+            <textarea name="detail_images" class="full" placeholder="상세 이미지 URL (줄바꿈)" style="grid-column: 1 / -1;">${(p.detail_images || []).join('\n')}</textarea>
+            
+            <div class="modal-actions" style="grid-column: 1 / -1;">
+              <button type="submit" class="btn btn-primary">수정 완료</button>
+              <button type="button" id="cancel-edit" class="btn btn-secondary">취소</button>
+            </div>
+          </form>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      modal.querySelector('#cancel-edit').onclick = () => modal.remove();
+
+      modal.querySelector('#product-edit-form').addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        const f = ev.target;
+        const detail_images = f.detail_images.value.split('\n').map(s => s.trim()).filter(Boolean);
+        
+        const submitBtn = f.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = '저장 중...';
+
+        const { error } = await db.from('products').update({
+          product_code: f.product_code.value.trim() || null,
+          name: f.name.value.trim(),
+          price: Number(f.price.value),
+          main_image: f.main_image.value.trim(),
+          detail_images,
+          colors: parseList(f.colors.value),
+          sizes: parseList(f.sizes.value),
+          hem_option: parseList(f.hem_option.value),
+          other_option: parseList(f.other_option.value),
+          min_qty: Number(f.min_qty.value) || 1,
+        }).eq('id', p.id);
+
+        if (error) {
+          alert('❌ 수정 실패: ' + error.message);
+          submitBtn.disabled = false;
+          submitBtn.textContent = '수정 완료';
+        } else {
+          alert('✅ 수정 완료!');
+          modal.remove();
+          loadAdminList();
+        }
+      });
+    }
+
+    // ⭐ 일괄 삭제 / 전체 선택 로직
+    const checkAllProducts = document.getElementById('check-all-products');
+    const bulkDelBtn = document.getElementById('bulk-del-btn');
+
+    function updateBulkBtn() {
+      if (selectedProductIds.size > 0) {
+        bulkDelBtn.classList.add('active');
+        bulkDelBtn.textContent = `선택 삭제 (${selectedProductIds.size})`;
+      } else {
+        bulkDelBtn.classList.remove('active');
+        bulkDelBtn.textContent = '선택 삭제';
+      }
+
+      // 현재 페이지의 모든 아이템이 선택되었는지 확인
+      const checkboxes = listEl.querySelectorAll('.product-check');
+      if (checkboxes.length === 0) {
+        checkAllProducts.checked = false;
+        checkAllProducts.disabled = true;
+      } else {
+        checkAllProducts.disabled = false;
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        checkAllProducts.checked = allChecked;
+      }
+    }
+
+    checkAllProducts.addEventListener('change', () => {
+      const checkboxes = listEl.querySelectorAll('.product-check');
+      checkboxes.forEach(cb => {
+        cb.checked = checkAllProducts.checked;
+        const id = String(cb.dataset.id);
+        if (checkAllProducts.checked) selectedProductIds.add(id);
+        else selectedProductIds.delete(id);
+      });
+      updateBulkBtn();
+    });
+
+    bulkDelBtn.addEventListener('click', async () => {
+      if (selectedProductIds.size === 0) return;
+      if (!confirm(`선택한 ${selectedProductIds.size}개의 상품을 삭제할까요?`)) return;
+
+      bulkDelBtn.disabled = true;
+      bulkDelBtn.textContent = '삭제 중...';
+
+      const ids = Array.from(selectedProductIds);
+      const { error } = await db.from('products').delete().in('id', ids);
+
+      bulkDelBtn.disabled = false;
+
+      if (error) {
+        alert('❌ 삭제 실패: ' + error.message);
+      } else {
+        alert('✅ 선택한 상품이 삭제되었습니다.');
+        selectedProductIds.clear();
+        loadAdminList();
+      }
+    });
+
+    // 검색 이벤트
+    document.getElementById('product-search-btn').addEventListener('click', () => {
+      applySearch(document.getElementById('product-search').value.trim());
+    });
+    document.getElementById('product-reset-btn').addEventListener('click', () => {
+      document.getElementById('product-search').value = '';
+      applySearch('');
+    });
+    document.getElementById('product-search').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') document.getElementById('product-search-btn').click();
+    });
+
+    // 페이지네이션
     function renderPagination(totalPages) {
       const el = document.getElementById('admin-pagination');
       if (totalPages <= 1) { el.innerHTML = ''; setTimeout(matchCardHeights, 20); return; }
@@ -801,7 +1024,7 @@
       setTimeout(matchCardHeights, 20);
     }
 
-    // ===== ⭐ 주문 관리 (한 줄 보기 + 전체 수정/삭제) =====
+    // ===== ⭐ 주문 관리 =====
     let allOrdersRaw = [];
 
     async function loadOrders(filterText) {
@@ -811,7 +1034,6 @@
       if (error) { el.innerHTML = '<p style="color:#dc2626;">' + error.message + '</p>'; return; }
       allOrdersRaw = data || [];
 
-      // 주문번호 기준 그룹화 (주문번호가 없으면 고유 id로 그룹화)
       const groups = {};
       allOrdersRaw.forEach(o => {
         const key = o.order_number || `single_${o.id}`;
@@ -821,7 +1043,6 @@
 
       let entries = Object.entries(groups);
 
-      // 검색 필터
       if (filterText) {
         const f = filterText.toLowerCase();
         entries = entries.filter(([num, items]) => {
@@ -844,8 +1065,8 @@
 
       el.innerHTML = entries.map(([key, items]) => {
         const first = items[0];
-        const realOrderNum = first.order_number; // 실제 주문번호 (null일 수 있음)
-        const displayNum = realOrderNum || `(주문번호 없음)`; // 화면 표시용
+        const realOrderNum = first.order_number;
+        const displayNum = realOrderNum || `(주문번호 없음)`;
         const totalAll = items.reduce((s, o) => s + Number(o.total_price || 0), 0);
         const totalQty = items.reduce((s, o) => s + Number(o.quantity || 0), 0);
         const dateStr = new Date(first.created_at).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' }).replace('. ', '/').replace('.', '');
@@ -889,10 +1110,8 @@
           
           let error;
           if (first.order_number) {
-            // 주문번호가 있으면 주문번호로 전체 삭제
             ({ error } = await db.from('orders').delete().eq('order_number', first.order_number));
           } else {
-            // 주문번호가 없으면 해당 단일 ID로만 삭제
             ({ error } = await db.from('orders').delete().eq('id', first.id));
           }
 
@@ -906,7 +1125,6 @@
       return { '입금대기':'#f59e0b', '입금완료':'#059669', '배송중':'#1976d2', '완료':'#6b7280', '취소':'#dc2626' }[s] || '#9ca3af';
     }
 
-    // ⭐ 주문 전체 수정 모달 (ID 기반 수정으로 변경)
     function showOrderEditModal(key, items) {
       const first = items[0];
       const realOrderNum = first.order_number;
@@ -984,10 +1202,8 @@
         
         let error;
         if (realOrderNum) {
-          // 주문번호가 있으면 주문번호 기준 전체 업데이트
           ({ error } = await db.from('orders').update(updates).eq('order_number', realOrderNum));
         } else {
-          // 주문번호가 없으면 단일 ID 기준 업데이트
           ({ error } = await db.from('orders').update(updates).eq('id', first.id));
         }
 
@@ -1010,7 +1226,7 @@
       if (e.key === 'Enter') document.getElementById('order-search-btn').click();
     });
 
-    // ===== ⭐ 회원 관리 (한 줄 보기 + 전체 수정/삭제) =====
+    // ===== ⭐ 회원 관리 =====
     let allMembers = [];
 
     async function loadMembers(filterText) {
@@ -1087,7 +1303,6 @@
       if (e.key === 'Enter') document.getElementById('member-search-btn').click();
     });
 
-    // ⭐ 회원 전체 정보 수정 모달
     function showMemberEditModal(m) {
       const modal = document.createElement('div');
       modal.className = 'modal-backdrop';
