@@ -10,38 +10,60 @@ if (_isDark) {
   document.documentElement.style.background = '#0a0a0a';
 }
 
-// 이미지 복사 방지 + 스크롤바 강제 고정 + ⭐ 반응형 헤더/하단바 고정
+// 이미지 복사 방지 + 스크롤바 강제 고정 + ⭐ 헤더 상단 고정 및 본문 스크롤 분리
 (function() {
   const style = document.createElement('style');
   style.textContent = `
-    /* ⭐ 스크롤바 강제로 항상 표시 */
-    html { 
-      overflow-y: scroll !important; 
-      overflow-x: hidden !important;
-    }
-    body {
+    /* ⭐ [핵심] 전체 body 스크롤을 막고, 헤더 아래 영역에서만 스크롤 발생하게 설정 */
+    html, body {
       margin: 0;
-      overflow-x: hidden;
+      padding: 0;
+      height: 100% !important;
+      overflow: hidden !important; /* body 스크롤 방지 */
       width: 100%;
-      /* PC 기준 상단 헤더 여백 */
-      padding-top: 160px !important; 
-      padding-bottom: 20px;
+      -webkit-text-size-adjust: 100%;
     }
 
-    /* ⭐ [PC] 상단 헤더 영역 고정 */
+    /* ⭐ 헤더와 본문을 감싸는 레이아웃 컨테이너 */
+    .site-wrapper {
+      display: flex;
+      flex-direction: column;
+      height: 100vh; /* 화면 전체 높이 */
+      width: 100%;
+    }
+
+    /* ⭐ [PC] 상단 헤더 영역 (고정) */
     #app-header {
-      position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-      width: 100% !important;
-      z-index: 99999 !important;
+      flex-shrink: 0;
+      position: relative; /* flex 레이아웃 내에서 고정 */
+      z-index: 99999;
       background: #fff;
+      width: 100%;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05); /* 스크롤 영역과 분리감 */
     }
     body.dark #app-header {
       background: #0f0f0f;
     }
 
-    /* ⭐ [PC] 네비게이션 정렬 */
+    /* ⭐ [핵심] 헤더 아래 본문 영역만 스크롤되도록 설정 */
+    .site-main-scroll {
+      flex: 1; /* 남은 공간 모두 차지 */
+      overflow-y: auto; /* 세로 스크롤 */
+      overflow-x: hidden;
+      width: 100%;
+      position: relative;
+      -webkit-overflow-scrolling: touch; /* 모바일 부드러운 스크롤 */
+    }
+
+    /* ⭐ 본문 영역 전용 스크롤바 디자인 */
+    .site-main-scroll::-webkit-scrollbar { width: 10px; }
+    .site-main-scroll::-webkit-scrollbar-track { background: transparent; }
+    .site-main-scroll::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 5px; border: 2px solid transparent; background-clip: padding-box; }
+    .site-main-scroll::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+    body.dark .site-main-scroll::-webkit-scrollbar-thumb { background: #333; border: 2px solid #0a0a0a; background-clip: padding-box; }
+    body.dark .site-main-scroll::-webkit-scrollbar-thumb:hover { background: #555; }
+
+    /* 상단 네비게이션 반응형 정렬 (PC는 우측, 모바일은 중앙) */
     .header-nav-wrap {
       display: flex;
       gap: 8px;
@@ -50,94 +72,18 @@ if (_isDark) {
       justify-content: flex-end;
     }
 
-    /* ⭐ [모바일] 반응형 처리 (768px 이하) */
+    /* ⭐ 모바일 환경 처리 */
     @media (max-width: 768px) {
-      body {
-        /* 모바일은 상단 헤더가 작아지므로 여백을 줄이고, 하단 탭바 공간 확보 */
-        padding-top: 110px !important; 
-        padding-bottom: 80px !important; 
+      .header-nav-wrap {
+        justify-content: center;
       }
       
-      /* 모바일 헤더는 로고와 이름만 표시 (메뉴는 하단으로 이동) */
-      #app-header {
-        height: 100px;
+      /* 모바일 헤더 내부 여백 축소 (세로 공간 확보) */
+      #app-header header {
+        padding: 10px 16px !important;
       }
-      .header-nav-wrap {
-        display: none !important; /* 모바일에서 상단 메뉴 숨김 */
-      }
-
-      /* ⭐ [모바일 하단 고정 탭바] */
-      #mobile-bottom-nav {
-        display: flex !important;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 65px;
-        background: #fff;
-        border-top: 1px solid #eee;
-        z-index: 99999;
-        justify-content: space-around;
-        align-items: center;
-        padding-bottom: env(safe-area-inset-bottom); /* 아이폰 하단 홈바 대응 */
-      }
-      body.dark #mobile-bottom-nav {
-        background: #0f0f0f;
-        border-top-color: #222;
-      }
-
-      /* 하단 탭바 아이템 스타일 */
-      .bottom-nav-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-        text-decoration: none;
-        color: #9ca3af; /* 기본 라이트 그레이 */
-        font-size: 11px;
-        font-weight: 500;
-        flex: 1;
-        height: 100%;
-        border: none;
-        background: none;
-        cursor: pointer;
-        padding: 0;
-        -webkit-tap-highlight-color: transparent;
-      }
-      .bottom-nav-item.active {
-        color: #111827; /* 활성화 시 검은색 */
-      }
-      body.dark .bottom-nav-item.active {
-        color: #fff;
-      }
-      .bottom-nav-item .nav-icon {
-        width: 22px;
-        height: 22px;
-        stroke: currentColor;
-        stroke-width: 1.5;
-        fill: none;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-      }
-      .bottom-nav-item .cart-badge {
-        position: absolute;
-        top: 8px;
-        right: 20px;
-        background: #ef4444;
-        color: #fff;
-        font-size: 10px;
-        font-weight: bold;
-        border-radius: 10px;
-        padding: 2px 5px;
-        line-height: 1;
-      }
-    }
-
-    /* PC에서는 하단 탭바 숨김 */
-    @media (min-width: 769px) {
-      #mobile-bottom-nav {
-        display: none !important;
+      .header-name-row {
+        margin-bottom: 6px !important;
       }
     }
 
@@ -188,8 +134,7 @@ if (_isDark) {
     }
     @media (max-width: 1450px) { #scroll-btns { left: auto; right: 16px; transform: none; } }
     @media (max-width: 768px) { 
-      /* 모바일에서는 하단 탭바와 겹치지 않게 스크롤 버튼 위치 조정 */
-      #scroll-btns { right: 12px; bottom: 85px; } 
+      #scroll-btns { right: 12px; bottom: 85px; } /* 모바일 하단 탭바 고려 */
       #scroll-btns button { width: 40px; height: 40px; font-size: 16px; } 
     }
 
@@ -204,6 +149,61 @@ if (_isDark) {
     body.dark #app-footer .footer-item { color: #888; }
     #app-footer .footer-text { margin-top: 12px; padding-top: 12px; border-top: 1px dashed #ddd; font-size: 12px; color: #999; white-space: pre-wrap; max-width: 800px; margin-left: auto; margin-right: auto; }
     body.dark #app-footer .footer-text { border-top-color: #222; color: #555; }
+
+    /* ⭐⭐⭐ 모바일 하단 고정 탭바 ⭐⭐⭐ */
+    #mobile-bottom-nav {
+      display: none;
+      height: 65px;
+      flex-shrink: 0;
+      background: #fff;
+      border-top: 1px solid #eee;
+      z-index: 99999;
+      justify-content: space-around;
+      align-items: center;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    body.dark #mobile-bottom-nav {
+      background: #0f0f0f;
+      border-top-color: #222;
+    }
+
+    .bottom-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      text-decoration: none;
+      color: #9ca3af;
+      font-size: 11px;
+      font-weight: 500;
+      flex: 1;
+      height: 100%;
+      border: none;
+      background: none;
+      cursor: pointer;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .bottom-nav-item.active { color: #111827; }
+    body.dark .bottom-nav-item.active { color: #fff; }
+    .bottom-nav-item .nav-icon {
+      width: 22px; height: 22px;
+      stroke: currentColor; stroke-width: 1.5;
+      fill: none; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .bottom-nav-item .cart-badge {
+      position: absolute;
+      top: 8px;
+      right: 20px;
+      background: #ef4444; color: #fff;
+      font-size: 10px; font-weight: bold;
+      border-radius: 10px; padding: 2px 5px; line-height: 1;
+    }
+
+    @media (max-width: 768px) {
+      #mobile-bottom-nav { display: flex; }
+    }
   `;
   document.head.appendChild(style);
 })();
@@ -246,19 +246,33 @@ function createScrollButtons() {
     <button id="btn-scroll-bottom" title="맨 아래로">▼</button>
   `;
   document.body.appendChild(wrap);
+  
+  // ⭐ 스크롤 버튼 클릭 시 body가 아닌 내부 스크롤 영역(.site-main-scroll) 제어
   document.getElementById('btn-scroll-top').addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const mainScroll = document.querySelector('.site-main-scroll');
+    if (mainScroll) mainScroll.scrollTo({ top: 0, behavior: 'smooth' });
+    else window.scrollTo({ top: 0, behavior: 'smooth' });
   });
   document.getElementById('btn-scroll-bottom').addEventListener('click', () => {
-    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+    const mainScroll = document.querySelector('.site-main-scroll');
+    if (mainScroll) mainScroll.scrollTo({ top: mainScroll.scrollHeight, behavior: 'smooth' });
+    else window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
   });
+  
   const updateVisibility = () => {
-    const canScroll = document.documentElement.scrollHeight > window.innerHeight + 50;
-    wrap.style.display = canScroll ? 'flex' : 'none';
+    const mainScroll = document.querySelector('.site-main-scroll');
+    if (mainScroll) {
+      const canScroll = mainScroll.scrollHeight > mainScroll.clientHeight + 50;
+      wrap.style.display = canScroll ? 'flex' : 'none';
+    } else {
+      const canScroll = document.documentElement.scrollHeight > window.innerHeight + 50;
+      wrap.style.display = canScroll ? 'flex' : 'none';
+    }
   };
   updateVisibility();
   window.addEventListener('resize', updateVisibility);
-  new MutationObserver(updateVisibility).observe(document.body, { childList: true, subtree: true });
+  // ⭐ body 구조가 변경되거나 내용이 바뀔 때 스크롤 버튼 표시 여부 업데이트
+  new MutationObserver(updateVisibility).observe(document.body, { childList: true, subtree: true, characterData: true });
 }
 
 function getCachedLogo() {
@@ -316,7 +330,10 @@ function renderFooter() {
   if (!wrap) {
     wrap = document.createElement('div');
     wrap.id = 'app-footer';
-    document.body.appendChild(wrap);
+    // ⭐ 푸터를 내부 스크롤 영역 끝에 추가
+    const mainScroll = document.querySelector('.site-main-scroll');
+    if (mainScroll) mainScroll.appendChild(wrap);
+    else document.body.appendChild(wrap);
   }
   const f = getCachedFooter();
   const owner = f.footer_owner || '';
@@ -399,7 +416,6 @@ function renderHeader(current) {
     btnBg: '#fff', btnBgActive: '#222', btnText: '#222', btnTextActive: '#fff', btnBorder: '#ddd', btnBorderActive: '#222', nameColor: '#555',
   };
 
-  // ⭐ 변경된 사항(장바구니 수량 등)만 업데이트
   if (_headerRendered && wrap.querySelector('header')) {
     wrap.querySelectorAll('[data-nav]').forEach(el => {
       const isActive = el.dataset.nav === current;
@@ -408,7 +424,6 @@ function renderHeader(current) {
       el.style.borderColor = isActive ? theme.btnBorderActive : theme.btnBorder;
     });
     
-    // 하단 탭바 액티브 상태 업데이트
     document.querySelectorAll('.bottom-nav-item').forEach(el => {
       if (el.dataset.nav === current) el.classList.add('active');
       else el.classList.remove('active');
@@ -416,10 +431,8 @@ function renderHeader(current) {
 
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const cc = document.getElementById('cart-count');
-    const ccm = document.getElementById('cart-count-mobile');
     const badge = document.getElementById('bottom-cart-badge');
     if (cc) cc.textContent = cart.length;
-    if (ccm) ccm.textContent = cart.length;
     if (badge) {
       badge.textContent = cart.length;
       badge.style.display = cart.length > 0 ? 'block' : 'none';
@@ -448,13 +461,9 @@ function renderHeader(current) {
     cart: `<svg class="nav-icon" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>`,
     orders: `<svg class="nav-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,
     mypage: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
-    myorders: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`,
-    logout: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`,
-    login: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>`,
-    signup: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>`
+    login: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>`
   };
 
-  // PC용 상단 메뉴 버튼
   const userBtns = m
     ? `<a href="mypage.html" data-nav="mypage" style="${btnStyle(current === 'mypage')}">내정보</a>
        <a href="myorders.html" data-nav="myorders" style="${btnStyle(current === 'myorders')}">주문내역</a>
@@ -472,19 +481,18 @@ function renderHeader(current) {
     ? `<a href="index.html" style="display:inline-block;"><img src="${logoImageUrl}" alt="${siteName}" style="height:40px; max-width:240px; object-fit:contain; display:block; margin:0 auto;"></a>`
     : `<a href="index.html" style="font-size:22px; font-weight:700; color:${theme.logoColor}; text-decoration:none; display:inline-block;">${siteName}</a>`;
 
-  // 모바일용 하단 탭바 메뉴 (홈, 장바구니, 주문조회, 내정보/로그인)
-  // 로그인 여부에 따라 내정보 대신 로그인 탭 표시
   const mobileTabMy = m 
     ? `<a href="mypage.html" data-nav="mypage" class="bottom-nav-item ${current === 'mypage' ? 'active' : ''}">${svgIcons.mypage}<span>내정보</span></a>`
     : `<a href="login.html" data-nav="login" class="bottom-nav-item ${current === 'login' ? 'active' : ''}">${svgIcons.login}<span>로그인</span></a>`;
 
-  // 하단 탭바 HTML 생성 (document.body에 추가)
   let bottomNav = document.getElementById('mobile-bottom-nav');
   if (!bottomNav) {
     bottomNav = document.createElement('nav');
     bottomNav.id = 'mobile-bottom-nav';
-    bottomNav.style.display = 'none'; // CSS 미디어쿼리로 제어
-    document.body.appendChild(bottomNav);
+    // ⭐ 하단 탭바를 site-wrapper 안쪽, main-scroll 바깥에 두어 고정되게 함
+    const wrapper = document.querySelector('.site-wrapper');
+    if (wrapper) wrapper.appendChild(bottomNav);
+    else document.body.appendChild(bottomNav);
   }
   
   bottomNav.innerHTML = `
@@ -498,9 +506,8 @@ function renderHeader(current) {
     ${mobileTabMy}
   `;
 
-  // PC 상단 헤더 HTML 렌더링
   wrap.innerHTML = `
-    <header style="background:${theme.headerBg}; border-bottom:1px solid ${theme.borderColor}; padding:14px 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.08);">
+    <header style="background:${theme.headerBg}; border-bottom:1px solid ${theme.borderColor}; padding:14px 16px;">
       <div style="max-width:1400px; margin:0 auto;">
         <div style="margin-bottom:12px; text-align:center;">${logoHtml}</div>
         ${nameRow}
@@ -523,7 +530,6 @@ function renderHeader(current) {
     badge.style.display = cart.length > 0 ? 'block' : 'none';
   }
 
-  // 로그아웃 버튼 이벤트 (PC용)
   const lb = document.getElementById('logout-btn');
   if (lb) {
     lb.onclick = (e) => {
@@ -537,6 +543,41 @@ function renderHeader(current) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // ⭐ [핵심] 기존 body 구조를 헤더 + 스크롤 본문 구조로 강제 재배치
+  const existingHeader = document.getElementById('app-header');
+  const bodyChildren = Array.from(document.body.children);
+  
+  // wrapper 및 scroll 영역 생성
+  const wrapper = document.createElement('div');
+  wrapper.className = 'site-wrapper';
+  
+  const mainScroll = document.createElement('div');
+  mainScroll.className = 'site-main-scroll';
+
+  // 기존 body 안의 모든 요소(헤더, main, script 제외)를 mainScroll 안으로 이동
+  bodyChildren.forEach(child => {
+    if (child.id === 'app-header') return; // 헤더는 나중에 처리
+    if (child.tagName === 'SCRIPT') return; // 스크립트는 body에 그대로 둠
+    if (child.id === 'app-footer') return; // 푸터는 렌더링 시 mainScroll에 추가
+    if (child.classList.contains('page-loader')) return; // 로더는 body에 둠
+    if (child.id === 'mobile-bottom-nav') return; // 하단 탭바는 wrapper에 둠
+    if (child.id === 'scroll-btns') return; // 스크롤 버튼은 body에 둠
+
+    mainScroll.appendChild(child);
+  });
+
+  // 헤더를 wrapper 최상단에 추가
+  if (existingHeader) {
+    wrapper.appendChild(existingHeader);
+  }
+  
+  // 스크롤 본문 영역 추가
+  wrapper.appendChild(mainScroll);
+  
+  // wrapper를 body 최상단에 삽입
+  document.body.insertBefore(wrapper, document.body.firstChild);
+
+  // 로더 생성
   const loader = document.createElement('div');
   loader.className = 'page-loader';
   if (!_isDark) loader.style.background = '#f8f8f8';
