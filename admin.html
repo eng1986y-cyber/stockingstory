@@ -8,13 +8,21 @@
   <script src="common.js"></script>
   <style>
     html, body { background: #f4f6f8 !important; color: #1f2937 !important; }
+    /* ⭐ 관리자 페이지 전용 상단 여백 확보 (헤더가 fixed이므로) */
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding-top: 70px !important; }
     * { box-sizing: border-box; transition: none !important; animation: none !important; transform: none !important; box-shadow: none !important; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; }
 
+    /* ⭐ 관리자 헤더 상단 고정 (fixed) */
     .admin-header {
       background: #fff !important; border-bottom: 1px solid #e5e7eb;
       padding: 16px 24px; display: flex; justify-content: space-between;
-      align-items: center; position: sticky; top: 0; z-index: 100;
+      align-items: center; 
+      position: fixed !important; 
+      top: 0 !important; 
+      left: 0 !important;
+      width: 100% !important;
+      z-index: 99999 !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
     .admin-header-left { display: flex; align-items: center; gap: 16px; }
     .admin-header .logo { font-size: 18px; font-weight: 700; color: #111827 !important; letter-spacing: 0.5px; cursor: default; }
@@ -62,7 +70,6 @@
 
     /* 상품 등록: 가로 스크롤 없이 화면 너비에 맞춰 자동 줄바꿈 */
     #product-register-card { min-width: 0; width: 100%; }
-    /* 다른 공통 CSS의 form 스타일이 등록 폼 너비를 줄이지 못하게 고정 */
     #product-register-card > #product-form {
       display: grid !important;
       grid-template-columns: 0.9fr 1.2fr 0.55fr 2fr 0.9fr 0.9fr 1fr 0.9fr 0.5fr 2fr 0.5fr !important;
@@ -134,7 +141,6 @@
     .btn-bulk-del.active { opacity: 1; pointer-events: auto; }
     #admin-list-wrap { background: #f9fafb; border-radius: 8px; padding: 10px; overflow-x: auto; }
     #admin-list { display: flex; flex-direction: column; gap: 7px; min-width: 0; min-height: 338px; }
-    /* 목록 항목이 1~4개여도 5개가 표시될 때의 영역 높이를 유지 */
     #admin-list-wrap { min-height: 360px; box-sizing: border-box; }
     .product-row {
       background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
@@ -195,7 +201,7 @@
     .row-sep { color: #d1d5db; }
 
     /* 모달 */
-    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 10px; }
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; z-index: 100000; padding: 10px; }
     .modal-box { background: #fff; padding: 24px; border-radius: 12px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; }
     .modal-box h2 { margin: 0 0 16px; font-size: 18px; color: #111827; }
     .modal-box .modal-form { display: grid; gap: 10px; }
@@ -228,6 +234,10 @@
       .product-row { min-width: 700px; }
       .admin-layout { padding: 10px; }
       .card { padding: 14px; }
+      
+      /* 모바일에서 헤더가 2줄로 될 수 있으므로 상단 여백 추가 확보 */
+      body { padding-top: 110px !important; }
+      .admin-header { padding: 12px 16px; flex-wrap: wrap; gap: 10px; }
     }
   
     /* 화면 오른쪽 가장자리에 고정되는 위/아래 이동 버튼 */
@@ -239,7 +249,7 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      z-index: 9999;
+      z-index: 99998;
     }
     .edge-scroll-controls button {
       width: 44px; height: 44px; border-radius: 50%;
@@ -466,6 +476,7 @@
         document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
         btn.classList.add('active');
         document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       });
     });
 
@@ -764,7 +775,7 @@
       }
     });
 
-    // ===== 상품 목록 (⭐ 체크박스 맨 앞, 우측 가격/버튼 배치) =====
+    // ===== 상품 목록 =====
     let allProducts = [];
     let filteredProducts = [];
     let currentPage = 1;
@@ -784,7 +795,6 @@
     }
 
     function applySearch(text) {
-      // 상품명/제품번호의 값이 숫자 또는 null이어도 검색 중 오류가 나지 않도록 문자열로 통일
       const normalizeSearch = (value) => String(value ?? '')
         .normalize('NFKC')
         .toLocaleLowerCase()
@@ -845,7 +855,6 @@
 
         const isChecked = selectedProductIds.has(String(p.id));
 
-        // ⭐ 체크박스 + 이미지 + 정보를 하나의 div(prod-left-wrap)로 묶음
         return `
           <div class="product-row">
             <input type="checkbox" class="product-check" data-id="${p.id}" aria-label="상품 선택" ${isChecked ? 'checked' : ''}>
@@ -874,7 +883,6 @@
     }
 
     function bindProductEvents() {
-      // 체크박스
       listEl.querySelectorAll('.product-check').forEach(cb => {
         cb.addEventListener('change', () => {
           const id = String(cb.dataset.id);
@@ -884,7 +892,6 @@
         });
       });
 
-      // 수정 버튼 (팝업)
       listEl.querySelectorAll('.edit-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const p = allProducts.find(x => String(x.id) === String(btn.dataset.id));
@@ -892,7 +899,6 @@
         });
       });
 
-      // 복제 버튼
       listEl.querySelectorAll('.copy-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
           const p = allProducts.find(x => String(x.id) === String(btn.dataset.id));
@@ -916,7 +922,6 @@
         });
       });
 
-      // 단독 삭제 버튼
       listEl.querySelectorAll('.del-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
           if (!confirm('정말 삭제할까요?')) return;
@@ -930,7 +935,6 @@
       });
     }
 
-    // ⭐ 상품 수정 팝업 모달
     function showProductEditModal(p) {
       const modal = document.createElement('div');
       modal.className = 'modal-backdrop';
@@ -993,7 +997,6 @@
       });
     }
 
-    // ⭐ 일괄 삭제 / 전체 선택 로직
     const checkAllProducts = document.getElementById('check-all-products');
     const bulkDelBtn = document.getElementById('bulk-del-btn');
 
@@ -1006,7 +1009,6 @@
         bulkDelBtn.textContent = '선택 삭제';
       }
 
-      // 현재 페이지의 모든 아이템이 선택되었는지 확인
       const checkboxes = listEl.querySelectorAll('.product-check');
       if (checkboxes.length === 0) {
         checkAllProducts.checked = false;
@@ -1050,7 +1052,6 @@
       }
     });
 
-    // 검색 이벤트
     document.getElementById('product-search-btn').addEventListener('click', () => {
       applySearch(document.getElementById('product-search').value.trim());
     });
@@ -1065,7 +1066,6 @@
       }
     });
 
-    // 페이지네이션
     function renderPagination(totalPages) {
       const el = document.getElementById('admin-pagination');
       if (totalPages <= 1) { el.innerHTML = ''; return; }
@@ -1087,7 +1087,6 @@
       });
     }
 
-    // 주문/회원 목록 공통 페이지 처리: 페이지당 5개, 최대 10페이지
     const secondaryListPages = { orders: 1, members: 1 };
     function paginateRenderedList(listId, paginationId, type) {
       const listEl = document.getElementById(listId);
@@ -1113,7 +1112,6 @@
       }));
     }
 
-    // ===== ⭐ 주문 관리 =====
     let allOrdersRaw = [];
 
     async function loadOrders(filterText) {
@@ -1317,7 +1315,6 @@
       if (e.key === 'Enter') document.getElementById('order-search-btn').click();
     });
 
-    // ===== ⭐ 회원 관리 =====
     let allMembers = [];
 
     async function loadMembers(filterText) {
