@@ -40,6 +40,7 @@ if (_isDark) {
       background: #fff;
       width: 100%;
       box-shadow: 0 4px 10px rgba(0,0,0,0.05); /* 스크롤 영역과 분리감 */
+      margin-bottom: 0 !important; /* 헤더와 본문 사이 간격 제거 */
     }
     body.dark #app-header {
       background: #0f0f0f;
@@ -52,6 +53,7 @@ if (_isDark) {
       overflow-x: hidden;
       width: 100%;
       position: relative;
+      padding-top: 0 !important; /* 본문 상단 여백 제거 */
       -webkit-overflow-scrolling: touch; /* 모바일 부드러운 스크롤 */
     }
 
@@ -247,7 +249,6 @@ function createScrollButtons() {
   `;
   document.body.appendChild(wrap);
   
-  // ⭐ 스크롤 버튼 클릭 시 body가 아닌 내부 스크롤 영역(.site-main-scroll) 제어
   document.getElementById('btn-scroll-top').addEventListener('click', () => {
     const mainScroll = document.querySelector('.site-main-scroll');
     if (mainScroll) mainScroll.scrollTo({ top: 0, behavior: 'smooth' });
@@ -271,7 +272,6 @@ function createScrollButtons() {
   };
   updateVisibility();
   window.addEventListener('resize', updateVisibility);
-  // ⭐ body 구조가 변경되거나 내용이 바뀔 때 스크롤 버튼 표시 여부 업데이트
   new MutationObserver(updateVisibility).observe(document.body, { childList: true, subtree: true, characterData: true });
 }
 
@@ -330,7 +330,6 @@ function renderFooter() {
   if (!wrap) {
     wrap = document.createElement('div');
     wrap.id = 'app-footer';
-    // ⭐ 푸터를 내부 스크롤 영역 끝에 추가
     const mainScroll = document.querySelector('.site-main-scroll');
     if (mainScroll) mainScroll.appendChild(wrap);
     else document.body.appendChild(wrap);
@@ -489,7 +488,6 @@ function renderHeader(current) {
   if (!bottomNav) {
     bottomNav = document.createElement('nav');
     bottomNav.id = 'mobile-bottom-nav';
-    // ⭐ 하단 탭바를 site-wrapper 안쪽, main-scroll 바깥에 두어 고정되게 함
     const wrapper = document.querySelector('.site-wrapper');
     if (wrapper) wrapper.appendChild(bottomNav);
     else document.body.appendChild(bottomNav);
@@ -506,10 +504,11 @@ function renderHeader(current) {
     ${mobileTabMy}
   `;
 
+  // ⭐ 헤더 하단 여백을 줄이고, 본문과의 경계를 명확히 하기 위해 padding 조정
   wrap.innerHTML = `
-    <header style="background:${theme.headerBg}; border-bottom:1px solid ${theme.borderColor}; padding:14px 16px;">
+    <header style="background:${theme.headerBg}; border-bottom:1px solid ${theme.borderColor}; padding:12px 16px 10px 16px;">
       <div style="max-width:1400px; margin:0 auto;">
-        <div style="margin-bottom:12px; text-align:center;">${logoHtml}</div>
+        <div style="margin-bottom:8px; text-align:center;">${logoHtml}</div>
         ${nameRow}
         <div class="header-nav-wrap">
           <a href="cart.html" data-nav="cart" style="${btnStyle(current === 'cart')}">장바구니 <span id="cart-count" style="margin-left:4px;">0</span></a>
@@ -543,41 +542,34 @@ function renderHeader(current) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // ⭐ [핵심] 기존 body 구조를 헤더 + 스크롤 본문 구조로 강제 재배치
   const existingHeader = document.getElementById('app-header');
   const bodyChildren = Array.from(document.body.children);
   
-  // wrapper 및 scroll 영역 생성
   const wrapper = document.createElement('div');
   wrapper.className = 'site-wrapper';
   
   const mainScroll = document.createElement('div');
   mainScroll.className = 'site-main-scroll';
 
-  // 기존 body 안의 모든 요소(헤더, main, script 제외)를 mainScroll 안으로 이동
   bodyChildren.forEach(child => {
-    if (child.id === 'app-header') return; // 헤더는 나중에 처리
-    if (child.tagName === 'SCRIPT') return; // 스크립트는 body에 그대로 둠
-    if (child.id === 'app-footer') return; // 푸터는 렌더링 시 mainScroll에 추가
-    if (child.classList.contains('page-loader')) return; // 로더는 body에 둠
-    if (child.id === 'mobile-bottom-nav') return; // 하단 탭바는 wrapper에 둠
-    if (child.id === 'scroll-btns') return; // 스크롤 버튼은 body에 둠
+    if (child.id === 'app-header') return;
+    if (child.tagName === 'SCRIPT') return;
+    if (child.id === 'app-footer') return;
+    if (child.classList.contains('page-loader')) return;
+    if (child.id === 'mobile-bottom-nav') return;
+    if (child.id === 'scroll-btns') return;
 
     mainScroll.appendChild(child);
   });
 
-  // 헤더를 wrapper 최상단에 추가
   if (existingHeader) {
     wrapper.appendChild(existingHeader);
   }
   
-  // 스크롤 본문 영역 추가
   wrapper.appendChild(mainScroll);
   
-  // wrapper를 body 최상단에 삽입
   document.body.insertBefore(wrapper, document.body.firstChild);
 
-  // 로더 생성
   const loader = document.createElement('div');
   loader.className = 'page-loader';
   if (!_isDark) loader.style.background = '#f8f8f8';

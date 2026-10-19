@@ -12,25 +12,28 @@
       overflow-x: hidden;
       width: 100%; max-width: 100%;
       margin: 0;
-      /* ⭐ index는 밝은 톤 (common.js에서 dark 클래스 안 붙임) */
     }
+    
+    /* ⭐ 배너 영역을 헤더 바로 아래에 밀착시키고 위쪽 여백을 0으로 설정 */
     #banner-wrap {
       width: 100vw;
       position: relative;
       left: 50%;
       margin-left: -50vw;
+      margin-top: 0; /* 상단 여백 제거 */
       margin-bottom: 24px;
       overflow: hidden;
     }
+
     #product-container {
       max-width: 1400px;
       margin: 0 auto;
       padding: 0 16px;
       box-sizing: border-box;
       width: 100%;
-      margin-top: 32px;
+      margin-top: 24px; /* 상품 목록 위쪽 여백도 살짝 조정 */
     }
-    @media (max-width: 768px) { #product-container { margin-top: 24px; } }
+    @media (max-width: 768px) { #product-container { margin-top: 16px; } }
 
     #product-list {
       display: grid;
