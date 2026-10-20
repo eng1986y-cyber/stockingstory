@@ -7,12 +7,23 @@
   <link rel="stylesheet" href="style.css">
   <script src="common.js"></script>
   <style>
-    /* ⭐ 전체 컨테이너 넓이 통일 및 여백 정리 */
+    /* ⭐ main의 기본 여백을 무력화해서 .mypage-wrap이 정확히 중앙에 오도록 */
+    main {
+      max-width: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    /* ⭐ 전체 컨테이너 중앙 정렬 (좌우 auto + width 100%) */
     .mypage-wrap { 
       max-width: 640px; 
+      width: 100%;
       margin: 40px auto; 
       padding: 0 16px; 
-      box-sizing: border-box; 
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
     }
     
     .mypage-title {
@@ -21,6 +32,7 @@
       margin-bottom: 16px;
       color: #222;
       padding: 0 4px;
+      text-align: left;
     }
     body.dark .mypage-title { color: #fff; }
     
@@ -51,6 +63,10 @@
       .form-grid-2 {
         grid-template-columns: 1fr;
         gap: 10px;
+      }
+      .mypage-wrap {
+        margin: 24px auto;
+        padding: 0 12px;
       }
     }
 
@@ -122,7 +138,6 @@
     <div class="mypage-wrap">
       <h2 class="mypage-title">내 정보</h2>
       
-      <!-- ⭐ 내 정보 폼 (주문내역은 헤더의 '주문내역' 버튼을 통해 이동) -->
       <form id="mypage-form" class="mypage-form">
         <div class="form-grid-2">
           <div class="form-group">
