@@ -7,21 +7,23 @@
   <link rel="stylesheet" href="style.css">
   <script src="common.js"></script>
   <style>
-    /* ⭐ main 여백 리셋 + 자식 중앙 정렬 */
+    /* ⭐ [핵심 1] main 태그의 기본 여백과 최대 넓이를 완전히 없앰 */
     main {
       max-width: none !important;
       margin: 0 !important;
       padding: 0 !important;
-      display: flex !important;
-      justify-content: center !important;
-      width: 100%;
+      width: 100% !important;
     }
 
-    /* ⭐ 카드 래퍼: flex 아이템으로서 중앙 정렬 */
+    /* ⭐ [핵심 2] 카드 래퍼를 무조건 중앙에 배치 */
     .mypage-wrap { 
       max-width: 640px; 
       width: 100%;
-      margin: 40px auto; 
+      /* 좌우 auto 마진 + 화면 기준 50% 이동으로 확실하게 센터 정렬 */
+      margin-left: auto !important;
+      margin-right: auto !important;
+      margin-top: 40px;
+      margin-bottom: 40px;
       padding: 0 16px; 
       box-sizing: border-box;
       display: flex;
@@ -36,6 +38,7 @@
       color: #222;
       padding: 0 4px;
       text-align: left;
+      width: 100%;
     }
     body.dark .mypage-title { color: #fff; }
     
@@ -63,13 +66,13 @@
       gap: 16px 12px;
     }
     @media (max-width: 768px) {
-      main { display: block !important; }   /* 모바일은 flex 해제 */
       .form-grid-2 {
         grid-template-columns: 1fr;
         gap: 10px;
       }
       .mypage-wrap {
-        margin: 24px auto;
+        margin-top: 24px;
+        margin-bottom: 24px;
         padding: 0 12px;
       }
     }
