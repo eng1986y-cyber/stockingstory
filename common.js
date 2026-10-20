@@ -30,7 +30,7 @@ if (_isDark) {
       display: flex;
       flex-direction: column;
       height: 100vh;
-      height: 100dvh; /* 동적 뷰포트 높이 */
+      height: 100dvh; /* 동적 뷰포트 높이 - 모바일 주소창 변화 대응 */
       width: 100%;
       overflow: hidden;
     }
@@ -249,7 +249,7 @@ function applyPhoneAttrs() {
 }
 
 function createScrollButtons() {
-  // ⭐ 관리자 페이지에서는 자체 버튼이 있으므로 생성하지 않음
+  // ⭐ 관리자 페이지에서는 자체 버튼(.edge-scroll-controls)이 있으므로 생성하지 않음
   if (_isAdmin) return;
   if (document.getElementById('scroll-btns')) return;
   const wrap = document.createElement('div');
@@ -426,20 +426,16 @@ function renderHeader(current) {
     btnBg: '#fff', btnBgActive: '#222', btnText: '#222', btnTextActive: '#fff', btnBorder: '#ddd', btnBorderActive: '#222', nameColor: '#555',
   };
 
-  // ⭐ 모바일 하단 탭바를 먼저 확보/이동 (site-wrapper 하단에 위치시킴)
+  // ⭐ 모바일 하단 탭바를 항상 site-wrapper의 마지막 자식으로 보장 (중복/위치 문제 방지)
   let bottomNav = document.getElementById('mobile-bottom-nav');
   const wrapper = document.querySelector('.site-wrapper');
   if (!bottomNav) {
     bottomNav = document.createElement('nav');
     bottomNav.id = 'mobile-bottom-nav';
   }
-  // ⭐ 항상 site-wrapper의 마지막 자식으로 이동 (중복/위치 문제 방지)
   if (wrapper) {
-    if (bottomNav.parentNode !== wrapper) {
-      wrapper.appendChild(bottomNav);
-    } else {
-      wrapper.appendChild(bottomNav); // 이미 마지막이어도 재배치하여 순서 보장
-    }
+    // 이미 wrapper의 자식이든 아니든, 항상 마지막으로 재배치
+    wrapper.appendChild(bottomNav);
   } else {
     if (!bottomNav.parentNode) document.body.appendChild(bottomNav);
   }
@@ -561,7 +557,16 @@ function renderHeader(current) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // ⭐⭐⭐ 관리자/수정 페이지에서는 공통 레이아웃 래핑을 전혀 하지 않음
+  // (admin.html, edit.html 은 자체 레이아웃 사용)
+  if (_isAdmin) {
+    if (_isDark) document.body.classList.add('dark');
+    applyPhoneAttrs();
+    return;
+  }
+
   const existingHeader = document.getElementById('app-header');
+  const existingBottomNav = document.getElementById('mobile-bottom-nav');
   const bodyChildren = Array.from(document.body.children);
   
   const wrapper = document.createElement('div');
@@ -572,10 +577,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   bodyChildren.forEach(child => {
     if (child.id === 'app-header') return;
+    if (child.id === 'mobile-bottom-nav') return;
     if (child.tagName === 'SCRIPT') return;
     if (child.id === 'app-footer') return;
     if (child.classList.contains('page-loader')) return;
-    if (child.id === 'mobile-bottom-nav') return;
     if (child.id === 'scroll-btns') return;
 
     mainScroll.appendChild(child);
@@ -586,6 +591,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   
   wrapper.appendChild(mainScroll);
+
+  // ⭐ 기존에 있던 #mobile-bottom-nav도 wrapper로 이동 (중복 방지)
+  if (existingBottomNav) {
+    wrapper.appendChild(existingBottomNav);
+  }
   
   document.body.insertBefore(wrapper, document.body.firstChild);
 
