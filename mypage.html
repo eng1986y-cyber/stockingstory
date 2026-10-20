@@ -19,7 +19,6 @@
     .mypage-wrap { 
       max-width: 640px; 
       width: 100%;
-      /* 좌우 auto 마진 + 화면 기준 50% 이동으로 확실하게 센터 정렬 */
       margin-left: auto !important;
       margin-right: auto !important;
       margin-top: 40px;
@@ -136,6 +135,13 @@
     .mypage-form button[type="submit"]:hover { background: #02b151; }
     
     #msg { margin-top: 12px; margin-bottom: 0; font-weight: 600; text-align: center; min-height: 20px; }
+
+    /* ⭐⭐⭐ 모바일에서만: 첫 input 자동 포커스/스크롤 방지 (PC 영향 없음) ⭐⭐⭐ */
+    @media (max-width: 768px) {
+      #mypage-form input:focus {
+        outline: none;
+      }
+    }
   </style>
 </head>
 <body>
@@ -269,6 +275,38 @@
       
       setTimeout(() => msg.textContent = '', 2000);
     });
+
+    // ⭐⭐⭐ 모바일 전용: 비밀번호 칸 자동 포커스/자동완성 방지 ⭐⭐⭐
+    if (window.matchMedia('(max-width: 768px)').matches) {
+      const pwEl = form.querySelector('input[name="password"]');
+      if (pwEl) {
+        // 브라우저 자동완성 트리거 방지
+        pwEl.setAttribute('autocomplete', 'new-password');
+        // Tab 포커스 순서에서 제외
+        pwEl.setAttribute('tabindex', '-1');
+
+        const blurActive = () => {
+          if (document.activeElement && document.activeElement.tagName === 'INPUT') {
+            document.activeElement.blur();
+          }
+          pwEl.blur();
+        };
+
+        // 즉시 + 지연 재시도 (모바일 브라우저 지연 포커스 대응)
+        blurActive();
+        setTimeout(blurActive, 100);
+        setTimeout(blurActive, 300);
+        setTimeout(blurActive, 600);
+
+        // 탭 복귀 시에도 blur
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') blurActive();
+        });
+
+        // 페이지가 pageshow 될 때 (bfcache 복원 포함)
+        window.addEventListener('pageshow', blurActive);
+      }
+    }
   </script>
 </body>
 </html>
