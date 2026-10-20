@@ -1,6 +1,6 @@
 // ===== 공통 유틸 =====
 
-// ⭐ 페이지 판별 (스크립트 로드 즉시 실행)
+// ⭐ 페이지 판별
 const _pathName = location.pathname.split('/').pop().replace('.html','') || 'index';
 const _isIndex = (_pathName === '' || _pathName === 'index');
 const _isAdmin = (_pathName === 'admin' || _pathName === 'edit');
@@ -10,33 +10,75 @@ if (_isDark) {
   document.documentElement.style.background = '#0a0a0a';
 }
 
-// ⭐⭐⭐ 스타일을 즉시 주입 (DOMContentLoaded 이전) — CSS 우선순위 확보
-(function injectCommonStyles() {
-  if (document.getElementById('common-js-style')) return;
+// 이미지 복사 방지 + 스크롤바 강제 고정 + ⭐ 헤더 상단 고정 및 본문 스크롤 분리
+(function() {
   const style = document.createElement('style');
-  style.id = 'common-js-style';
   style.textContent = `
-    /* ⭐ body 스크롤은 브라우저 기본 사용 */
-    html { scroll-behavior: smooth; }
-    body {
+    /* ⭐ [핵심] 전체 body 스크롤을 막고, 헤더 아래 영역에서만 스크롤 발생하게 설정 */
+    html, body {
       margin: 0;
       padding: 0;
-      min-height: 100vh;
+      height: 100% !important;
+      overflow: hidden !important;
+      width: 100%;
       -webkit-text-size-adjust: 100%;
+      overscroll-behavior: none;
     }
 
-    /* ⭐ 상단 헤더: sticky로 스크롤 시 상단 고정 */
+    /* ⭐ 헤더와 본문을 감싸는 레이아웃 컨테이너 */
+    .site-wrapper {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      height: 100dvh;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    /* ⭐ 상단 헤더 영역 (고정) */
     #app-header {
-      position: sticky !important;
-      top: 0 !important;
-      z-index: 99999 !important;
+      flex-shrink: 0;
+      flex-grow: 0;
+      position: relative;
+      z-index: 99999;
       background: #fff;
       width: 100%;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      margin-bottom: 0 !important;
     }
-    body.dark #app-header { background: #0f0f0f; }
+    body.dark #app-header {
+      background: #0f0f0f;
+    }
 
-    /* PC 상단 네비게이션 */
+    /* ⭐ [핵심] 헤더 아래 본문 영역만 스크롤되도록 설정
+       - overflow-y: scroll → 항상 스크롤바 자리 확보 (스크롤 유무 무관 폭 고정)
+       - 스크롤바 두께 8px + 트랙 투명 → 시각적 부담 최소화
+    */
+    .site-main-scroll {
+      flex: 1 1 0;
+      min-height: 0;
+      overflow-y: scroll;
+      overflow-x: hidden;
+      width: 100%;
+      position: relative;
+      padding-top: 0 !important;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+      scrollbar-color: #d1d5db transparent;
+    }
+    body.dark .site-main-scroll {
+      scrollbar-color: #333 transparent;
+    }
+
+    .site-main-scroll::-webkit-scrollbar { width: 8px; }
+    .site-main-scroll::-webkit-scrollbar-track { background: transparent; }
+    .site-main-scroll::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+    .site-main-scroll::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+    body.dark .site-main-scroll::-webkit-scrollbar-thumb { background: #333; }
+    body.dark .site-main-scroll::-webkit-scrollbar-thumb:hover { background: #555; }
+
+    /* 상단 네비게이션 반응형 정렬 (PC는 우측) */
     .header-nav-wrap {
       display: flex;
       gap: 8px;
@@ -45,34 +87,23 @@ if (_isDark) {
       justify-content: flex-end;
     }
 
-    /* ⭐⭐⭐ 모바일: 상단 헤더 네비 무조건 숨김 (최우선순위) ⭐⭐⭐ */
+    /* ⭐⭐⭐ 모바일 환경 처리 ⭐⭐⭐ */
     @media (max-width: 768px) {
-      #app-header .header-nav-wrap,
-      #app-header .header-nav-wrap * {
+      .header-nav-wrap {
         display: none !important;
-        visibility: hidden !important;
-        height: 0 !important;
-        width: 0 !important;
-        overflow: hidden !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        border: 0 !important;
       }
       #app-header header {
         padding: 10px 16px 8px 16px !important;
       }
-      #app-header .header-name-row {
+      .header-name-row {
         margin-bottom: 0 !important;
         min-height: 16px !important;
         line-height: 16px !important;
       }
-      /* ⭐ 모바일 하단 탭바 공간 확보 */
-      body {
-        padding-bottom: calc(65px + env(safe-area-inset-bottom)) !important;
-      }
+      .site-main-scroll { overflow-y: auto; }
     }
 
-    /* 로딩 스피너 */
+    /* ⭐ 데이터 로딩 중 화면 가리는 스피너 */
     .page-loader {
       position: fixed; inset: 0;
       background: #0a0a0a;
@@ -103,28 +134,22 @@ if (_isDark) {
 
     /* 플로팅 스크롤 버튼 */
     #scroll-btns {
-      position: fixed;
-      right: 16px;
-      bottom: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      z-index: 900;
+      position: fixed; left: 50%; transform: translateX(calc(700px + 16px));
+      bottom: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 900;
     }
     #scroll-btns button {
       width: 44px; height: 44px; border-radius: 50%;
       border: 1px solid #ddd; background: #fff; color: #222;
-      font-size: 18px; font-weight: 700; cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,.12);
-      display: flex; align-items: center; justify-content: center;
-      padding: 0; line-height: 1;
+      font-size: 18px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.12);
+      display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1;
     }
     body.dark #scroll-btns button {
-      border-color: #333; background: #1a1a1a; color: #e5e7eb;
+      border-color: #333; background: #1a1a1a; color: #e5e7eb; box-shadow: 0 2px 8px rgba(0,0,0,.5);
     }
-    @media (max-width: 768px) {
-      #scroll-btns { bottom: calc(85px + env(safe-area-inset-bottom)); }
-      #scroll-btns button { width: 40px; height: 40px; font-size: 16px; }
+    @media (max-width: 1450px) { #scroll-btns { left: auto; right: 16px; transform: none; } }
+    @media (max-width: 768px) { 
+      #scroll-btns { right: 12px; bottom: 85px; }
+      #scroll-btns button { width: 40px; height: 40px; font-size: 16px; } 
     }
 
     /* Footer */
@@ -178,17 +203,15 @@ if (_isDark) {
       border-color: #e5e7eb;
     }
 
-    /* ⭐⭐⭐ 모바일 하단 고정 탭바 (fixed) ⭐⭐⭐ */
+    /* ⭐⭐⭐ 모바일 하단 고정 탭바 ⭐⭐⭐ */
     #mobile-bottom-nav {
       display: none;
-      position: fixed !important;
-      left: 0 !important;
-      right: 0 !important;
-      bottom: 0 !important;
       height: 65px;
+      flex-shrink: 0;
+      flex-grow: 0;
       background: #fff;
       border-top: 1px solid #eee;
-      z-index: 99999 !important;
+      z-index: 99999;
       justify-content: space-around;
       align-items: center;
       padding-bottom: env(safe-area-inset-bottom);
@@ -235,7 +258,7 @@ if (_isDark) {
     }
 
     @media (max-width: 768px) {
-      #mobile-bottom-nav { display: flex !important; }
+      #mobile-bottom-nav { display: flex; }
     }
   `;
   document.head.appendChild(style);
@@ -282,15 +305,25 @@ function createScrollButtons() {
   document.body.appendChild(wrap);
   
   document.getElementById('btn-scroll-top').addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const mainScroll = document.querySelector('.site-main-scroll');
+    if (mainScroll) mainScroll.scrollTo({ top: 0, behavior: 'smooth' });
+    else window.scrollTo({ top: 0, behavior: 'smooth' });
   });
   document.getElementById('btn-scroll-bottom').addEventListener('click', () => {
-    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+    const mainScroll = document.querySelector('.site-main-scroll');
+    if (mainScroll) mainScroll.scrollTo({ top: mainScroll.scrollHeight, behavior: 'smooth' });
+    else window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
   });
   
   const updateVisibility = () => {
-    const canScroll = document.documentElement.scrollHeight > window.innerHeight + 50;
-    wrap.style.display = canScroll ? 'flex' : 'none';
+    const mainScroll = document.querySelector('.site-main-scroll');
+    if (mainScroll) {
+      const canScroll = mainScroll.scrollHeight > mainScroll.clientHeight + 50;
+      wrap.style.display = canScroll ? 'flex' : 'none';
+    } else {
+      const canScroll = document.documentElement.scrollHeight > window.innerHeight + 50;
+      wrap.style.display = canScroll ? 'flex' : 'none';
+    }
   };
   updateVisibility();
   window.addEventListener('resize', updateVisibility);
@@ -357,7 +390,9 @@ function renderFooter() {
   if (!wrap) {
     wrap = document.createElement('div');
     wrap.id = 'app-footer';
-    document.body.appendChild(wrap);
+    const mainScroll = document.querySelector('.site-main-scroll');
+    if (mainScroll) mainScroll.appendChild(wrap);
+    else document.body.appendChild(wrap);
   }
   const f = getCachedFooter();
   const owner = f.footer_owner || '';
@@ -473,9 +508,6 @@ function renderHeader(current) {
   const wrap = document.getElementById('app-header');
   if (!wrap) return;
 
-  // ⭐ 모바일 감지 (렌더링 자체를 분기)
-  const isMobile = window.matchMedia('(max-width: 768px)').matches;
-
   const isDark = _isDark;
   const theme = isDark ? {
     headerBg: '#0f0f0f', borderColor: '#222', logoColor: '#fff',
@@ -484,6 +516,18 @@ function renderHeader(current) {
     headerBg: '#fff', borderColor: '#eee', logoColor: '#222',
     btnBg: '#fff', btnBgActive: '#222', btnText: '#222', btnTextActive: '#fff', btnBorder: '#ddd', btnBorderActive: '#222', nameColor: '#555',
   };
+
+  let bottomNav = document.getElementById('mobile-bottom-nav');
+  const wrapper = document.querySelector('.site-wrapper');
+  if (!bottomNav) {
+    bottomNav = document.createElement('nav');
+    bottomNav.id = 'mobile-bottom-nav';
+  }
+  if (wrapper) {
+    wrapper.appendChild(bottomNav);
+  } else {
+    if (!bottomNav.parentNode) document.body.appendChild(bottomNav);
+  }
 
   if (_headerRendered && wrap.querySelector('header')) {
     wrap.querySelectorAll('[data-nav]').forEach(el => {
@@ -540,38 +584,15 @@ function renderHeader(current) {
     : `<a href="login.html" data-nav="login" style="${btnStyle(current === 'login')}">로그인</a>
        <a href="signup.html" data-nav="signup" style="${btnStyle(current === 'signup')}">회원가입</a>`;
 
-  const logoHtml = logoImageUrl
-    ? `<a href="index.html" style="display:inline-block;"><img src="${logoImageUrl}" alt="${siteName}" style="height:40px; max-width:240px; object-fit:contain; display:block; margin:0 auto;"></a>`
-    : `<a href="index.html" style="font-size:22px; font-weight:700; color:${theme.logoColor}; text-decoration:none; display:inline-block;">${siteName}</a>`;
-
-  // ⭐⭐⭐ 모바일이면 .header-nav-wrap을 아예 DOM에 안 넣음 ⭐⭐⭐
-  const navHtml = isMobile ? '' : `
-    <div class="header-nav-wrap">
-      <a href="cart.html" data-nav="cart" style="${btnStyle(current === 'cart')}">장바구니 <span id="cart-count" style="margin-left:4px;">0</span></a>
-      <a href="orders.html" data-nav="orders" style="${btnStyle(current === 'orders')}">주문조회</a>
-      ${userBtns}
+  const nameRow = `
+    <div class="header-name-row" style="text-align:center; font-size:13px; color:${theme.nameColor}; margin-bottom:12px; min-height:18px; line-height:18px; font-weight:500;">
+      ${m ? `${m.name}님` : ''}
     </div>
   `;
 
-  wrap.innerHTML = `
-    <header style="background:${theme.headerBg}; border-bottom:1px solid ${theme.borderColor}; padding:${isMobile ? '10px 16px 8px 16px' : '12px 16px 10px 16px'};">
-      <div style="max-width:1400px; margin:0 auto;">
-        <div style="margin-bottom:${isMobile ? '4px' : '8px'}; text-align:center;">${logoHtml}</div>
-        <div class="header-name-row" style="text-align:center; font-size:13px; color:${theme.nameColor}; margin-bottom:${isMobile ? '0' : '12px'}; min-height:${isMobile ? '16px' : '18px'}; line-height:${isMobile ? '16px' : '18px'}; font-weight:500;">
-          ${m ? `${m.name}님` : ''}
-        </div>
-        ${navHtml}
-      </div>
-    </header>
-  `;
-
-  // ⭐ 하단 탭바 갱신
-  let bottomNav = document.getElementById('mobile-bottom-nav');
-  if (!bottomNav) {
-    bottomNav = document.createElement('nav');
-    bottomNav.id = 'mobile-bottom-nav';
-    document.body.appendChild(bottomNav);
-  }
+  const logoHtml = logoImageUrl
+    ? `<a href="index.html" style="display:inline-block;"><img src="${logoImageUrl}" alt="${siteName}" style="height:40px; max-width:240px; object-fit:contain; display:block; margin:0 auto;"></a>`
+    : `<a href="index.html" style="font-size:22px; font-weight:700; color:${theme.logoColor}; text-decoration:none; display:inline-block;">${siteName}</a>`;
 
   const mobileTabMy = m 
     ? `<a href="mypage.html" data-nav="mypage" class="bottom-nav-item ${current === 'mypage' ? 'active' : ''}">${svgIcons.mypage}<span>내정보</span></a>`
@@ -588,9 +609,21 @@ function renderHeader(current) {
     ${mobileTabMy}
   `;
 
-  _headerRendered = true;
+  wrap.innerHTML = `
+    <header style="background:${theme.headerBg}; border-bottom:1px solid ${theme.borderColor}; padding:12px 16px 10px 16px;">
+      <div style="max-width:1400px; margin:0 auto;">
+        <div style="margin-bottom:8px; text-align:center;">${logoHtml}</div>
+        ${nameRow}
+        <div class="header-nav-wrap">
+          <a href="cart.html" data-nav="cart" style="${btnStyle(current === 'cart')}">장바구니 <span id="cart-count" style="margin-left:4px;">0</span></a>
+          <a href="orders.html" data-nav="orders" style="${btnStyle(current === 'orders')}">주문조회</a>
+          ${userBtns}
+        </div>
+      </div>
+    </header>
+  `;
 
-  // 상단 카트 카운트 & 하단 배지 갱신
+  _headerRendered = true;
   const cart = JSON.parse(localStorage.getItem('cart') || '[]');
   const cc = document.getElementById('cart-count');
   const badge = document.getElementById('bottom-cart-badge');
@@ -612,13 +645,45 @@ function renderHeader(current) {
   refreshLogoCache();
 }
 
-// ⭐⭐⭐ DOM 부트스트랩: 재배치 로직 없음, 헤더/푸터/버튼만 렌더 ⭐⭐⭐
 document.addEventListener('DOMContentLoaded', async () => {
   if (_isAdmin) {
     if (_isDark) document.body.classList.add('dark');
     applyPhoneAttrs();
     return;
   }
+
+  const existingHeader = document.getElementById('app-header');
+  const existingBottomNav = document.getElementById('mobile-bottom-nav');
+  const bodyChildren = Array.from(document.body.children);
+  
+  const wrapper = document.createElement('div');
+  wrapper.className = 'site-wrapper';
+  
+  const mainScroll = document.createElement('div');
+  mainScroll.className = 'site-main-scroll';
+
+  bodyChildren.forEach(child => {
+    if (child.id === 'app-header') return;
+    if (child.id === 'mobile-bottom-nav') return;
+    if (child.tagName === 'SCRIPT') return;
+    if (child.id === 'app-footer') return;
+    if (child.classList.contains('page-loader')) return;
+    if (child.id === 'scroll-btns') return;
+
+    mainScroll.appendChild(child);
+  });
+
+  if (existingHeader) {
+    wrapper.appendChild(existingHeader);
+  }
+  
+  wrapper.appendChild(mainScroll);
+
+  if (existingBottomNav) {
+    wrapper.appendChild(existingBottomNav);
+  }
+  
+  document.body.insertBefore(wrapper, document.body.firstChild);
 
   const loader = document.createElement('div');
   loader.className = 'page-loader';
