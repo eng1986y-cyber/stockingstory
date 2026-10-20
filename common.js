@@ -10,55 +10,36 @@ if (_isDark) {
   document.documentElement.style.background = '#0a0a0a';
 }
 
-// 이미지 복사 방지 + 스크롤바 강제 고정 + ⭐ 헤더 상단 고정 및 본문 스크롤 분리
 (function() {
   const style = document.createElement('style');
   style.textContent = `
-    /* ⭐ [핵심] 전체 body 스크롤을 막고, 헤더 아래 영역에서만 스크롤 발생하게 설정 */
     html, body {
-      margin: 0;
-      padding: 0;
+      margin: 0; padding: 0;
       height: 100% !important;
       overflow: hidden !important;
       width: 100%;
       -webkit-text-size-adjust: 100%;
       overscroll-behavior: none;
-      scrollbar-gutter: stable; /* ⭐ 스크롤바 공간 확보로 좌우 밀림 방지 */
+      scrollbar-gutter: stable;
     }
-
-    /* ⭐ 헤더와 본문을 감싸는 레이아웃 컨테이너 */
     .site-wrapper {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      height: 100dvh;
-      width: 100%;
-      overflow: hidden;
+      display: flex; flex-direction: column;
+      height: 100vh; height: 100dvh;
+      width: 100%; overflow: hidden;
     }
-
-    /* ⭐ 상단 헤더 영역 (고정) */
     #app-header {
-      flex-shrink: 0;
-      flex-grow: 0;
-      position: relative;
-      z-index: 99999;
-      background: #fff;
-      width: 100%;
+      flex-shrink: 0; flex-grow: 0;
+      position: relative; z-index: 99999;
+      background: #fff; width: 100%;
       box-shadow: 0 4px 10px rgba(0,0,0,0.05);
       margin-bottom: 0 !important;
     }
-    body.dark #app-header {
-      background: #0f0f0f;
-    }
+    body.dark #app-header { background: #0f0f0f; }
 
-    /* ⭐ [핵심] 헤더 아래 본문 영역만 스크롤되도록 설정 */
     .site-main-scroll {
-      flex: 1 1 0;
-      min-height: 0;
-      overflow-y: scroll;
-      overflow-x: hidden;
-      width: 100%;
-      position: relative;
+      flex: 1 1 0; min-height: 0;
+      overflow-y: scroll; overflow-x: hidden;
+      width: 100%; position: relative;
       padding-top: 0 !important;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
@@ -66,9 +47,7 @@ if (_isDark) {
       scrollbar-color: #d1d5db transparent;
       scrollbar-gutter: stable;
     }
-    body.dark .site-main-scroll {
-      scrollbar-color: #333 transparent;
-    }
+    body.dark .site-main-scroll { scrollbar-color: #333 transparent; }
 
     .site-main-scroll::-webkit-scrollbar { width: 8px; }
     .site-main-scroll::-webkit-scrollbar-track { background: transparent; }
@@ -77,61 +56,42 @@ if (_isDark) {
     body.dark .site-main-scroll::-webkit-scrollbar-thumb { background: #333; }
     body.dark .site-main-scroll::-webkit-scrollbar-thumb:hover { background: #555; }
 
-    /* 상단 네비게이션 반응형 정렬 (PC는 우측) */
     .header-nav-wrap {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: flex-end;
+      display: flex; gap: 8px; flex-wrap: wrap;
+      align-items: center; justify-content: flex-end;
     }
 
-    /* ⭐⭐⭐ 모바일 환경 처리 ⭐⭐⭐ */
     @media (max-width: 768px) {
-      .header-nav-wrap {
-        display: none !important;
-      }
-      #app-header header {
-        padding: 10px 16px 8px 16px !important;
-      }
+      .header-nav-wrap { display: none !important; }
+      #app-header header { padding: 10px 16px 8px 16px !important; }
       .header-name-row {
         margin-bottom: 0 !important;
-        min-height: 16px !important;
-        line-height: 16px !important;
+        min-height: 16px !important; line-height: 16px !important;
       }
       .site-main-scroll { overflow-y: auto; }
     }
 
-    /* ⭐ 데이터 로딩 중 화면 가리는 스피너 */
     .page-loader {
-      position: fixed; inset: 0;
-      background: #0a0a0a;
+      position: fixed; inset: 0; background: #0a0a0a;
       display: flex; align-items: center; justify-content: center;
-      z-index: 999999;
-      transition: opacity 0.2s ease;
+      z-index: 999999; transition: opacity 0.2s ease;
     }
     .page-loader.hide { opacity: 0; pointer-events: none; }
     .spinner {
       width: 40px; height: 40px;
       border: 3px solid rgba(255,255,255,0.1);
       border-top-color: #e5e7eb;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+      border-radius: 50%; animation: spin 0.8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* 이미지 복사/드래그 방지 */
     img {
-      -webkit-user-drag: none !important;
-      user-drag: none !important;
-      user-select: none !important;
-      -webkit-user-select: none !important;
-      -webkit-touch-callout: none !important;
-      pointer-events: none !important;
+      -webkit-user-drag: none !important; user-drag: none !important;
+      user-select: none !important; -webkit-user-select: none !important;
+      -webkit-touch-callout: none !important; pointer-events: none !important;
     }
     a img { pointer-events: auto !important; }
 
-    /* 플로팅 스크롤 버튼 */
     #scroll-btns {
       position: fixed; left: 50%; transform: translateX(calc(700px + 16px));
       bottom: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 900;
@@ -146,12 +106,11 @@ if (_isDark) {
       border-color: #333; background: #1a1a1a; color: #e5e7eb; box-shadow: 0 2px 8px rgba(0,0,0,.5);
     }
     @media (max-width: 1450px) { #scroll-btns { left: auto; right: 16px; transform: none; } }
-    @media (max-width: 768px) { 
+    @media (max-width: 768px) {
       #scroll-btns { right: 12px; bottom: 85px; }
-      #scroll-btns button { width: 40px; height: 40px; font-size: 16px; } 
+      #scroll-btns button { width: 40px; height: 40px; font-size: 16px; }
     }
 
-    /* Footer */
     #app-footer { margin-top: 40px; padding: 24px 16px; background: #fafafa; border-top: 1px solid #eee; color: #666; font-size: 13px; line-height: 1.8; }
     body.dark #app-footer { background: #0f0f0f; border-top-color: #1f1f1f; color: #888; }
     #app-footer .footer-inner { max-width: 1400px; margin: 0 auto; text-align: center; }
@@ -163,114 +122,65 @@ if (_isDark) {
     #app-footer .footer-text { margin-top: 12px; padding-top: 12px; border-top: 1px dashed #ddd; font-size: 12px; color: #999; white-space: pre-wrap; max-width: 800px; margin-left: auto; margin-right: auto; }
     body.dark #app-footer .footer-text { border-top-color: #222; color: #555; }
 
-    /* ⭐ Footer SNS 아이콘 */
     #app-footer .footer-sns-row {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 12px;
-      margin-top: 14px;
+      display: flex; justify-content: center; align-items: center;
+      gap: 12px; margin-top: 14px;
     }
     #app-footer .footer-sns-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border: 1px solid #e5e7eb;
-      background: #fff;
-      color: #4b5563;
-      text-decoration: none;
-      transition: all 0.15s ease;
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 1px solid #e5e7eb; background: #fff; color: #4b5563;
+      text-decoration: none; transition: all 0.15s ease;
       pointer-events: auto !important;
     }
     #app-footer .footer-sns-btn svg { pointer-events: none !important; }
     #app-footer .footer-sns-btn:hover {
-      background: #111827;
-      color: #fff;
-      border-color: #111827;
+      background: #111827; color: #fff; border-color: #111827;
     }
     body.dark #app-footer .footer-sns-btn {
-      background: #1a1a1a;
-      border-color: #333;
-      color: #e5e7eb;
+      background: #1a1a1a; border-color: #333; color: #e5e7eb;
     }
     body.dark #app-footer .footer-sns-btn:hover {
-      background: #e5e7eb;
-      color: #111;
-      border-color: #e5e7eb;
+      background: #e5e7eb; color: #111; border-color: #e5e7eb;
     }
 
-    /* ⭐⭐⭐ 모바일 Footer / SNS 아이콘 보강 ⭐⭐⭐ */
     @media (max-width: 768px) {
       #app-footer {
         padding: 20px 16px calc(20px + 65px + env(safe-area-inset-bottom));
-        margin-top: 24px;
-        font-size: 12px;
+        margin-top: 24px; font-size: 12px;
       }
-      #app-footer .footer-sns-row {
-        gap: 14px;
-        margin-top: 16px;
-      }
-      #app-footer .footer-sns-btn {
-        width: 44px;
-        height: 44px;
-      }
-      #app-footer .footer-sns-btn svg {
-        width: 22px;
-        height: 22px;
-      }
-      #app-footer .footer-text {
-        margin-top: 14px;
-        padding-top: 14px;
-        font-size: 11px;
-      }
+      #app-footer .footer-sns-row { gap: 14px; margin-top: 16px; }
+      #app-footer .footer-sns-btn { width: 44px; height: 44px; }
+      #app-footer .footer-sns-btn svg { width: 22px; height: 22px; }
+      #app-footer .footer-text { margin-top: 14px; padding-top: 14px; font-size: 11px; }
     }
 
     /* ⭐⭐⭐ 모바일 하단 고정 탭바 ⭐⭐⭐ */
     #mobile-bottom-nav {
       display: none;
       height: 65px;
-      flex-shrink: 0;
-      flex-grow: 0;
-      background: #fff;
-      border-top: 1px solid #eee;
+      flex-shrink: 0; flex-grow: 0;
+      background: #fff; border-top: 1px solid #eee;
       z-index: 99999;
-      justify-content: space-around;
-      align-items: center;
+      justify-content: space-around; align-items: center;
       padding-bottom: env(safe-area-inset-bottom);
     }
     body.dark #mobile-bottom-nav {
-      background: #0f0f0f;
-      border-top-color: #222;
+      background: #0f0f0f; border-top-color: #222;
     }
-
     .bottom-nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-      text-decoration: none;
-      color: #9ca3af;
-      font-size: 10px;
-      font-weight: 500;
-      flex: 1 1 0;
-      min-width: 0;
-      height: 100%;
-      border: none;
-      background: none;
-      cursor: pointer;
-      padding: 0 2px;
-      white-space: nowrap;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 3px; text-decoration: none;
+      color: #9ca3af; font-size: 10px; font-weight: 500;
+      flex: 1 1 0; min-width: 0; height: 100%;
+      border: none; background: none; cursor: pointer;
+      padding: 0 2px; white-space: nowrap;
       -webkit-tap-highlight-color: transparent;
       position: relative;
     }
     .bottom-nav-item > span {
-      font-size: 10px;
-      line-height: 1.1;
-      white-space: nowrap;
+      font-size: 10px; line-height: 1.1; white-space: nowrap;
     }
     .bottom-nav-item.active { color: #111827; }
     body.dark .bottom-nav-item.active { color: #fff; }
@@ -280,9 +190,7 @@ if (_isDark) {
       fill: none; stroke-linecap: round; stroke-linejoin: round;
     }
     .bottom-nav-item .cart-badge {
-      position: absolute;
-      top: 6px;
-      right: 50%;
+      position: absolute; top: 6px; right: 50%;
       transform: translateX(16px);
       background: #ef4444; color: #fff;
       font-size: 10px; font-weight: bold;
@@ -301,7 +209,6 @@ if (_isDark) {
   document.head.appendChild(style);
 })();
 
-// 이미지 복사 방지
 document.addEventListener('contextmenu', (e) => {
   if (e.target.tagName === 'IMG') e.preventDefault();
 });
@@ -309,7 +216,6 @@ document.addEventListener('dragstart', (e) => {
   if (e.target.tagName === 'IMG') e.preventDefault();
 });
 
-// 연락처 자동 하이픈
 document.addEventListener('input', (e) => {
   const el = e.target;
   if (el.tagName !== 'INPUT') return;
@@ -340,7 +246,6 @@ function createScrollButtons() {
     <button id="btn-scroll-bottom" title="맨 아래로">▼</button>
   `;
   document.body.appendChild(wrap);
-  
   document.getElementById('btn-scroll-top').addEventListener('click', () => {
     const mainScroll = document.querySelector('.site-main-scroll');
     if (mainScroll) mainScroll.scrollTo({ top: 0, behavior: 'smooth' });
@@ -351,15 +256,12 @@ function createScrollButtons() {
     if (mainScroll) mainScroll.scrollTo({ top: mainScroll.scrollHeight, behavior: 'smooth' });
     else window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
   });
-  
   const updateVisibility = () => {
     const mainScroll = document.querySelector('.site-main-scroll');
     if (mainScroll) {
-      const canScroll = mainScroll.scrollHeight > mainScroll.clientHeight + 50;
-      wrap.style.display = canScroll ? 'flex' : 'none';
+      wrap.style.display = (mainScroll.scrollHeight > mainScroll.clientHeight + 50) ? 'flex' : 'none';
     } else {
-      const canScroll = document.documentElement.scrollHeight > window.innerHeight + 50;
-      wrap.style.display = canScroll ? 'flex' : 'none';
+      wrap.style.display = (document.documentElement.scrollHeight > window.innerHeight + 50) ? 'flex' : 'none';
     }
   };
   updateVisibility();
@@ -406,7 +308,6 @@ async function refreshLogoCache() {
   } catch (e) {}
 }
 
-// ⭐ SNS 키 포함
 async function refreshFooterCache() {
   const client = getSupabaseClient();
   if (!client) return;
@@ -421,7 +322,6 @@ async function refreshFooterCache() {
   } catch (e) {}
 }
 
-// ⭐ SNS 아이콘 렌더 포함
 function renderFooter() {
   let wrap = document.getElementById('app-footer');
   if (!wrap) {
@@ -441,7 +341,6 @@ function renderFooter() {
   const instagram = f.footer_instagram || '';
   const blog = f.footer_blog || '';
   const band = f.footer_band || '';
-
   const hasSns = instagram || blog || band;
 
   if (!owner && !phone && !email && !address && !business && !text && !hasSns) {
@@ -457,39 +356,29 @@ function renderFooter() {
   if (business) items.push(`<span class="footer-item">사업자번호: ${business}</span>`);
 
   const snsLinks = [];
-  if (instagram) {
-    snsLinks.push(`
-      <a href="${instagram}" target="_blank" rel="noopener noreferrer" class="footer-sns-btn" aria-label="Instagram" title="Instagram">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-        </svg>
-      </a>
-    `);
-  }
-  if (blog) {
-    snsLinks.push(`
-      <a href="${blog}" target="_blank" rel="noopener noreferrer" class="footer-sns-btn" aria-label="Naver Blog" title="Naver Blog">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-          <path d="M8 16V8l8 8V8"></path>
-        </svg>
-      </a>
-    `);
-  }
-  if (band) {
-    snsLinks.push(`
-      <a href="${band}" target="_blank" rel="noopener noreferrer" class="footer-sns-btn" aria-label="Naver Band" title="Naver Band">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-          <circle cx="9" cy="7" r="4"></circle>
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-        </svg>
-      </a>
-    `);
-  }
+  if (instagram) snsLinks.push(`
+    <a href="${instagram}" target="_blank" rel="noopener noreferrer" class="footer-sns-btn" aria-label="Instagram">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+      </svg>
+    </a>`);
+  if (blog) snsLinks.push(`
+    <a href="${blog}" target="_blank" rel="noopener noreferrer" class="footer-sns-btn" aria-label="Naver Blog">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle><path d="M8 16V8l8 8V8"></path>
+      </svg>
+    </a>`);
+  if (band) snsLinks.push(`
+    <a href="${band}" target="_blank" rel="noopener noreferrer" class="footer-sns-btn" aria-label="Naver Band">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+      </svg>
+    </a>`);
 
   wrap.innerHTML = `
     <div class="footer-inner">
@@ -540,6 +429,65 @@ async function verifyMemberStatus() {
 
 // ===== 헤더 및 하단 탭바 렌더 =====
 let _headerRendered = false;
+
+// ⭐ 하단 탭바 HTML 생성 (별도 함수로 분리 → 재사용/재렌더 용이)
+function buildBottomNav(current, isMember, svgIcons) {
+  const commonTabs = `
+    <a href="index.html" data-nav="home" class="bottom-nav-item ${current === 'home' ? 'active' : ''}">
+      ${svgIcons.home}<span>홈</span>
+    </a>
+    <a href="cart.html" data-nav="cart" class="bottom-nav-item ${current === 'cart' ? 'active' : ''}">
+      ${svgIcons.cart}
+      <span id="bottom-cart-badge" class="cart-badge" style="display:none;">0</span>
+      <span>장바구니</span>
+    </a>
+    <a href="orders.html" data-nav="orders" class="bottom-nav-item ${current === 'orders' ? 'active' : ''}">
+      ${svgIcons.orders}<span>주문조회</span>
+    </a>
+  `;
+
+  const memberTabs = isMember
+    ? `<a href="myorders.html" data-nav="myorders" class="bottom-nav-item ${current === 'myorders' ? 'active' : ''}">
+         ${svgIcons.myorders}<span>주문내역</span>
+       </a>
+       <a href="mypage.html" data-nav="mypage" class="bottom-nav-item ${current === 'mypage' ? 'active' : ''}">
+         ${svgIcons.mypage}<span>내정보</span>
+       </a>
+       <a href="#" data-nav="logout" id="bottom-logout-btn" class="bottom-nav-item">
+         ${svgIcons.logout}<span>로그아웃</span>
+       </a>`
+    : `<a href="login.html" data-nav="login" class="bottom-nav-item ${current === 'login' ? 'active' : ''}">
+         ${svgIcons.login}<span>로그인</span>
+       </a>
+       <a href="signup.html" data-nav="signup" class="bottom-nav-item ${current === 'signup' ? 'active' : ''}">
+         ${svgIcons.signup}<span>회원가입</span>
+       </a>`;
+
+  return { html: commonTabs + memberTabs, count: isMember ? 6 : 5 };
+}
+
+function updateBottomNavBadge() {
+  const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+  const badge = document.getElementById('bottom-cart-badge');
+  if (badge) {
+    badge.textContent = cart.length;
+    badge.style.display = cart.length > 0 ? 'block' : 'none';
+  }
+}
+
+function bindBottomLogout() {
+  const blb = document.getElementById('bottom-logout-btn');
+  if (blb) {
+    blb.onclick = (e) => {
+      e.preventDefault();
+      if (confirm('로그아웃 하시겠습니까?')) {
+        localStorage.removeItem('member');
+        location.href = 'index.html';
+      }
+    };
+  }
+}
+
 function renderHeader(current) {
   const wrap = document.getElementById('app-header');
   if (!wrap) return;
@@ -559,36 +507,48 @@ function renderHeader(current) {
     bottomNav = document.createElement('nav');
     bottomNav.id = 'mobile-bottom-nav';
   }
+  // ⭐ 항상 wrapper의 마지막 자식으로 이동 (본문/헤더 뒤에 오도록)
   if (wrapper) {
-    wrapper.appendChild(bottomNav);
-  } else {
-    if (!bottomNav.parentNode) document.body.appendChild(bottomNav);
+    if (bottomNav.parentNode !== wrapper) wrapper.appendChild(bottomNav);
+    else wrapper.appendChild(bottomNav); // 순서 보장
+  } else if (!bottomNav.parentNode) {
+    document.body.appendChild(bottomNav);
   }
 
   const member = localStorage.getItem('member');
-  const m = member ? JSON.parse(member) : null;
+  let m = null;
+  try { m = member ? JSON.parse(member) : null; } catch { m = null; }
+  const isMember = !!(m && m.id);
 
+  const svgIcons = {
+    home: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
+    cart: `<svg class="nav-icon" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>`,
+    orders: `<svg class="nav-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,
+    myorders: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
+    mypage: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+    logout: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`,
+    login: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>`,
+    signup: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>`
+  };
+
+  // ⭐ 하단 탭바는 "매번 강제 재생성" (상태 변화/렌더 누락 방지)
+  const { html: navHtml, count } = buildBottomNav(current, isMember, svgIcons);
+  bottomNav.className = `nav-count-${count}`;
+  bottomNav.innerHTML = navHtml;
+  updateBottomNavBadge();
+  bindBottomLogout();
+
+  // ⭐ 헤더도 상태 변화 반영 필요 → 매번 재생성하지 않고, 최초 1회만 그리되 하단탭바는 위에서 항상 갱신
   if (_headerRendered && wrap.querySelector('header')) {
+    // 헤더 내 활성 버튼만 갱신
     wrap.querySelectorAll('[data-nav]').forEach(el => {
       const isActive = el.dataset.nav === current;
       el.style.background = isActive ? theme.btnBgActive : theme.btnBg;
       el.style.color = isActive ? theme.btnTextActive : theme.btnText;
       el.style.borderColor = isActive ? theme.btnBorderActive : theme.btnBorder;
     });
-    
-    document.querySelectorAll('.bottom-nav-item').forEach(el => {
-      if (el.dataset.nav === current) el.classList.add('active');
-      else el.classList.remove('active');
-    });
-
-    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const cc = document.getElementById('cart-count');
-    const badge = document.getElementById('bottom-cart-badge');
-    if (cc) cc.textContent = cart.length;
-    if (badge) {
-      badge.textContent = cart.length;
-      badge.style.display = cart.length > 0 ? 'block' : 'none';
-    }
+    if (cc) cc.textContent = JSON.parse(localStorage.getItem('cart') || '[]').length;
     return;
   }
 
@@ -606,18 +566,7 @@ function renderHeader(current) {
     white-space: nowrap; box-sizing: border-box; flex-shrink: 0;
   `;
 
-  const svgIcons = {
-    home: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
-    cart: `<svg class="nav-icon" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>`,
-    orders: `<svg class="nav-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,
-    myorders: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
-    mypage: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
-    logout: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`,
-    login: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>`,
-    signup: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>`
-  };
-
-  const userBtns = m
+  const userBtns = isMember
     ? `<a href="mypage.html" data-nav="mypage" style="${btnStyle(current === 'mypage')}">내정보</a>
        <a href="myorders.html" data-nav="myorders" style="${btnStyle(current === 'myorders')}">주문내역</a>
        <a href="#" id="logout-btn" style="${btnStyle(false)}">로그아웃</a>`
@@ -626,38 +575,13 @@ function renderHeader(current) {
 
   const nameRow = `
     <div class="header-name-row" style="text-align:center; font-size:13px; color:${theme.nameColor}; margin-bottom:12px; min-height:18px; line-height:18px; font-weight:500;">
-      ${m ? `${m.name}님` : ''}
+      ${isMember ? `${m.name}님` : ''}
     </div>
   `;
 
   const logoHtml = logoImageUrl
     ? `<a href="index.html" style="display:inline-block;"><img src="${logoImageUrl}" alt="${siteName}" style="height:40px; max-width:240px; object-fit:contain; display:block; margin:0 auto;"></a>`
     : `<a href="index.html" style="font-size:22px; font-weight:700; color:${theme.logoColor}; text-decoration:none; display:inline-block;">${siteName}</a>`;
-
-  // ⭐⭐⭐ 모바일 하단 탭바 아이템 구성 ⭐⭐⭐
-  // 로그인 시: 홈 · 장바구니 · 주문조회 · 주문내역 · 내정보 · 로그아웃 (6개)
-  // 로그아웃 시: 홈 · 장바구니 · 주문조회 · 로그인 · 회원가입 (5개)
-  const commonTabs = `
-    <a href="index.html" data-nav="home" class="bottom-nav-item ${current === 'home' ? 'active' : ''}">${svgIcons.home}<span>홈</span></a>
-    <a href="cart.html" data-nav="cart" class="bottom-nav-item ${current === 'cart' ? 'active' : ''}">
-      ${svgIcons.cart}
-      <span id="bottom-cart-badge" class="cart-badge" style="display:none;">0</span>
-      <span>장바구니</span>
-    </a>
-    <a href="orders.html" data-nav="orders" class="bottom-nav-item ${current === 'orders' ? 'active' : ''}">${svgIcons.orders}<span>주문조회</span></a>
-  `;
-
-  const memberTabs = m
-    ? `<a href="myorders.html" data-nav="myorders" class="bottom-nav-item ${current === 'myorders' ? 'active' : ''}">${svgIcons.myorders}<span>주문내역</span></a>
-       <a href="mypage.html" data-nav="mypage" class="bottom-nav-item ${current === 'mypage' ? 'active' : ''}">${svgIcons.mypage}<span>내정보</span></a>
-       <a href="#" data-nav="logout" id="bottom-logout-btn" class="bottom-nav-item">${svgIcons.logout}<span>로그아웃</span></a>`
-    : `<a href="login.html" data-nav="login" class="bottom-nav-item ${current === 'login' ? 'active' : ''}">${svgIcons.login}<span>로그인</span></a>
-       <a href="signup.html" data-nav="signup" class="bottom-nav-item ${current === 'signup' ? 'active' : ''}">${svgIcons.signup}<span>회원가입</span></a>`;
-
-  // ⭐ 탭 개수에 따라 클래스 부여 (아이콘/폰트 축소 여부 결정)
-  const tabCount = m ? 6 : 5;
-  bottomNav.className = `nav-count-${tabCount}`;
-  bottomNav.innerHTML = commonTabs + memberTabs;
 
   wrap.innerHTML = `
     <header style="background:${theme.headerBg}; border-bottom:1px solid ${theme.borderColor}; padding:12px 16px 10px 16px;">
@@ -674,14 +598,8 @@ function renderHeader(current) {
   `;
 
   _headerRendered = true;
-  const cart = JSON.parse(localStorage.getItem('cart') || '[]');
   const cc = document.getElementById('cart-count');
-  const badge = document.getElementById('bottom-cart-badge');
-  if (cc) cc.textContent = cart.length;
-  if (badge) {
-    badge.textContent = cart.length;
-    badge.style.display = cart.length > 0 ? 'block' : 'none';
-  }
+  if (cc) cc.textContent = JSON.parse(localStorage.getItem('cart') || '[]').length;
 
   const lb = document.getElementById('logout-btn');
   if (lb) {
@@ -689,17 +607,6 @@ function renderHeader(current) {
       e.preventDefault();
       localStorage.removeItem('member');
       location.href = 'index.html';
-    };
-  }
-  // ⭐ 하단 탭바 로그아웃 버튼 핸들러
-  const blb = document.getElementById('bottom-logout-btn');
-  if (blb) {
-    blb.onclick = (e) => {
-      e.preventDefault();
-      if (confirm('로그아웃 하시겠습니까?')) {
-        localStorage.removeItem('member');
-        location.href = 'index.html';
-      }
     };
   }
 
@@ -730,19 +637,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (child.id === 'app-footer') return;
     if (child.classList.contains('page-loader')) return;
     if (child.id === 'scroll-btns') return;
-
     mainScroll.appendChild(child);
   });
 
-  if (existingHeader) {
-    wrapper.appendChild(existingHeader);
-  }
-  
+  if (existingHeader) wrapper.appendChild(existingHeader);
   wrapper.appendChild(mainScroll);
-
-  if (existingBottomNav) {
-    wrapper.appendChild(existingBottomNav);
-  }
+  if (existingBottomNav) wrapper.appendChild(existingBottomNav);
   
   document.body.insertBefore(wrapper, document.body.firstChild);
 
