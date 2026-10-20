@@ -14,21 +14,103 @@
       margin: 0;
     }
     
-    /* ⭐ 배너 영역을 헤더 바로 아래에 밀착시키고 위쪽 여백을 0으로 설정 */
+    /* ⭐ 배너 슬라이드 영역 */
     #banner-wrap {
-  width: 100%;
-  margin-top: 0;
-  margin-bottom: 24px;
-  overflow: hidden;
-}
+      width: 100%;
+      margin-top: 0;
+      margin-bottom: 24px;
+      overflow: hidden;
+      position: relative;
+      background: #f0f0f0;
+    }
+    #banner-slider {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+    }
+    #banner-track {
+      display: flex;
+      transition: transform 0.5s ease;
+      will-change: transform;
+    }
+    .banner-slide {
+      flex: 0 0 100%;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+      display: block;
+    }
+    .banner-slide img {
+      width: 100%;
+      height: 700px;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+    }
+    .banner-slide a {
+      display: block;
+      width: 100%;
+      height: 100%;
+      pointer-events: auto;
+    }
 
+    /* ⭐ 좌우 화살표 버튼 */
+    .banner-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.4);
+      color: #fff;
+      border: 0;
+      cursor: pointer;
+      font-size: 22px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .banner-arrow:hover { background: rgba(0, 0, 0, 0.6); }
+    .banner-arrow.prev { left: 20px; }
+    .banner-arrow.next { right: 20px; }
+    .banner-arrow[hidden] { display: none; }
+
+    /* ⭐ 하단 인디케이터(점) */
+    .banner-dots {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      z-index: 10;
+    }
+    .banner-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+      border: 0;
+      cursor: pointer;
+      padding: 0;
+      transition: background 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .banner-dot.active { background: #fff; }
+    .banner-dots[hidden] { display: none; }
+
+    /* ⭐ 상품 목록 */
     #product-container {
       max-width: 1400px;
       margin: 0 auto;
       padding: 0 16px;
       box-sizing: border-box;
       width: 100%;
-      margin-top: 24px; /* 상품 목록 위쪽 여백도 살짝 조정 */
+      margin-top: 24px;
     }
     @media (max-width: 768px) { #product-container { margin-top: 16px; } }
 
@@ -73,6 +155,7 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+    body.dark #product-list .card .name { color: #e5e7eb; }
     #product-list .card .price {
       color: #e53935;
       font-weight: 700;
@@ -91,11 +174,30 @@
       box-sizing: border-box;
       min-height: 50px;
     }
+
+    /* ⭐⭐⭐ 모바일: 배너 높이 축소 + 화살표/점 크기 조정 ⭐⭐⭐ */
+    @media (max-width: 768px) {
+      .banner-slide img { height: 260px; }
+      .banner-arrow { width: 38px; height: 38px; font-size: 18px; }
+      .banner-arrow.prev { left: 10px; }
+      .banner-arrow.next { right: 10px; }
+      .banner-dots { bottom: 12px; gap: 6px; }
+      .banner-dot { width: 8px; height: 8px; }
+    }
   </style>
 </head>
 <body>
   <div id="app-header"></div>
-  <div id="banner-wrap" style="display:none;"><div id="banner-inner"></div></div>
+
+  <div id="banner-wrap" style="display:none;">
+    <div id="banner-slider">
+      <div id="banner-track"></div>
+      <button type="button" class="banner-arrow prev" id="banner-prev" aria-label="이전 배너" hidden>‹</button>
+      <button type="button" class="banner-arrow next" id="banner-next" aria-label="다음 배너" hidden>›</button>
+      <div class="banner-dots" id="banner-dots" hidden></div>
+    </div>
+  </div>
+
   <main id="product-container">
     <div id="product-list">로딩중...</div>
     <div id="pagination"></div>
@@ -120,17 +222,169 @@
     let allProducts = [];
     let currentPage = 1;
 
+    /* =========================================
+       ⭐ 배너 슬라이드
+    ========================================= */
+    const AUTO_INTERVAL = 5000; // 5초 자동 넘김
+    let bannerList = [];
+    let bannerIndex = 0;
+    let autoTimer = null;
+
     async function loadBanner() {
       const wrap = document.getElementById('banner-wrap');
-      const inner = document.getElementById('banner-inner');
-      const { data, error } = await db.from('banners').select('*')
-        .order('id', { ascending: false }).limit(1).maybeSingle();
-      if (error || !data || !data.image_url) { wrap.style.display = 'none'; return; }
-      wrap.style.display = isPC() ? 'block' : 'none';
-      const imgHtml = `<img src="${data.image_url}" alt="배너" style="width:100%; height:700px; object-fit:cover; display:block;">`;
-      inner.innerHTML = data.link_url ? `<a href="${data.link_url}" style="display:block; width:100%;">${imgHtml}</a>` : imgHtml;
+      const track = document.getElementById('banner-track');
+      const dotsEl = document.getElementById('banner-dots');
+      const prevBtn = document.getElementById('banner-prev');
+      const nextBtn = document.getElementById('banner-next');
+
+      const { data, error } = await db
+        .from('banners')
+        .select('*')
+        .order('id', { ascending: false });
+
+      if (error || !data || data.length === 0) {
+        wrap.style.display = 'none';
+        bannerList = [];
+        return;
+      }
+
+      bannerList = data.filter(b => b.image_url);
+      if (bannerList.length === 0) {
+        wrap.style.display = 'none';
+        return;
+      }
+
+      wrap.style.display = 'block';
+
+      // ⭐ 슬라이드 HTML 생성
+      track.innerHTML = bannerList.map((b, i) => {
+        const img = `<img src="${b.image_url}" alt="배너 ${i + 1}" loading="${i === 0 ? 'eager' : 'lazy'}">`;
+        return b.link_url
+          ? `<div class="banner-slide"><a href="${b.link_url}" target="_blank" rel="noopener noreferrer">${img}</a></div>`
+          : `<div class="banner-slide">${img}</div>`;
+      }).join('');
+
+      // ⭐ 인디케이터 점
+      if (bannerList.length > 1) {
+        dotsEl.hidden = false;
+        prevBtn.hidden = false;
+        nextBtn.hidden = false;
+        dotsEl.innerHTML = bannerList.map((_, i) =>
+          `<button type="button" class="banner-dot ${i === 0 ? 'active' : ''}" data-idx="${i}" aria-label="배너 ${i + 1}"></button>`
+        ).join('');
+
+        dotsEl.querySelectorAll('.banner-dot').forEach(dot => {
+          dot.addEventListener('click', () => {
+            goToBanner(Number(dot.dataset.idx));
+            restartAuto();
+          });
+        });
+
+        prevBtn.onclick = () => {
+          goToBanner(bannerIndex - 1);
+          restartAuto();
+        };
+        nextBtn.onclick = () => {
+          goToBanner(bannerIndex + 1);
+          restartAuto();
+        };
+
+        startAuto();
+      } else {
+        dotsEl.hidden = true;
+        prevBtn.hidden = true;
+        nextBtn.hidden = true;
+        dotsEl.innerHTML = '';
+        stopAuto();
+      }
+
+      bannerIndex = 0;
+      goToBanner(0);
     }
 
+    function goToBanner(idx) {
+      const track = document.getElementById('banner-track');
+      const dotsEl = document.getElementById('banner-dots');
+      if (!track || bannerList.length === 0) return;
+
+      // 무한 순환
+      const total = bannerList.length;
+      bannerIndex = ((idx % total) + total) % total;
+
+      track.style.transform = `translateX(-${bannerIndex * 100}%)`;
+
+      if (dotsEl) {
+        dotsEl.querySelectorAll('.banner-dot').forEach((d, i) => {
+          d.classList.toggle('active', i === bannerIndex);
+        });
+      }
+    }
+
+    function startAuto() {
+      stopAuto();
+      if (bannerList.length <= 1) return;
+      autoTimer = setInterval(() => {
+        goToBanner(bannerIndex + 1);
+      }, AUTO_INTERVAL);
+    }
+    function stopAuto() {
+      if (autoTimer) {
+        clearInterval(autoTimer);
+        autoTimer = null;
+      }
+    }
+    function restartAuto() {
+      startAuto();
+    }
+
+    // ⭐ 페이지 백그라운드 시 자동 중지
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') stopAuto();
+      else if (bannerList.length > 1) startAuto();
+    });
+
+    // ⭐ 모바일 스와이프 지원
+    (function setupSwipe() {
+      const slider = document.getElementById('banner-slider');
+      if (!slider) return;
+
+      let startX = 0, startY = 0, isSwiping = false;
+
+      slider.addEventListener('touchstart', (e) => {
+        if (bannerList.length <= 1) return;
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        isSwiping = true;
+        stopAuto();
+      }, { passive: true });
+
+      slider.addEventListener('touchmove', (e) => {
+        if (!isSwiping) return;
+        const dx = Math.abs(e.touches[0].clientX - startX);
+        const dy = Math.abs(e.touches[0].clientY - startY);
+        if (dx > dy && dx > 10) {
+          // 가로 스와이프 → 페이지 스크롤 방지
+          e.preventDefault();
+        }
+      }, { passive: false });
+
+      slider.addEventListener('touchend', (e) => {
+        if (!isSwiping) return;
+        isSwiping = false;
+        const dx = e.changedTouches[0].clientX - startX;
+        const dy = e.changedTouches[0].clientY - startY;
+
+        if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+          if (dx < 0) goToBanner(bannerIndex + 1);  // 왼쪽으로 → 다음
+          else goToBanner(bannerIndex - 1);          // 오른쪽으로 → 이전
+        }
+        if (bannerList.length > 1) startAuto();
+      }, { passive: true });
+    })();
+
+    /* =========================================
+       ⭐ 상품 목록
+    ========================================= */
     async function loadProducts() {
       const list = document.getElementById('product-list');
       const { data, error } = await db.from('products').select('*').order('created_at', { ascending: false });
@@ -219,9 +473,6 @@
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
         applyGridColumns();
-        const wrap = document.getElementById('banner-wrap');
-        const inner = document.getElementById('banner-inner');
-        if (inner.innerHTML.trim()) wrap.style.display = isPC() ? 'block' : 'none';
         const maxP = getMaxPages();
         const totalP = Math.min(Math.ceil(allProducts.length / getPerPage()), maxP);
         if (currentPage > totalP) currentPage = totalP || 1;
