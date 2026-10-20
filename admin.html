@@ -107,29 +107,34 @@
     .card input[readonly] { background: #f9fafb !important; color: #6b7280 !important; }
     .card textarea { resize: vertical; min-height: 70px; }
 
-    /* ⭐⭐⭐ 설정 탭 2열 그리드 ⭐⭐⭐ */
-    .settings-grid {
+    /* ⭐⭐⭐ 설정 탭: 좌우 2열 배치 ⭐⭐⭐ */
+    .settings-split {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 16px;
+      align-items: start;
       margin-bottom: 16px;
-      align-items: start;   /* 카드 높이 자연스럽게 */
     }
-    .settings-grid > .card {
+    .settings-col {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-width: 0;
+    }
+    .settings-col > .card {
       margin-bottom: 0 !important;
       min-width: 0;
       width: 100%;
     }
-    /* 각 카드 내부 요소가 넘치지 않게 */
-    .settings-grid > .card input,
-    .settings-grid > .card textarea,
-    .settings-grid > .card button {
+    .settings-col .card input,
+    .settings-col .card textarea,
+    .settings-col .card button {
       max-width: 100%;
       box-sizing: border-box;
     }
 
     @media (max-width: 1000px) {
-      .settings-grid {
+      .settings-split {
         grid-template-columns: 1fr;
         gap: 12px;
       }
@@ -455,85 +460,91 @@
         <!-- 설정 -->
         <section id="tab-settings" class="admin-section">
           <h1 class="page-title">사이트 설정</h1>
-          <p class="page-subtitle">로고, 배너, 푸터, 배송비를 관리합니다</p>
+          <p class="page-subtitle">로고, 배너, 푸터, SNS, 배송비를 관리합니다</p>
 
-          <!-- ⭐⭐⭐ 2열 그리드 (1행: 로고 / 배너) ⭐⭐⭐ -->
-          <div class="settings-grid">
-            <!-- 로고 카드 -->
-            <div class="card">
-              <div class="card-title">🏷️ 로고 / 사이트명</div>
-              <div style="display: grid; gap: 10px;">
-                <input id="logo-site-name" placeholder="사이트명">
-                <input id="logo-image-url" placeholder="로고 이미지 URL">
-                <div class="form-row">
-                  <button id="logo-save-btn" class="btn btn-primary">등록/수정</button>
-                  <button id="logo-delete-btn" class="btn btn-danger">삭제</button>
-                </div>
-              </div>
-              <p id="logo-msg" class="msg"></p>
-              <div id="logo-preview" class="preview-box" style="display:none;">
-                <div class="preview-label">현재 로고</div>
-                <img id="logo-preview-img" style="max-height:60px; object-fit:contain; display:block;">
-              </div>
-            </div>
+          <!-- ⭐⭐⭐ 좌우 2열 배치 ⭐⭐⭐ -->
+          <div class="settings-split">
 
-            <!-- 배너 카드 -->
-            <div class="card">
-              <div class="card-title">🖼️ 배너 이미지</div>
-              <div style="display: grid; gap: 10px;">
-                <input id="banner-image-url" placeholder="배너 이미지 URL">
-                <input id="banner-link-url" placeholder="클릭 시 이동할 링크 URL (선택)">
-                <div class="form-row">
-                  <button id="banner-save-btn" class="btn btn-primary">등록/수정</button>
-                  <button id="banner-delete-btn" class="btn btn-danger">삭제</button>
-                </div>
-              </div>
-              <p id="banner-msg" class="msg"></p>
-              <div id="banner-preview" class="preview-box" style="display:none;">
-                <div class="preview-label">현재 배너</div>
-                <img id="banner-preview-img" style="width:100%; max-height:180px; object-fit:cover; border-radius:6px;">
-              </div>
-            </div>
-          </div>
-
-          <!-- ⭐⭐⭐ 2열 그리드 (2행: Footer+SNS / 배송비) ⭐⭐⭐ -->
-          <div class="settings-grid">
-            <!-- 사이트 하단 정보 카드 (SNS 링크 포함) -->
-            <div class="card">
-              <div class="card-title">📄 사이트 하단 정보 (Footer)</div>
-              <div style="display: grid; gap: 10px;">
-                <input id="footer-owner" placeholder="상호명 / 대표자">
-                <input id="footer-phone" placeholder="연락처">
-                <input id="footer-email" placeholder="이메일">
-                <input id="footer-address" placeholder="주소">
-                <input id="footer-business" placeholder="사업자등록번호">
-                <textarea id="footer-text" placeholder="추가 안내문"></textarea>
-
-                <!-- SNS 링크 서브섹션 (같은 카드 내부) -->
-                <div style="margin-top: 8px; padding-top: 12px; border-top: 1px dashed #e5e7eb;">
-                  <div style="font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 8px;">🔗 SNS 링크 (입력 시 하단에 아이콘 표시)</div>
-                  <div style="display: grid; gap: 8px;">
-                    <input id="footer-instagram" placeholder="Instagram URL (예: https://instagram.com/your_id)">
-                    <input id="footer-blog" placeholder="Naver Blog URL (예: https://blog.naver.com/your_id)">
-                    <input id="footer-band" placeholder="Naver Band URL (예: https://band.us/band/12345678)">
+            <!-- ══════════ 좌측 열 ══════════ -->
+            <div class="settings-col">
+              <!-- 1. 로고 / 사이트명 -->
+              <div class="card">
+                <div class="card-title">🏷️ 로고 / 사이트명</div>
+                <div style="display: grid; gap: 10px;">
+                  <input id="logo-site-name" placeholder="사이트명">
+                  <input id="logo-image-url" placeholder="로고 이미지 URL">
+                  <div class="form-row">
+                    <button id="logo-save-btn" class="btn btn-primary">등록/수정</button>
+                    <button id="logo-delete-btn" class="btn btn-danger">삭제</button>
                   </div>
                 </div>
-
-                <button id="save-footer" class="btn btn-success">저장</button>
+                <p id="logo-msg" class="msg"></p>
+                <div id="logo-preview" class="preview-box" style="display:none;">
+                  <div class="preview-label">현재 로고</div>
+                  <img id="logo-preview-img" style="max-height:60px; object-fit:contain; display:block;">
+                </div>
               </div>
-              <p id="footer-msg" class="msg"></p>
+
+              <!-- 2. 배너 이미지 (로고 아래) -->
+              <div class="card">
+                <div class="card-title">🖼️ 배너 이미지</div>
+                <div style="display: grid; gap: 10px;">
+                  <input id="banner-image-url" placeholder="배너 이미지 URL">
+                  <input id="banner-link-url" placeholder="클릭 시 이동할 링크 URL (선택)">
+                  <div class="form-row">
+                    <button id="banner-save-btn" class="btn btn-primary">등록/수정</button>
+                    <button id="banner-delete-btn" class="btn btn-danger">삭제</button>
+                  </div>
+                </div>
+                <p id="banner-msg" class="msg"></p>
+                <div id="banner-preview" class="preview-box" style="display:none;">
+                  <div class="preview-label">현재 배너</div>
+                  <img id="banner-preview-img" style="width:100%; max-height:180px; object-fit:cover; border-radius:6px;">
+                </div>
+              </div>
             </div>
 
-            <!-- 전체 배송비 설정 카드 -->
-            <div class="card">
-              <div class="card-title">🚚 전체 배송비 설정</div>
-              <div class="form-row">
-                <input id="global-shipping" type="number" min="0" placeholder="배송비 (0=무료)">
-                <button id="save-shipping" class="btn btn-success" style="flex:0 0 auto;">저장</button>
+            <!-- ══════════ 우측 열 ══════════ -->
+            <div class="settings-col">
+              <!-- 1. 사이트 하단 정보 (Footer) -->
+              <div class="card">
+                <div class="card-title">📄 사이트 하단 정보 (Footer)</div>
+                <div style="display: grid; gap: 10px;">
+                  <input id="footer-owner" placeholder="상호명 / 대표자">
+                  <input id="footer-phone" placeholder="연락처">
+                  <input id="footer-email" placeholder="이메일">
+                  <input id="footer-address" placeholder="주소">
+                  <input id="footer-business" placeholder="사업자등록번호">
+                  <textarea id="footer-text" placeholder="추가 안내문"></textarea>
+                  <button id="save-footer" class="btn btn-success">저장</button>
+                </div>
+                <p id="footer-msg" class="msg"></p>
               </div>
-              <p style="font-size:12px; color:#9ca3af; margin:6px 0 0;">모든 상품에 동일하게 적용됩니다</p>
-              <p id="shipping-msg" class="msg"></p>
+
+              <!-- 2. SNS 링크 (별도 카드) -->
+              <div class="card">
+                <div class="card-title">🔗 SNS 링크 <span class="hint">(입력 시 하단에 아이콘 표시)</span></div>
+                <div style="display: grid; gap: 10px;">
+                  <input id="footer-instagram" placeholder="Instagram URL (예: https://instagram.com/your_id)">
+                  <input id="footer-blog" placeholder="Naver Blog URL (예: https://blog.naver.com/your_id)">
+                  <input id="footer-band" placeholder="Naver Band URL (예: https://band.us/band/12345678)">
+                  <button id="save-sns" class="btn btn-success">저장</button>
+                </div>
+                <p id="sns-msg" class="msg"></p>
+              </div>
+
+              <!-- 3. 전체 배송비 설정 (SNS 아래) -->
+              <div class="card">
+                <div class="card-title">🚚 전체 배송비 설정</div>
+                <div class="form-row">
+                  <input id="global-shipping" type="number" min="0" placeholder="배송비 (0=무료)">
+                  <button id="save-shipping" class="btn btn-success" style="flex:0 0 auto;">저장</button>
+                </div>
+                <p style="font-size:12px; color:#9ca3af; margin:6px 0 0;">모든 상품에 동일하게 적용됩니다</p>
+                <p id="shipping-msg" class="msg"></p>
+              </div>
             </div>
+
           </div>
         </section>
       </div>
@@ -580,7 +591,7 @@
     function showAdmin() {
       loginScreen.style.display = 'none';
       adminScreen.style.display = 'block';
-      loadLogo(); loadFooter(); loadBanner(); loadShippingSetting();
+      loadLogo(); loadFooter(); loadBanner(); loadShippingSetting(); loadSnsLinks();
       loadAdminList(); loadOrders(); loadMembers();
     }
 
@@ -687,12 +698,9 @@
       }
     });
 
-    // ===== 푸터 (SNS 링크 포함) =====
+    // ===== 푸터 (SNS 제외, 푸터 정보만) =====
     async function loadFooter() {
-      const keys = [
-        'footer_owner','footer_phone','footer_email','footer_address','footer_business','footer_text',
-        'footer_instagram','footer_blog','footer_band'
-      ];
+      const keys = ['footer_owner','footer_phone','footer_email','footer_address','footer_business','footer_text'];
       const { data } = await db.from('settings').select('key, value').in('key', keys);
       const map = {};
       (data || []).forEach(row => { map[row.key] = row.value || ''; });
@@ -702,12 +710,45 @@
       document.getElementById('footer-address').value = map.footer_address || '';
       document.getElementById('footer-business').value = map.footer_business || '';
       document.getElementById('footer-text').value = map.footer_text || '';
+    }
+    document.getElementById('save-footer').addEventListener('click', async () => {
+      const msg = document.getElementById('footer-msg');
+      msg.className = 'msg';
+      msg.textContent = '저장 중...';
+
+      const updates = [
+        { key: 'footer_owner', value: document.getElementById('footer-owner').value.trim() },
+        { key: 'footer_phone', value: document.getElementById('footer-phone').value.trim() },
+        { key: 'footer_email', value: document.getElementById('footer-email').value.trim() },
+        { key: 'footer_address', value: document.getElementById('footer-address').value.trim() },
+        { key: 'footer_business', value: document.getElementById('footer-business').value.trim() },
+        { key: 'footer_text', value: document.getElementById('footer-text').value.trim() },
+      ];
+
+      const { error } = await db.from('settings').upsert(updates);
+      if (error) {
+        msg.className = 'msg error';
+        msg.textContent = '❌ ' + error.message;
+      } else {
+        msg.className = 'msg success';
+        msg.textContent = '✅ 저장 완료!';
+        localStorage.removeItem('footer_cache');
+        setTimeout(() => msg.textContent = '', 2000);
+      }
+    });
+
+    // ===== SNS 링크 (별도 카드) =====
+    async function loadSnsLinks() {
+      const keys = ['footer_instagram','footer_blog','footer_band'];
+      const { data } = await db.from('settings').select('key, value').in('key', keys);
+      const map = {};
+      (data || []).forEach(row => { map[row.key] = row.value || ''; });
       document.getElementById('footer-instagram').value = map.footer_instagram || '';
       document.getElementById('footer-blog').value = map.footer_blog || '';
       document.getElementById('footer-band').value = map.footer_band || '';
     }
-    document.getElementById('save-footer').addEventListener('click', async () => {
-      const msg = document.getElementById('footer-msg');
+    document.getElementById('save-sns').addEventListener('click', async () => {
+      const msg = document.getElementById('sns-msg');
       msg.className = 'msg';
       msg.textContent = '저장 중...';
 
@@ -719,12 +760,6 @@
       };
 
       const updates = [
-        { key: 'footer_owner', value: document.getElementById('footer-owner').value.trim() },
-        { key: 'footer_phone', value: document.getElementById('footer-phone').value.trim() },
-        { key: 'footer_email', value: document.getElementById('footer-email').value.trim() },
-        { key: 'footer_address', value: document.getElementById('footer-address').value.trim() },
-        { key: 'footer_business', value: document.getElementById('footer-business').value.trim() },
-        { key: 'footer_text', value: document.getElementById('footer-text').value.trim() },
         { key: 'footer_instagram', value: normalizeUrl(document.getElementById('footer-instagram').value) },
         { key: 'footer_blog', value: normalizeUrl(document.getElementById('footer-blog').value) },
         { key: 'footer_band', value: normalizeUrl(document.getElementById('footer-band').value) },
