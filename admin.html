@@ -39,7 +39,7 @@
     /* ⭐⭐⭐ 상단 탭 메뉴 바 (헤더 아래에 fixed로 고정) ⭐⭐⭐ */
     .admin-tabbar {
       position: fixed !important;
-      top: 65px !important;         /* 헤더 높이 바로 아래 */
+      top: 65px !important;
       left: 0 !important;
       width: 100% !important;
       background: #f4f6f8 !important;
@@ -69,7 +69,7 @@
     }
     .admin-tabbar .nav-item.active { background: #111827; color: #fff; }
 
-    /* ⭐ 헤더(65) + 탭바(약 74) 아래로 본문 밀기, 본문만 스크롤 */
+    /* ⭐ 헤더(65) + 탭바(74) 아래로 본문 밀기, 본문만 스크롤 */
     .admin-layout { 
       display: flex; 
       flex-direction: column; 
@@ -77,13 +77,12 @@
       max-width: 1600px; 
       margin: 0 auto; 
       padding: 24px; 
-      height: calc(100vh - 65px - 74px);   /* 헤더 + 탭바 제외 */
-      margin-top: calc(65px + 74px);      /* 헤더 + 탭바 만큼 아래로 */
+      height: calc(100vh - 65px - 74px);
+      margin-top: calc(65px + 74px);
       overflow-y: auto; 
       overflow-x: hidden;
     }
 
-    /* 스크롤바 디자인 (본문 영역 전용) */
     .admin-layout::-webkit-scrollbar { width: 10px; }
     .admin-layout::-webkit-scrollbar-track { background: #f4f6f8; }
     .admin-layout::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 5px; border: 2px solid #f4f6f8; }
@@ -107,6 +106,34 @@
     .card input:focus, .card textarea:focus { outline: none; border-color: #111827; }
     .card input[readonly] { background: #f9fafb !important; color: #6b7280 !important; }
     .card textarea { resize: vertical; min-height: 70px; }
+
+    /* ⭐⭐⭐ 설정 탭 2열 그리드 ⭐⭐⭐ */
+    .settings-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+      align-items: start;   /* 카드 높이 자연스럽게 */
+    }
+    .settings-grid > .card {
+      margin-bottom: 0 !important;
+      min-width: 0;
+      width: 100%;
+    }
+    /* 각 카드 내부 요소가 넘치지 않게 */
+    .settings-grid > .card input,
+    .settings-grid > .card textarea,
+    .settings-grid > .card button {
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+
+    @media (max-width: 1000px) {
+      .settings-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+    }
 
     /* 상품 등록: 가로 스크롤 없이 화면 너비에 맞춰 자동 줄바꿈 */
     #product-register-card { min-width: 0; width: 100%; }
@@ -323,7 +350,6 @@
   </div>
 
   <div id="admin-screen" style="display:none;">
-    <!-- ⭐ 상단 헤더 (fixed) -->
     <header class="admin-header">
       <div class="admin-header-left">
         <span class="logo">ADMIN</span>
@@ -332,7 +358,6 @@
       <button id="logout-btn" class="logout-btn">로그아웃</button>
     </header>
 
-    <!-- ⭐⭐⭐ 탭 메뉴 바 (헤더 아래에 fixed로 고정) ⭐⭐⭐ -->
     <div class="admin-tabbar">
       <div class="admin-tabbar-inner">
         <button class="nav-item active" data-tab="products">📦 상품</button>
@@ -351,7 +376,6 @@
 
           <div class="product-layout">
             
-            <!-- 1. 새 상품 등록 카드 (1열 배치) -->
             <div class="card" id="product-register-card">
               <div class="card-title">📝 새 상품 등록</div>
               <form id="product-form">
@@ -370,7 +394,6 @@
               <p id="msg" class="msg"></p>
             </div>
 
-            <!-- 2. 등록된 상품 목록 카드 -->
             <div class="card" style="display:flex; flex-direction:column; margin-bottom:0;">
               <div class="card-title">📋 등록된 상품 <span id="product-count" class="hint"></span></div>
               
@@ -434,72 +457,83 @@
           <h1 class="page-title">사이트 설정</h1>
           <p class="page-subtitle">로고, 배너, 푸터, 배송비를 관리합니다</p>
 
-          <div class="card">
-            <div class="card-title">🏷️ 로고 / 사이트명</div>
-            <div style="display: grid; gap: 10px;">
-              <input id="logo-site-name" placeholder="사이트명">
-              <input id="logo-image-url" placeholder="로고 이미지 URL">
-              <div class="form-row">
-                <button id="logo-save-btn" class="btn btn-primary">등록/수정</button>
-                <button id="logo-delete-btn" class="btn btn-danger">삭제</button>
-              </div>
-            </div>
-            <p id="logo-msg" class="msg"></p>
-            <div id="logo-preview" class="preview-box" style="display:none;">
-              <div class="preview-label">현재 로고</div>
-              <img id="logo-preview-img" style="max-height:60px; object-fit:contain; display:block;">
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-title">📄 사이트 하단 정보 (Footer)</div>
-            <div style="display: grid; gap: 10px;">
-              <input id="footer-owner" placeholder="상호명 / 대표자">
-              <input id="footer-phone" placeholder="연락처">
-              <input id="footer-email" placeholder="이메일">
-              <input id="footer-address" placeholder="주소">
-              <input id="footer-business" placeholder="사업자등록번호">
-              <textarea id="footer-text" placeholder="추가 안내문"></textarea>
-
-              <div style="margin-top: 8px; padding-top: 12px; border-top: 1px dashed #e5e7eb;">
-                <div style="font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 8px;">🔗 SNS 링크 (입력 시 하단에 아이콘 표시)</div>
-                <div style="display: grid; gap: 8px;">
-                  <input id="footer-instagram" placeholder="Instagram URL (예: https://instagram.com/your_id)">
-                  <input id="footer-blog" placeholder="Naver Blog URL (예: https://blog.naver.com/your_id)">
-                  <input id="footer-band" placeholder="Naver Band URL (예: https://band.us/band/12345678)">
+          <!-- ⭐⭐⭐ 2열 그리드 (1행: 로고 / 배너) ⭐⭐⭐ -->
+          <div class="settings-grid">
+            <!-- 로고 카드 -->
+            <div class="card">
+              <div class="card-title">🏷️ 로고 / 사이트명</div>
+              <div style="display: grid; gap: 10px;">
+                <input id="logo-site-name" placeholder="사이트명">
+                <input id="logo-image-url" placeholder="로고 이미지 URL">
+                <div class="form-row">
+                  <button id="logo-save-btn" class="btn btn-primary">등록/수정</button>
+                  <button id="logo-delete-btn" class="btn btn-danger">삭제</button>
                 </div>
               </div>
-
-              <button id="save-footer" class="btn btn-success">저장</button>
-            </div>
-            <p id="footer-msg" class="msg"></p>
-          </div>
-
-          <div class="card">
-            <div class="card-title">🖼️ 배너 이미지</div>
-            <div style="display: grid; gap: 10px;">
-              <input id="banner-image-url" placeholder="배너 이미지 URL">
-              <input id="banner-link-url" placeholder="클릭 시 이동할 링크 URL (선택)">
-              <div class="form-row">
-                <button id="banner-save-btn" class="btn btn-primary">등록/수정</button>
-                <button id="banner-delete-btn" class="btn btn-danger">삭제</button>
+              <p id="logo-msg" class="msg"></p>
+              <div id="logo-preview" class="preview-box" style="display:none;">
+                <div class="preview-label">현재 로고</div>
+                <img id="logo-preview-img" style="max-height:60px; object-fit:contain; display:block;">
               </div>
             </div>
-            <p id="banner-msg" class="msg"></p>
-            <div id="banner-preview" class="preview-box" style="display:none;">
-              <div class="preview-label">현재 배너</div>
-              <img id="banner-preview-img" style="width:100%; max-height:180px; object-fit:cover; border-radius:6px;">
+
+            <!-- 배너 카드 -->
+            <div class="card">
+              <div class="card-title">🖼️ 배너 이미지</div>
+              <div style="display: grid; gap: 10px;">
+                <input id="banner-image-url" placeholder="배너 이미지 URL">
+                <input id="banner-link-url" placeholder="클릭 시 이동할 링크 URL (선택)">
+                <div class="form-row">
+                  <button id="banner-save-btn" class="btn btn-primary">등록/수정</button>
+                  <button id="banner-delete-btn" class="btn btn-danger">삭제</button>
+                </div>
+              </div>
+              <p id="banner-msg" class="msg"></p>
+              <div id="banner-preview" class="preview-box" style="display:none;">
+                <div class="preview-label">현재 배너</div>
+                <img id="banner-preview-img" style="width:100%; max-height:180px; object-fit:cover; border-radius:6px;">
+              </div>
             </div>
           </div>
 
-          <div class="card">
-            <div class="card-title">🚚 전체 배송비 설정</div>
-            <div class="form-row">
-              <input id="global-shipping" type="number" min="0" placeholder="배송비 (0=무료)">
-              <button id="save-shipping" class="btn btn-success" style="flex:0 0 auto;">저장</button>
+          <!-- ⭐⭐⭐ 2열 그리드 (2행: Footer+SNS / 배송비) ⭐⭐⭐ -->
+          <div class="settings-grid">
+            <!-- 사이트 하단 정보 카드 (SNS 링크 포함) -->
+            <div class="card">
+              <div class="card-title">📄 사이트 하단 정보 (Footer)</div>
+              <div style="display: grid; gap: 10px;">
+                <input id="footer-owner" placeholder="상호명 / 대표자">
+                <input id="footer-phone" placeholder="연락처">
+                <input id="footer-email" placeholder="이메일">
+                <input id="footer-address" placeholder="주소">
+                <input id="footer-business" placeholder="사업자등록번호">
+                <textarea id="footer-text" placeholder="추가 안내문"></textarea>
+
+                <!-- SNS 링크 서브섹션 (같은 카드 내부) -->
+                <div style="margin-top: 8px; padding-top: 12px; border-top: 1px dashed #e5e7eb;">
+                  <div style="font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 8px;">🔗 SNS 링크 (입력 시 하단에 아이콘 표시)</div>
+                  <div style="display: grid; gap: 8px;">
+                    <input id="footer-instagram" placeholder="Instagram URL (예: https://instagram.com/your_id)">
+                    <input id="footer-blog" placeholder="Naver Blog URL (예: https://blog.naver.com/your_id)">
+                    <input id="footer-band" placeholder="Naver Band URL (예: https://band.us/band/12345678)">
+                  </div>
+                </div>
+
+                <button id="save-footer" class="btn btn-success">저장</button>
+              </div>
+              <p id="footer-msg" class="msg"></p>
             </div>
-            <p style="font-size:12px; color:#9ca3af; margin:6px 0 0;">모든 상품에 동일하게 적용됩니다</p>
-            <p id="shipping-msg" class="msg"></p>
+
+            <!-- 전체 배송비 설정 카드 -->
+            <div class="card">
+              <div class="card-title">🚚 전체 배송비 설정</div>
+              <div class="form-row">
+                <input id="global-shipping" type="number" min="0" placeholder="배송비 (0=무료)">
+                <button id="save-shipping" class="btn btn-success" style="flex:0 0 auto;">저장</button>
+              </div>
+              <p style="font-size:12px; color:#9ca3af; margin:6px 0 0;">모든 상품에 동일하게 적용됩니다</p>
+              <p id="shipping-msg" class="msg"></p>
+            </div>
           </div>
         </section>
       </div>
@@ -530,7 +564,6 @@
         document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
         btn.classList.add('active');
         document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
-        // 탭 변경 시 스크롤을 맨 위로
         document.querySelector('.admin-layout').scrollTop = 0;
       });
     });
@@ -879,15 +912,8 @@
       } else {
         filteredProducts = allProducts.filter((p) => {
           const searchableValues = [
-            p.name,
-            p.product_code,
-            p.colors,
-            p.sizes,
-            p.hem_option,
-            p.other_option,
-            p.min_qty,
-            p.price,
-            p.id
+            p.name, p.product_code, p.colors, p.sizes, p.hem_option, p.other_option,
+            p.min_qty, p.price, p.id
           ];
           return searchableValues.some((value) => {
             const valueText = Array.isArray(value) ? value.join(' ') : value;
