@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>관리자 - STK스토리 심플라이프</title>
   <link rel="stylesheet" href="style.css">
-  <script src="common.js"></script>
   <style>
     html, body { background: #f4f6f8 !important; color: #1f2937 !important; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; }
@@ -44,9 +43,8 @@
       max-width: 1600px; 
       margin: 0 auto; 
       padding: 24px; 
-      /* 화면 전체 높이에서 헤더 높이(65px)를 뺀 만큼만 차지하고 내부에서 스크롤 */
       height: calc(100vh - 65px);
-      margin-top: 65px; /* 헤더에 가려지지 않게 아래로 밀기 */
+      margin-top: 65px;
       overflow-y: auto; 
       overflow-x: hidden;
     }
@@ -431,6 +429,17 @@
               <input id="footer-address" placeholder="주소">
               <input id="footer-business" placeholder="사업자등록번호">
               <textarea id="footer-text" placeholder="추가 안내문"></textarea>
+
+              <!-- ⭐ SNS 링크 입력 -->
+              <div style="margin-top: 8px; padding-top: 12px; border-top: 1px dashed #e5e7eb;">
+                <div style="font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 8px;">🔗 SNS 링크 (입력 시 하단에 아이콘 표시)</div>
+                <div style="display: grid; gap: 8px;">
+                  <input id="footer-instagram" placeholder="Instagram URL (예: https://instagram.com/your_id)">
+                  <input id="footer-blog" placeholder="Naver Blog URL (예: https://blog.naver.com/your_id)">
+                  <input id="footer-band" placeholder="Naver Band URL (예: https://band.us/band/12345678)">
+                </div>
+              </div>
+
               <button id="save-footer" class="btn btn-success">저장</button>
             </div>
             <p id="footer-msg" class="msg"></p>
@@ -615,9 +624,12 @@
       }
     });
 
-    // ===== 푸터 =====
+    // ===== 푸터 (SNS 링크 포함) =====
     async function loadFooter() {
-      const keys = ['footer_owner','footer_phone','footer_email','footer_address','footer_business','footer_text'];
+      const keys = [
+        'footer_owner','footer_phone','footer_email','footer_address','footer_business','footer_text',
+        'footer_instagram','footer_blog','footer_band'
+      ];
       const { data } = await db.from('settings').select('key, value').in('key', keys);
       const map = {};
       (data || []).forEach(row => { map[row.key] = row.value || ''; });
@@ -627,11 +639,23 @@
       document.getElementById('footer-address').value = map.footer_address || '';
       document.getElementById('footer-business').value = map.footer_business || '';
       document.getElementById('footer-text').value = map.footer_text || '';
+      document.getElementById('footer-instagram').value = map.footer_instagram || '';
+      document.getElementById('footer-blog').value = map.footer_blog || '';
+      document.getElementById('footer-band').value = map.footer_band || '';
     }
     document.getElementById('save-footer').addEventListener('click', async () => {
       const msg = document.getElementById('footer-msg');
       msg.className = 'msg';
       msg.textContent = '저장 중...';
+
+      // ⭐ SNS URL 정규화 (프로토콜 없으면 https:// 자동 추가)
+      const normalizeUrl = (v) => {
+        const s = (v || '').trim();
+        if (!s) return '';
+        if (/^https?:\/\//i.test(s)) return s;
+        return 'https://' + s;
+      };
+
       const updates = [
         { key: 'footer_owner', value: document.getElementById('footer-owner').value.trim() },
         { key: 'footer_phone', value: document.getElementById('footer-phone').value.trim() },
@@ -639,7 +663,11 @@
         { key: 'footer_address', value: document.getElementById('footer-address').value.trim() },
         { key: 'footer_business', value: document.getElementById('footer-business').value.trim() },
         { key: 'footer_text', value: document.getElementById('footer-text').value.trim() },
+        { key: 'footer_instagram', value: normalizeUrl(document.getElementById('footer-instagram').value) },
+        { key: 'footer_blog', value: normalizeUrl(document.getElementById('footer-blog').value) },
+        { key: 'footer_band', value: normalizeUrl(document.getElementById('footer-band').value) },
       ];
+
       const { error } = await db.from('settings').upsert(updates);
       if (error) {
         msg.className = 'msg error';

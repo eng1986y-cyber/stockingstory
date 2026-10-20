@@ -73,3 +73,10 @@ body.dark ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 5px; }
 @media (max-width: 600px) {
   .detail-wrap { grid-template-columns: 1fr; }
 }
+
+/* ⭐ 모바일 하단 탭바 공간 확보 (fixed 탭바에 콘텐츠 가려지지 않도록) */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: calc(65px + env(safe-area-inset-bottom));
+  }
+}
