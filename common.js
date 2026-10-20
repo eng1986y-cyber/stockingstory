@@ -19,7 +19,7 @@ if (_isDark) {
       margin: 0;
       padding: 0;
       height: 100% !important;
-      overflow: hidden !important; /* body 스크롤 방지 */
+      overflow: hidden !important;
       width: 100%;
       -webkit-text-size-adjust: 100%;
       overscroll-behavior: none;
@@ -30,7 +30,7 @@ if (_isDark) {
       display: flex;
       flex-direction: column;
       height: 100vh;
-      height: 100dvh; /* 동적 뷰포트 높이 - 모바일 주소창 변화 대응 */
+      height: 100dvh;
       width: 100%;
       overflow: hidden;
     }
@@ -51,28 +51,26 @@ if (_isDark) {
     }
 
     /* ⭐ [핵심] 헤더 아래 본문 영역만 스크롤되도록 설정
-       - overflow-y: scroll → 항상 스크롤바 자리를 확보하여 콘텐츠 폭 고정
-         (스크롤 유무와 관계없이 헤더/본문 밀림 없음)
-       - 스크롤바 폭을 8px로 얇게 + 트랙 투명 처리하여 시각적 부담 최소화
+       - overflow-y: scroll → 항상 스크롤바 자리 확보 (스크롤 유무 무관 폭 고정)
+       - 스크롤바 두께 8px + 트랙 투명 → 시각적 부담 최소화
     */
     .site-main-scroll {
       flex: 1 1 0;
       min-height: 0;
-      overflow-y: scroll;   /* ⭐ 항상 스크롤바 영역 확보 (폭 고정) */
+      overflow-y: scroll;
       overflow-x: hidden;
       width: 100%;
       position: relative;
       padding-top: 0 !important;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
-      scrollbar-width: thin;             /* Firefox */
+      scrollbar-width: thin;
       scrollbar-color: #d1d5db transparent;
     }
     body.dark .site-main-scroll {
       scrollbar-color: #333 transparent;
     }
 
-    /* ⭐ 커스텀 스크롤바: 두께 8px, 트랙 투명 → 시각적 부담 없음 */
     .site-main-scroll::-webkit-scrollbar { width: 8px; }
     .site-main-scroll::-webkit-scrollbar-track { background: transparent; }
     .site-main-scroll::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
@@ -80,7 +78,7 @@ if (_isDark) {
     body.dark .site-main-scroll::-webkit-scrollbar-thumb { background: #333; }
     body.dark .site-main-scroll::-webkit-scrollbar-thumb:hover { background: #555; }
 
-    /* 상단 네비게이션 반응형 정렬 (PC는 우측, 모바일은 중앙) */
+    /* 상단 네비게이션 반응형 정렬 (PC는 우측) */
     .header-nav-wrap {
       display: flex;
       gap: 8px;
@@ -89,18 +87,23 @@ if (_isDark) {
       justify-content: flex-end;
     }
 
-    /* ⭐ 모바일 환경 처리 */
+    /* ⭐⭐⭐ 모바일 환경 처리 ⭐⭐⭐ */
     @media (max-width: 768px) {
+      /* ⭐ 상단 헤더 네비게이션은 숨기고 하단 탭바만 사용 */
       .header-nav-wrap {
-        justify-content: center;
+        display: none !important;
       }
-      
+      /* ⭐ 헤더 여백 최소화 (로고 + 이름만) */
       #app-header header {
-        padding: 10px 16px !important;
+        padding: 10px 16px 8px 16px !important;
       }
       .header-name-row {
-        margin-bottom: 6px !important;
+        margin-bottom: 0 !important;
+        min-height: 16px !important;
+        line-height: 16px !important;
       }
+      /* 모바일은 오버레이 스크롤바라 폭 영향 없음 */
+      .site-main-scroll { overflow-y: auto; }
     }
 
     /* ⭐ 데이터 로딩 중 화면 가리는 스피너 */
@@ -111,9 +114,7 @@ if (_isDark) {
       z-index: 999999;
       transition: opacity 0.2s ease;
     }
-    .page-loader.hide {
-      opacity: 0; pointer-events: none;
-    }
+    .page-loader.hide { opacity: 0; pointer-events: none; }
     .spinner {
       width: 40px; height: 40px;
       border: 3px solid rgba(255,255,255,0.1);
@@ -222,8 +223,6 @@ if (_isDark) {
 
     @media (max-width: 768px) {
       #mobile-bottom-nav { display: flex; }
-      /* ⭐ 모바일은 오버레이 스크롤바라 폭 영향 없음 */
-      .site-main-scroll { overflow-y: auto; }
     }
   `;
   document.head.appendChild(style);
