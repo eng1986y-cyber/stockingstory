@@ -23,8 +23,6 @@ if (_isDark) {
       width: 100%;
       -webkit-text-size-adjust: 100%;
       overscroll-behavior: none;
-      /* ⭐ 브라우저 기본 스크롤바 공간 예약 (스크롤 유무와 무관하게 폭 고정) */
-      scrollbar-gutter: stable;
     }
 
     /* ⭐ 헤더와 본문을 감싸는 레이아웃 컨테이너 */
@@ -53,28 +51,33 @@ if (_isDark) {
     }
 
     /* ⭐ [핵심] 헤더 아래 본문 영역만 스크롤되도록 설정
-       - scrollbar-gutter: stable → 스크롤바 없어도 공간 예약하여 폭 변동 없음
-       - min-height:0 → flex 자식 스크롤 안정화
+       - overflow-y: scroll → 항상 스크롤바 자리를 확보하여 콘텐츠 폭 고정
+         (스크롤 유무와 관계없이 헤더/본문 밀림 없음)
+       - 스크롤바 폭을 8px로 얇게 + 트랙 투명 처리하여 시각적 부담 최소화
     */
     .site-main-scroll {
       flex: 1 1 0;
       min-height: 0;
-      overflow-y: auto;
+      overflow-y: scroll;   /* ⭐ 항상 스크롤바 영역 확보 (폭 고정) */
       overflow-x: hidden;
       width: 100%;
       position: relative;
       padding-top: 0 !important;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
-      scrollbar-gutter: stable; /* ⭐ 스크롤바 공간 항상 예약 */
+      scrollbar-width: thin;             /* Firefox */
+      scrollbar-color: #d1d5db transparent;
+    }
+    body.dark .site-main-scroll {
+      scrollbar-color: #333 transparent;
     }
 
-    /* ⭐ 스크롤바 두께 고정 (10px) - 안정적 레이아웃 */
-    .site-main-scroll::-webkit-scrollbar { width: 10px; }
+    /* ⭐ 커스텀 스크롤바: 두께 8px, 트랙 투명 → 시각적 부담 없음 */
+    .site-main-scroll::-webkit-scrollbar { width: 8px; }
     .site-main-scroll::-webkit-scrollbar-track { background: transparent; }
-    .site-main-scroll::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 5px; border: 2px solid transparent; background-clip: padding-box; }
+    .site-main-scroll::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
     .site-main-scroll::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
-    body.dark .site-main-scroll::-webkit-scrollbar-thumb { background: #333; border: 2px solid #0a0a0a; background-clip: padding-box; }
+    body.dark .site-main-scroll::-webkit-scrollbar-thumb { background: #333; }
     body.dark .site-main-scroll::-webkit-scrollbar-thumb:hover { background: #555; }
 
     /* 상단 네비게이션 반응형 정렬 (PC는 우측, 모바일은 중앙) */
@@ -219,17 +222,8 @@ if (_isDark) {
 
     @media (max-width: 768px) {
       #mobile-bottom-nav { display: flex; }
-    }
-
-    /* ⭐ Safari 등 scrollbar-gutter 미지원 브라우저 fallback
-       → 스크롤바 두께만큼 padding-right를 미리 확보하여 폭 변동 방지 */
-    @supports not (scrollbar-gutter: stable) {
-      .site-main-scroll {
-        padding-right: 10px;
-      }
-      @media (max-width: 768px) {
-        .site-main-scroll { padding-right: 0; } /* 모바일은 오버레이 스크롤바라 불필요 */
-      }
+      /* ⭐ 모바일은 오버레이 스크롤바라 폭 영향 없음 */
+      .site-main-scroll { overflow-y: auto; }
     }
   `;
   document.head.appendChild(style);
@@ -265,7 +259,6 @@ function applyPhoneAttrs() {
 }
 
 function createScrollButtons() {
-  // ⭐ 관리자 페이지에서는 자체 버튼(.edge-scroll-controls)이 있으므로 생성하지 않음
   if (_isAdmin) return;
   if (document.getElementById('scroll-btns')) return;
   const wrap = document.createElement('div');
@@ -442,7 +435,6 @@ function renderHeader(current) {
     btnBg: '#fff', btnBgActive: '#222', btnText: '#222', btnTextActive: '#fff', btnBorder: '#ddd', btnBorderActive: '#222', nameColor: '#555',
   };
 
-  // ⭐ 모바일 하단 탭바를 항상 site-wrapper의 마지막 자식으로 보장
   let bottomNav = document.getElementById('mobile-bottom-nav');
   const wrapper = document.querySelector('.site-wrapper');
   if (!bottomNav) {
@@ -572,7 +564,6 @@ function renderHeader(current) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // ⭐⭐⭐ 관리자/수정 페이지에서는 공통 레이아웃 래핑을 전혀 하지 않음
   if (_isAdmin) {
     if (_isDark) document.body.classList.add('dark');
     applyPhoneAttrs();
@@ -606,7 +597,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   wrapper.appendChild(mainScroll);
 
-  // ⭐ 기존 #mobile-bottom-nav도 wrapper로 이동 (중복 방지)
   if (existingBottomNav) {
     wrapper.appendChild(existingBottomNav);
   }
