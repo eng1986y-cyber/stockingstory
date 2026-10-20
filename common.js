@@ -292,6 +292,11 @@ if (_isDark) {
     @media (max-width: 768px) {
       #mobile-bottom-nav { display: flex; }
     }
+
+    /* ⭐⭐⭐ 6개 탭 대응: 아이콘/라벨 축소 ⭐⭐⭐ */
+    #mobile-bottom-nav.nav-count-6 .bottom-nav-item { padding: 0 1px; gap: 2px; }
+    #mobile-bottom-nav.nav-count-6 .bottom-nav-item .nav-icon { width: 18px; height: 18px; }
+    #mobile-bottom-nav.nav-count-6 .bottom-nav-item > span { font-size: 9px; }
   `;
   document.head.appendChild(style);
 })();
@@ -560,6 +565,9 @@ function renderHeader(current) {
     if (!bottomNav.parentNode) document.body.appendChild(bottomNav);
   }
 
+  const member = localStorage.getItem('member');
+  const m = member ? JSON.parse(member) : null;
+
   if (_headerRendered && wrap.querySelector('header')) {
     wrap.querySelectorAll('[data-nav]').forEach(el => {
       const isActive = el.dataset.nav === current;
@@ -584,8 +592,6 @@ function renderHeader(current) {
     return;
   }
 
-  const member = localStorage.getItem('member');
-  const m = member ? JSON.parse(member) : null;
   const cached = getCachedLogo();
   const logoImageUrl = cached.image_url || '';
   const siteName = cached.site_name || '스타킹스토리 심플라이프';
@@ -628,14 +634,10 @@ function renderHeader(current) {
     ? `<a href="index.html" style="display:inline-block;"><img src="${logoImageUrl}" alt="${siteName}" style="height:40px; max-width:240px; object-fit:contain; display:block; margin:0 auto;"></a>`
     : `<a href="index.html" style="font-size:22px; font-weight:700; color:${theme.logoColor}; text-decoration:none; display:inline-block;">${siteName}</a>`;
 
-  // ⭐⭐⭐ 로그인 시: 주문내역 + 내정보 / 비로그인 시: 로그인 + 회원가입 (로그아웃은 헤더에 있음) ⭐⭐⭐
-  const mobileTabExtra = m
-    ? `<a href="myorders.html" data-nav="myorders" class="bottom-nav-item ${current === 'myorders' ? 'active' : ''}">${svgIcons.myorders}<span>주문내역</span></a>
-       <a href="mypage.html" data-nav="mypage" class="bottom-nav-item ${current === 'mypage' ? 'active' : ''}">${svgIcons.mypage}<span>내정보</span></a>`
-    : `<a href="login.html" data-nav="login" class="bottom-nav-item ${current === 'login' ? 'active' : ''}">${svgIcons.login}<span>로그인</span></a>
-       <a href="signup.html" data-nav="signup" class="bottom-nav-item ${current === 'signup' ? 'active' : ''}">${svgIcons.signup}<span>회원가입</span></a>`;
-
-  bottomNav.innerHTML = `
+  // ⭐⭐⭐ 모바일 하단 탭바 아이템 구성 ⭐⭐⭐
+  // 로그인 시: 홈 · 장바구니 · 주문조회 · 주문내역 · 내정보 · 로그아웃 (6개)
+  // 로그아웃 시: 홈 · 장바구니 · 주문조회 · 로그인 · 회원가입 (5개)
+  const commonTabs = `
     <a href="index.html" data-nav="home" class="bottom-nav-item ${current === 'home' ? 'active' : ''}">${svgIcons.home}<span>홈</span></a>
     <a href="cart.html" data-nav="cart" class="bottom-nav-item ${current === 'cart' ? 'active' : ''}">
       ${svgIcons.cart}
@@ -643,8 +645,19 @@ function renderHeader(current) {
       <span>장바구니</span>
     </a>
     <a href="orders.html" data-nav="orders" class="bottom-nav-item ${current === 'orders' ? 'active' : ''}">${svgIcons.orders}<span>주문조회</span></a>
-    ${mobileTabExtra}
   `;
+
+  const memberTabs = m
+    ? `<a href="myorders.html" data-nav="myorders" class="bottom-nav-item ${current === 'myorders' ? 'active' : ''}">${svgIcons.myorders}<span>주문내역</span></a>
+       <a href="mypage.html" data-nav="mypage" class="bottom-nav-item ${current === 'mypage' ? 'active' : ''}">${svgIcons.mypage}<span>내정보</span></a>
+       <a href="#" data-nav="logout" id="bottom-logout-btn" class="bottom-nav-item">${svgIcons.logout}<span>로그아웃</span></a>`
+    : `<a href="login.html" data-nav="login" class="bottom-nav-item ${current === 'login' ? 'active' : ''}">${svgIcons.login}<span>로그인</span></a>
+       <a href="signup.html" data-nav="signup" class="bottom-nav-item ${current === 'signup' ? 'active' : ''}">${svgIcons.signup}<span>회원가입</span></a>`;
+
+  // ⭐ 탭 개수에 따라 클래스 부여 (아이콘/폰트 축소 여부 결정)
+  const tabCount = m ? 6 : 5;
+  bottomNav.className = `nav-count-${tabCount}`;
+  bottomNav.innerHTML = commonTabs + memberTabs;
 
   wrap.innerHTML = `
     <header style="background:${theme.headerBg}; border-bottom:1px solid ${theme.borderColor}; padding:12px 16px 10px 16px;">
@@ -676,6 +689,17 @@ function renderHeader(current) {
       e.preventDefault();
       localStorage.removeItem('member');
       location.href = 'index.html';
+    };
+  }
+  // ⭐ 하단 탭바 로그아웃 버튼 핸들러
+  const blb = document.getElementById('bottom-logout-btn');
+  if (blb) {
+    blb.onclick = (e) => {
+      e.preventDefault();
+      if (confirm('로그아웃 하시겠습니까?')) {
+        localStorage.removeItem('member');
+        location.href = 'index.html';
+      }
     };
   }
 
