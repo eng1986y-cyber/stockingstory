@@ -23,6 +23,7 @@ if (_isDark) {
       width: 100%;
       -webkit-text-size-adjust: 100%;
       overscroll-behavior: none;
+      scrollbar-gutter: stable; /* ⭐ 스크롤바 공간 확보로 좌우 밀림 방지 */
     }
 
     /* ⭐ 헤더와 본문을 감싸는 레이아웃 컨테이너 */
@@ -63,6 +64,7 @@ if (_isDark) {
       overscroll-behavior: contain;
       scrollbar-width: thin;
       scrollbar-color: #d1d5db transparent;
+      scrollbar-gutter: stable;
     }
     body.dark .site-main-scroll {
       scrollbar-color: #333 transparent;
@@ -626,10 +628,10 @@ function renderHeader(current) {
     ? `<a href="index.html" style="display:inline-block;"><img src="${logoImageUrl}" alt="${siteName}" style="height:40px; max-width:240px; object-fit:contain; display:block; margin:0 auto;"></a>`
     : `<a href="index.html" style="font-size:22px; font-weight:700; color:${theme.logoColor}; text-decoration:none; display:inline-block;">${siteName}</a>`;
 
-  // ⭐⭐⭐ 로그인 시: 주문내역 + 로그아웃 / 비로그인 시: 로그인 + 회원가입 ⭐⭐⭐
+  // ⭐⭐⭐ 로그인 시: 주문내역 + 내정보 / 비로그인 시: 로그인 + 회원가입 (로그아웃은 헤더에 있음) ⭐⭐⭐
   const mobileTabExtra = m
     ? `<a href="myorders.html" data-nav="myorders" class="bottom-nav-item ${current === 'myorders' ? 'active' : ''}">${svgIcons.myorders}<span>주문내역</span></a>
-       <button type="button" id="bottom-logout-btn" class="bottom-nav-item" data-nav="logout">${svgIcons.logout}<span>로그아웃</span></button>`
+       <a href="mypage.html" data-nav="mypage" class="bottom-nav-item ${current === 'mypage' ? 'active' : ''}">${svgIcons.mypage}<span>내정보</span></a>`
     : `<a href="login.html" data-nav="login" class="bottom-nav-item ${current === 'login' ? 'active' : ''}">${svgIcons.login}<span>로그인</span></a>
        <a href="signup.html" data-nav="signup" class="bottom-nav-item ${current === 'signup' ? 'active' : ''}">${svgIcons.signup}<span>회원가입</span></a>`;
 
@@ -672,16 +674,6 @@ function renderHeader(current) {
   if (lb) {
     lb.onclick = (e) => {
       e.preventDefault();
-      localStorage.removeItem('member');
-      location.href = 'index.html';
-    };
-  }
-
-  const bottomLb = document.getElementById('bottom-logout-btn');
-  if (bottomLb) {
-    bottomLb.onclick = (e) => {
-      e.preventDefault();
-      if (!confirm('로그아웃 하시겠습니까?')) return;
       localStorage.removeItem('member');
       location.href = 'index.html';
     };
