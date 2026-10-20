@@ -50,10 +50,7 @@ if (_isDark) {
       background: #0f0f0f;
     }
 
-    /* ⭐ [핵심] 헤더 아래 본문 영역만 스크롤되도록 설정
-       - overflow-y: scroll → 항상 스크롤바 자리 확보 (스크롤 유무 무관 폭 고정)
-       - 스크롤바 두께 8px + 트랙 투명 → 시각적 부담 최소화
-    */
+    /* ⭐ [핵심] 헤더 아래 본문 영역만 스크롤되도록 설정 */
     .site-main-scroll {
       flex: 1 1 0;
       min-height: 0;
@@ -426,7 +423,6 @@ function renderFooter() {
   if (email) items.push(`<span class="footer-item">✉️ ${email}</span>`);
   if (business) items.push(`<span class="footer-item">사업자번호: ${business}</span>`);
 
-  // ⭐ SNS 아이콘 (인라인 SVG)
   const snsLinks = [];
   if (instagram) {
     snsLinks.push(`
@@ -582,6 +578,7 @@ function renderHeader(current) {
     orders: `<svg class="nav-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,
     myorders: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
     mypage: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+    logout: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`,
     login: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>`,
     signup: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>`
   };
@@ -603,10 +600,10 @@ function renderHeader(current) {
     ? `<a href="index.html" style="display:inline-block;"><img src="${logoImageUrl}" alt="${siteName}" style="height:40px; max-width:240px; object-fit:contain; display:block; margin:0 auto;"></a>`
     : `<a href="index.html" style="font-size:22px; font-weight:700; color:${theme.logoColor}; text-decoration:none; display:inline-block;">${siteName}</a>`;
 
-  // ⭐ 로그인 시: 주문내역 + 내정보 / 비로그인 시: 로그인 + 회원가입
+  // ⭐⭐⭐ 로그인 시: 주문내역 + 로그아웃 / 비로그인 시: 로그인 + 회원가입 ⭐⭐⭐
   const mobileTabExtra = m
     ? `<a href="myorders.html" data-nav="myorders" class="bottom-nav-item ${current === 'myorders' ? 'active' : ''}">${svgIcons.myorders}<span>주문내역</span></a>
-       <a href="mypage.html" data-nav="mypage" class="bottom-nav-item ${current === 'mypage' ? 'active' : ''}">${svgIcons.mypage}<span>내정보</span></a>`
+       <button type="button" id="bottom-logout-btn" class="bottom-nav-item" data-nav="logout">${svgIcons.logout}<span>로그아웃</span></button>`
     : `<a href="login.html" data-nav="login" class="bottom-nav-item ${current === 'login' ? 'active' : ''}">${svgIcons.login}<span>로그인</span></a>
        <a href="signup.html" data-nav="signup" class="bottom-nav-item ${current === 'signup' ? 'active' : ''}">${svgIcons.signup}<span>회원가입</span></a>`;
 
@@ -645,10 +642,22 @@ function renderHeader(current) {
     badge.style.display = cart.length > 0 ? 'block' : 'none';
   }
 
+  // ⭐ 상단 헤더 로그아웃 (PC)
   const lb = document.getElementById('logout-btn');
   if (lb) {
     lb.onclick = (e) => {
       e.preventDefault();
+      localStorage.removeItem('member');
+      location.href = 'index.html';
+    };
+  }
+
+  // ⭐ 하단 탭바 로그아웃 (모바일)
+  const bottomLb = document.getElementById('bottom-logout-btn');
+  if (bottomLb) {
+    bottomLb.onclick = (e) => {
+      e.preventDefault();
+      if (!confirm('로그아웃 하시겠습니까?')) return;
       localStorage.removeItem('member');
       location.href = 'index.html';
     };
