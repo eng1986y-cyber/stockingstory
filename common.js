@@ -23,9 +23,11 @@ if (_isDark) {
       width: 100%;
       -webkit-text-size-adjust: 100%;
       overscroll-behavior: none;
+      /* ⭐ 브라우저 기본 스크롤바 공간 예약 (스크롤 유무와 무관하게 폭 고정) */
+      scrollbar-gutter: stable;
     }
 
-    /* ⭐ 헤더와 본문을 감싸는 레이아웃 컨테이너 (dvh 사용으로 모바일 주소창 변화 대응) */
+    /* ⭐ 헤더와 본문을 감싸는 레이아웃 컨테이너 */
     .site-wrapper {
       display: flex;
       flex-direction: column;
@@ -35,7 +37,7 @@ if (_isDark) {
       overflow: hidden;
     }
 
-    /* ⭐ [PC] 상단 헤더 영역 (고정) */
+    /* ⭐ 상단 헤더 영역 (고정) */
     #app-header {
       flex-shrink: 0;
       flex-grow: 0;
@@ -50,10 +52,13 @@ if (_isDark) {
       background: #0f0f0f;
     }
 
-    /* ⭐ [핵심] 헤더 아래 본문 영역만 스크롤되도록 설정 (min-height:0 필수) */
+    /* ⭐ [핵심] 헤더 아래 본문 영역만 스크롤되도록 설정
+       - scrollbar-gutter: stable → 스크롤바 없어도 공간 예약하여 폭 변동 없음
+       - min-height:0 → flex 자식 스크롤 안정화
+    */
     .site-main-scroll {
       flex: 1 1 0;
-      min-height: 0; /* flex 자식 스크롤 안정화 핵심 */
+      min-height: 0;
       overflow-y: auto;
       overflow-x: hidden;
       width: 100%;
@@ -61,9 +66,10 @@ if (_isDark) {
       padding-top: 0 !important;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
+      scrollbar-gutter: stable; /* ⭐ 스크롤바 공간 항상 예약 */
     }
 
-    /* ⭐ 본문 영역 전용 스크롤바 디자인 */
+    /* ⭐ 스크롤바 두께 고정 (10px) - 안정적 레이아웃 */
     .site-main-scroll::-webkit-scrollbar { width: 10px; }
     .site-main-scroll::-webkit-scrollbar-track { background: transparent; }
     .site-main-scroll::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 5px; border: 2px solid transparent; background-clip: padding-box; }
@@ -86,7 +92,6 @@ if (_isDark) {
         justify-content: center;
       }
       
-      /* 모바일 헤더 내부 여백 축소 (세로 공간 확보) */
       #app-header header {
         padding: 10px 16px !important;
       }
@@ -214,6 +219,17 @@ if (_isDark) {
 
     @media (max-width: 768px) {
       #mobile-bottom-nav { display: flex; }
+    }
+
+    /* ⭐ Safari 등 scrollbar-gutter 미지원 브라우저 fallback
+       → 스크롤바 두께만큼 padding-right를 미리 확보하여 폭 변동 방지 */
+    @supports not (scrollbar-gutter: stable) {
+      .site-main-scroll {
+        padding-right: 10px;
+      }
+      @media (max-width: 768px) {
+        .site-main-scroll { padding-right: 0; } /* 모바일은 오버레이 스크롤바라 불필요 */
+      }
     }
   `;
   document.head.appendChild(style);
@@ -426,7 +442,7 @@ function renderHeader(current) {
     btnBg: '#fff', btnBgActive: '#222', btnText: '#222', btnTextActive: '#fff', btnBorder: '#ddd', btnBorderActive: '#222', nameColor: '#555',
   };
 
-  // ⭐ 모바일 하단 탭바를 항상 site-wrapper의 마지막 자식으로 보장 (중복/위치 문제 방지)
+  // ⭐ 모바일 하단 탭바를 항상 site-wrapper의 마지막 자식으로 보장
   let bottomNav = document.getElementById('mobile-bottom-nav');
   const wrapper = document.querySelector('.site-wrapper');
   if (!bottomNav) {
@@ -434,7 +450,6 @@ function renderHeader(current) {
     bottomNav.id = 'mobile-bottom-nav';
   }
   if (wrapper) {
-    // 이미 wrapper의 자식이든 아니든, 항상 마지막으로 재배치
     wrapper.appendChild(bottomNav);
   } else {
     if (!bottomNav.parentNode) document.body.appendChild(bottomNav);
@@ -558,7 +573,6 @@ function renderHeader(current) {
 
 document.addEventListener('DOMContentLoaded', async () => {
   // ⭐⭐⭐ 관리자/수정 페이지에서는 공통 레이아웃 래핑을 전혀 하지 않음
-  // (admin.html, edit.html 은 자체 레이아웃 사용)
   if (_isAdmin) {
     if (_isDark) document.body.classList.add('dark');
     applyPhoneAttrs();
@@ -592,7 +606,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   wrapper.appendChild(mainScroll);
 
-  // ⭐ 기존에 있던 #mobile-bottom-nav도 wrapper로 이동 (중복 방지)
+  // ⭐ 기존 #mobile-bottom-nav도 wrapper로 이동 (중복 방지)
   if (existingBottomNav) {
     wrapper.appendChild(existingBottomNav);
   }
