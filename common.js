@@ -22,39 +22,45 @@ if (_isDark) {
       overflow: hidden !important; /* body 스크롤 방지 */
       width: 100%;
       -webkit-text-size-adjust: 100%;
+      overscroll-behavior: none;
     }
 
-    /* ⭐ 헤더와 본문을 감싸는 레이아웃 컨테이너 */
+    /* ⭐ 헤더와 본문을 감싸는 레이아웃 컨테이너 (dvh 사용으로 모바일 주소창 변화 대응) */
     .site-wrapper {
       display: flex;
       flex-direction: column;
-      height: 100vh; /* 화면 전체 높이 */
+      height: 100vh;
+      height: 100dvh; /* 동적 뷰포트 높이 */
       width: 100%;
+      overflow: hidden;
     }
 
     /* ⭐ [PC] 상단 헤더 영역 (고정) */
     #app-header {
       flex-shrink: 0;
-      position: relative; /* flex 레이아웃 내에서 고정 */
+      flex-grow: 0;
+      position: relative;
       z-index: 99999;
       background: #fff;
       width: 100%;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05); /* 스크롤 영역과 분리감 */
-      margin-bottom: 0 !important; /* 헤더와 본문 사이 간격 제거 */
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      margin-bottom: 0 !important;
     }
     body.dark #app-header {
       background: #0f0f0f;
     }
 
-    /* ⭐ [핵심] 헤더 아래 본문 영역만 스크롤되도록 설정 */
+    /* ⭐ [핵심] 헤더 아래 본문 영역만 스크롤되도록 설정 (min-height:0 필수) */
     .site-main-scroll {
-      flex: 1; /* 남은 공간 모두 차지 */
-      overflow-y: auto; /* 세로 스크롤 */
+      flex: 1 1 0;
+      min-height: 0; /* flex 자식 스크롤 안정화 핵심 */
+      overflow-y: auto;
       overflow-x: hidden;
       width: 100%;
       position: relative;
-      padding-top: 0 !important; /* 본문 상단 여백 제거 */
-      -webkit-overflow-scrolling: touch; /* 모바일 부드러운 스크롤 */
+      padding-top: 0 !important;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
     }
 
     /* ⭐ 본문 영역 전용 스크롤바 디자인 */
@@ -136,7 +142,7 @@ if (_isDark) {
     }
     @media (max-width: 1450px) { #scroll-btns { left: auto; right: 16px; transform: none; } }
     @media (max-width: 768px) { 
-      #scroll-btns { right: 12px; bottom: 85px; } /* 모바일 하단 탭바 고려 */
+      #scroll-btns { right: 12px; bottom: 85px; }
       #scroll-btns button { width: 40px; height: 40px; font-size: 16px; } 
     }
 
@@ -157,6 +163,7 @@ if (_isDark) {
       display: none;
       height: 65px;
       flex-shrink: 0;
+      flex-grow: 0;
       background: #fff;
       border-top: 1px solid #eee;
       z-index: 99999;
@@ -186,6 +193,7 @@ if (_isDark) {
       cursor: pointer;
       padding: 0;
       -webkit-tap-highlight-color: transparent;
+      position: relative;
     }
     .bottom-nav-item.active { color: #111827; }
     body.dark .bottom-nav-item.active { color: #fff; }
@@ -196,8 +204,9 @@ if (_isDark) {
     }
     .bottom-nav-item .cart-badge {
       position: absolute;
-      top: 8px;
-      right: 20px;
+      top: 6px;
+      right: 50%;
+      transform: translateX(16px);
       background: #ef4444; color: #fff;
       font-size: 10px; font-weight: bold;
       border-radius: 10px; padding: 2px 5px; line-height: 1;
@@ -240,6 +249,8 @@ function applyPhoneAttrs() {
 }
 
 function createScrollButtons() {
+  // ⭐ 관리자 페이지에서는 자체 버튼이 있으므로 생성하지 않음
+  if (_isAdmin) return;
   if (document.getElementById('scroll-btns')) return;
   const wrap = document.createElement('div');
   wrap.id = 'scroll-btns';
@@ -415,6 +426,24 @@ function renderHeader(current) {
     btnBg: '#fff', btnBgActive: '#222', btnText: '#222', btnTextActive: '#fff', btnBorder: '#ddd', btnBorderActive: '#222', nameColor: '#555',
   };
 
+  // ⭐ 모바일 하단 탭바를 먼저 확보/이동 (site-wrapper 하단에 위치시킴)
+  let bottomNav = document.getElementById('mobile-bottom-nav');
+  const wrapper = document.querySelector('.site-wrapper');
+  if (!bottomNav) {
+    bottomNav = document.createElement('nav');
+    bottomNav.id = 'mobile-bottom-nav';
+  }
+  // ⭐ 항상 site-wrapper의 마지막 자식으로 이동 (중복/위치 문제 방지)
+  if (wrapper) {
+    if (bottomNav.parentNode !== wrapper) {
+      wrapper.appendChild(bottomNav);
+    } else {
+      wrapper.appendChild(bottomNav); // 이미 마지막이어도 재배치하여 순서 보장
+    }
+  } else {
+    if (!bottomNav.parentNode) document.body.appendChild(bottomNav);
+  }
+
   if (_headerRendered && wrap.querySelector('header')) {
     wrap.querySelectorAll('[data-nav]').forEach(el => {
       const isActive = el.dataset.nav === current;
@@ -484,18 +513,9 @@ function renderHeader(current) {
     ? `<a href="mypage.html" data-nav="mypage" class="bottom-nav-item ${current === 'mypage' ? 'active' : ''}">${svgIcons.mypage}<span>내정보</span></a>`
     : `<a href="login.html" data-nav="login" class="bottom-nav-item ${current === 'login' ? 'active' : ''}">${svgIcons.login}<span>로그인</span></a>`;
 
-  let bottomNav = document.getElementById('mobile-bottom-nav');
-  if (!bottomNav) {
-    bottomNav = document.createElement('nav');
-    bottomNav.id = 'mobile-bottom-nav';
-    const wrapper = document.querySelector('.site-wrapper');
-    if (wrapper) wrapper.appendChild(bottomNav);
-    else document.body.appendChild(bottomNav);
-  }
-  
   bottomNav.innerHTML = `
     <a href="index.html" data-nav="home" class="bottom-nav-item ${current === 'home' ? 'active' : ''}">${svgIcons.home}<span>홈</span></a>
-    <a href="cart.html" data-nav="cart" class="bottom-nav-item ${current === 'cart' ? 'active' : ''}" style="position:relative;">
+    <a href="cart.html" data-nav="cart" class="bottom-nav-item ${current === 'cart' ? 'active' : ''}">
       ${svgIcons.cart}
       <span id="bottom-cart-badge" class="cart-badge" style="display:none;">0</span>
       <span>장바구니</span>
@@ -504,7 +524,6 @@ function renderHeader(current) {
     ${mobileTabMy}
   `;
 
-  // ⭐ 헤더 하단 여백을 줄이고, 본문과의 경계를 명확히 하기 위해 padding 조정
   wrap.innerHTML = `
     <header style="background:${theme.headerBg}; border-bottom:1px solid ${theme.borderColor}; padding:12px 16px 10px 16px;">
       <div style="max-width:1400px; margin:0 auto;">
