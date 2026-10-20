@@ -200,6 +200,32 @@ if (_isDark) {
       border-color: #e5e7eb;
     }
 
+    /* ⭐⭐⭐ 모바일 Footer / SNS 아이콘 보강 ⭐⭐⭐ */
+    @media (max-width: 768px) {
+      #app-footer {
+        padding: 20px 16px calc(20px + 65px + env(safe-area-inset-bottom));
+        margin-top: 24px;
+        font-size: 12px;
+      }
+      #app-footer .footer-sns-row {
+        gap: 14px;
+        margin-top: 16px;
+      }
+      #app-footer .footer-sns-btn {
+        width: 44px;
+        height: 44px;
+      }
+      #app-footer .footer-sns-btn svg {
+        width: 22px;
+        height: 22px;
+      }
+      #app-footer .footer-text {
+        margin-top: 14px;
+        padding-top: 14px;
+        font-size: 11px;
+      }
+    }
+
     /* ⭐⭐⭐ 모바일 하단 고정 탭바 ⭐⭐⭐ */
     #mobile-bottom-nav {
       display: none;
@@ -642,7 +668,6 @@ function renderHeader(current) {
     badge.style.display = cart.length > 0 ? 'block' : 'none';
   }
 
-  // ⭐ 상단 헤더 로그아웃 (PC)
   const lb = document.getElementById('logout-btn');
   if (lb) {
     lb.onclick = (e) => {
@@ -652,7 +677,6 @@ function renderHeader(current) {
     };
   }
 
-  // ⭐ 하단 탭바 로그아웃 (모바일)
   const bottomLb = document.getElementById('bottom-logout-btn');
   if (bottomLb) {
     bottomLb.onclick = (e) => {
