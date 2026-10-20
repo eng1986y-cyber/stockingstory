@@ -11,16 +11,16 @@
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; }
     * { box-sizing: border-box; transition: none !important; animation: none !important; transform: none !important; box-shadow: none !important; }
 
-    /* ⭐ 관리자 헤더 상단 고정 */
+    /* ⭐ 관리자 상단 헤더 (고정) */
     .admin-header {
       background: #fff !important; border-bottom: 1px solid #e5e7eb;
-      padding: 16px 24px; display: flex; justify-content: space-between;
+      padding: 0 24px; display: flex; justify-content: space-between;
       align-items: center; 
       position: fixed !important; 
       top: 0 !important; 
       left: 0 !important;
       width: 100% !important;
-      height: 65px; /* 헤더 높이 고정 */
+      height: 65px;
       z-index: 99999 !important;
     }
     .admin-header-left { display: flex; align-items: center; gap: 16px; }
@@ -36,7 +36,40 @@
       cursor: pointer; font-size: 13px; font-weight: 500; font-family: inherit;
     }
 
-    /* ⭐ [핵심] 헤더 아래 영역에서만 스크롤이 생기도록 설정 */
+    /* ⭐⭐⭐ 상단 탭 메뉴 바 (헤더 아래에 fixed로 고정) ⭐⭐⭐ */
+    .admin-tabbar {
+      position: fixed !important;
+      top: 65px !important;         /* 헤더 높이 바로 아래 */
+      left: 0 !important;
+      width: 100% !important;
+      background: #f4f6f8 !important;
+      z-index: 99998 !important;
+      padding: 12px 24px 12px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .admin-tabbar-inner {
+      max-width: 1600px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 10px;
+      padding: 8px;
+      border: 1px solid #e5e7eb;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      gap: 8px;
+      width: 100%;
+    }
+    .admin-tabbar .nav-item {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 11px 18px; border-radius: 6px; cursor: pointer;
+      color: #4b5563; font-size: 14px; font-weight: 500;
+      border: 0; background: none; flex: 1 1 0; min-width: 0; white-space: nowrap;
+      text-align: center; font-family: inherit;
+    }
+    .admin-tabbar .nav-item.active { background: #111827; color: #fff; }
+
+    /* ⭐ 헤더(65) + 탭바(약 74) 아래로 본문 밀기, 본문만 스크롤 */
     .admin-layout { 
       display: flex; 
       flex-direction: column; 
@@ -44,8 +77,8 @@
       max-width: 1600px; 
       margin: 0 auto; 
       padding: 24px; 
-      height: calc(100vh - 65px);
-      margin-top: 65px;
+      height: calc(100vh - 65px - 74px);   /* 헤더 + 탭바 제외 */
+      margin-top: calc(65px + 74px);      /* 헤더 + 탭바 만큼 아래로 */
       overflow-y: auto; 
       overflow-x: hidden;
     }
@@ -55,17 +88,6 @@
     .admin-layout::-webkit-scrollbar-track { background: #f4f6f8; }
     .admin-layout::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 5px; border: 2px solid #f4f6f8; }
     .admin-layout::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
-
-    /* 관리자 메뉴를 사이드바에서 상단 가로 메뉴로 변경 */
-    .admin-sidebar { width: 100%; flex-shrink: 0; position: static; height: auto; }
-    .admin-sidebar .nav-group { background: #fff; border-radius: 10px; padding: 8px; border: 1px solid #e5e7eb; display: flex; flex-direction: row; flex-wrap: nowrap; gap: 8px; width: 100%; }
-    .admin-sidebar .nav-item {
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      padding: 11px 18px; border-radius: 6px; cursor: pointer;
-      color: #4b5563; font-size: 14px; font-weight: 500;
-      border: 0; background: none; flex: 1 1 0; min-width: 0; white-space: nowrap; text-align: center; font-family: inherit;
-    }
-    .admin-sidebar .nav-item.active { background: #111827; color: #fff; }
 
     .admin-content { flex: 1; min-width: 0; }
     .admin-section { display: none; }
@@ -233,15 +255,22 @@
     .modal-box .modal-actions { display: flex; gap: 8px; margin-top: 10px; }
     .modal-box .modal-actions > * { flex: 1; }
 
+    /* ⭐⭐⭐ 반응형: 태블릿/모바일 ⭐⭐⭐ */
     @media (max-width: 1000px) {
-      .admin-layout { flex-direction: column; padding: 16px; gap: 14px; height: calc(100vh - 65px); margin-top: 65px; }
-      .admin-sidebar { width: 100%; position: static; }
-      .admin-sidebar .nav-group { display: flex; flex-direction: row; flex-wrap: wrap; gap: 4px; }
-      .admin-sidebar .nav-item { flex: 1 1 calc(25% - 4px); min-width: 0; padding: 10px 6px; justify-content: center; font-size: 13px; }
-      
+      .admin-header { padding: 0 16px; }
+      .admin-tabbar { padding: 10px 16px 10px; }
+      .admin-tabbar-inner { flex-wrap: wrap; gap: 4px; padding: 6px; }
+      .admin-tabbar .nav-item { flex: 1 1 calc(50% - 4px); min-width: 0; padding: 10px 6px; justify-content: center; font-size: 13px; }
+
+      .admin-layout {
+        padding: 16px;
+        gap: 14px;
+        height: calc(100vh - 65px - 120px);
+        margin-top: calc(65px + 120px);
+      }
       .row-item { padding: 10px 12px; }
       .row-item .row-main { font-size: 12px; }
-      
+
       #product-register-card > #product-form { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
       #product-register-card > #product-form input[name="detail_images"],
       #product-register-card > #product-form button { grid-column: 1 / -1; }
@@ -253,7 +282,7 @@
       .admin-layout { padding: 10px; }
       .card { padding: 14px; }
     }
-  
+
     /* 화면 오른쪽 가장자리에 고정되는 위/아래 이동 버튼 */
     .edge-scroll-controls {
       position: fixed;
@@ -294,6 +323,7 @@
   </div>
 
   <div id="admin-screen" style="display:none;">
+    <!-- ⭐ 상단 헤더 (fixed) -->
     <header class="admin-header">
       <div class="admin-header-left">
         <span class="logo">ADMIN</span>
@@ -302,16 +332,17 @@
       <button id="logout-btn" class="logout-btn">로그아웃</button>
     </header>
 
-    <div class="admin-layout">
-      <aside class="admin-sidebar">
-        <div class="nav-group">
-          <button class="nav-item active" data-tab="products">📦 상품</button>
-          <button class="nav-item" data-tab="orders">🧾 주문</button>
-          <button class="nav-item" data-tab="members">👥 회원</button>
-          <button class="nav-item" data-tab="settings">⚙️ 사이트 설정</button>
-        </div>
-      </aside>
+    <!-- ⭐⭐⭐ 탭 메뉴 바 (헤더 아래에 fixed로 고정) ⭐⭐⭐ -->
+    <div class="admin-tabbar">
+      <div class="admin-tabbar-inner">
+        <button class="nav-item active" data-tab="products">📦 상품</button>
+        <button class="nav-item" data-tab="orders">🧾 주문</button>
+        <button class="nav-item" data-tab="members">👥 회원</button>
+        <button class="nav-item" data-tab="settings">⚙️ 사이트 설정</button>
+      </div>
+    </div>
 
+    <div class="admin-layout">
       <div class="admin-content">
         <!-- 상품 -->
         <section id="tab-products" class="admin-section active">
@@ -343,7 +374,6 @@
             <div class="card" style="display:flex; flex-direction:column; margin-bottom:0;">
               <div class="card-title">📋 등록된 상품 <span id="product-count" class="hint"></span></div>
               
-              <!-- ⭐ 검색 및 일괄 액션 컨트롤 -->
               <div class="list-controls">
                 <div class="list-search">
                   <input id="product-search" placeholder="상품명 / 제품번호 검색">
@@ -421,7 +451,6 @@
             </div>
           </div>
 
-          <!-- ⭐ 사이트 하단 정보 카드 - SNS 링크 3개 추가 -->
           <div class="card">
             <div class="card-title">📄 사이트 하단 정보 (Footer)</div>
             <div style="display: grid; gap: 10px;">
@@ -432,7 +461,6 @@
               <input id="footer-business" placeholder="사업자등록번호">
               <textarea id="footer-text" placeholder="추가 안내문"></textarea>
 
-              <!-- ⭐ SNS 링크 입력 -->
               <div style="margin-top: 8px; padding-top: 12px; border-top: 1px dashed #e5e7eb;">
                 <div style="font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 8px;">🔗 SNS 링크 (입력 시 하단에 아이콘 표시)</div>
                 <div style="display: grid; gap: 8px;">
@@ -496,12 +524,13 @@
     const loginForm = document.getElementById('login-form');
     const loginMsg = document.getElementById('login-msg');
 
-    document.querySelectorAll('.admin-sidebar .nav-item').forEach(btn => {
+    document.querySelectorAll('.admin-tabbar .nav-item').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.admin-sidebar .nav-item').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.admin-tabbar .nav-item').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
         btn.classList.add('active');
         document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+        // 탭 변경 시 스크롤을 맨 위로
         document.querySelector('.admin-layout').scrollTop = 0;
       });
     });
@@ -649,7 +678,6 @@
       msg.className = 'msg';
       msg.textContent = '저장 중...';
 
-      // ⭐ SNS URL 정규화
       const normalizeUrl = (v) => {
         const s = (v || '').trim();
         if (!s) return '';
