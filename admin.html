@@ -272,6 +272,28 @@
     .row-total { color: #e53935; font-weight: 700; font-size: 13px; white-space: nowrap; }
     .row-sep { color: #d1d5db; }
 
+    /* ⭐ 배너 목록 아이템 */
+    .banner-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+    .banner-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff;
+    }
+    .banner-item-thumb {
+      width: 80px; height: 50px; flex-shrink: 0;
+      border-radius: 6px; border: 1px solid #e5e7eb; object-fit: cover;
+      background: #f3f4f6;
+    }
+    .banner-item-info { flex: 1; min-width: 0; font-size: 12px; }
+    .banner-item-info .b-link {
+      color: #1976d2; text-decoration: none;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;
+    }
+    .banner-item-info .b-link.none { color: #9ca3af; }
+    .banner-item .b-del-btn {
+      padding: 6px 10px; background: #dc2626; color: #fff; border: 0; border-radius: 6px;
+      font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap;
+    }
+
     /* 모달 */
     .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; z-index: 100000; padding: 10px; }
     .modal-box { background: #fff; padding: 24px; border-radius: 12px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; }
@@ -338,7 +360,7 @@
       .edge-scroll-controls { right: 8px; }
       .edge-scroll-controls button { width: 38px; height: 38px; font-size: 17px; }
     }
-</style>
+  </style>
 </head>
 <body>
   <div id="login-screen" style="display:none;">
@@ -487,19 +509,24 @@
 
               <!-- 2. 배너 이미지 (로고 아래) -->
               <div class="card">
-                <div class="card-title">🖼️ 배너 이미지</div>
+                <div class="card-title">🖼️ 배너 이미지 <span class="hint">(여러 개 등록 가능)</span></div>
                 <div style="display: grid; gap: 10px;">
                   <input id="banner-image-url" placeholder="배너 이미지 URL">
                   <input id="banner-link-url" placeholder="클릭 시 이동할 링크 URL (선택)">
                   <div class="form-row">
-                    <button id="banner-save-btn" class="btn btn-primary">등록/수정</button>
-                    <button id="banner-delete-btn" class="btn btn-danger">삭제</button>
+                    <button id="banner-save-btn" class="btn btn-primary">➕ 새 배너 추가</button>
                   </div>
                 </div>
                 <p id="banner-msg" class="msg"></p>
-                <div id="banner-preview" class="preview-box" style="display:none;">
-                  <div class="preview-label">현재 배너</div>
-                  <img id="banner-preview-img" style="width:100%; max-height:180px; object-fit:cover; border-radius:6px;">
+
+                <!-- ⭐ 등록된 배너 목록 -->
+                <div style="margin-top: 12px;">
+                  <div style="font-size: 12px; font-weight: 600; color: #6b7280; margin-bottom: 8px;">
+                    📋 등록된 배너 <span id="banner-count" style="font-weight: 400;"></span>
+                  </div>
+                  <div id="banner-list" class="banner-list">
+                    <p style="font-size: 12px; color: #9ca3af;">로딩중...</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -777,30 +804,62 @@
       }
     });
 
-    // ===== 배너 =====
-    let currentBannerId = null;
+    // ===== 배너 (여러 개 등록/개별 삭제) =====
     async function loadBanner() {
-      const { data, error } = await db.from('banners').select('*').order('id', { ascending: false }).limit(1).maybeSingle();
-      const preview = document.getElementById('banner-preview');
-      const img = document.getElementById('banner-preview-img');
-      const imgUrl = document.getElementById('banner-image-url');
-      const linkUrl = document.getElementById('banner-link-url');
-      if (error || !data) {
-        preview.style.display = 'none';
-        imgUrl.value = ''; linkUrl.value = '';
-        currentBannerId = null;
+      const listEl = document.getElementById('banner-list');
+      const countEl = document.getElementById('banner-count');
+      const msg = document.getElementById('banner-msg');
+
+      const { data, error } = await db.from('banners').select('*').order('id', { ascending: false });
+
+      if (error) {
+        listEl.innerHTML = '<p style="font-size:12px; color:#dc2626;">❌ ' + error.message + '</p>';
+        countEl.textContent = '';
         return;
       }
-      currentBannerId = data.id;
-      imgUrl.value = data.image_url || '';
-      linkUrl.value = data.link_url || '';
-      if (data.image_url) {
-        img.src = data.image_url;
-        preview.style.display = 'block';
-      } else {
-        preview.style.display = 'none';
+
+      const list = (data || []).filter(b => b.image_url);
+      countEl.textContent = `(총 ${list.length}개)`;
+
+      if (list.length === 0) {
+        listEl.innerHTML = '<p style="font-size:12px; color:#9ca3af;">등록된 배너가 없습니다. 위에서 새 배너를 추가하세요.</p>';
+        return;
       }
+
+      listEl.innerHTML = list.map(b => `
+        <div class="banner-item" data-id="${b.id}">
+          <img class="banner-item-thumb" src="${b.image_url}" alt="배너" loading="lazy">
+          <div class="banner-item-info">
+            ${b.link_url
+              ? `<a class="b-link" href="${b.link_url}" target="_blank" rel="noopener noreferrer" title="${b.link_url}">🔗 ${b.link_url}</a>`
+              : `<span class="b-link none">🔗 링크 없음</span>`}
+          </div>
+          <button type="button" class="b-del-btn" data-id="${b.id}">삭제</button>
+        </div>
+      `).join('');
+
+      // ⭐ 개별 삭제 버튼 이벤트
+      listEl.querySelectorAll('.b-del-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = btn.dataset.id;
+          if (!confirm('이 배너를 삭제할까요?')) return;
+          btn.disabled = true;
+          btn.textContent = '...';
+          const { error } = await db.from('banners').delete().eq('id', id);
+          if (error) {
+            alert('❌ 삭제 실패: ' + error.message);
+            btn.disabled = false;
+            btn.textContent = '삭제';
+          } else {
+            msg.className = 'msg success';
+            msg.textContent = '✅ 배너가 삭제되었습니다.';
+            setTimeout(() => msg.textContent = '', 2000);
+            loadBanner();
+          }
+        });
+      });
     }
+
     document.getElementById('banner-save-btn').addEventListener('click', async () => {
       const msg = document.getElementById('banner-msg');
       const imageUrl = document.getElementById('banner-image-url').value.trim();
@@ -812,48 +871,22 @@
       }
       msg.className = 'msg';
       msg.textContent = '저장 중...';
-      let error;
-      if (currentBannerId) {
-        ({ error } = await db.from('banners').update({
-          image_url: imageUrl, link_url: linkUrl || null,
-          updated_at: new Date().toISOString(),
-        }).eq('id', currentBannerId));
-      } else {
-        const res = await db.from('banners').insert({
-          image_url: imageUrl, link_url: linkUrl || null,
-        }).select().single();
-        error = res.error;
-        if (res.data) currentBannerId = res.data.id;
-      }
+
+      // ⭐ 항상 insert (여러 개 누적)
+      const { error } = await db.from('banners').insert({
+        image_url: imageUrl,
+        link_url: linkUrl || null,
+      });
+
       if (error) {
         msg.className = 'msg error';
         msg.textContent = '❌ ' + error.message;
       } else {
         msg.className = 'msg success';
-        msg.textContent = '✅ 저장 완료!';
-        loadBanner();
-        setTimeout(() => msg.textContent = '', 2000);
-      }
-    });
-    document.getElementById('banner-delete-btn').addEventListener('click', async () => {
-      const msg = document.getElementById('banner-msg');
-      if (!currentBannerId) {
-        msg.className = 'msg error';
-        msg.textContent = '❌ 삭제할 배너가 없습니다.';
-        return;
-      }
-      if (!confirm('배너를 삭제할까요?')) return;
-      const { error } = await db.from('banners').delete().eq('id', currentBannerId);
-      if (error) {
-        msg.className = 'msg error';
-        msg.textContent = '❌ ' + error.message;
-      } else {
-        msg.className = 'msg success';
-        msg.textContent = '✅ 삭제 완료!';
+        msg.textContent = '✅ 배너가 추가되었습니다!';
         document.getElementById('banner-image-url').value = '';
         document.getElementById('banner-link-url').value = '';
-        document.getElementById('banner-preview').style.display = 'none';
-        currentBannerId = null;
+        loadBanner();
         setTimeout(() => msg.textContent = '', 2000);
       }
     });
