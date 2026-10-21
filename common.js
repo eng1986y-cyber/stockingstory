@@ -20,7 +20,7 @@ if (_isDark) {
       width: 100%;
       -webkit-text-size-adjust: 100%;
       overscroll-behavior: none;
-      scrollbar-gutter: stable;
+      /* ⭐ scrollbar-gutter 제거: 스크롤바가 실제로 나타날 때만 공간 차지 */
     }
     .site-wrapper {
       display: flex; flex-direction: column;
@@ -33,6 +33,7 @@ if (_isDark) {
       background: #fff; width: 100%;
       box-shadow: 0 4px 10px rgba(0,0,0,0.05);
       margin-bottom: 0 !important;
+      /* ⭐ 스크롤바 영역만큼 헤더도 함께 밀리지 않도록 패딩 조정 없음 */
     }
     body.dark #app-header { background: #0f0f0f; }
 
@@ -45,7 +46,7 @@ if (_isDark) {
       overscroll-behavior: contain;
       scrollbar-width: thin;
       scrollbar-color: #d1d5db transparent;
-      scrollbar-gutter: stable;
+      /* ⭐ scrollbar-gutter: stable 제거 → 스크롤바가 실제로 나타날 때만 폭 차지 */
     }
     body.dark .site-main-scroll { scrollbar-color: #333 transparent; }
 
