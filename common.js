@@ -353,7 +353,6 @@ async function recordVisit() {
   const client = getSupabaseClient();
   if (!client) return;
   try {
-    // 같은 세션에서 같은 페이지를 너무 자주 기록하지 않도록 5분 이내 중복 방지
     const key = 'last_visit_' + _pathName;
     const now = Date.now();
     const last = Number(localStorage.getItem(key) || 0);
@@ -366,10 +365,11 @@ async function recordVisit() {
       user_agent: navigator.userAgent ? navigator.userAgent.slice(0, 500) : null,
       referrer: document.referrer ? document.referrer.slice(0, 500) : null,
     });
-  } catch (e) {
-    // 실패해도 사이트 동작에는 영향 없음
-  }
+  } catch (e) {}
 }
+
+// ⭐⭐⭐ 푸터 렌더 (캐시 없으면 서버 요청해서 다시 렌더) ⭐⭐⭐
+let _footerRenderCount = 0;
 
 function renderFooter() {
   let wrap = document.getElementById('app-footer');
@@ -394,9 +394,16 @@ function renderFooter() {
 
   if (!owner && !phone && !email && !address && !business && !text && !hasSns) {
     wrap.style.display = 'none';
-    refreshFooterCache();
+    // ⭐ 캐시가 비었으면 서버에서 다시 받아와 재렌더 (무한루프 방지: 2회까지만)
+    if (_footerRenderCount < 2) {
+      _footerRenderCount++;
+      refreshFooterCache().then(() => {
+        renderFooter();
+      });
+    }
     return;
   }
+  _footerRenderCount = 0;
   wrap.style.display = 'block';
 
   const items = [];
@@ -701,7 +708,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   new MutationObserver(applyPhoneAttrs).observe(document.body, { childList: true, subtree: true });
 
   createScrollButtons();
+
+  // ⭐⭐⭐ 푸터 렌더 (2단계: 캐시 → 서버 재조회) ⭐⭐⭐
+  // 1차: 캐시로 즉시 그리기 (이미 캐시 있으면 바로 표시)
   renderFooter();
+  // 2차: 서버에서 최신값 받아 다시 그리기 (캐시 없거나 오래된 경우 SNS 아이콘 확실히 표시)
+  refreshFooterCache().then(() => {
+    renderFooter();
+  });
 
   // ⭐ 방문 기록 (통계용)
   recordVisit();
