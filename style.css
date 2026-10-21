@@ -74,21 +74,5 @@ body.dark ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 5px; }
   .detail-wrap { grid-template-columns: 1fr; }
 }
 
-/* ⭐ 모바일 하단 탭바 공간 확보 (fixed 탭바에 콘텐츠 가려지지 않도록) */
-@media (max-width: 768px) {
-  body {
-    padding-bottom: calc(65px + env(safe-area-inset-bottom));
-  }
-}
-
-@media (max-width: 768px) {
-  #app-footer {
-    padding: 20px 16px calc(20px + 65px + env(safe-area-inset-bottom));
-    margin-top: 24px;
-    font-size: 12px;
-  }
-  #app-footer .footer-sns-row { gap: 14px; margin-top: 16px; }
-  #app-footer .footer-sns-btn { width: 44px; height: 44px; }   /* 터치 타겟 확대 */
-  #app-footer .footer-sns-btn svg { width: 22px; height: 22px; }
-  #app-footer .footer-text { margin-top: 14px; padding-top: 14px; font-size: 11px; }
-}
+/* ⭐ 모바일 하단 탭바 공간 확보 → .site-main-scroll 내부 패딩은 common.js에서 처리.
+   body padding은 무효(body overflow:hidden)이므로 제거함. */

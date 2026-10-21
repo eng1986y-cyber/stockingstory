@@ -20,7 +20,6 @@ if (_isDark) {
       width: 100%;
       -webkit-text-size-adjust: 100%;
       overscroll-behavior: none;
-      /* ⭐ scrollbar-gutter 제거: 스크롤바가 실제로 나타날 때만 공간 차지 */
     }
     .site-wrapper {
       display: flex; flex-direction: column;
@@ -33,7 +32,6 @@ if (_isDark) {
       background: #fff; width: 100%;
       box-shadow: 0 4px 10px rgba(0,0,0,0.05);
       margin-bottom: 0 !important;
-      /* ⭐ 스크롤바 영역만큼 헤더도 함께 밀리지 않도록 패딩 조정 없음 */
     }
     body.dark #app-header { background: #0f0f0f; }
 
@@ -46,7 +44,6 @@ if (_isDark) {
       overscroll-behavior: contain;
       scrollbar-width: thin;
       scrollbar-color: #d1d5db transparent;
-      /* ⭐ scrollbar-gutter: stable 제거 → 스크롤바가 실제로 나타날 때만 폭 차지 */
     }
     body.dark .site-main-scroll { scrollbar-color: #333 transparent; }
 
@@ -145,15 +142,34 @@ if (_isDark) {
       background: #e5e7eb; color: #111; border-color: #e5e7eb;
     }
 
+    /* ⭐⭐⭐ 모바일: SNS 아이콘 보이도록 명시 + 여백 확보 ⭐⭐⭐ */
     @media (max-width: 768px) {
       #app-footer {
-        padding: 20px 16px calc(20px + 65px + env(safe-area-inset-bottom));
+        padding: 20px 16px;
         margin-top: 24px; font-size: 12px;
       }
-      #app-footer .footer-sns-row { gap: 14px; margin-top: 16px; }
-      #app-footer .footer-sns-btn { width: 44px; height: 44px; }
-      #app-footer .footer-sns-btn svg { width: 22px; height: 22px; }
+      #app-footer .footer-sns-row {
+        display: flex !important;
+        visibility: visible !important;
+        gap: 14px;
+        margin-top: 16px;
+        margin-bottom: 4px;
+      }
+      #app-footer .footer-sns-btn {
+        display: inline-flex !important;
+        visibility: visible !important;
+        width: 44px; height: 44px;
+      }
+      #app-footer .footer-sns-btn svg {
+        display: block !important;
+        width: 22px; height: 22px;
+      }
       #app-footer .footer-text { margin-top: 14px; padding-top: 14px; font-size: 11px; }
+
+      /* ⭐ 하단 탭바(65px)에 콘텐츠가 가려지지 않도록 스크롤 영역 안쪽에 여백 */
+      .site-main-scroll {
+        padding-bottom: calc(65px + env(safe-area-inset-bottom));
+      }
     }
 
     /* ⭐⭐⭐ 모바일 하단 고정 탭바 ⭐⭐⭐ */
@@ -202,7 +218,6 @@ if (_isDark) {
       #mobile-bottom-nav { display: flex; }
     }
 
-    /* ⭐⭐⭐ 6개 탭 대응: 아이콘/라벨 축소 ⭐⭐⭐ */
     #mobile-bottom-nav.nav-count-6 .bottom-nav-item { padding: 0 1px; gap: 2px; }
     #mobile-bottom-nav.nav-count-6 .bottom-nav-item .nav-icon { width: 18px; height: 18px; }
     #mobile-bottom-nav.nav-count-6 .bottom-nav-item > span { font-size: 9px; }
@@ -431,7 +446,6 @@ async function verifyMemberStatus() {
 // ===== 헤더 및 하단 탭바 렌더 =====
 let _headerRendered = false;
 
-// ⭐ 하단 탭바 HTML 생성 (별도 함수로 분리 → 재사용/재렌더 용이)
 function buildBottomNav(current, isMember, svgIcons) {
   const commonTabs = `
     <a href="index.html" data-nav="home" class="bottom-nav-item ${current === 'home' ? 'active' : ''}">
@@ -508,10 +522,9 @@ function renderHeader(current) {
     bottomNav = document.createElement('nav');
     bottomNav.id = 'mobile-bottom-nav';
   }
-  // ⭐ 항상 wrapper의 마지막 자식으로 이동 (본문/헤더 뒤에 오도록)
   if (wrapper) {
     if (bottomNav.parentNode !== wrapper) wrapper.appendChild(bottomNav);
-    else wrapper.appendChild(bottomNav); // 순서 보장
+    else wrapper.appendChild(bottomNav);
   } else if (!bottomNav.parentNode) {
     document.body.appendChild(bottomNav);
   }
@@ -532,16 +545,13 @@ function renderHeader(current) {
     signup: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>`
   };
 
-  // ⭐ 하단 탭바는 "매번 강제 재생성" (상태 변화/렌더 누락 방지)
   const { html: navHtml, count } = buildBottomNav(current, isMember, svgIcons);
   bottomNav.className = `nav-count-${count}`;
   bottomNav.innerHTML = navHtml;
   updateBottomNavBadge();
   bindBottomLogout();
 
-  // ⭐ 헤더도 상태 변화 반영 필요 → 매번 재생성하지 않고, 최초 1회만 그리되 하단탭바는 위에서 항상 갱신
   if (_headerRendered && wrap.querySelector('header')) {
-    // 헤더 내 활성 버튼만 갱신
     wrap.querySelectorAll('[data-nav]').forEach(el => {
       const isActive = el.dataset.nav === current;
       el.style.background = isActive ? theme.btnBgActive : theme.btnBg;
