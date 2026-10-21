@@ -13,12 +13,12 @@
       width: 100%; max-width: 100%;
       margin: 0;
     }
-    
+
     /* ⭐ 배너 슬라이드 영역 */
     #banner-wrap {
       width: 100%;
       margin-top: 0;
-      margin-bottom: 0;  /* ⭐ 배너 아래 여백 제거 */
+      margin-bottom: 0;
       overflow: hidden;
       position: relative;
       background: #f0f0f0;
@@ -54,7 +54,6 @@
       pointer-events: auto;
     }
 
-    /* ⭐ 좌우 화살표 버튼 */
     .banner-arrow {
       position: absolute;
       top: 50%;
@@ -79,7 +78,6 @@
     .banner-arrow.next { right: 20px; }
     .banner-arrow[hidden] { display: none; }
 
-    /* ⭐ 하단 인디케이터(점) */
     .banner-dots {
       position: absolute;
       bottom: 20px;
@@ -103,6 +101,38 @@
     .banner-dot.active { background: #fff; }
     .banner-dots[hidden] { display: none; }
 
+    /* ⭐⭐⭐ 홍보 영상 영역 (상품 6개 넓이) ⭐⭐⭐ */
+    #promo-video-wrap {
+      display: none;
+      max-width: 1400px;
+      margin: 16px auto 0;
+      padding: 0 16px;
+      box-sizing: border-box;
+      width: 100%;
+    }
+    #promo-video-inner {
+      position: relative;
+      width: 100%;
+      padding-bottom: 56.25%;
+      background: #000;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    #promo-video-inner iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      border: 0;
+      display: block;
+    }
+    @media (max-width: 768px) {
+      #promo-video-wrap {
+        padding: 0 12px;
+        margin-top: 12px;
+      }
+      #promo-video-inner { border-radius: 8px; }
+    }
+
     /* ⭐ 상품 목록 */
     #product-container {
       max-width: 1400px;
@@ -110,9 +140,8 @@
       padding: 0 16px;
       box-sizing: border-box;
       width: 100%;
-      margin-top: 16px; /* ⭐ 배너 아래 여백 최소화 */
+      margin-top: 16px;
     }
-    /* ⭐ 배너가 없을 때만 위 여백 확보 */
     #product-container.no-banner { margin-top: 24px; }
     @media (max-width: 768px) { #product-container { margin-top: 12px; } }
 
@@ -177,7 +206,6 @@
       min-height: 50px;
     }
 
-    /* ⭐⭐⭐ 모바일: 배너 높이 축소 + 화살표/점 크기 조정 ⭐⭐⭐ */
     @media (max-width: 768px) {
       .banner-slide img { height: 260px; }
       .banner-arrow { width: 38px; height: 38px; font-size: 18px; }
@@ -198,6 +226,11 @@
       <button type="button" class="banner-arrow next" id="banner-next" aria-label="다음 배너" hidden>›</button>
       <div class="banner-dots" id="banner-dots" hidden></div>
     </div>
+  </div>
+
+  <!-- ⭐⭐⭐ 홍보 영상 (상품목록 바로 위) ⭐⭐⭐ -->
+  <div id="promo-video-wrap">
+    <div id="promo-video-inner"></div>
   </div>
 
   <main id="product-container">
@@ -224,10 +257,43 @@
     let allProducts = [];
     let currentPage = 1;
 
-    /* =========================================
-       ⭐ 배너 슬라이드
-    ========================================= */
-    const AUTO_INTERVAL = 5000; // 5초 자동 넘김
+    /* ⭐ YouTube URL → embed URL 변환 */
+    function getYouTubeEmbedUrl(url) {
+      if (!url) return '';
+      const s = String(url).trim();
+      if (!s) return '';
+      if (/youtube\.com\/embed\//i.test(s)) return s;
+      let m = s.match(/[?&]v=([A-Za-z0-9_-]{6,})/);
+      if (m) return `https://www.youtube.com/embed/${m[1]}`;
+      m = s.match(/youtu\.be\/([A-Za-z0-9_-]{6,})/);
+      if (m) return `https://www.youtube.com/embed/${m[1]}`;
+      m = s.match(/youtube\.com\/shorts\/([A-Za-z0-9_-]{6,})/);
+      if (m) return `https://www.youtube.com/embed/${m[1]}`;
+      return s;
+    }
+
+    /* ⭐ 홍보 영상 로드 */
+    async function loadPromoVideo() {
+      const wrap = document.getElementById('promo-video-wrap');
+      const inner = document.getElementById('promo-video-inner');
+      try {
+        const { data } = await db.from('settings').select('value').eq('key', 'promo_video_url').maybeSingle();
+        const url = data?.value || '';
+        if (!url) {
+          wrap.style.display = 'none';
+          inner.innerHTML = '';
+          return;
+        }
+        const embed = getYouTubeEmbedUrl(url);
+        inner.innerHTML = `<iframe src="${embed}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>`;
+        wrap.style.display = 'block';
+      } catch (e) {
+        wrap.style.display = 'none';
+      }
+    }
+
+    /* ⭐ 배너 슬라이드 */
+    const AUTO_INTERVAL = 5000;
     let bannerList = [];
     let bannerIndex = 0;
     let autoTimer = null;
@@ -248,7 +314,6 @@
       if (error || !data || data.length === 0) {
         wrap.style.display = 'none';
         bannerList = [];
-        // ⭐ 배너 없을 때 상품 목록 위 여백 확보
         if (container) container.classList.add('no-banner');
         return;
       }
@@ -261,10 +326,8 @@
       }
 
       wrap.style.display = 'block';
-      // ⭐ 배너 있을 때 상품 목록 위 여백 최소화
       if (container) container.classList.remove('no-banner');
 
-      // ⭐ 슬라이드 HTML 생성
       track.innerHTML = bannerList.map((b, i) => {
         const img = `<img src="${b.image_url}" alt="배너 ${i + 1}" loading="${i === 0 ? 'eager' : 'lazy'}">`;
         return b.link_url
@@ -272,7 +335,6 @@
           : `<div class="banner-slide">${img}</div>`;
       }).join('');
 
-      // ⭐ 인디케이터 점
       if (bannerList.length > 1) {
         dotsEl.hidden = false;
         prevBtn.hidden = false;
@@ -315,7 +377,6 @@
       const dotsEl = document.getElementById('banner-dots');
       if (!track || bannerList.length === 0) return;
 
-      // 무한 순환
       const total = bannerList.length;
       bannerIndex = ((idx % total) + total) % total;
 
@@ -345,13 +406,11 @@
       startAuto();
     }
 
-    // ⭐ 페이지 백그라운드 시 자동 중지
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden') stopAuto();
       else if (bannerList.length > 1) startAuto();
     });
 
-    // ⭐ 모바일 스와이프 지원
     (function setupSwipe() {
       const slider = document.getElementById('banner-slider');
       if (!slider) return;
@@ -371,7 +430,6 @@
         const dx = Math.abs(e.touches[0].clientX - startX);
         const dy = Math.abs(e.touches[0].clientY - startY);
         if (dx > dy && dx > 10) {
-          // 가로 스와이프 → 페이지 스크롤 방지
           e.preventDefault();
         }
       }, { passive: false });
@@ -383,16 +441,14 @@
         const dy = e.changedTouches[0].clientY - startY;
 
         if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
-          if (dx < 0) goToBanner(bannerIndex + 1);  // 왼쪽으로 → 다음
-          else goToBanner(bannerIndex - 1);          // 오른쪽으로 → 이전
+          if (dx < 0) goToBanner(bannerIndex + 1);
+          else goToBanner(bannerIndex - 1);
         }
         if (bannerList.length > 1) startAuto();
       }, { passive: true });
     })();
 
-    /* =========================================
-       ⭐ 상품 목록
-    ========================================= */
+    /* ⭐ 상품 목록 */
     async function loadProducts() {
       const list = document.getElementById('product-list');
       const { data, error } = await db.from('products').select('*').order('created_at', { ascending: false });
@@ -490,6 +546,7 @@
 
     (async () => {
       await loadBanner();
+      await loadPromoVideo();
       await loadProducts();
     })();
   </script>
