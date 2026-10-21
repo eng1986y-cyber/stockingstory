@@ -272,26 +272,38 @@
     .row-total { color: #e53935; font-weight: 700; font-size: 13px; white-space: nowrap; }
     .row-sep { color: #d1d5db; }
 
-    /* ⭐ 배너 목록 아이템 */
+    /* ⭐ 배너 목록 아이템 (PC 삭제 버튼 항상 보이도록 수정) */
     .banner-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
     .banner-item {
       display: flex; align-items: center; gap: 10px;
       padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff;
+      width: 100%; box-sizing: border-box;
     }
     .banner-item-thumb {
-      width: 80px; height: 50px; flex-shrink: 0;
+      width: 80px; height: 50px; flex: 0 0 80px;
       border-radius: 6px; border: 1px solid #e5e7eb; object-fit: cover;
       background: #f3f4f6;
     }
-    .banner-item-info { flex: 1; min-width: 0; font-size: 12px; }
+    .banner-item-info {
+      flex: 1 1 0; min-width: 0; font-size: 12px;
+      overflow: hidden;
+    }
     .banner-item-info .b-link {
       color: #1976d2; text-decoration: none;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;
+      max-width: 100%;
     }
     .banner-item-info .b-link.none { color: #9ca3af; }
     .banner-item .b-del-btn {
-      padding: 6px 10px; background: #dc2626; color: #fff; border: 0; border-radius: 6px;
-      font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap;
+      flex: 0 0 auto;
+      min-width: 56px;
+      padding: 6px 12px;
+      background: #dc2626; color: #fff; border: 0; border-radius: 6px;
+      font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center; justify-content: center;
+      visibility: visible; opacity: 1;
     }
 
     /* 모달 */
