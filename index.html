@@ -18,7 +18,7 @@
     #banner-wrap {
       width: 100%;
       margin-top: 0;
-      margin-bottom: 24px;
+      margin-bottom: 0;  /* ⭐ 배너 아래 여백 제거 */
       overflow: hidden;
       position: relative;
       background: #f0f0f0;
@@ -110,9 +110,11 @@
       padding: 0 16px;
       box-sizing: border-box;
       width: 100%;
-      margin-top: 24px;
+      margin-top: 16px; /* ⭐ 배너 아래 여백 최소화 */
     }
-    @media (max-width: 768px) { #product-container { margin-top: 16px; } }
+    /* ⭐ 배너가 없을 때만 위 여백 확보 */
+    #product-container.no-banner { margin-top: 24px; }
+    @media (max-width: 768px) { #product-container { margin-top: 12px; } }
 
     #product-list {
       display: grid;
@@ -236,6 +238,7 @@
       const dotsEl = document.getElementById('banner-dots');
       const prevBtn = document.getElementById('banner-prev');
       const nextBtn = document.getElementById('banner-next');
+      const container = document.getElementById('product-container');
 
       const { data, error } = await db
         .from('banners')
@@ -245,16 +248,21 @@
       if (error || !data || data.length === 0) {
         wrap.style.display = 'none';
         bannerList = [];
+        // ⭐ 배너 없을 때 상품 목록 위 여백 확보
+        if (container) container.classList.add('no-banner');
         return;
       }
 
       bannerList = data.filter(b => b.image_url);
       if (bannerList.length === 0) {
         wrap.style.display = 'none';
+        if (container) container.classList.add('no-banner');
         return;
       }
 
       wrap.style.display = 'block';
+      // ⭐ 배너 있을 때 상품 목록 위 여백 최소화
+      if (container) container.classList.remove('no-banner');
 
       // ⭐ 슬라이드 HTML 생성
       track.innerHTML = bannerList.map((b, i) => {
