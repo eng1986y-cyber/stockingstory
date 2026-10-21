@@ -83,7 +83,6 @@
     .card input[readonly] { background: #f9fafb !important; color: #6b7280 !important; }
     .card textarea { resize: vertical; min-height: 70px; }
 
-    /* ⭐⭐⭐ 설정 탭: 좌우 2열 배치 ⭐⭐⭐ */
     .settings-split {
       display: grid; grid-template-columns: 1fr 1fr;
       gap: 16px; align-items: start; margin-bottom: 16px;
@@ -97,7 +96,6 @@
       .settings-split { grid-template-columns: 1fr; gap: 12px; }
     }
 
-    /* 상품 등록: 가로 스크롤 없이 화면 너비에 맞춰 자동 줄바꿈 */
     #product-register-card { min-width: 0; width: 100%; }
     #product-register-card > #product-form {
       display: grid !important;
@@ -203,7 +201,6 @@
       cursor: pointer; font-size: 14px; font-weight: 600; font-family: inherit;
     }
 
-    /* 주문/회원 컴팩트 레이아웃 */
     .row-list { display: flex; flex-direction: column; gap: 8px; min-height: 420px; box-sizing: border-box; }
     .row-item {
       background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
@@ -218,7 +215,6 @@
     .row-total { color: #e53935; font-weight: 700; font-size: 13px; white-space: nowrap; }
     .row-sep { color: #d1d5db; }
 
-    /* ⭐ 상단 액션 바 (검색 + 엑셀/인쇄) */
     .list-action-bar {
       display: flex; justify-content: space-between; align-items: center;
       gap: 10px; flex-wrap: wrap; margin-bottom: 12px;
@@ -226,7 +222,7 @@
     .list-action-bar .search-group { display: flex; gap: 6px; flex: 1 1 400px; min-width: 0; max-width: 640px; }
     .list-action-bar .export-group { display: flex; gap: 6px; flex-shrink: 0; }
 
-    /* ⭐ 배너 목록 아이템 (수정 + 삭제) */
+    /* ⭐ 배너 목록 아이템 */
     .banner-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
     .banner-item {
       display: flex; align-items: center; gap: 10px;
@@ -245,9 +241,7 @@
       max-width: 100%;
     }
     .banner-item-info .b-link.none { color: #9ca3af; }
-    .banner-item .b-actions {
-      display: flex; gap: 6px; flex: 0 0 auto;
-    }
+    .banner-item .b-actions { display: flex; gap: 6px; flex: 0 0 auto; }
     .banner-item .b-edit-btn {
       flex: 0 0 auto; min-width: 56px; padding: 6px 12px;
       background: #111827; color: #fff; border: 0; border-radius: 6px;
@@ -260,6 +254,64 @@
       font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
       white-space: nowrap; display: inline-flex; align-items: center; justify-content: center;
     }
+
+    /* ⭐⭐⭐ 통계 탭 - 대시보드 카드 & 그래프 ⭐⭐⭐ */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .stat-card {
+      background: #fff; border: 1px solid #e5e7eb; border-radius: 10px;
+      padding: 16px 18px; display: flex; flex-direction: column; gap: 4px;
+    }
+    .stat-card .stat-label { font-size: 12px; color: #6b7280; font-weight: 500; }
+    .stat-card .stat-value { font-size: 26px; font-weight: 700; color: #111827; line-height: 1.2; }
+    .stat-card .stat-sub { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+    .stat-card.accent { background: #111827; }
+    .stat-card.accent .stat-label { color: #d1d5db; }
+    .stat-card.accent .stat-value { color: #fff; }
+    .stat-card.accent .stat-sub { color: #9ca3af; }
+
+    .chart-wrap {
+      background: #fff; border: 1px solid #e5e7eb; border-radius: 10px;
+      padding: 18px; margin-bottom: 16px;
+    }
+    .chart-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 14px; flex-wrap: wrap; gap: 8px;
+    }
+    .chart-title { font-size: 14px; font-weight: 700; color: #111827; }
+    .chart-controls { display: flex; gap: 6px; }
+    .chart-controls .range-btn {
+      padding: 6px 12px; border: 1px solid #e5e7eb; background: #fff;
+      color: #374151; border-radius: 6px; cursor: pointer; font-size: 12px;
+      font-family: inherit; font-weight: 500;
+    }
+    .chart-controls .range-btn.active { background: #111827; color: #fff; border-color: #111827; }
+
+    #chart-svg {
+      width: 100%;
+      height: 280px;
+      display: block;
+    }
+    .chart-empty {
+      padding: 40px 20px; text-align: center; color: #9ca3af; font-size: 13px;
+    }
+
+    .top-pages-list { display: flex; flex-direction: column; gap: 6px; }
+    .top-page-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 12px; background: #f9fafb; border-radius: 8px; font-size: 13px;
+    }
+    .top-page-item .tp-name { color: #111827; font-weight: 600; }
+    .top-page-item .tp-bar-wrap {
+      flex: 1; height: 6px; background: #e5e7eb; border-radius: 3px;
+      margin: 0 12px; overflow: hidden;
+    }
+    .top-page-item .tp-bar { height: 100%; background: #3b82f6; border-radius: 3px; }
+    .top-page-item .tp-count { color: #6b7280; font-size: 12px; white-space: nowrap; }
 
     /* 모달 */
     .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; z-index: 100000; padding: 10px; }
@@ -276,7 +328,7 @@
     .modal-box .modal-actions { display: flex; gap: 8px; margin-top: 10px; }
     .modal-box .modal-actions > * { flex: 1; }
 
-    /* ⭐⭐⭐ 반응형: 태블릿/모바일 ⭐⭐⭐ */
+    /* ⭐⭐⭐ 반응형 ⭐⭐⭐ */
     @media (max-width: 1000px) {
       .admin-header { padding: 0 16px; }
       .admin-tabbar { padding: 10px 16px 10px; }
@@ -298,9 +350,10 @@
       .list-action-bar { flex-direction: column; align-items: stretch; }
       .list-action-bar .search-group { max-width: none; }
       .list-action-bar .export-group { width: 100%; justify-content: flex-end; }
+      #chart-svg { height: 220px; }
+      .stat-card .stat-value { font-size: 22px; }
     }
 
-    /* 화면 오른쪽 가장자리에 고정되는 위/아래 이동 버튼 */
     .edge-scroll-controls {
       position: fixed; right: 14px; top: 50%;
       transform: translateY(-50%); display: flex; flex-direction: column;
@@ -319,7 +372,6 @@
       .edge-scroll-controls button { width: 38px; height: 38px; font-size: 17px; }
     }
 
-    /* ⭐⭐⭐ 인쇄 전용 스타일 ⭐⭐⭐ */
     @media print {
       body { background: #fff !important; }
       .admin-header, .admin-tabbar, .edge-scroll-controls,
@@ -368,6 +420,7 @@
         <button class="nav-item active" data-tab="products">📦 상품</button>
         <button class="nav-item" data-tab="orders">🧾 주문</button>
         <button class="nav-item" data-tab="members">👥 회원</button>
+        <button class="nav-item" data-tab="stats">📊 접속통계</button>
         <button class="nav-item" data-tab="settings">⚙️ 사이트 설정</button>
       </div>
     </div>
@@ -471,15 +524,74 @@
           <div id="member-pagination" class="admin-list-pagination"></div>
         </section>
 
+        <!-- ⭐⭐⭐ 접속 통계 -->
+        <section id="tab-stats" class="admin-section">
+          <h1 class="page-title">접속 통계</h1>
+          <p class="page-subtitle">방문자 수, 페이지뷰, 인기 페이지를 한눈에 확인합니다</p>
+
+          <!-- 상단 요약 카드 -->
+          <div class="stats-grid">
+            <div class="stat-card accent">
+              <div class="stat-label">오늘 방문자 (UV)</div>
+              <div class="stat-value" id="stat-today-uv">-</div>
+              <div class="stat-sub" id="stat-today-pv"></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">어제 방문자</div>
+              <div class="stat-value" id="stat-yesterday">-</div>
+              <div class="stat-sub">어제 00:00 ~ 23:59</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">최근 7일 방문자</div>
+              <div class="stat-value" id="stat-week">-</div>
+              <div class="stat-sub">중복 제거 합계</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">최근 30일 방문자</div>
+              <div class="stat-value" id="stat-month">-</div>
+              <div class="stat-sub">중복 제거 합계</div>
+            </div>
+          </div>
+
+          <!-- 차트 -->
+          <div class="chart-wrap">
+            <div class="chart-header">
+              <div class="chart-title" id="chart-title">일별 방문자 추이</div>
+              <div class="chart-controls">
+                <button type="button" class="range-btn active" data-range="7">7일</button>
+                <button type="button" class="range-btn" data-range="14">14일</button>
+                <button type="button" class="range-btn" data-range="30">30일</button>
+              </div>
+            </div>
+            <div id="chart-container">
+              <svg id="chart-svg" viewBox="0 0 800 280" preserveAspectRatio="none"></svg>
+            </div>
+            <div id="chart-empty" class="chart-empty" style="display:none;">아직 방문 데이터가 없습니다.<br>사이트를 방문하면 자동으로 기록됩니다.</div>
+          </div>
+
+          <!-- 인기 페이지 -->
+          <div class="chart-wrap">
+            <div class="chart-title" style="margin-bottom:14px;">🔥 인기 페이지 (최근 30일)</div>
+            <div id="top-pages" class="top-pages-list">
+              <p style="font-size:13px; color:#9ca3af;">데이터를 불러오는 중...</p>
+            </div>
+          </div>
+
+          <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+              <div style="font-size:12px; color:#6b7280;">💡 방문 기록은 페이지 방문 시 자동 저장됩니다. (같은 페이지 5분 이내 중복 제외)</div>
+              <button type="button" id="stats-refresh-btn" class="btn btn-primary btn-sm">🔄 새로고침</button>
+            </div>
+          </div>
+        </section>
+
         <!-- 설정 -->
         <section id="tab-settings" class="admin-section">
           <h1 class="page-title">사이트 설정</h1>
           <p class="page-subtitle">로고, 배너, 푸터, SNS, 배송비를 관리합니다</p>
 
           <div class="settings-split">
-            <!-- ══════════ 좌측 열 ══════════ -->
             <div class="settings-col">
-              <!-- 1. 로고 / 사이트명 -->
               <div class="card">
                 <div class="card-title">🏷️ 로고 / 사이트명</div>
                 <div style="display: grid; gap: 10px;">
@@ -497,7 +609,6 @@
                 </div>
               </div>
 
-              <!-- 2. 배너 이미지 (로고 아래) -->
               <div class="card">
                 <div class="card-title">🖼️ 배너 이미지 <span class="hint">(여러 개 등록 가능)</span></div>
                 <div style="display: grid; gap: 10px;">
@@ -509,7 +620,6 @@
                 </div>
                 <p id="banner-msg" class="msg"></p>
 
-                <!-- ⭐ 등록된 배너 목록 -->
                 <div style="margin-top: 12px;">
                   <div style="font-size: 12px; font-weight: 600; color: #6b7280; margin-bottom: 8px;">
                     📋 등록된 배너 <span id="banner-count" style="font-weight: 400;"></span>
@@ -521,9 +631,7 @@
               </div>
             </div>
 
-            <!-- ══════════ 우측 열 ══════════ -->
             <div class="settings-col">
-              <!-- 1. 사이트 하단 정보 (Footer) -->
               <div class="card">
                 <div class="card-title">📄 사이트 하단 정보 (Footer)</div>
                 <div style="display: grid; gap: 10px;">
@@ -538,7 +646,6 @@
                 <p id="footer-msg" class="msg"></p>
               </div>
 
-              <!-- 2. SNS 링크 (별도 카드) -->
               <div class="card">
                 <div class="card-title">🔗 SNS 링크 <span class="hint">(입력 시 하단에 아이콘 표시)</span></div>
                 <div style="display: grid; gap: 10px;">
@@ -550,7 +657,6 @@
                 <p id="sns-msg" class="msg"></p>
               </div>
 
-              <!-- 3. 전체 배송비 설정 (SNS 아래) -->
               <div class="card">
                 <div class="card-title">🚚 전체 배송비 설정</div>
                 <div class="form-row">
@@ -561,7 +667,6 @@
                 <p id="shipping-msg" class="msg"></p>
               </div>
             </div>
-
           </div>
         </section>
       </div>
@@ -591,8 +696,11 @@
         document.querySelectorAll('.admin-tabbar .nav-item').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
         btn.classList.add('active');
-        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+        const tabId = 'tab-' + btn.dataset.tab;
+        document.getElementById(tabId).classList.add('active');
         document.querySelector('.admin-layout').scrollTop = 0;
+        // ⭐ 통계 탭 진입 시 자동 로드
+        if (btn.dataset.tab === 'stats') loadStats();
       });
     });
 
@@ -794,7 +902,7 @@
       }
     });
 
-    // ===== 배너 (등록 / 수정 / 삭제) =====
+    // ===== 배너 =====
     async function loadBanner() {
       const listEl = document.getElementById('banner-list');
       const countEl = document.getElementById('banner-count');
@@ -831,7 +939,6 @@
         </div>
       `).join('');
 
-      // ⭐ 개별 수정 버튼
       listEl.querySelectorAll('.b-edit-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const id = btn.dataset.id;
@@ -840,7 +947,6 @@
         });
       });
 
-      // ⭐ 개별 삭제 버튼
       listEl.querySelectorAll('.b-del-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
           const id = btn.dataset.id;
@@ -862,7 +968,6 @@
       });
     }
 
-    // ⭐ 배너 수정 모달
     function openBannerEditModal(banner) {
       const modal = document.createElement('div');
       modal.className = 'modal-backdrop';
@@ -931,7 +1036,6 @@
       });
     }
 
-    // ⭐ 새 배너 추가
     document.getElementById('banner-save-btn').addEventListener('click', async () => {
       const msg = document.getElementById('banner-msg');
       const imageUrl = document.getElementById('banner-image-url').value.trim();
@@ -1340,7 +1444,7 @@
       }));
     }
 
-    // ⭐⭐⭐ CSV 다운로드 헬퍼 (BOM 포함 → 엑셀에서 한글 깨짐 방지) ⭐⭐⭐
+    // ===== CSV 다운로드 헬퍼 =====
     function downloadCSV(filename, rows) {
       const escapeCell = (v) => {
         const s = String(v ?? '');
@@ -1362,7 +1466,6 @@
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
-    // ⭐⭐⭐ 주문 엑셀 다운로드 ⭐⭐⭐
     document.getElementById('order-excel-btn').addEventListener('click', () => {
       if (!allOrdersRaw || allOrdersRaw.length === 0) {
         alert('다운로드할 주문이 없습니다.');
@@ -1405,7 +1508,6 @@
       downloadCSV('주문목록', rows);
     });
 
-    // ⭐⭐⭐ 회원 엑셀 다운로드 ⭐⭐⭐
     document.getElementById('member-excel-btn').addEventListener('click', () => {
       if (!allMembers || allMembers.length === 0) {
         alert('다운로드할 회원이 없습니다.');
@@ -1429,18 +1531,15 @@
       downloadCSV('회원목록', rows);
     });
 
-    // ⭐⭐⭐ 주문 인쇄 ⭐⭐⭐
     document.getElementById('order-print-btn').addEventListener('click', () => {
       if (!allOrdersRaw || allOrdersRaw.length === 0) {
         alert('인쇄할 주문이 없습니다.');
         return;
       }
-      // 인쇄 시 전체 표시
       document.querySelectorAll('#order-list .row-item').forEach(r => r.style.display = '');
       setTimeout(() => window.print(), 50);
     });
 
-    // ⭐⭐⭐ 회원 인쇄 ⭐⭐⭐
     document.getElementById('member-print-btn').addEventListener('click', () => {
       if (!allMembers || allMembers.length === 0) {
         alert('인쇄할 회원이 없습니다.');
@@ -1772,6 +1871,246 @@
         modal.remove();
         loadMembers(document.getElementById('member-search').value.trim() || null);
       });
+    }
+
+    // ============================================================
+    // ⭐⭐⭐ 접속 통계 ⭐⭐⭐
+    // ============================================================
+    let statsRange = 7;
+
+    document.querySelectorAll('.chart-controls .range-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.chart-controls .range-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        statsRange = Number(btn.dataset.range) || 7;
+        loadStats();
+      });
+    });
+
+    document.getElementById('stats-refresh-btn').addEventListener('click', loadStats);
+
+    async function loadStats() {
+      try {
+        // 최근 30일 방문 데이터 (인기 페이지 계산용 여유분)
+        const since = new Date();
+        since.setDate(since.getDate() - 30);
+        since.setHours(0, 0, 0, 0);
+
+        const { data, error } = await db
+          .from('visits')
+          .select('id, path, session_id, created_at')
+          .gte('created_at', since.toISOString())
+          .order('created_at', { ascending: true })
+          .limit(20000);
+
+        if (error) {
+          console.warn('통계 로드 실패:', error);
+          renderEmptyStats();
+          return;
+        }
+
+        const visits = data || [];
+        renderStats(visits);
+      } catch (e) {
+        console.error(e);
+        renderEmptyStats();
+      }
+    }
+
+    function renderEmptyStats() {
+      document.getElementById('stat-today-uv').textContent = '0';
+      document.getElementById('stat-today-pv').textContent = 'PV 0';
+      document.getElementById('stat-yesterday').textContent = '0';
+      document.getElementById('stat-week').textContent = '0';
+      document.getElementById('stat-month').textContent = '0';
+      document.getElementById('chart-empty').style.display = 'block';
+      document.getElementById('chart-svg').innerHTML = '';
+      document.getElementById('top-pages').innerHTML = '<p style="font-size:13px; color:#9ca3af;">데이터가 없습니다.</p>';
+    }
+
+    function dateKeyLocal(d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
+    function renderStats(visits) {
+      // ===== 일자별 집계 =====
+      const dayMap = {}; // { 'YYYY-MM-DD': { pv: n, sessions: Set } }
+      const pageMap = {}; // { path: { pv: n, sessions: Set } }
+
+      const today = new Date(); today.setHours(0,0,0,0);
+      const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+      const todayKey = dateKeyLocal(today);
+      const yesterdayKey = dateKeyLocal(yesterday);
+
+      const weekStart = new Date(today); weekStart.setDate(weekStart.getDate() - 6);
+      const monthStart = new Date(today); monthStart.setDate(monthStart.getDate() - 29);
+
+      visits.forEach(v => {
+        const d = new Date(v.created_at);
+        const key = dateKeyLocal(d);
+        if (!dayMap[key]) dayMap[key] = { pv: 0, sessions: new Set() };
+        dayMap[key].pv += 1;
+        if (v.session_id) dayMap[key].sessions.add(v.session_id);
+
+        if (!pageMap[v.path]) pageMap[v.path] = { pv: 0, sessions: new Set() };
+        pageMap[v.path].pv += 1;
+        if (v.session_id) pageMap[v.path].sessions.add(v.session_id);
+      });
+
+      // ===== 요약 카드 =====
+      const todayData = dayMap[todayKey] || { pv: 0, sessions: new Set() };
+      document.getElementById('stat-today-uv').textContent = todayData.sessions.size.toLocaleString();
+      document.getElementById('stat-today-pv').textContent = `PV ${todayData.pv.toLocaleString()}`;
+
+      const yData = dayMap[yesterdayKey] || { pv: 0, sessions: new Set() };
+      document.getElementById('stat-yesterday').textContent = yData.sessions.size.toLocaleString();
+
+      let weekUV = 0, monthUV = 0;
+      Object.entries(dayMap).forEach(([k, v]) => {
+        const d = new Date(k + 'T00:00:00');
+        if (d >= weekStart) weekUV += v.sessions.size;
+        if (d >= monthStart) monthUV += v.sessions.size;
+      });
+      document.getElementById('stat-week').textContent = weekUV.toLocaleString();
+      document.getElementById('stat-month').textContent = monthUV.toLocaleString();
+
+      // ===== 차트 데이터 (선택한 기간) =====
+      const chartDays = [];
+      for (let i = statsRange - 1; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        const k = dateKeyLocal(d);
+        const v = dayMap[k] || { pv: 0, sessions: new Set() };
+        chartDays.push({
+          date: d,
+          key: k,
+          label: `${d.getMonth() + 1}/${d.getDate()}`,
+          uv: v.sessions.size,
+          pv: v.pv,
+        });
+      }
+
+      const hasAny = chartDays.some(d => d.uv > 0 || d.pv > 0);
+      if (!hasAny && Object.keys(pageMap).length === 0) {
+        renderEmptyStats();
+        return;
+      }
+      document.getElementById('chart-empty').style.display = hasAny ? 'none' : 'block';
+      drawChart(chartDays);
+
+      // ===== 인기 페이지 =====
+      const topPages = Object.entries(pageMap)
+        .map(([path, v]) => ({ path, pv: v.pv, uv: v.sessions.size }))
+        .sort((a, b) => b.pv - a.pv)
+        .slice(0, 8);
+
+      const topPagesEl = document.getElementById('top-pages');
+      if (topPages.length === 0) {
+        topPagesEl.innerHTML = '<p style="font-size:13px; color:#9ca3af;">데이터가 없습니다.</p>';
+        return;
+      }
+      const maxPv = topPages[0].pv || 1;
+      topPagesEl.innerHTML = topPages.map(p => {
+        const pct = Math.round((p.pv / maxPv) * 100);
+        return `
+          <div class="top-page-item">
+            <span class="tp-name">${escapeHtml(pathLabel(p.path))}</span>
+            <div class="tp-bar-wrap"><div class="tp-bar" style="width:${pct}%"></div></div>
+            <span class="tp-count">PV ${p.pv.toLocaleString()} · UV ${p.uv.toLocaleString()}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function pathLabel(p) {
+      const map = {
+        'index': '홈 (index)',
+        'product': '상품 상세',
+        'cart': '장바구니',
+        'login': '로그인',
+        'signup': '회원가입',
+        'orders': '주문조회',
+        'mypage': '내정보',
+        'myorders': '내 주문내역',
+      };
+      return map[p] || p;
+    }
+
+    function escapeHtml(s) {
+      return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+    }
+
+    // ===== SVG 막대 그래프 그리기 =====
+    function drawChart(days) {
+      const svg = document.getElementById('chart-svg');
+      const W = 800, H = 280;
+      const PADDING = { top: 20, right: 20, bottom: 40, left: 50 };
+      const innerW = W - PADDING.left - PADDING.right;
+      const innerH = H - PADDING.top - PADDING.bottom;
+
+      const maxVal = Math.max(1, ...days.map(d => Math.max(d.uv, d.pv)));
+      // y축 눈금 (5단계)
+      const ySteps = 4;
+      const stepVal = Math.ceil(maxVal / ySteps) || 1;
+      const yMax = stepVal * ySteps;
+
+      const barGroupWidth = innerW / days.length;
+      const barWidth = Math.max(4, Math.min(24, barGroupWidth * 0.32));
+      const gap = 3;
+
+      let svgContent = '';
+
+      // y축 그리드 + 라벨
+      for (let i = 0; i <= ySteps; i++) {
+        const yVal = stepVal * i;
+        const y = PADDING.top + innerH - (yVal / yMax) * innerH;
+        svgContent += `<line x1="${PADDING.left}" y1="${y}" x2="${W - PADDING.right}" y2="${y}" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="${i === 0 ? '0' : '3 3'}" />`;
+        svgContent += `<text x="${PADDING.left - 8}" y="${y + 4}" text-anchor="end" font-size="11" fill="#9ca3af" font-family="sans-serif">${yVal}</text>`;
+      }
+
+      // 막대 및 x축 라벨
+      days.forEach((d, idx) => {
+        const cx = PADDING.left + barGroupWidth * idx + barGroupWidth / 2;
+        const uvH = (d.uv / yMax) * innerH;
+        const pvH = (d.pv / yMax) * innerH;
+        const uvX = cx - barWidth - gap / 2;
+        const pvX = cx + gap / 2;
+        const uvY = PADDING.top + innerH - uvH;
+        const pvY = PADDING.top + innerH - pvH;
+
+        // UV (파란색)
+        svgContent += `<rect x="${uvX}" y="${uvY}" width="${barWidth}" height="${Math.max(0, uvH)}" fill="#3b82f6" rx="2">
+          <title>${d.label} UV: ${d.uv}</title>
+        </rect>`;
+        // PV (연한 파란색)
+        svgContent += `<rect x="${pvX}" y="${pvY}" width="${barWidth}" height="${Math.max(0, pvH)}" fill="#93c5fd" rx="2">
+          <title>${d.label} PV: ${d.pv}</title>
+        </rect>`;
+
+        // x축 라벨 (너무 많으면 건너뛰기)
+        const showEvery = days.length > 14 ? Math.ceil(days.length / 10) : 1;
+        if (idx % showEvery === 0 || idx === days.length - 1) {
+          svgContent += `<text x="${cx}" y="${H - PADDING.bottom + 16}" text-anchor="middle" font-size="10" fill="#6b7280" font-family="sans-serif">${d.label}</text>`;
+        }
+      });
+
+      // x축 기준선
+      svgContent += `<line x1="${PADDING.left}" y1="${PADDING.top + innerH}" x2="${W - PADDING.right}" y2="${PADDING.top + innerH}" stroke="#d1d5db" stroke-width="1" />`;
+
+      // 범례
+      svgContent += `
+        <g transform="translate(${W - PADDING.right - 130}, ${PADDING.top})">
+          <rect x="0" y="0" width="10" height="10" fill="#3b82f6" rx="2" />
+          <text x="14" y="9" font-size="11" fill="#374151" font-family="sans-serif">UV (방문자)</text>
+          <rect x="0" y="16" width="10" height="10" fill="#93c5fd" rx="2" />
+          <text x="14" y="25" font-size="11" fill="#374151" font-family="sans-serif">PV (페이지뷰)</text>
+        </g>
+      `;
+
+      svg.innerHTML = svgContent;
     }
 
     checkSession();

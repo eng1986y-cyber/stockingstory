@@ -142,7 +142,6 @@ if (_isDark) {
       background: #e5e7eb; color: #111; border-color: #e5e7eb;
     }
 
-    /* ⭐⭐⭐ 모바일: SNS 아이콘 보이도록 명시 + 여백 확보 ⭐⭐⭐ */
     @media (max-width: 768px) {
       #app-footer {
         padding: 20px 16px;
@@ -166,13 +165,11 @@ if (_isDark) {
       }
       #app-footer .footer-text { margin-top: 14px; padding-top: 14px; font-size: 11px; }
 
-      /* ⭐ 하단 탭바(65px)에 콘텐츠가 가려지지 않도록 스크롤 영역 안쪽에 여백 */
       .site-main-scroll {
         padding-bottom: calc(65px + env(safe-area-inset-bottom));
       }
     }
 
-    /* ⭐⭐⭐ 모바일 하단 고정 탭바 ⭐⭐⭐ */
     #mobile-bottom-nav {
       display: none;
       height: 65px;
@@ -336,6 +333,42 @@ async function refreshFooterCache() {
     (data || []).forEach(row => { obj[row.key] = row.value || ''; });
     setCachedFooter(obj);
   } catch (e) {}
+}
+
+// ⭐⭐⭐ 방문 기록 (visits 테이블에 insert) ⭐⭐⭐
+function getOrCreateSessionId() {
+  try {
+    let sid = localStorage.getItem('visitor_sid');
+    if (!sid) {
+      sid = 'sid_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
+      localStorage.setItem('visitor_sid', sid);
+    }
+    return sid;
+  } catch (e) {
+    return 'sid_anon_' + Math.random().toString(36).slice(2, 10);
+  }
+}
+
+async function recordVisit() {
+  const client = getSupabaseClient();
+  if (!client) return;
+  try {
+    // 같은 세션에서 같은 페이지를 너무 자주 기록하지 않도록 5분 이내 중복 방지
+    const key = 'last_visit_' + _pathName;
+    const now = Date.now();
+    const last = Number(localStorage.getItem(key) || 0);
+    if (now - last < 5 * 60 * 1000) return;
+    localStorage.setItem(key, String(now));
+
+    await client.from('visits').insert({
+      path: _pathName || 'index',
+      session_id: getOrCreateSessionId(),
+      user_agent: navigator.userAgent ? navigator.userAgent.slice(0, 500) : null,
+      referrer: document.referrer ? document.referrer.slice(0, 500) : null,
+    });
+  } catch (e) {
+    // 실패해도 사이트 동작에는 영향 없음
+  }
 }
 
 function renderFooter() {
@@ -669,6 +702,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   createScrollButtons();
   renderFooter();
+
+  // ⭐ 방문 기록 (통계용)
+  recordVisit();
 
   const isOk = await verifyMemberStatus();
   if (!isOk) return;
