@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="style.css">
   <script src="common.js"></script>
   <style>
-    /* 수량 인풋 화살표 제거 */
     input[type=number]::-webkit-inner-spin-button,
     input[type=number]::-webkit-outer-spin-button {
       -webkit-appearance: none;
@@ -72,7 +71,6 @@
       const hemOptions = data.hem_option || [];
       const otherOptions = data.other_option || [];
 
-      // 옵션 셀렉트박스 생성 헬퍼
       function buildSelect(name, label, options) {
         if (!options.length) return '';
         return `
@@ -87,7 +85,6 @@
         `;
       }
 
-      // ⭐ 2열 배치
       const row1 = (colors.length || sizes.length) ? `
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
           ${buildSelect('color', '색상', colors)}
@@ -164,11 +161,9 @@
         ${detailImgs ? `<div style="margin-top:16px;">${detailImgs}</div>` : ''}
       `;
 
-      // 공유 버튼
       const shareEl = document.getElementById('share-btn');
       if (shareEl) shareEl.onclick = () => shareProduct(data);
 
-      // 옵션 변경 시 자동 추가
       detailEl.querySelectorAll('select[data-opt-name]').forEach(sel => {
         sel.addEventListener('change', () => handleOptionChange());
       });
@@ -179,7 +174,6 @@
       renderSelectedItems();
     }
 
-    // 옵션 변경 시 자동으로 아래에 추가
     function handleOptionChange() {
       const detailEl = document.getElementById('product-detail');
       const selects = detailEl.querySelectorAll('select[data-opt-name]');
@@ -200,7 +194,6 @@
         qty: 1,
       };
 
-      // 같은 옵션 있으면 +1
       const dupIdx = selectedItems.findIndex(it =>
         it.color === item.color &&
         it.size === item.size &&
@@ -219,7 +212,6 @@
       renderSelectedItems();
     }
 
-    // 선택된 옵션 리스트 렌더
     function renderSelectedItems() {
       const el = document.getElementById('selected-items');
       if (!el) return;
@@ -413,9 +405,10 @@
       const labelStyle = 'font-size:13px; font-weight:600; color:#ccc; display:block; margin-bottom:4px;';
 
       const modal = document.createElement('div');
-      modal.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.75); display:flex; align-items:center; justify-content:center; z-index:1000; padding:10px;`;
+      // ⭐ 모바일에서 전체 입력창이 보이도록 백드롭 자체를 스크롤 가능하게 수정
+      modal.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.75); display:flex; align-items:flex-start; justify-content:center; z-index:1000; padding:10px; overflow-y:auto; -webkit-overflow-scrolling:touch;`;
       modal.innerHTML = `
-        <div style="background:#151515; border:1px solid #222; padding:24px; border-radius:12px; width:100%; max-width:460px; max-height:90vh; overflow-y:auto; color:#e5e7eb;">
+        <div style="background:#151515; border:1px solid #222; padding:20px 16px; border-radius:12px; width:100%; max-width:460px; max-height:92vh; overflow-y:auto; color:#e5e7eb; -webkit-overflow-scrolling:touch; padding-bottom:calc(20px + env(safe-area-inset-bottom)); box-sizing:border-box; margin:auto 0;">
           <h2 style="margin:0 0 16px; font-size:18px; color:#fff;">주문 정보 입력</h2>
           <form id="checkout-form" style="display:grid; gap:10px; background:none; padding:0; border:0; max-width:none;">
             <label style="${labelStyle}">주문자 이름 *</label>

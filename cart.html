@@ -7,12 +7,10 @@
   <link rel="stylesheet" href="style.css">
   <script src="common.js"></script>
   <style>
-    /* 수량 인풋 화살표 제거 */
     input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     input[type=number] { -moz-appearance: textfield; appearance: textfield; }
     .cart-check { width: 22px; height: 22px; cursor: pointer; accent-color: #10b981; }
     
-    /* ⭐ 주문 규칙 심플 카드 */
     .rule-card {
       background: #151515;
       border: 1px solid #222;
@@ -123,7 +121,6 @@
             <span style="font-size:12px; color:#888;">전체 총 수량: ${totalQty}개</span>
           </div>
 
-          <!-- ⭐ 요청하신 심플 카드형 주문 규칙 -->
           <div class="rule-card">
             <span class="rule-text">📦 주문 규칙: 선택 상품 총 6개 이상</span>
             <span class="rule-status" style="color:${canOrder ? '#10b981' : '#f59e0b'};">
@@ -203,9 +200,10 @@
       const labelStyle = 'font-size:13px; font-weight:600; color:#ccc; display:block; margin-bottom:4px;';
 
       const modal = document.createElement('div');
-      modal.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.75); display:flex; align-items:center; justify-content:center; z-index:1000; padding:10px;`;
+      // ⭐ 모바일에서 전체 입력창이 보이도록 백드롭 자체를 스크롤 가능하게 수정
+      modal.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.75); display:flex; align-items:flex-start; justify-content:center; z-index:1000; padding:10px; overflow-y:auto; -webkit-overflow-scrolling:touch;`;
       modal.innerHTML = `
-        <div style="background:#151515; border:1px solid #222; padding:24px; border-radius:12px; width:100%; max-width:460px; max-height:90vh; overflow-y:auto; color:#e5e7eb;">
+        <div style="background:#151515; border:1px solid #222; padding:20px 16px; border-radius:12px; width:100%; max-width:460px; max-height:92vh; overflow-y:auto; color:#e5e7eb; -webkit-overflow-scrolling:touch; padding-bottom:calc(20px + env(safe-area-inset-bottom)); box-sizing:border-box; margin:auto 0;">
           <h2 style="margin:0 0 16px; font-size:18px; color:#fff;">주문 정보 입력</h2>
           <form id="checkout-form" style="display:grid; gap:10px; background:none; padding:0; border:0; max-width:none;">
             <label style="${labelStyle}">주문자 이름 *</label>
