@@ -13,7 +13,6 @@
   <main>
     <div style="max-width:640px; margin:0 auto;">
       <h2 style="margin-bottom:16px; color:#fff;">주문 조회</h2>
-
       <div style="background:#151515; border:1px solid #222; padding:16px; border-radius:12px; margin-bottom:20px;">
         <p style="font-size:13px; color:#888; margin-bottom:8px;">
           <b style="color:#e5e7eb;">주문번호</b>로 조회합니다. (예: ORD-251016-A3F9)
@@ -27,7 +26,6 @@
           </button>
         </div>
       </div>
-
       <div id="orders-result"></div>
     </div>
   </main>
@@ -41,6 +39,25 @@
   </script>
 
   <script>
+    // ⭐⭐⭐ UTC → KST 변환 헬퍼 ⭐⭐⭐
+    function formatKST(dateStr, opts = {}) {
+      if (!dateStr) return '-';
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return '-';
+      const kst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
+      const y = kst.getUTCFullYear();
+      const mo = String(kst.getUTCMonth() + 1).padStart(2, '0');
+      const da = String(kst.getUTCDate()).padStart(2, '0');
+      const hh = String(kst.getUTCHours()).padStart(2, '0');
+      const mi = String(kst.getUTCMinutes()).padStart(2, '0');
+      const ss = String(kst.getUTCSeconds()).padStart(2, '0');
+      if (opts.dateOnly) return `${y}-${mo}-${da}`;
+      if (opts.shortDate) return `${mo}/${da}`;
+      if (opts.timeOnly) return `${hh}:${mi}`;
+      if (opts.full) return `${y}-${mo}-${da} ${hh}:${mi}:${ss}`;
+      return `${y}-${mo}-${da} ${hh}:${mi}`;
+    }
+
     const input = document.getElementById('order-number-input');
     const searchBtn = document.getElementById('search-btn');
     const resultEl = document.getElementById('orders-result');
@@ -52,22 +69,15 @@
     async function searchOrders() {
       const num = input.value.trim().toUpperCase();
       if (!num) { alert('주문번호를 입력해주세요.'); return; }
-
       resultEl.innerHTML = '<p style="text-align:center; padding:20px; color:#888;">조회 중...</p>';
-
-      const { data, error } = await db.from('orders').select('*')
-        .eq('order_number', num).order('created_at', { ascending: true });
-
+      const { data, error } = await db.from('orders').select('*').eq('order_number', num).order('created_at', { ascending: true });
       if (error) { resultEl.innerHTML = '<p>조회 실패: ' + error.message + '</p>'; return; }
       if (!data || data.length === 0) {
         resultEl.innerHTML = '<p style="text-align:center; padding:20px; color:#666;">해당 주문번호로 조회된 주문이 없습니다.</p>';
         return;
       }
-
       const first = data[0];
       const totalAll = data.reduce((s, o) => s + Number(o.total_price || 0), 0);
-
-      // ⭐ 운송장 정보가 있을 경우 렌더링
       const trackingHtml = (first.courier || first.tracking_number) ? `
         <div style="margin-top:12px; padding:12px; background:#0f0f0f; border:1px solid #2a2a2a; border-radius:8px; font-size:13px;">
           <div style="font-weight:700; color:#60a5fa; margin-bottom:6px;">🚚 배송 정보</div>
@@ -82,9 +92,7 @@
         <div style="background:#151515; border:1px solid #222; padding:16px; border-radius:12px; margin-bottom:12px; border-left:4px solid ${statusColor(first.status)};">
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
             <span style="font-size:15px; font-weight:700; color:#60a5fa; letter-spacing:1px;">${first.order_number}</span>
-            <span style="background:${statusColor(first.status)}; color:#fff; padding:3px 10px; border-radius:12px; font-size:12px; font-weight:600;">
-              ${first.status}
-            </span>
+            <span style="background:${statusColor(first.status)}; color:#fff; padding:3px 10px; border-radius:12px; font-size:12px; font-weight:600;">${first.status}</span>
           </div>
           <div style="font-size:13px; color:#ccc; line-height:1.7; margin-bottom:10px;">
             주문자: ${first.customer_name} (${first.customer_phone})<br>
@@ -92,11 +100,8 @@
             입금자명: <b>${first.depositor_name}</b>
             ${first.memo ? `<br>요청: ${first.memo}` : ''}
           </div>
-
           ${trackingHtml}
-
           <hr style="border:0; border-top:1px solid #222; margin:12px 0;">
-
           ${data.map(o => `
             <div style="font-size:13px; line-height:1.7; padding:6px 0; border-bottom:1px dashed #222; color:#ccc;">
               <b style="color:#fff;">${o.product_name}</b>
@@ -108,12 +113,11 @@
               ${o.selected_other ? `<br><span style="color:#888; font-size:12px;">기타옵션: ${o.selected_other}</span>` : ''}
             </div>
           `).join('')}
-
           <div style="text-align:right; font-size:16px; margin-top:12px; color:#e5e7eb;">
             총 <b style="color:#ef4444; font-size:18px;">${totalAll.toLocaleString()}원</b>
           </div>
           <div style="font-size:12px; color:#666; text-align:right; margin-top:4px;">
-            ${new Date(first.created_at).toLocaleString('ko-KR')}
+            주문일시 (KST): ${formatKST(first.created_at, { full: true })}
           </div>
         </div>
       `;

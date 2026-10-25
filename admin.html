@@ -315,14 +315,8 @@
     }
     .chart-controls .range-btn.active { background: #111827; color: #fff; border-color: #111827; }
 
-    #chart-svg {
-      width: 100%;
-      height: 280px;
-      display: block;
-    }
-    .chart-empty {
-      padding: 40px 20px; text-align: center; color: #9ca3af; font-size: 13px;
-    }
+    #chart-svg { width: 100%; height: 280px; display: block; }
+    .chart-empty { padding: 40px 20px; text-align: center; color: #9ca3af; font-size: 13px; }
 
     .top-pages-list { display: flex; flex-direction: column; gap: 6px; }
     .top-page-item {
@@ -449,7 +443,6 @@
 
     <div class="admin-layout">
       <div class="admin-content">
-        <!-- 상품 -->
         <section id="tab-products" class="admin-section active">
           <h1 class="page-title">상품 관리</h1>
           <p class="page-subtitle">상품을 등록하고 목록을 관리합니다</p>
@@ -498,7 +491,6 @@
           </div>
         </section>
 
-        <!-- 주문 -->
         <section id="tab-orders" class="admin-section">
           <h1 class="page-title">주문 관리</h1>
           <p class="page-subtitle">주문 내역을 확인하고, 엑셀 다운로드 / 인쇄 / 수정 / 삭제합니다</p>
@@ -526,7 +518,6 @@
           <div id="order-pagination" class="admin-list-pagination"></div>
         </section>
 
-        <!-- 회원 -->
         <section id="tab-members" class="admin-section">
           <h1 class="page-title">회원 관리</h1>
           <p class="page-subtitle">회원 정보를 확인하고, 엑셀 다운로드 / 인쇄 / 수정 / 삭제합니다</p>
@@ -554,7 +545,6 @@
           <div id="member-pagination" class="admin-list-pagination"></div>
         </section>
 
-        <!-- 접속 통계 -->
         <section id="tab-stats" class="admin-section">
           <h1 class="page-title">접속 통계</h1>
           <p class="page-subtitle">방문자 수, 페이지뷰, 인기 페이지를 한눈에 확인합니다</p>
@@ -612,7 +602,6 @@
           </div>
         </section>
 
-        <!-- 설정 -->
         <section id="tab-settings" class="admin-section">
           <h1 class="page-title">사이트 설정</h1>
           <p class="page-subtitle">로고, 배너, 푸터, SNS, 배송비, 홍보영상을 관리합니다</p>
@@ -645,9 +634,7 @@
                     <button id="promo-video-delete-btn" class="btn btn-danger">삭제</button>
                   </div>
                 </div>
-                <p style="font-size:12px; color:#9ca3af; margin:6px 0 0;">
-                  YouTube 링크를 붙여넣으면 자동으로 영상이 삽입됩니다. (16:9 비율)
-                </p>
+                <p style="font-size:12px; color:#9ca3af; margin:6px 0 0;">YouTube 링크를 붙여넣으면 자동으로 영상이 삽입됩니다. (16:9 비율)</p>
                 <p id="promo-video-msg" class="msg"></p>
                 <div id="promo-video-preview" class="preview-box" style="display:none;">
                   <div class="preview-label">현재 등록된 영상</div>
@@ -665,14 +652,9 @@
                   </div>
                 </div>
                 <p id="banner-msg" class="msg"></p>
-
                 <div style="margin-top: 12px;">
-                  <div style="font-size: 12px; font-weight: 600; color: #6b7280; margin-bottom: 8px;">
-                    📋 등록된 배너 <span id="banner-count" style="font-weight: 400;"></span>
-                  </div>
-                  <div id="banner-list" class="banner-list">
-                    <p style="font-size: 12px; color: #9ca3af;">로딩중...</p>
-                  </div>
+                  <div style="font-size: 12px; font-weight: 600; color: #6b7280; margin-bottom: 8px;">📋 등록된 배너 <span id="banner-count" style="font-weight: 400;"></span></div>
+                  <div id="banner-list" class="banner-list"><p style="font-size: 12px; color: #9ca3af;">로딩중...</p></div>
                 </div>
               </div>
             </div>
@@ -733,6 +715,25 @@
   </script>
 
   <script>
+    // ⭐⭐⭐ UTC → KST(한국시간, UTC+9) 변환 헬퍼 ⭐⭐⭐
+    function formatKST(dateStr, opts = {}) {
+      if (!dateStr) return '-';
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return '-';
+      const kst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
+      const y = kst.getUTCFullYear();
+      const mo = String(kst.getUTCMonth() + 1).padStart(2, '0');
+      const da = String(kst.getUTCDate()).padStart(2, '0');
+      const hh = String(kst.getUTCHours()).padStart(2, '0');
+      const mi = String(kst.getUTCMinutes()).padStart(2, '0');
+      const ss = String(kst.getUTCSeconds()).padStart(2, '0');
+      if (opts.dateOnly) return `${y}-${mo}-${da}`;
+      if (opts.shortDate) return `${mo}/${da}`;
+      if (opts.timeOnly) return `${hh}:${mi}`;
+      if (opts.full) return `${y}-${mo}-${da} ${hh}:${mi}:${ss}`;
+      return `${y}-${mo}-${da} ${hh}:${mi}`;
+    }
+
     const loginScreen = document.getElementById('login-screen');
     const adminScreen = document.getElementById('admin-screen');
     const loginForm = document.getElementById('login-form');
@@ -806,12 +807,8 @@
       currentLogoId = data.id;
       siteNameInput.value = data.site_name || '';
       imgUrlInput.value = data.image_url || '';
-      if (data.image_url) {
-        img.src = data.image_url;
-        preview.style.display = 'block';
-      } else {
-        preview.style.display = 'none';
-      }
+      if (data.image_url) { img.src = data.image_url; preview.style.display = 'block'; }
+      else preview.style.display = 'none';
     }
     document.getElementById('logo-save-btn').addEventListener('click', async () => {
       const msg = document.getElementById('logo-msg');
@@ -837,31 +834,17 @@
         error = res.error;
         if (res.data) currentLogoId = res.data.id;
       }
-      if (error) {
-        msg.className = 'msg error';
-        msg.textContent = '❌ ' + error.message;
-      } else {
-        msg.className = 'msg success';
-        msg.textContent = '✅ 저장 완료!';
-        loadLogo();
-        setTimeout(() => msg.textContent = '', 2000);
-      }
+      if (error) { msg.className = 'msg error'; msg.textContent = '❌ ' + error.message; }
+      else { msg.className = 'msg success'; msg.textContent = '✅ 저장 완료!'; loadLogo(); setTimeout(() => msg.textContent = '', 2000); }
     });
     document.getElementById('logo-delete-btn').addEventListener('click', async () => {
       const msg = document.getElementById('logo-msg');
-      if (!currentLogoId) {
-        msg.className = 'msg error';
-        msg.textContent = '❌ 삭제할 로고가 없습니다.';
-        return;
-      }
+      if (!currentLogoId) { msg.className = 'msg error'; msg.textContent = '❌ 삭제할 로고가 없습니다.'; return; }
       if (!confirm('로고를 삭제할까요?')) return;
       const { error } = await db.from('logos').delete().eq('id', currentLogoId);
-      if (error) {
-        msg.className = 'msg error';
-        msg.textContent = '❌ ' + error.message;
-      } else {
-        msg.className = 'msg success';
-        msg.textContent = '✅ 삭제 완료!';
+      if (error) { msg.className = 'msg error'; msg.textContent = '❌ ' + error.message; }
+      else {
+        msg.className = 'msg success'; msg.textContent = '✅ 삭제 완료!';
         document.getElementById('logo-site-name').value = '';
         document.getElementById('logo-image-url').value = '';
         document.getElementById('logo-preview').style.display = 'none';
@@ -885,9 +868,7 @@
     }
     document.getElementById('save-footer').addEventListener('click', async () => {
       const msg = document.getElementById('footer-msg');
-      msg.className = 'msg';
-      msg.textContent = '저장 중...';
-
+      msg.className = 'msg'; msg.textContent = '저장 중...';
       const updates = [
         { key: 'footer_owner', value: document.getElementById('footer-owner').value.trim() },
         { key: 'footer_phone', value: document.getElementById('footer-phone').value.trim() },
@@ -896,20 +877,12 @@
         { key: 'footer_business', value: document.getElementById('footer-business').value.trim() },
         { key: 'footer_text', value: document.getElementById('footer-text').value.trim() },
       ];
-
       const { error } = await db.from('settings').upsert(updates);
-      if (error) {
-        msg.className = 'msg error';
-        msg.textContent = '❌ ' + error.message;
-      } else {
-        msg.className = 'msg success';
-        msg.textContent = '✅ 저장 완료!';
-        localStorage.removeItem('footer_cache');
-        setTimeout(() => msg.textContent = '', 2000);
-      }
+      if (error) { msg.className = 'msg error'; msg.textContent = '❌ ' + error.message; }
+      else { msg.className = 'msg success'; msg.textContent = '✅ 저장 완료!'; localStorage.removeItem('footer_cache'); setTimeout(() => msg.textContent = '', 2000); }
     });
 
-    // ===== SNS 링크 =====
+    // ===== SNS =====
     async function loadSnsLinks() {
       const keys = ['footer_instagram','footer_blog','footer_band'];
       const { data } = await db.from('settings').select('key, value').in('key', keys);
@@ -921,37 +894,20 @@
     }
     document.getElementById('save-sns').addEventListener('click', async () => {
       const msg = document.getElementById('sns-msg');
-      msg.className = 'msg';
-      msg.textContent = '저장 중...';
-
-      const normalizeUrl = (v) => {
-        const s = (v || '').trim();
-        if (!s) return '';
-        if (/^https?:\/\//i.test(s)) return s;
-        return 'https://' + s;
-      };
-
+      msg.className = 'msg'; msg.textContent = '저장 중...';
+      const normalizeUrl = (v) => { const s = (v || '').trim(); if (!s) return ''; if (/^https?:\/\//i.test(s)) return s; return 'https://' + s; };
       const updates = [
         { key: 'footer_instagram', value: normalizeUrl(document.getElementById('footer-instagram').value) },
         { key: 'footer_blog', value: normalizeUrl(document.getElementById('footer-blog').value) },
         { key: 'footer_band', value: normalizeUrl(document.getElementById('footer-band').value) },
       ];
-
       const { error } = await db.from('settings').upsert(updates);
-      if (error) {
-        msg.className = 'msg error';
-        msg.textContent = '❌ ' + error.message;
-      } else {
-        msg.className = 'msg success';
-        msg.textContent = '✅ 저장 완료!';
-        localStorage.removeItem('footer_cache');
-        setTimeout(() => msg.textContent = '', 2000);
-      }
+      if (error) { msg.className = 'msg error'; msg.textContent = '❌ ' + error.message; }
+      else { msg.className = 'msg success'; msg.textContent = '✅ 저장 완료!'; localStorage.removeItem('footer_cache'); setTimeout(() => msg.textContent = '', 2000); }
     });
 
     // ===== 홍보 영상 =====
     let currentPromoVideoUrl = '';
-
     function getYouTubeEmbedUrl(url) {
       if (!url) return '';
       const s = String(url).trim();
@@ -965,74 +921,36 @@
       if (m) return `https://www.youtube.com/embed/${m[1]}`;
       return s;
     }
-
     async function loadPromoVideo() {
       const { data } = await db.from('settings').select('value').eq('key', 'promo_video_url').maybeSingle();
       currentPromoVideoUrl = data?.value || '';
       document.getElementById('promo-video-url').value = currentPromoVideoUrl;
-
       const previewBox = document.getElementById('promo-video-preview');
       const inner = document.getElementById('promo-video-preview-inner');
       if (currentPromoVideoUrl) {
         const embed = getYouTubeEmbedUrl(currentPromoVideoUrl);
         inner.innerHTML = `<iframe src="${embed}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
         previewBox.style.display = 'block';
-      } else {
-        inner.innerHTML = '';
-        previewBox.style.display = 'none';
-      }
+      } else { inner.innerHTML = ''; previewBox.style.display = 'none'; }
     }
-
     document.getElementById('promo-video-save-btn').addEventListener('click', async () => {
       const msg = document.getElementById('promo-video-msg');
       const url = document.getElementById('promo-video-url').value.trim();
-
-      if (!url) {
-        msg.className = 'msg error';
-        msg.textContent = '❌ 영상 URL을 입력하세요.';
-        return;
-      }
-
-      msg.className = 'msg';
-      msg.textContent = '저장 중...';
-
-      const { error } = await db.from('settings').upsert({
-        key: 'promo_video_url',
-        value: url,
-      });
-
-      if (error) {
-        msg.className = 'msg error';
-        msg.textContent = '❌ ' + error.message;
-      } else {
-        msg.className = 'msg success';
-        msg.textContent = '✅ 저장 완료!';
-        localStorage.removeItem('footer_cache');
-        await loadPromoVideo();
-        setTimeout(() => msg.textContent = '', 2000);
-      }
+      if (!url) { msg.className = 'msg error'; msg.textContent = '❌ 영상 URL을 입력하세요.'; return; }
+      msg.className = 'msg'; msg.textContent = '저장 중...';
+      const { error } = await db.from('settings').upsert({ key: 'promo_video_url', value: url });
+      if (error) { msg.className = 'msg error'; msg.textContent = '❌ ' + error.message; }
+      else { msg.className = 'msg success'; msg.textContent = '✅ 저장 완료!'; localStorage.removeItem('footer_cache'); await loadPromoVideo(); setTimeout(() => msg.textContent = '', 2000); }
     });
-
     document.getElementById('promo-video-delete-btn').addEventListener('click', async () => {
       const msg = document.getElementById('promo-video-msg');
-      if (!currentPromoVideoUrl) {
-        msg.className = 'msg error';
-        msg.textContent = '❌ 삭제할 영상이 없습니다.';
-        return;
-      }
+      if (!currentPromoVideoUrl) { msg.className = 'msg error'; msg.textContent = '❌ 삭제할 영상이 없습니다.'; return; }
       if (!confirm('홍보 영상을 삭제할까요?')) return;
-
-      msg.className = 'msg';
-      msg.textContent = '삭제 중...';
-
+      msg.className = 'msg'; msg.textContent = '삭제 중...';
       const { error } = await db.from('settings').delete().eq('key', 'promo_video_url');
-
-      if (error) {
-        msg.className = 'msg error';
-        msg.textContent = '❌ ' + error.message;
-      } else {
-        msg.className = 'msg success';
-        msg.textContent = '✅ 삭제 완료!';
+      if (error) { msg.className = 'msg error'; msg.textContent = '❌ ' + error.message; }
+      else {
+        msg.className = 'msg success'; msg.textContent = '✅ 삭제 완료!';
         document.getElementById('promo-video-url').value = '';
         currentPromoVideoUrl = '';
         document.getElementById('promo-video-preview').style.display = 'none';
@@ -1046,30 +964,16 @@
       const listEl = document.getElementById('banner-list');
       const countEl = document.getElementById('banner-count');
       const msg = document.getElementById('banner-msg');
-
       const { data, error } = await db.from('banners').select('*').order('id', { ascending: false });
-
-      if (error) {
-        listEl.innerHTML = '<p style="font-size:12px; color:#dc2626;">❌ ' + error.message + '</p>';
-        countEl.textContent = '';
-        return;
-      }
-
+      if (error) { listEl.innerHTML = '<p style="font-size:12px; color:#dc2626;">❌ ' + error.message + '</p>'; countEl.textContent = ''; return; }
       const list = (data || []).filter(b => b.image_url);
       countEl.textContent = `(총 ${list.length}개)`;
-
-      if (list.length === 0) {
-        listEl.innerHTML = '<p style="font-size:12px; color:#9ca3af;">등록된 배너가 없습니다. 위에서 새 배너를 추가하세요.</p>';
-        return;
-      }
-
+      if (list.length === 0) { listEl.innerHTML = '<p style="font-size:12px; color:#9ca3af;">등록된 배너가 없습니다. 위에서 새 배너를 추가하세요.</p>'; return; }
       listEl.innerHTML = list.map(b => `
         <div class="banner-item" data-id="${b.id}">
           <img class="banner-item-thumb" src="${b.image_url}" alt="배너" loading="lazy">
           <div class="banner-item-info">
-            ${b.link_url
-              ? `<a class="b-link" href="${b.link_url}" target="_blank" rel="noopener noreferrer" title="${b.link_url}">🔗 ${b.link_url}</a>`
-              : `<span class="b-link none">🔗 링크 없음</span>`}
+            ${b.link_url ? `<a class="b-link" href="${b.link_url}" target="_blank" rel="noopener noreferrer" title="${b.link_url}">🔗 ${b.link_url}</a>` : `<span class="b-link none">🔗 링크 없음</span>`}
           </div>
           <div class="b-actions">
             <button type="button" class="b-edit-btn" data-id="${b.id}">수정</button>
@@ -1077,7 +981,6 @@
           </div>
         </div>
       `).join('');
-
       listEl.querySelectorAll('.b-edit-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const id = btn.dataset.id;
@@ -1085,28 +988,20 @@
           if (b) openBannerEditModal(b);
         });
       });
-
       listEl.querySelectorAll('.b-del-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
           const id = btn.dataset.id;
           if (!confirm('이 배너를 삭제할까요?')) return;
-          btn.disabled = true;
-          btn.textContent = '...';
+          btn.disabled = true; btn.textContent = '...';
           const { error } = await db.from('banners').delete().eq('id', id);
-          if (error) {
-            alert('❌ 삭제 실패: ' + error.message);
-            btn.disabled = false;
-            btn.textContent = '삭제';
-          } else {
-            msg.className = 'msg success';
-            msg.textContent = '✅ 배너가 삭제되었습니다.';
-            setTimeout(() => msg.textContent = '', 2000);
-            loadBanner();
+          if (error) { alert('❌ 삭제 실패: ' + error.message); btn.disabled = false; btn.textContent = '삭제'; }
+          else {
+            msg.className = 'msg success'; msg.textContent = '✅ 배너가 삭제되었습니다.';
+            setTimeout(() => msg.textContent = '', 2000); loadBanner();
           }
         });
       });
     }
-
     function openBannerEditModal(banner) {
       const modal = document.createElement('div');
       modal.className = 'modal-backdrop';
@@ -1130,78 +1025,44 @@
         </div>
       `;
       document.body.appendChild(modal);
-
       const form = modal.querySelector('#banner-edit-form');
       const previewImg = modal.querySelector('#banner-edit-preview');
       form.querySelector('input[name="image_url"]').addEventListener('input', (e) => {
         const v = e.target.value.trim();
         if (v) { previewImg.src = v; previewImg.style.display = 'block'; }
-        else { previewImg.style.display = 'none'; }
+        else previewImg.style.display = 'none';
       });
-
       modal.querySelector('#cancel-edit').onclick = () => modal.remove();
-
       form.addEventListener('submit', async (ev) => {
         ev.preventDefault();
         const submitBtn = form.querySelector('button[type="submit"]');
         const imageUrl = form.image_url.value.trim();
         const linkUrl = form.link_url.value.trim();
-
-        if (!imageUrl) {
-          alert('배너 이미지 URL을 입력하세요.');
-          return;
-        }
-
-        submitBtn.disabled = true;
-        submitBtn.textContent = '저장 중...';
-
-        const { error } = await db.from('banners').update({
-          image_url: imageUrl,
-          link_url: linkUrl || null,
-        }).eq('id', banner.id);
-
-        if (error) {
-          alert('❌ 수정 실패: ' + error.message);
-          submitBtn.disabled = false;
-          submitBtn.textContent = '저장';
-        } else {
+        if (!imageUrl) { alert('배너 이미지 URL을 입력하세요.'); return; }
+        submitBtn.disabled = true; submitBtn.textContent = '저장 중...';
+        const { error } = await db.from('banners').update({ image_url: imageUrl, link_url: linkUrl || null }).eq('id', banner.id);
+        if (error) { alert('❌ 수정 실패: ' + error.message); submitBtn.disabled = false; submitBtn.textContent = '저장'; }
+        else {
           const bannerMsg = document.getElementById('banner-msg');
-          bannerMsg.className = 'msg success';
-          bannerMsg.textContent = '✅ 배너가 수정되었습니다.';
+          bannerMsg.className = 'msg success'; bannerMsg.textContent = '✅ 배너가 수정되었습니다.';
           setTimeout(() => bannerMsg.textContent = '', 2000);
-          modal.remove();
-          loadBanner();
+          modal.remove(); loadBanner();
         }
       });
     }
-
     document.getElementById('banner-save-btn').addEventListener('click', async () => {
       const msg = document.getElementById('banner-msg');
       const imageUrl = document.getElementById('banner-image-url').value.trim();
       const linkUrl = document.getElementById('banner-link-url').value.trim();
-      if (!imageUrl) {
-        msg.className = 'msg error';
-        msg.textContent = '❌ 배너 이미지 URL을 입력하세요.';
-        return;
-      }
-      msg.className = 'msg';
-      msg.textContent = '저장 중...';
-
-      const { error } = await db.from('banners').insert({
-        image_url: imageUrl,
-        link_url: linkUrl || null,
-      });
-
-      if (error) {
-        msg.className = 'msg error';
-        msg.textContent = '❌ ' + error.message;
-      } else {
-        msg.className = 'msg success';
-        msg.textContent = '✅ 배너가 추가되었습니다!';
+      if (!imageUrl) { msg.className = 'msg error'; msg.textContent = '❌ 배너 이미지 URL을 입력하세요.'; return; }
+      msg.className = 'msg'; msg.textContent = '저장 중...';
+      const { error } = await db.from('banners').insert({ image_url: imageUrl, link_url: linkUrl || null });
+      if (error) { msg.className = 'msg error'; msg.textContent = '❌ ' + error.message; }
+      else {
+        msg.className = 'msg success'; msg.textContent = '✅ 배너가 추가되었습니다!';
         document.getElementById('banner-image-url').value = '';
         document.getElementById('banner-link-url').value = '';
-        loadBanner();
-        setTimeout(() => msg.textContent = '', 2000);
+        loadBanner(); setTimeout(() => msg.textContent = '', 2000);
       }
     });
 
@@ -1213,17 +1074,10 @@
     document.getElementById('save-shipping').addEventListener('click', async () => {
       const val = Number(document.getElementById('global-shipping').value) || 0;
       const sm = document.getElementById('shipping-msg');
-      sm.className = 'msg';
-      sm.textContent = '저장 중...';
+      sm.className = 'msg'; sm.textContent = '저장 중...';
       const { error } = await db.from('settings').upsert({ key: 'shipping_fee', value: String(val) });
-      if (error) {
-        sm.className = 'msg error';
-        sm.textContent = '❌ ' + error.message;
-      } else {
-        sm.className = 'msg success';
-        sm.textContent = '✅ 저장 완료!';
-        setTimeout(() => sm.textContent = '', 2000);
-      }
+      if (error) { sm.className = 'msg error'; sm.textContent = '❌ ' + error.message; }
+      else { sm.className = 'msg success'; sm.textContent = '✅ 저장 완료!'; setTimeout(() => sm.textContent = '', 2000); }
     });
 
     // ===== 상품 등록 =====
@@ -1235,9 +1089,7 @@
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const detail_images = form.detail_images.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
-      msg.className = 'msg';
-      msg.textContent = '등록 중...';
-
+      msg.className = 'msg'; msg.textContent = '등록 중...';
       const { error } = await db.from('products').insert({
         product_code: form.product_code.value.trim() || null,
         name: form.name.value.trim(),
@@ -1250,16 +1102,10 @@
         other_option: parseList(form.other_option.value),
         min_qty: Number(form.min_qty.value) || 1,
       });
-
-      if (error) {
-        msg.className = 'msg error';
-        msg.textContent = '❌ ' + error.message;
-      } else {
-        msg.className = 'msg success';
-        msg.textContent = '✅ 등록 완료!';
-        form.reset();
-        form.min_qty.value = 1;
-        loadAdminList();
+      if (error) { msg.className = 'msg error'; msg.textContent = '❌ ' + error.message; }
+      else {
+        msg.className = 'msg success'; msg.textContent = '✅ 등록 완료!';
+        form.reset(); form.min_qty.value = 1; loadAdminList();
       }
     });
 
@@ -1276,29 +1122,22 @@
       if (error) { listEl.innerHTML = '<p>불러오기 실패</p>'; return; }
       allProducts = data || [];
       document.getElementById('product-count').textContent = `총 ${allProducts.length}개`;
-      const searchText = document.getElementById('product-search').value.trim();
-      applySearch(searchText);
+      applySearch(document.getElementById('product-search').value.trim());
     }
 
     function applySearch(text) {
       const normalizeSearch = (value) => String(value ?? '').normalize('NFKC').toLocaleLowerCase().trim();
       const keyword = normalizeSearch(text);
-
-      if (!keyword) {
-        filteredProducts = [...allProducts];
-      } else {
+      if (!keyword) filteredProducts = [...allProducts];
+      else {
         filteredProducts = allProducts.filter((p) => {
-          const searchableValues = [
-            p.name, p.product_code, p.colors, p.sizes, p.hem_option, p.other_option,
-            p.min_qty, p.price, p.id
-          ];
-          return searchableValues.some((value) => {
-            const valueText = Array.isArray(value) ? value.join(' ') : value;
-            return normalizeSearch(valueText).includes(keyword);
+          const vals = [p.name, p.product_code, p.colors, p.sizes, p.hem_option, p.other_option, p.min_qty, p.price, p.id];
+          return vals.some((v) => {
+            const t = Array.isArray(v) ? v.join(' ') : v;
+            return normalizeSearch(t).includes(keyword);
           });
         });
       }
-
       currentPage = 1;
       selectedProductIds.clear();
       if (typeof checkAllProducts !== 'undefined' && checkAllProducts) checkAllProducts.checked = false;
@@ -1309,14 +1148,12 @@
       const totalPages = Math.min(Math.ceil(filteredProducts.length / PER_PAGE), MAX_PAGES);
       const start = (currentPage - 1) * PER_PAGE;
       const items = filteredProducts.slice(start, start + PER_PAGE);
-
       if (filteredProducts.length === 0) {
         listEl.innerHTML = '<p style="text-align:center; color:#9ca3af; padding:20px;">조건에 맞는 상품이 없습니다</p>';
         document.getElementById('admin-pagination').innerHTML = '';
         updateBulkBtn();
         return;
       }
-
       listEl.innerHTML = items.map(p => {
         const opts = [];
         if (p.colors && p.colors.length) opts.push(`색상: ${p.colors.join(',')}`);
@@ -1327,7 +1164,6 @@
         if (p.detail_images && p.detail_images.length) opts.push(`상세이미지: ${p.detail_images.length}장`);
         const detailStr = opts.join('  ·  ');
         const isChecked = selectedProductIds.has(String(p.id));
-
         return `
           <div class="product-row">
             <input type="checkbox" class="product-check" data-id="${p.id}" aria-label="상품 선택" ${isChecked ? 'checked' : ''}>
@@ -1349,7 +1185,6 @@
           </div>
         `;
       }).join('');
-
       bindProductEvents();
       renderPagination(totalPages);
       updateBulkBtn();
@@ -1364,21 +1199,18 @@
           updateBulkBtn();
         });
       });
-
       listEl.querySelectorAll('.edit-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const p = allProducts.find(x => String(x.id) === String(btn.dataset.id));
           if (p) showProductEditModal(p);
         });
       });
-
       listEl.querySelectorAll('.copy-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
           const p = allProducts.find(x => String(x.id) === String(btn.dataset.id));
           if (!p) return;
           if (!confirm(`"${p.name}" 을 복사해서 새로 등록할까요?`)) return;
-          btn.disabled = true;
-          btn.textContent = '...';
+          btn.disabled = true; btn.textContent = '...';
           const { error } = await db.from('products').insert({
             product_code: p.product_code ? p.product_code + '-C' : null,
             name: p.name + ' (복사)',
@@ -1388,22 +1220,16 @@
             hem_option: p.hem_option || [], other_option: p.other_option || [],
             min_qty: p.min_qty || 1,
           });
-          if (error) {
-            alert('❌ 복사 실패: ' + error.message);
-            btn.disabled = false; btn.textContent = '복제';
-          } else loadAdminList();
+          if (error) { alert('❌ 복사 실패: ' + error.message); btn.disabled = false; btn.textContent = '복제'; }
+          else loadAdminList();
         });
       });
-
       listEl.querySelectorAll('.del-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
           if (!confirm('정말 삭제할까요?')) return;
           const { error } = await db.from('products').delete().eq('id', btn.dataset.id);
           if (error) alert('삭제 실패: ' + error.message);
-          else {
-            selectedProductIds.delete(String(btn.dataset.id));
-            loadAdminList();
-          }
+          else { selectedProductIds.delete(String(btn.dataset.id)); loadAdminList(); }
         });
       });
     }
@@ -1434,15 +1260,12 @@
       `;
       document.body.appendChild(modal);
       modal.querySelector('#cancel-edit').onclick = () => modal.remove();
-
       modal.querySelector('#product-edit-form').addEventListener('submit', async (ev) => {
         ev.preventDefault();
         const f = ev.target;
         const detail_images = f.detail_images.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
         const submitBtn = f.querySelector('button[type="submit"]');
-        submitBtn.disabled = true;
-        submitBtn.textContent = '저장 중...';
-
+        submitBtn.disabled = true; submitBtn.textContent = '저장 중...';
         const { error } = await db.from('products').update({
           product_code: f.product_code.value.trim() || null,
           name: f.name.value.trim(),
@@ -1455,16 +1278,8 @@
           other_option: parseList(f.other_option.value),
           min_qty: Number(f.min_qty.value) || 1,
         }).eq('id', p.id);
-
-        if (error) {
-          alert('❌ 수정 실패: ' + error.message);
-          submitBtn.disabled = false;
-          submitBtn.textContent = '수정 완료';
-        } else {
-          alert('✅ 수정 완료!');
-          modal.remove();
-          loadAdminList();
-        }
+        if (error) { alert('❌ 수정 실패: ' + error.message); submitBtn.disabled = false; submitBtn.textContent = '수정 완료'; }
+        else { alert('✅ 수정 완료!'); modal.remove(); loadAdminList(); }
       });
     }
 
@@ -1479,16 +1294,9 @@
         bulkDelBtn.classList.remove('active');
         bulkDelBtn.textContent = '선택 삭제';
       }
-
       const checkboxes = listEl.querySelectorAll('.product-check');
-      if (checkboxes.length === 0) {
-        checkAllProducts.checked = false;
-        checkAllProducts.disabled = true;
-      } else {
-        checkAllProducts.disabled = false;
-        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-        checkAllProducts.checked = allChecked;
-      }
+      if (checkboxes.length === 0) { checkAllProducts.checked = false; checkAllProducts.disabled = true; }
+      else { checkAllProducts.disabled = false; checkAllProducts.checked = Array.from(checkboxes).every(cb => cb.checked); }
     }
 
     checkAllProducts.addEventListener('change', () => {
@@ -1505,49 +1313,28 @@
     bulkDelBtn.addEventListener('click', async () => {
       if (selectedProductIds.size === 0) return;
       if (!confirm(`선택한 ${selectedProductIds.size}개의 상품을 삭제할까요?`)) return;
-
-      bulkDelBtn.disabled = true;
-      bulkDelBtn.textContent = '삭제 중...';
-
+      bulkDelBtn.disabled = true; bulkDelBtn.textContent = '삭제 중...';
       const ids = Array.from(selectedProductIds);
       const { error } = await db.from('products').delete().in('id', ids);
-
       bulkDelBtn.disabled = false;
-
-      if (error) {
-        alert('❌ 삭제 실패: ' + error.message);
-      } else {
-        alert('✅ 선택한 상품이 삭제되었습니다.');
-        selectedProductIds.clear();
-        loadAdminList();
-      }
+      if (error) alert('❌ 삭제 실패: ' + error.message);
+      else { alert('✅ 선택한 상품이 삭제되었습니다.'); selectedProductIds.clear(); loadAdminList(); }
     });
 
-    document.getElementById('product-search-btn').addEventListener('click', () => {
-      applySearch(document.getElementById('product-search').value.trim());
-    });
-    document.getElementById('product-reset-btn').addEventListener('click', () => {
-      document.getElementById('product-search').value = '';
-      applySearch('');
-    });
+    document.getElementById('product-search-btn').addEventListener('click', () => applySearch(document.getElementById('product-search').value.trim()));
+    document.getElementById('product-reset-btn').addEventListener('click', () => { document.getElementById('product-search').value = ''; applySearch(''); });
     document.getElementById('product-search').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        applySearch(e.currentTarget.value.trim());
-      }
+      if (e.key === 'Enter') { e.preventDefault(); applySearch(e.currentTarget.value.trim()); }
     });
 
     function renderPagination(totalPages) {
       const el = document.getElementById('admin-pagination');
       if (totalPages <= 1) { el.innerHTML = ''; return; }
       let html = '';
-      html += `<button type="button" class="btn btn-secondary btn-sm page-nav" data-page="${currentPage-1}" ${currentPage===1?'disabled':''} aria-label="이전 페이지">← 이전</button>`;
-      for (let i = 1; i <= totalPages; i++) {
-        html += `<button class="btn btn-sm page-num ${i===currentPage?'btn-primary':'btn-secondary'}" data-page="${i}">${i}</button>`;
-      }
-      html += `<button type="button" class="btn btn-secondary btn-sm page-nav" data-page="${currentPage+1}" ${currentPage===totalPages?'disabled':''} aria-label="다음 페이지">다음 →</button>`;
+      html += `<button type="button" class="btn btn-secondary btn-sm page-nav" data-page="${currentPage-1}" ${currentPage===1?'disabled':''}>← 이전</button>`;
+      for (let i = 1; i <= totalPages; i++) html += `<button class="btn btn-sm page-num ${i===currentPage?'btn-primary':'btn-secondary'}" data-page="${i}">${i}</button>`;
+      html += `<button type="button" class="btn btn-secondary btn-sm page-nav" data-page="${currentPage+1}" ${currentPage===totalPages?'disabled':''}>다음 →</button>`;
       el.innerHTML = html;
-
       el.querySelectorAll('.page-num, .page-nav').forEach(btn => {
         btn.addEventListener('click', () => {
           if (btn.disabled) return;
@@ -1560,16 +1347,15 @@
 
     const secondaryListPages = { orders: 1, members: 1 };
     function paginateRenderedList(listId, paginationId, type) {
-      const listEl = document.getElementById(listId);
+      const lel = document.getElementById(listId);
       const pager = document.getElementById(paginationId);
-      const rows = Array.from(listEl.children).filter(node => node.classList.contains('row-item'));
-      const ITEMS_PER_PAGE = 5;
-      const MAX_LIST_PAGES = 10;
-      const totalPages = Math.min(Math.ceil(rows.length / ITEMS_PER_PAGE), MAX_LIST_PAGES);
+      const rows = Array.from(lel.children).filter(node => node.classList.contains('row-item'));
+      const IPP = 5, MLP = 10;
+      const totalPages = Math.min(Math.ceil(rows.length / IPP), MLP);
       if (!totalPages) { pager.innerHTML = ''; return; }
       let page = Math.min(Math.max(secondaryListPages[type] || 1, 1), totalPages);
       secondaryListPages[type] = page;
-      rows.forEach((row, index) => { row.style.display = (index >= (page - 1) * ITEMS_PER_PAGE && index < page * ITEMS_PER_PAGE) ? '' : 'none'; });
+      rows.forEach((row, index) => { row.style.display = (index >= (page - 1) * IPP && index < page * IPP) ? '' : 'none'; });
       if (totalPages <= 1) { pager.innerHTML = ''; return; }
       let html = `<button type="button" class="btn btn-secondary btn-sm" data-page="${page-1}" ${page===1?'disabled':''}>← 이전</button>`;
       for (let i=1; i<=totalPages; i++) html += `<button type="button" class="btn btn-sm ${i===page?'btn-primary':'btn-secondary'}" data-page="${i}">${i}</button>`;
@@ -1583,56 +1369,30 @@
       }));
     }
 
-    // ===== CSV 다운로드 =====
     function downloadCSV(filename, rows) {
-      const escapeCell = (v) => {
-        const s = String(v ?? '');
-        if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
-        return s;
-      };
+      const escapeCell = (v) => { const s = String(v ?? ''); if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"'; return s; };
       const csv = rows.map(r => r.map(escapeCell).join(',')).join('\r\n');
       const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       const now = new Date();
-      const stamp = now.getFullYear() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0') + '_' +
-                    String(now.getHours()).padStart(2,'0') + String(now.getMinutes()).padStart(2,'0');
-      a.href = url;
-      a.download = `${filename}_${stamp}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      const stamp = now.getFullYear() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0') + '_' + String(now.getHours()).padStart(2,'0') + String(now.getMinutes()).padStart(2,'0');
+      a.href = url; a.download = `${filename}_${stamp}.csv`;
+      document.body.appendChild(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
     document.getElementById('order-excel-btn').addEventListener('click', () => {
       let ordersToExport;
-      if (selectedOrderKeys.size > 0) {
-        ordersToExport = allOrdersRaw.filter(o => {
-          const key = o.order_number || `single_${o.id}`;
-          return selectedOrderKeys.has(key);
-        });
-      } else {
-        ordersToExport = allOrdersRaw;
-      }
-
-      if (!ordersToExport || ordersToExport.length === 0) {
-        alert('다운로드할 주문이 없습니다.');
-        return;
-      }
-
-      const header = [
-        '주문번호','주문일시','상태','주문자','연락처','입금자명',
-        '우편번호','주소','상세주소','요청사항',
-        '제품번호','상품명','가격','수량','총금액','배송비',
-        '색상','사이즈','밑단','기타옵션',
-        '택배사','운송장번호'
-      ];
+      if (selectedOrderKeys.size > 0) ordersToExport = allOrdersRaw.filter(o => { const key = o.order_number || `single_${o.id}`; return selectedOrderKeys.has(key); });
+      else ordersToExport = allOrdersRaw;
+      if (!ordersToExport || ordersToExport.length === 0) { alert('다운로드할 주문이 없습니다.'); return; }
+      const header = ['주문번호','주문일시(KST)','상태','주문자','연락처','입금자명','우편번호','주소','상세주소','요청사항','제품번호','상품명','가격','수량','총금액','배송비','색상','사이즈','밑단','기타옵션','택배사','운송장번호'];
       const rows = [header];
       ordersToExport.forEach(o => {
         rows.push([
           o.order_number || '',
-          o.created_at ? new Date(o.created_at).toLocaleString('ko-KR') : '',
+          formatKST(o.created_at, { full: true }),
           o.status || '',
           o.customer_name || '',
           o.customer_phone || '',
@@ -1661,18 +1421,10 @@
 
     document.getElementById('member-excel-btn').addEventListener('click', () => {
       let membersToExport;
-      if (selectedMemberIds.size > 0) {
-        membersToExport = allMembers.filter(m => selectedMemberIds.has(String(m.id)));
-      } else {
-        membersToExport = allMembers;
-      }
-
-      if (!membersToExport || membersToExport.length === 0) {
-        alert('다운로드할 회원이 없습니다.');
-        return;
-      }
-
-      const header = ['아이디','이름','연락처','이메일','우편번호','주소','상세주소','상태','가입일시'];
+      if (selectedMemberIds.size > 0) membersToExport = allMembers.filter(m => selectedMemberIds.has(String(m.id)));
+      else membersToExport = allMembers;
+      if (!membersToExport || membersToExport.length === 0) { alert('다운로드할 회원이 없습니다.'); return; }
+      const header = ['아이디','이름','연락처','이메일','우편번호','주소','상세주소','상태','가입일시(KST)'];
       const rows = [header];
       membersToExport.forEach(m => {
         rows.push([
@@ -1684,7 +1436,7 @@
           m.address || '',
           m.address_detail || '',
           m.status || '정상',
-          m.created_at ? new Date(m.created_at).toLocaleString('ko-KR') : '',
+          formatKST(m.created_at, { full: true }),
         ]);
       });
       const suffix = selectedMemberIds.size > 0 ? `_선택${selectedMemberIds.size}명` : '_전체';
@@ -1692,24 +1444,18 @@
     });
 
     document.getElementById('order-print-btn').addEventListener('click', () => {
-      if (!allOrdersRaw || allOrdersRaw.length === 0) {
-        alert('인쇄할 주문이 없습니다.');
-        return;
-      }
+      if (!allOrdersRaw || allOrdersRaw.length === 0) { alert('인쇄할 주문이 없습니다.'); return; }
       document.querySelectorAll('#order-list .row-item').forEach(r => r.style.display = '');
       setTimeout(() => window.print(), 50);
     });
 
     document.getElementById('member-print-btn').addEventListener('click', () => {
-      if (!allMembers || allMembers.length === 0) {
-        alert('인쇄할 회원이 없습니다.');
-        return;
-      }
+      if (!allMembers || allMembers.length === 0) { alert('인쇄할 회원이 없습니다.'); return; }
       document.querySelectorAll('#member-list .row-item').forEach(r => r.style.display = '');
       setTimeout(() => window.print(), 50);
     });
 
-    // ===== 주문 목록 =====
+    // ===== 주문 =====
     let allOrdersRaw = [];
     let selectedOrderKeys = new Set();
 
@@ -1718,7 +1464,6 @@
       const bulkBtn = document.getElementById('order-bulk-del-btn');
       const excelBtn = document.getElementById('order-excel-btn');
       const checkboxes = document.querySelectorAll('#order-list .order-row-check');
-
       if (selectedOrderKeys.size > 0) {
         bulkBtn.classList.add('active');
         bulkBtn.textContent = `선택 삭제 (${selectedOrderKeys.size})`;
@@ -1726,20 +1471,10 @@
         bulkBtn.classList.remove('active');
         bulkBtn.textContent = '선택 삭제';
       }
-
-      if (selectedOrderKeys.size > 0) {
-        excelBtn.textContent = `📊 엑셀 (선택 ${selectedOrderKeys.size})`;
-      } else {
-        excelBtn.textContent = '📊 엑셀 다운로드';
-      }
-
-      if (checkboxes.length === 0) {
-        checkAll.checked = false;
-        checkAll.disabled = true;
-      } else {
-        checkAll.disabled = false;
-        checkAll.checked = Array.from(checkboxes).every(cb => cb.checked);
-      }
+      if (selectedOrderKeys.size > 0) excelBtn.textContent = `📊 엑셀 (선택 ${selectedOrderKeys.size})`;
+      else excelBtn.textContent = '📊 엑셀 다운로드';
+      if (checkboxes.length === 0) { checkAll.checked = false; checkAll.disabled = true; }
+      else { checkAll.disabled = false; checkAll.checked = Array.from(checkboxes).every(cb => cb.checked); }
     }
 
     async function loadOrders(filterText) {
@@ -1758,14 +1493,12 @@
       });
 
       let entries = Object.entries(groups);
-
       if (filterText) {
         const f = filterText.toLowerCase();
         entries = entries.filter(([num, items]) => {
           const first = items[0];
-          const orderNumText = first.order_number || '';
           return (
-            orderNumText.toLowerCase().includes(f) ||
+            (first.order_number || '').toLowerCase().includes(f) ||
             (first.customer_name || '').toLowerCase().includes(f) ||
             (first.depositor_name || '').toLowerCase().includes(f) ||
             (first.customer_phone || '').includes(f) ||
@@ -1776,8 +1509,7 @@
 
       if (entries.length === 0) {
         el.innerHTML = '<p style="text-align:center; color:#9ca3af; padding:20px;">주문이 없습니다</p>';
-        updateOrderBulkUI();
-        return;
+        updateOrderBulkUI(); return;
       }
 
       el.innerHTML = entries.slice(0, 100).map(([key, items]) => {
@@ -1786,13 +1518,13 @@
         const displayNum = realOrderNum || `(주문번호 없음)`;
         const totalAll = items.reduce((s, o) => s + Number(o.total_price || 0), 0);
         const totalQty = items.reduce((s, o) => s + Number(o.quantity || 0), 0);
-        const dateStr = new Date(first.created_at).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' }).replace('. ', '/').replace('.', '');
+        const dateStr = formatKST(first.created_at, { dateOnly: true });  // YYYY-MM-DD
+        const timeStr = formatKST(first.created_at, { timeOnly: true });  // HH:mm
         const itemCount = items.length;
         const isChecked = selectedOrderKeys.has(key);
-
         return `
           <div class="row-item" data-key="${key}">
-            <input type="checkbox" class="row-check order-row-check" data-key="${key}" ${isChecked ? 'checked' : ''} aria-label="주문 선택">
+            <input type="checkbox" class="row-check order-row-check" data-key="${key}" ${isChecked ? 'checked' : ''}>
             <span class="badge" style="background:${statusColor(first.status)};">${first.status || '-'}</span>
             <span class="order-num">${displayNum}</span>
             <span class="row-sep">|</span>
@@ -1800,7 +1532,7 @@
             <span class="row-sep">|</span>
             <span class="row-muted">${itemCount}건 · ${totalQty}개 · <b class="row-total">${totalAll.toLocaleString()}원</b></span>
             <span class="row-sep">|</span>
-            <span class="row-muted">${dateStr}</span>
+            <span class="row-muted">${dateStr} ${timeStr}</span>
             ${first.tracking_number ? `<span class="row-sep">|</span><span class="row-muted">🚚 ${first.courier || ''} ${first.tracking_number}</span>` : ''}
             <div class="row-actions">
               <button class="btn btn-secondary btn-sm order-view" data-key="${key}">상세보기</button>
@@ -1829,7 +1561,6 @@
           if (items && items.length) showOrderDetailModal(key, items);
         });
       });
-
       el.querySelectorAll('.order-edit').forEach(btn => {
         btn.addEventListener('click', () => {
           const key = btn.dataset.key;
@@ -1837,7 +1568,6 @@
           if (items && items.length) showOrderEditModal(key, items);
         });
       });
-
       el.querySelectorAll('.order-del').forEach(btn => {
         btn.addEventListener('click', async () => {
           const key = btn.dataset.key;
@@ -1846,17 +1576,10 @@
           const label = first.order_number ? `주문번호 "${first.order_number}"` : `해당 주문(ID: ${first.id})`;
           if (!confirm(`${label} 의 모든 항목을 삭제할까요?`)) return;
           let error;
-          if (first.order_number) {
-            ({ error } = await db.from('orders').delete().eq('order_number', first.order_number));
-          } else {
-            ({ error } = await db.from('orders').delete().eq('id', first.id));
-          }
+          if (first.order_number) ({ error } = await db.from('orders').delete().eq('order_number', first.order_number));
+          else ({ error } = await db.from('orders').delete().eq('id', first.id));
           if (error) alert('삭제 실패: ' + error.message);
-          else {
-            selectedOrderKeys.delete(key);
-            alert('✅ 주문이 삭제되었습니다.');
-            loadOrders(document.getElementById('order-search').value.trim() || null);
-          }
+          else { selectedOrderKeys.delete(key); alert('✅ 주문이 삭제되었습니다.'); loadOrders(document.getElementById('order-search').value.trim() || null); }
         });
       });
     }
@@ -1875,33 +1598,22 @@
     document.getElementById('order-bulk-del-btn').addEventListener('click', async () => {
       if (selectedOrderKeys.size === 0) return;
       if (!confirm(`선택한 ${selectedOrderKeys.size}개의 주문을 삭제할까요?`)) return;
-
       const btn = document.getElementById('order-bulk-del-btn');
-      btn.disabled = true;
-      btn.textContent = '삭제 중...';
-
+      btn.disabled = true; btn.textContent = '삭제 중...';
       let failCount = 0;
       for (const key of Array.from(selectedOrderKeys)) {
         const items = allOrdersRaw.filter(o => (o.order_number || `single_${o.id}`) === key);
         if (!items.length) continue;
         const first = items[0];
         let error;
-        if (first.order_number) {
-          ({ error } = await db.from('orders').delete().eq('order_number', first.order_number));
-        } else {
-          ({ error } = await db.from('orders').delete().eq('id', first.id));
-        }
+        if (first.order_number) ({ error } = await db.from('orders').delete().eq('order_number', first.order_number));
+        else ({ error } = await db.from('orders').delete().eq('id', first.id));
         if (error) failCount++;
       }
-
       btn.disabled = false;
       selectedOrderKeys.clear();
-
-      if (failCount > 0) {
-        alert(`⚠️ ${failCount}건 삭제 실패. 나머지는 삭제되었습니다.`);
-      } else {
-        alert('✅ 선택한 주문이 삭제되었습니다.');
-      }
+      if (failCount > 0) alert(`⚠️ ${failCount}건 삭제 실패. 나머지는 삭제되었습니다.`);
+      else alert('✅ 선택한 주문이 삭제되었습니다.');
       loadOrders(document.getElementById('order-search').value.trim() || null);
     });
 
@@ -1909,14 +1621,11 @@
       return { '입금대기':'#f59e0b', '입금완료':'#059669', '배송중':'#1976d2', '완료':'#6b7280', '취소':'#dc2626' }[s] || '#9ca3af';
     }
 
-    // ⭐ 주문 상세보기 모달 (신규)
     function showOrderDetailModal(key, items) {
       const first = items[0];
       const displayNum = first.order_number || `(주문번호 없음 / ID: ${first.id})`;
-      const dateStr = new Date(first.created_at).toLocaleString('ko-KR');
-
-      let productTotal = 0;
-      let shippingTotal = 0;
+      const dateStr = formatKST(first.created_at, { full: true });
+      let productTotal = 0, shippingTotal = 0;
       items.forEach(o => {
         const rowTotal = Number(o.total_price || 0);
         const rowShip = Number(o.shipping_fee || 0);
@@ -1924,9 +1633,7 @@
         shippingTotal += rowShip;
       });
       const totalAll = productTotal + shippingTotal;
-
       const fullAddress = `${first.postcode ? `[${first.postcode}] ` : ''}${first.address || ''} ${first.address_detail || ''}`.trim();
-
       const itemsHtml = items.map((o, idx) => {
         const opts = [];
         if (o.selected_color) opts.push(`색상: ${o.selected_color}`);
@@ -1935,7 +1642,6 @@
         if (o.selected_other) opts.push(`기타: ${o.selected_other}`);
         const optStr = opts.length ? opts.join(' | ') : '기본 옵션';
         const itemPrice = Number(o.total_price) - Number(o.shipping_fee || 0);
-
         return `
           <div style="padding:10px 0; ${idx > 0 ? 'border-top:1px dashed #e5e7eb;' : ''}">
             <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
@@ -1947,67 +1653,30 @@
           </div>
         `;
       }).join('');
-
       const modal = document.createElement('div');
       modal.className = 'modal-backdrop';
       modal.innerHTML = `
         <div class="modal-box" style="max-width: 600px;">
           <h2 style="margin-bottom:4px;">주문 상세</h2>
           <p style="font-size:12px; color:#6b7280; margin:0 0 16px;">${displayNum}</p>
-
           <div style="background:#f9fafb; border-radius:8px; padding:12px; font-size:13px; color:#374151; line-height:1.7; margin-bottom:16px;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-              <span style="color:#6b7280;">주문일시</span>
-              <span style="font-weight:600;">${dateStr}</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:6px; align-items:center;">
-              <span style="color:#6b7280;">상태</span>
-              <span class="badge" style="background:${statusColor(first.status)};">${first.status || '-'}</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-              <span style="color:#6b7280;">주문자</span>
-              <span style="font-weight:600;">${first.customer_name || '-'} (${first.customer_phone || '-'})</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-              <span style="color:#6b7280;">입금자명</span>
-              <span style="font-weight:600;">${first.depositor_name || '-'}</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; gap:12px; margin-bottom:6px;">
-              <span style="color:#6b7280; flex-shrink:0;">배송지</span>
-              <span style="font-weight:600; text-align:right; word-break:break-all;">${fullAddress || '주소 정보 없음'}</span>
-            </div>
-            ${first.memo ? `
-            <div style="display:flex; justify-content:space-between; gap:12px; margin-bottom:6px;">
-              <span style="color:#6b7280; flex-shrink:0;">요청사항</span>
-              <span style="text-align:right; word-break:break-all;">${first.memo}</span>
-            </div>` : ''}
-            ${(first.courier || first.tracking_number) ? `
-            <div style="display:flex; justify-content:space-between; gap:12px; padding-top:8px; border-top:1px dashed #e5e7eb; margin-top:8px;">
-              <span style="color:#6b7280; flex-shrink:0;">배송정보</span>
-              <span style="color:#1976d2; font-weight:600; text-align:right;">🚚 ${first.courier || '택배사 미정'} | ${first.tracking_number || '운송장 없음'}</span>
-            </div>` : ''}
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px;"><span style="color:#6b7280;">주문일시 (KST)</span><span style="font-weight:600;">${dateStr}</span></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px; align-items:center;"><span style="color:#6b7280;">상태</span><span class="badge" style="background:${statusColor(first.status)};">${first.status || '-'}</span></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px;"><span style="color:#6b7280;">주문자</span><span style="font-weight:600;">${first.customer_name || '-'} (${first.customer_phone || '-'})</span></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px;"><span style="color:#6b7280;">입금자명</span><span style="font-weight:600;">${first.depositor_name || '-'}</span></div>
+            <div style="display:flex; justify-content:space-between; gap:12px; margin-bottom:6px;"><span style="color:#6b7280; flex-shrink:0;">배송지</span><span style="font-weight:600; text-align:right; word-break:break-all;">${fullAddress || '주소 정보 없음'}</span></div>
+            ${first.memo ? `<div style="display:flex; justify-content:space-between; gap:12px; margin-bottom:6px;"><span style="color:#6b7280; flex-shrink:0;">요청사항</span><span style="text-align:right; word-break:break-all;">${first.memo}</span></div>` : ''}
+            ${(first.courier || first.tracking_number) ? `<div style="display:flex; justify-content:space-between; gap:12px; padding-top:8px; border-top:1px dashed #e5e7eb; margin-top:8px;"><span style="color:#6b7280; flex-shrink:0;">배송정보</span><span style="color:#1976d2; font-weight:600; text-align:right;">🚚 ${first.courier || '택배사 미정'} | ${first.tracking_number || '운송장 없음'}</span></div>` : ''}
           </div>
-
           <div style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:12px; margin-bottom:16px;">
             <div style="font-size:13px; font-weight:700; color:#111827; margin-bottom:6px;">주문 상품 (${items.length}건)</div>
             ${itemsHtml}
           </div>
-
           <div style="background:#f9fafb; border-radius:8px; padding:12px; font-size:13px; margin-bottom:16px;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-              <span style="color:#6b7280;">상품 금액</span>
-              <span>${productTotal.toLocaleString()}원</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-              <span style="color:#6b7280;">배송비</span>
-              <span>${shippingTotal > 0 ? shippingTotal.toLocaleString() + '원' : '무료'}</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; padding-top:8px; border-top:1px dashed #e5e7eb; font-weight:700; font-size:15px;">
-              <span>총 결제금액</span>
-              <span style="color:#e53935;">${totalAll.toLocaleString()}원</span>
-            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span style="color:#6b7280;">상품 금액</span><span>${productTotal.toLocaleString()}원</span></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="color:#6b7280;">배송비</span><span>${shippingTotal > 0 ? shippingTotal.toLocaleString() + '원' : '무료'}</span></div>
+            <div style="display:flex; justify-content:space-between; padding-top:8px; border-top:1px dashed #e5e7eb; font-weight:700; font-size:15px;"><span>총 결제금액</span><span style="color:#e53935;">${totalAll.toLocaleString()}원</span></div>
           </div>
-
           <div class="modal-actions">
             <button type="button" id="close-detail" class="btn btn-secondary">닫기</button>
           </div>
@@ -2022,7 +1691,6 @@
       const realOrderNum = first.order_number;
       const displayNum = realOrderNum || `(주문번호 없음)`;
       const totalAll = items.reduce((s, o) => s + Number(o.total_price || 0), 0);
-
       const modal = document.createElement('div');
       modal.className = 'modal-backdrop';
       modal.innerHTML = `
@@ -2031,27 +1699,16 @@
           <p style="font-size:12px; color:#6b7280; margin:0 0 16px;">주문의 공통 정보를 수정합니다. 저장 시 주문번호에 속한 모든 상품 행에 반영됩니다.</p>
           <form id="order-edit-form" class="modal-form">
             <label>주문 상태</label>
-            <select name="status">
-              ${['입금대기','입금완료','배송중','완료','취소'].map(s => `<option ${s === first.status ? 'selected' : ''}>${s}</option>`).join('')}
-            </select>
-            <label>주문자 이름</label>
-            <input name="customer_name" value="${first.customer_name || ''}" required>
-            <label>연락처</label>
-            <input name="customer_phone" type="tel" value="${first.customer_phone || ''}" required>
-            <label>입금자명</label>
-            <input name="depositor_name" value="${first.depositor_name || ''}">
-            <label>우편번호</label>
-            <input name="postcode" value="${first.postcode || ''}">
-            <label>주소</label>
-            <input name="address" value="${first.address || ''}">
-            <label>상세주소</label>
-            <input name="address_detail" value="${first.address_detail || ''}">
-            <label>요청사항</label>
-            <textarea name="memo" style="min-height:60px;">${first.memo || ''}</textarea>
-            <label>택배사</label>
-            <input name="courier" value="${first.courier || ''}" placeholder="예: CJ대한통운">
-            <label>운송장 번호</label>
-            <input name="tracking_number" value="${first.tracking_number || ''}" placeholder="숫자만 입력">
+            <select name="status">${['입금대기','입금완료','배송중','완료','취소'].map(s => `<option ${s === first.status ? 'selected' : ''}>${s}</option>`).join('')}</select>
+            <label>주문자 이름</label><input name="customer_name" value="${first.customer_name || ''}" required>
+            <label>연락처</label><input name="customer_phone" type="tel" value="${first.customer_phone || ''}" required>
+            <label>입금자명</label><input name="depositor_name" value="${first.depositor_name || ''}">
+            <label>우편번호</label><input name="postcode" value="${first.postcode || ''}">
+            <label>주소</label><input name="address" value="${first.address || ''}">
+            <label>상세주소</label><input name="address_detail" value="${first.address_detail || ''}">
+            <label>요청사항</label><textarea name="memo" style="min-height:60px;">${first.memo || ''}</textarea>
+            <label>택배사</label><input name="courier" value="${first.courier || ''}" placeholder="예: CJ대한통운">
+            <label>운송장 번호</label><input name="tracking_number" value="${first.tracking_number || ''}" placeholder="숫자만 입력">
             <div style="font-size:13px; color:#374151; background:#f9fafb; padding:10px; border-radius:8px; margin-top:6px;">
               상품 ${items.length}건 · 총 수량 ${items.reduce((s,o)=>s+Number(o.quantity||0),0)}개 · <b style="color:#e53935;">총액 ${totalAll.toLocaleString()}원</b>
             </div>
@@ -2064,7 +1721,6 @@
       `;
       document.body.appendChild(modal);
       modal.querySelector('#cancel-edit').onclick = () => modal.remove();
-
       modal.querySelector('#order-edit-form').addEventListener('submit', async (ev) => {
         ev.preventDefault();
         const f = ev.target;
@@ -2081,11 +1737,8 @@
           tracking_number: f.tracking_number.value.trim() || null,
         };
         let error;
-        if (realOrderNum) {
-          ({ error } = await db.from('orders').update(updates).eq('order_number', realOrderNum));
-        } else {
-          ({ error } = await db.from('orders').update(updates).eq('id', first.id));
-        }
+        if (realOrderNum) ({ error } = await db.from('orders').update(updates).eq('order_number', realOrderNum));
+        else ({ error } = await db.from('orders').update(updates).eq('id', first.id));
         if (error) { alert('❌ 저장 실패: ' + error.message); return; }
         alert('✅ 주문이 수정되었습니다.');
         modal.remove();
@@ -2093,21 +1746,11 @@
       });
     }
 
-    document.getElementById('order-search-btn').addEventListener('click', () => {
-      selectedOrderKeys.clear();
-      const txt = document.getElementById('order-search').value.trim();
-      loadOrders(txt || null);
-    });
-    document.getElementById('order-reset-btn').addEventListener('click', () => {
-      selectedOrderKeys.clear();
-      document.getElementById('order-search').value = '';
-      loadOrders();
-    });
-    document.getElementById('order-search').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') document.getElementById('order-search-btn').click();
-    });
+    document.getElementById('order-search-btn').addEventListener('click', () => { selectedOrderKeys.clear(); loadOrders(document.getElementById('order-search').value.trim() || null); });
+    document.getElementById('order-reset-btn').addEventListener('click', () => { selectedOrderKeys.clear(); document.getElementById('order-search').value = ''; loadOrders(); });
+    document.getElementById('order-search').addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('order-search-btn').click(); });
 
-    // ===== 회원 목록 =====
+    // ===== 회원 =====
     let allMembers = [];
     let selectedMemberIds = new Set();
 
@@ -2116,28 +1759,12 @@
       const bulkBtn = document.getElementById('member-bulk-del-btn');
       const excelBtn = document.getElementById('member-excel-btn');
       const checkboxes = document.querySelectorAll('#member-list .member-row-check');
-
-      if (selectedMemberIds.size > 0) {
-        bulkBtn.classList.add('active');
-        bulkBtn.textContent = `선택 삭제 (${selectedMemberIds.size})`;
-      } else {
-        bulkBtn.classList.remove('active');
-        bulkBtn.textContent = '선택 삭제';
-      }
-
-      if (selectedMemberIds.size > 0) {
-        excelBtn.textContent = `📊 엑셀 (선택 ${selectedMemberIds.size})`;
-      } else {
-        excelBtn.textContent = '📊 엑셀 다운로드';
-      }
-
-      if (checkboxes.length === 0) {
-        checkAll.checked = false;
-        checkAll.disabled = true;
-      } else {
-        checkAll.disabled = false;
-        checkAll.checked = Array.from(checkboxes).every(cb => cb.checked);
-      }
+      if (selectedMemberIds.size > 0) { bulkBtn.classList.add('active'); bulkBtn.textContent = `선택 삭제 (${selectedMemberIds.size})`; }
+      else { bulkBtn.classList.remove('active'); bulkBtn.textContent = '선택 삭제'; }
+      if (selectedMemberIds.size > 0) excelBtn.textContent = `📊 엑셀 (선택 ${selectedMemberIds.size})`;
+      else excelBtn.textContent = '📊 엑셀 다운로드';
+      if (checkboxes.length === 0) { checkAll.checked = false; checkAll.disabled = true; }
+      else { checkAll.disabled = false; checkAll.checked = Array.from(checkboxes).every(cb => cb.checked); }
     }
 
     async function loadMembers(filterText) {
@@ -2162,19 +1789,14 @@
           (m.email && m.email.toLowerCase().includes(f))
         );
       }
-      if (list.length === 0) {
-        el.innerHTML = '<p style="text-align:center; color:#9ca3af; padding:20px;">해당하는 회원이 없습니다</p>';
-        updateMemberBulkUI();
-        return;
-      }
-
+      if (list.length === 0) { el.innerHTML = '<p style="text-align:center; color:#9ca3af; padding:20px;">해당하는 회원이 없습니다</p>'; updateMemberBulkUI(); return; }
       el.innerHTML = list.slice(0, 100).map(m => {
         const status = m.status || '정상';
         const sc = status === '정상' ? '#059669' : status === '정지' ? '#f59e0b' : '#dc2626';
         const isChecked = selectedMemberIds.has(String(m.id));
         return `
           <div class="row-item">
-            <input type="checkbox" class="row-check member-row-check" data-id="${m.id}" ${isChecked ? 'checked' : ''} aria-label="회원 선택">
+            <input type="checkbox" class="row-check member-row-check" data-id="${m.id}" ${isChecked ? 'checked' : ''}>
             <span class="badge" style="background:${sc};">${status}</span>
             <span><b class="row-strong">${m.name || '-'}</b> <span class="row-muted">(${m.username || '-'})</span></span>
             <span class="row-sep">|</span>
@@ -2188,7 +1810,6 @@
           </div>
         `;
       }).join('');
-
       el.querySelectorAll('.member-row-check').forEach(cb => {
         cb.addEventListener('change', () => {
           const id = String(cb.dataset.id);
@@ -2199,21 +1820,18 @@
       });
       updateMemberBulkUI();
       paginateRenderedList('member-list', 'member-pagination', 'members');
-
       el.querySelectorAll('.member-view').forEach(btn => {
         btn.addEventListener('click', () => {
           const m = allMembers.find(x => String(x.id) === String(btn.dataset.id));
           if (m) showMemberDetailModal(m);
         });
       });
-
       el.querySelectorAll('.member-edit').forEach(btn => {
         btn.addEventListener('click', () => {
           const m = allMembers.find(x => String(x.id) === String(btn.dataset.id));
           if (m) showMemberEditModal(m);
         });
       });
-
       el.querySelectorAll('.member-del').forEach(btn => {
         btn.addEventListener('click', async () => {
           const m = allMembers.find(x => String(x.id) === String(btn.dataset.id));
@@ -2221,11 +1839,7 @@
           if (!confirm(`"${m.name}" (${m.username}) 회원을 완전히 삭제할까요?`)) return;
           const { error } = await db.from('members').delete().eq('id', m.id);
           if (error) alert('삭제 실패: ' + error.message);
-          else {
-            selectedMemberIds.delete(String(m.id));
-            alert('✅ 회원이 삭제되었습니다.');
-            loadMembers(document.getElementById('member-search').value.trim() || null);
-          }
+          else { selectedMemberIds.delete(String(m.id)); alert('✅ 회원이 삭제되었습니다.'); loadMembers(document.getElementById('member-search').value.trim() || null); }
         });
       });
     }
@@ -2244,85 +1858,39 @@
     document.getElementById('member-bulk-del-btn').addEventListener('click', async () => {
       if (selectedMemberIds.size === 0) return;
       if (!confirm(`선택한 ${selectedMemberIds.size}명의 회원을 완전히 삭제할까요?`)) return;
-
       const btn = document.getElementById('member-bulk-del-btn');
-      btn.disabled = true;
-      btn.textContent = '삭제 중...';
-
+      btn.disabled = true; btn.textContent = '삭제 중...';
       const ids = Array.from(selectedMemberIds);
       const { error } = await db.from('members').delete().in('id', ids);
-
       btn.disabled = false;
-
-      if (error) {
-        alert('❌ 삭제 실패: ' + error.message);
-      } else {
-        alert('✅ 선택한 회원이 삭제되었습니다.');
-        selectedMemberIds.clear();
-        loadMembers(document.getElementById('member-search').value.trim() || null);
-      }
+      if (error) alert('❌ 삭제 실패: ' + error.message);
+      else { alert('✅ 선택한 회원이 삭제되었습니다.'); selectedMemberIds.clear(); loadMembers(document.getElementById('member-search').value.trim() || null); }
     });
 
-    document.getElementById('member-search-btn').addEventListener('click', () => {
-      selectedMemberIds.clear();
-      renderMembers(document.getElementById('member-search').value.trim());
-    });
-    document.getElementById('member-reset-btn').addEventListener('click', () => {
-      selectedMemberIds.clear();
-      document.getElementById('member-search').value = '';
-      renderMembers();
-    });
-    document.getElementById('member-search').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') document.getElementById('member-search-btn').click();
-    });
+    document.getElementById('member-search-btn').addEventListener('click', () => { selectedMemberIds.clear(); renderMembers(document.getElementById('member-search').value.trim()); });
+    document.getElementById('member-reset-btn').addEventListener('click', () => { selectedMemberIds.clear(); document.getElementById('member-search').value = ''; renderMembers(); });
+    document.getElementById('member-search').addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('member-search-btn').click(); });
 
-    // ⭐ 회원 상세보기 모달 (신규)
     function showMemberDetailModal(m) {
       const status = m.status || '정상';
       const sc = status === '정상' ? '#059669' : status === '정지' ? '#f59e0b' : '#dc2626';
       const fullAddress = `${m.postcode ? `[${m.postcode}] ` : ''}${m.address || ''} ${m.address_detail || ''}`.trim();
-      const joinDate = m.created_at ? new Date(m.created_at).toLocaleString('ko-KR') : '-';
-
+      const joinDate = formatKST(m.created_at, { full: true });
       const modal = document.createElement('div');
       modal.className = 'modal-backdrop';
       modal.innerHTML = `
         <div class="modal-box" style="max-width: 500px;">
           <h2 style="margin-bottom:16px;">회원 상세 정보</h2>
-
           <div style="background:#f9fafb; border-radius:8px; padding:16px; font-size:13px; color:#374151; line-height:1.9;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:8px; align-items:center;">
-              <span style="color:#6b7280;">상태</span>
-              <span class="badge" style="background:${sc};">${status}</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-              <span style="color:#6b7280;">아이디</span>
-              <span style="font-weight:600;">${m.username || '-'}</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-              <span style="color:#6b7280;">이름</span>
-              <span style="font-weight:600;">${m.name || '-'}</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-              <span style="color:#6b7280;">연락처</span>
-              <span style="font-weight:600;">${m.phone || '-'}</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-              <span style="color:#6b7280;">이메일</span>
-              <span style="font-weight:600;">${m.email || '-'}</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; gap:12px; margin-bottom:8px;">
-              <span style="color:#6b7280; flex-shrink:0;">주소</span>
-              <span style="font-weight:600; text-align:right; word-break:break-all;">${fullAddress || '-'}</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; padding-top:8px; border-top:1px dashed #e5e7eb;">
-              <span style="color:#6b7280;">가입일시</span>
-              <span style="font-weight:600;">${joinDate}</span>
-            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px; align-items:center;"><span style="color:#6b7280;">상태</span><span class="badge" style="background:${sc};">${status}</span></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="color:#6b7280;">아이디</span><span style="font-weight:600;">${m.username || '-'}</span></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="color:#6b7280;">이름</span><span style="font-weight:600;">${m.name || '-'}</span></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="color:#6b7280;">연락처</span><span style="font-weight:600;">${m.phone || '-'}</span></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="color:#6b7280;">이메일</span><span style="font-weight:600;">${m.email || '-'}</span></div>
+            <div style="display:flex; justify-content:space-between; gap:12px; margin-bottom:8px;"><span style="color:#6b7280; flex-shrink:0;">주소</span><span style="font-weight:600; text-align:right; word-break:break-all;">${fullAddress || '-'}</span></div>
+            <div style="display:flex; justify-content:space-between; padding-top:8px; border-top:1px dashed #e5e7eb;"><span style="color:#6b7280;">가입일시 (KST)</span><span style="font-weight:600;">${joinDate}</span></div>
           </div>
-
-          <div class="modal-actions">
-            <button type="button" id="close-member-detail" class="btn btn-secondary">닫기</button>
-          </div>
+          <div class="modal-actions"><button type="button" id="close-member-detail" class="btn btn-secondary">닫기</button></div>
         </div>
       `;
       document.body.appendChild(modal);
@@ -2336,26 +1904,16 @@
         <div class="modal-box">
           <h2>회원 정보 수정 (${m.username || '-'})</h2>
           <form id="member-edit-form" class="modal-form">
-            <label>아이디 (변경 불가)</label>
-            <input name="username" value="${m.username || ''}" readonly>
-            <label>비밀번호</label>
-            <input name="password" value="${m.password || ''}">
-            <label>이름</label>
-            <input name="name" value="${m.name || ''}" required>
-            <label>연락처</label>
-            <input name="phone" type="tel" value="${m.phone || ''}" required>
-            <label>이메일</label>
-            <input name="email" type="email" value="${m.email || ''}">
-            <label>우편번호</label>
-            <input name="postcode" value="${m.postcode || ''}">
-            <label>주소</label>
-            <input name="address" value="${m.address || ''}">
-            <label>상세주소</label>
-            <input name="address_detail" value="${m.address_detail || ''}">
+            <label>아이디 (변경 불가)</label><input name="username" value="${m.username || ''}" readonly>
+            <label>비밀번호</label><input name="password" value="${m.password || ''}">
+            <label>이름</label><input name="name" value="${m.name || ''}" required>
+            <label>연락처</label><input name="phone" type="tel" value="${m.phone || ''}" required>
+            <label>이메일</label><input name="email" type="email" value="${m.email || ''}">
+            <label>우편번호</label><input name="postcode" value="${m.postcode || ''}">
+            <label>주소</label><input name="address" value="${m.address || ''}">
+            <label>상세주소</label><input name="address_detail" value="${m.address_detail || ''}">
             <label>회원 상태</label>
-            <select name="status">
-              ${['정상','정지','탈퇴'].map(s => `<option ${s === (m.status || '정상') ? 'selected' : ''}>${s}</option>`).join('')}
-            </select>
+            <select name="status">${['정상','정지','탈퇴'].map(s => `<option ${s === (m.status || '정상') ? 'selected' : ''}>${s}</option>`).join('')}</select>
             <div class="modal-actions">
               <button type="submit" class="btn btn-primary">저장</button>
               <button type="button" id="cancel-edit" class="btn btn-secondary">취소</button>
@@ -2365,7 +1923,6 @@
       `;
       document.body.appendChild(modal);
       modal.querySelector('#cancel-edit').onclick = () => modal.remove();
-
       modal.querySelector('#member-edit-form').addEventListener('submit', async (ev) => {
         ev.preventDefault();
         const f = ev.target;
@@ -2386,11 +1943,8 @@
       });
     }
 
-    // ============================================================
-    // ⭐⭐⭐ 접속 통계 ⭐⭐⭐
-    // ============================================================
+    // ===== 통계 =====
     let statsRange = 7;
-
     document.querySelectorAll('.chart-controls .range-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.chart-controls .range-btn').forEach(b => b.classList.remove('active'));
@@ -2399,7 +1953,6 @@
         loadStats();
       });
     });
-
     document.getElementById('stats-refresh-btn').addEventListener('click', loadStats);
 
     async function loadStats() {
@@ -2407,26 +1960,10 @@
         const since = new Date();
         since.setDate(since.getDate() - 30);
         since.setHours(0, 0, 0, 0);
-
-        const { data, error } = await db
-          .from('visits')
-          .select('id, path, session_id, created_at')
-          .gte('created_at', since.toISOString())
-          .order('created_at', { ascending: true })
-          .limit(20000);
-
-        if (error) {
-          console.warn('통계 로드 실패:', error);
-          renderEmptyStats();
-          return;
-        }
-
-        const visits = data || [];
-        renderStats(visits);
-      } catch (e) {
-        console.error(e);
-        renderEmptyStats();
-      }
+        const { data, error } = await db.from('visits').select('id, path, session_id, created_at').gte('created_at', since.toISOString()).order('created_at', { ascending: true }).limit(20000);
+        if (error) { console.warn('통계 로드 실패:', error); renderEmptyStats(); return; }
+        renderStats(data || []);
+      } catch (e) { console.error(e); renderEmptyStats(); }
     }
 
     function renderEmptyStats() {
@@ -2440,32 +1977,26 @@
       document.getElementById('top-pages').innerHTML = '<p style="font-size:13px; color:#9ca3af;">데이터가 없습니다.</p>';
     }
 
-    function dateKeyLocal(d) {
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
+    function dateKeyKST(d) {
+      const kst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
+      const y = kst.getUTCFullYear();
+      const m = String(kst.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(kst.getUTCDate()).padStart(2, '0');
       return `${y}-${m}-${day}`;
     }
 
     function renderStats(visits) {
-      const dayMap = {};
-      const pageMap = {};
-
-      const today = new Date(); today.setHours(0,0,0,0);
-      const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
-      const todayKey = dateKeyLocal(today);
-      const yesterdayKey = dateKeyLocal(yesterday);
-
-      const weekStart = new Date(today); weekStart.setDate(weekStart.getDate() - 6);
-      const monthStart = new Date(today); monthStart.setDate(monthStart.getDate() - 29);
+      const dayMap = {}, pageMap = {};
+      const nowKST = new Date(Date.now() + 9 * 60 * 60 * 1000);
+      const todayKey = dateKeyKST(new Date());
+      const yesterdayKey = dateKeyKST(new Date(Date.now() - 24 * 60 * 60 * 1000));
 
       visits.forEach(v => {
         const d = new Date(v.created_at);
-        const key = dateKeyLocal(d);
+        const key = dateKeyKST(d);
         if (!dayMap[key]) dayMap[key] = { pv: 0, sessions: new Set() };
         dayMap[key].pv += 1;
         if (v.session_id) dayMap[key].sessions.add(v.session_id);
-
         if (!pageMap[v.path]) pageMap[v.path] = { pv: 0, sessions: new Set() };
         pageMap[v.path].pv += 1;
         if (v.session_id) pageMap[v.path].sessions.add(v.session_id);
@@ -2474,142 +2005,85 @@
       const todayData = dayMap[todayKey] || { pv: 0, sessions: new Set() };
       document.getElementById('stat-today-uv').textContent = todayData.sessions.size.toLocaleString();
       document.getElementById('stat-today-pv').textContent = `PV ${todayData.pv.toLocaleString()}`;
-
       const yData = dayMap[yesterdayKey] || { pv: 0, sessions: new Set() };
       document.getElementById('stat-yesterday').textContent = yData.sessions.size.toLocaleString();
 
       let weekUV = 0, monthUV = 0;
+      const weekStartKey = dateKeyKST(new Date(Date.now() - 6 * 24 * 60 * 60 * 1000));
+      const monthStartKey = dateKeyKST(new Date(Date.now() - 29 * 24 * 60 * 60 * 1000));
       Object.entries(dayMap).forEach(([k, v]) => {
-        const d = new Date(k + 'T00:00:00');
-        if (d >= weekStart) weekUV += v.sessions.size;
-        if (d >= monthStart) monthUV += v.sessions.size;
+        if (k >= weekStartKey) weekUV += v.sessions.size;
+        if (k >= monthStartKey) monthUV += v.sessions.size;
       });
       document.getElementById('stat-week').textContent = weekUV.toLocaleString();
       document.getElementById('stat-month').textContent = monthUV.toLocaleString();
 
       const chartDays = [];
       for (let i = statsRange - 1; i >= 0; i--) {
-        const d = new Date(today);
-        d.setDate(d.getDate() - i);
-        const k = dateKeyLocal(d);
+        const dKST = new Date(nowKST.getTime() - i * 24 * 60 * 60 * 1000);
+        const y = dKST.getUTCFullYear();
+        const mo = dKST.getUTCMonth() + 1;
+        const da = dKST.getUTCDate();
+        const k = `${y}-${String(mo).padStart(2,'0')}-${String(da).padStart(2,'0')}`;
         const v = dayMap[k] || { pv: 0, sessions: new Set() };
-        chartDays.push({
-          date: d,
-          key: k,
-          label: `${d.getMonth() + 1}/${d.getDate()}`,
-          uv: v.sessions.size,
-          pv: v.pv,
-        });
+        chartDays.push({ key: k, label: `${mo}/${da}`, uv: v.sessions.size, pv: v.pv });
       }
 
       const hasAny = chartDays.some(d => d.uv > 0 || d.pv > 0);
-      if (!hasAny && Object.keys(pageMap).length === 0) {
-        renderEmptyStats();
-        return;
-      }
+      if (!hasAny && Object.keys(pageMap).length === 0) { renderEmptyStats(); return; }
       document.getElementById('chart-empty').style.display = hasAny ? 'none' : 'block';
       drawChart(chartDays);
 
-      const topPages = Object.entries(pageMap)
-        .map(([path, v]) => ({ path, pv: v.pv, uv: v.sessions.size }))
-        .sort((a, b) => b.pv - a.pv)
-        .slice(0, 8);
-
+      const topPages = Object.entries(pageMap).map(([path, v]) => ({ path, pv: v.pv, uv: v.sessions.size })).sort((a, b) => b.pv - a.pv).slice(0, 8);
       const topPagesEl = document.getElementById('top-pages');
-      if (topPages.length === 0) {
-        topPagesEl.innerHTML = '<p style="font-size:13px; color:#9ca3af;">데이터가 없습니다.</p>';
-        return;
-      }
+      if (topPages.length === 0) { topPagesEl.innerHTML = '<p style="font-size:13px; color:#9ca3af;">데이터가 없습니다.</p>'; return; }
       const maxPv = topPages[0].pv || 1;
       topPagesEl.innerHTML = topPages.map(p => {
         const pct = Math.round((p.pv / maxPv) * 100);
-        return `
-          <div class="top-page-item">
-            <span class="tp-name">${escapeHtml(pathLabel(p.path))}</span>
-            <div class="tp-bar-wrap"><div class="tp-bar" style="width:${pct}%"></div></div>
-            <span class="tp-count">PV ${p.pv.toLocaleString()} · UV ${p.uv.toLocaleString()}</span>
-          </div>
-        `;
+        return `<div class="top-page-item"><span class="tp-name">${escapeHtml(pathLabel(p.path))}</span><div class="tp-bar-wrap"><div class="tp-bar" style="width:${pct}%"></div></div><span class="tp-count">PV ${p.pv.toLocaleString()} · UV ${p.uv.toLocaleString()}</span></div>`;
       }).join('');
     }
 
     function pathLabel(p) {
-      const map = {
-        'index': '홈 (index)',
-        'product': '상품 상세',
-        'cart': '장바구니',
-        'login': '로그인',
-        'signup': '회원가입',
-        'orders': '주문조회',
-        'mypage': '내정보',
-        'myorders': '내 주문내역',
-      };
+      const map = { 'index': '홈 (index)', 'product': '상품 상세', 'cart': '장바구니', 'login': '로그인', 'signup': '회원가입', 'orders': '주문조회', 'mypage': '내정보', 'myorders': '내 주문내역' };
       return map[p] || p;
     }
-
-    function escapeHtml(s) {
-      return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
-    }
+    function escapeHtml(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c])); }
 
     function drawChart(days) {
       const svg = document.getElementById('chart-svg');
       const W = 800, H = 280;
-      const PADDING = { top: 20, right: 20, bottom: 40, left: 50 };
-      const innerW = W - PADDING.left - PADDING.right;
-      const innerH = H - PADDING.top - PADDING.bottom;
-
+      const P = { top: 20, right: 20, bottom: 40, left: 50 };
+      const iW = W - P.left - P.right, iH = H - P.top - P.bottom;
       const maxVal = Math.max(1, ...days.map(d => Math.max(d.uv, d.pv)));
       const ySteps = 4;
       const stepVal = Math.ceil(maxVal / ySteps) || 1;
       const yMax = stepVal * ySteps;
-
-      const barGroupWidth = innerW / days.length;
-      const barWidth = Math.max(4, Math.min(24, barGroupWidth * 0.32));
+      const bgw = iW / days.length;
+      const bw = Math.max(4, Math.min(24, bgw * 0.32));
       const gap = 3;
-
-      let svgContent = '';
-
+      let c = '';
       for (let i = 0; i <= ySteps; i++) {
         const yVal = stepVal * i;
-        const y = PADDING.top + innerH - (yVal / yMax) * innerH;
-        svgContent += `<line x1="${PADDING.left}" y1="${y}" x2="${W - PADDING.right}" y2="${y}" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="${i === 0 ? '0' : '3 3'}" />`;
-        svgContent += `<text x="${PADDING.left - 8}" y="${y + 4}" text-anchor="end" font-size="11" fill="#9ca3af" font-family="sans-serif">${yVal}</text>`;
+        const y = P.top + iH - (yVal / yMax) * iH;
+        c += `<line x1="${P.left}" y1="${y}" x2="${W - P.right}" y2="${y}" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="${i === 0 ? '0' : '3 3'}" />`;
+        c += `<text x="${P.left - 8}" y="${y + 4}" text-anchor="end" font-size="11" fill="#9ca3af" font-family="sans-serif">${yVal}</text>`;
       }
-
       days.forEach((d, idx) => {
-        const cx = PADDING.left + barGroupWidth * idx + barGroupWidth / 2;
-        const uvH = (d.uv / yMax) * innerH;
-        const pvH = (d.pv / yMax) * innerH;
-        const uvX = cx - barWidth - gap / 2;
-        const pvX = cx + gap / 2;
-        const uvY = PADDING.top + innerH - uvH;
-        const pvY = PADDING.top + innerH - pvH;
-
-        svgContent += `<rect x="${uvX}" y="${uvY}" width="${barWidth}" height="${Math.max(0, uvH)}" fill="#3b82f6" rx="2">
-          <title>${d.label} UV: ${d.uv}</title>
-        </rect>`;
-        svgContent += `<rect x="${pvX}" y="${pvY}" width="${barWidth}" height="${Math.max(0, pvH)}" fill="#93c5fd" rx="2">
-          <title>${d.label} PV: ${d.pv}</title>
-        </rect>`;
-
+        const cx = P.left + bgw * idx + bgw / 2;
+        const uvH = (d.uv / yMax) * iH, pvH = (d.pv / yMax) * iH;
+        const uvX = cx - bw - gap / 2, pvX = cx + gap / 2;
+        const uvY = P.top + iH - uvH, pvY = P.top + iH - pvH;
+        c += `<rect x="${uvX}" y="${uvY}" width="${bw}" height="${Math.max(0, uvH)}" fill="#3b82f6" rx="2"><title>${d.label} UV: ${d.uv}</title></rect>`;
+        c += `<rect x="${pvX}" y="${pvY}" width="${bw}" height="${Math.max(0, pvH)}" fill="#93c5fd" rx="2"><title>${d.label} PV: ${d.pv}</title></rect>`;
         const showEvery = days.length > 14 ? Math.ceil(days.length / 10) : 1;
         if (idx % showEvery === 0 || idx === days.length - 1) {
-          svgContent += `<text x="${cx}" y="${H - PADDING.bottom + 16}" text-anchor="middle" font-size="10" fill="#6b7280" font-family="sans-serif">${d.label}</text>`;
+          c += `<text x="${cx}" y="${H - P.bottom + 16}" text-anchor="middle" font-size="10" fill="#6b7280" font-family="sans-serif">${d.label}</text>`;
         }
       });
-
-      svgContent += `<line x1="${PADDING.left}" y1="${PADDING.top + innerH}" x2="${W - PADDING.right}" y2="${PADDING.top + innerH}" stroke="#d1d5db" stroke-width="1" />`;
-
-      svgContent += `
-        <g transform="translate(${W - PADDING.right - 130}, ${PADDING.top})">
-          <rect x="0" y="0" width="10" height="10" fill="#3b82f6" rx="2" />
-          <text x="14" y="9" font-size="11" fill="#374151" font-family="sans-serif">UV (방문자)</text>
-          <rect x="0" y="16" width="10" height="10" fill="#93c5fd" rx="2" />
-          <text x="14" y="25" font-size="11" fill="#374151" font-family="sans-serif">PV (페이지뷰)</text>
-        </g>
-      `;
-
-      svg.innerHTML = svgContent;
+      c += `<line x1="${P.left}" y1="${P.top + iH}" x2="${W - P.right}" y2="${P.top + iH}" stroke="#d1d5db" stroke-width="1" />`;
+      c += `<g transform="translate(${W - P.right - 130}, ${P.top})"><rect x="0" y="0" width="10" height="10" fill="#3b82f6" rx="2" /><text x="14" y="9" font-size="11" fill="#374151" font-family="sans-serif">UV (방문자)</text><rect x="0" y="16" width="10" height="10" fill="#93c5fd" rx="2" /><text x="14" y="25" font-size="11" fill="#374151" font-family="sans-serif">PV (페이지뷰)</text></g>`;
+      svg.innerHTML = c;
     }
 
     checkSession();

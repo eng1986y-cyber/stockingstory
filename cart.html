@@ -10,21 +10,7 @@
     input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     input[type=number] { -moz-appearance: textfield; appearance: textfield; }
     .cart-check { width: 22px; height: 22px; cursor: pointer; accent-color: #10b981; }
-    
-    .rule-card {
-      background: #151515;
-      border: 1px solid #222;
-      border-radius: 8px;
-      padding: 14px 16px;
-      margin-bottom: 16px;
-      font-size: 13px;
-      color: #e5e7eb;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
+    .rule-card { background: #151515; border: 1px solid #222; border-radius: 8px; padding: 14px 16px; margin-bottom: 16px; font-size: 13px; color: #e5e7eb; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
     .rule-card .rule-text { color: #aaa; }
     .rule-card .rule-status { font-weight: 700; }
   </style>
@@ -47,16 +33,12 @@
   <script>
     const listEl = document.getElementById('cart-list');
     const summaryEl = document.getElementById('cart-summary');
-
     let globalShipping = 0;
     let selectedIndexes = new Set();
 
     function getCart() { return JSON.parse(localStorage.getItem('cart') || '[]'); }
     function saveCart(cart) { localStorage.setItem('cart', JSON.stringify(cart)); }
-    function getMember() {
-      try { return JSON.parse(localStorage.getItem('member') || 'null'); }
-      catch { return null; }
-    }
+    function getMember() { try { return JSON.parse(localStorage.getItem('member') || 'null'); } catch { return null; } }
 
     async function loadShipping() {
       const { data } = await db.from('settings').select('value').eq('key', 'shipping_fee').maybeSingle();
@@ -72,7 +54,6 @@
         summaryEl.style.display = 'none';
         return;
       }
-
       selectedIndexes.forEach(idx => { if (idx >= cart.length) selectedIndexes.delete(idx); });
 
       listEl.innerHTML = cart.map((it, idx) => {
@@ -120,14 +101,12 @@
             </label>
             <span style="font-size:12px; color:#888;">전체 총 수량: ${totalQty}개</span>
           </div>
-
           <div class="rule-card">
             <span class="rule-text">📦 주문 규칙: 선택 상품 총 6개 이상</span>
             <span class="rule-status" style="color:${canOrder ? '#10b981' : '#f59e0b'};">
               현재 ${selectedQty}개 ${canOrder ? '✅ 주문 가능' : `(${TOTAL_MIN - selectedQty}개 부족)`}
             </span>
           </div>
-
           <div style="text-align:right;">
             <div>선택 상품 합계: <b>${subTotal.toLocaleString()}원</b></div>
             <div>배송비: <b>${globalShipping > 0 ? globalShipping.toLocaleString() + '원' : '무료'}</b></div>
@@ -147,13 +126,11 @@
           render();
         });
       });
-
       document.getElementById('check-all').addEventListener('change', (e) => {
         if (e.target.checked) cart.forEach((_, idx) => selectedIndexes.add(idx));
         else selectedIndexes.clear();
         render();
       });
-
       listEl.querySelectorAll('.qty-minus').forEach(btn => {
         btn.addEventListener('click', () => {
           const cart = getCart(); const idx = Number(btn.dataset.idx);
@@ -172,7 +149,6 @@
           cart[idx].quantity = Math.max(1, Number(inp.value) || 1); saveCart(cart); render(); if (document.getElementById('app-header')) renderHeader('cart');
         });
       });
-
       listEl.querySelectorAll('.del-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const cart = getCart(); const idx = Number(btn.dataset.idx);
@@ -183,7 +159,6 @@
           render(); if (document.getElementById('app-header')) renderHeader('cart');
         });
       });
-
       document.getElementById('checkout-btn').onclick = () => {
         if (selectedIndexes.size === 0) { alert('주문할 상품을 선택해주세요.'); return; }
         if (!canOrder) { alert(`구매가능최소수량은 ${TOTAL_MIN}개입니다. 기타옵션 및 기타제품 추가해주시기 바랍니다.\n(현재: ${selectedQty}개)`); return; }
@@ -195,12 +170,10 @@
       const subTotal = cart.reduce((s, it) => s + it.product_price * it.quantity, 0);
       const total = subTotal + globalShipping;
       const m = getMember();
-
       const inputStyle = 'width:100%; padding:10px 12px; background:#0f0f0f; border:1px solid #2a2a2a; border-radius:8px; color:#e5e7eb; font-family:inherit; font-size:14px;';
       const labelStyle = 'font-size:13px; font-weight:600; color:#ccc; display:block; margin-bottom:4px;';
 
       const modal = document.createElement('div');
-      // ⭐ 모바일에서 전체 입력창이 보이도록 백드롭 자체를 스크롤 가능하게 수정
       modal.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.75); display:flex; align-items:flex-start; justify-content:center; z-index:1000; padding:10px; overflow-y:auto; -webkit-overflow-scrolling:touch;`;
       modal.innerHTML = `
         <div style="background:#151515; border:1px solid #222; padding:20px 16px; border-radius:12px; width:100%; max-width:460px; max-height:92vh; overflow-y:auto; color:#e5e7eb; -webkit-overflow-scrolling:touch; padding-bottom:calc(20px + env(safe-area-inset-bottom)); box-sizing:border-box; margin:auto 0;">
@@ -248,7 +221,6 @@
         }));
         const { error } = await db.from('orders').insert(rows);
         if (error) { alert('❌ 주문 실패: ' + error.message); return; }
-
         const remainingCart = getCart().filter((_, idx) => !selectedIndexes.has(idx));
         saveCart(remainingCart);
         selectedIndexes.clear();
@@ -259,7 +231,9 @@
     }
 
     function generateOrderNumber() {
-      const d = new Date(); const ymd = d.getFullYear().toString().slice(-2) + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
+      const d = new Date();
+      const kst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
+      const ymd = String(kst.getUTCFullYear()).slice(-2) + String(kst.getUTCMonth()+1).padStart(2,'0') + String(kst.getUTCDate()).padStart(2,'0');
       return `ORD-${ymd}-${Math.random().toString(36).slice(2,6).toUpperCase()}`;
     }
 
@@ -284,10 +258,7 @@
       modal.querySelector('#copy-account').onclick = () => { navigator.clipboard.writeText('123-456-789012').then(() => alert('계좌번호가 복사되었습니다.')); };
     }
 
-    (async () => {
-      await loadShipping();
-      render();
-    })();
+    (async () => { await loadShipping(); render(); })();
   </script>
 </body>
 </html>
