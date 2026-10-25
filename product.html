@@ -337,10 +337,14 @@
       });
     }
 
-    function generateOrderNumber() {
+        function generateOrderNumber() {
       const d = new Date();
-      const kst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
-      const ymd = String(kst.getUTCFullYear()).slice(-2) + String(kst.getUTCMonth()+1).padStart(2,'0') + String(kst.getUTCDate()).padStart(2,'0');
+      const parts = new Intl.DateTimeFormat('ko-KR', {
+        timeZone: 'Asia/Seoul',
+        year: '2-digit', month: '2-digit', day: '2-digit',
+      }).formatToParts(d);
+      const get = (t) => parts.find(p => p.type === t)?.value || '00';
+      const ymd = get('year') + get('month') + get('day');
       return `ORD-${ymd}-${Math.random().toString(36).slice(2,6).toUpperCase()}`;
     }
 
