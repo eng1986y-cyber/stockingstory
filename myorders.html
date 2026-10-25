@@ -13,38 +13,69 @@
     body.dark .order-history-title { color: #fff; }
     .bulk-actions { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #4b5563; }
     body.dark .bulk-actions { color: #9ca3af; }
-    .bulk-actions label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600; }
-    .bulk-actions input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #10b981; }
-    .btn-delete-selected { padding: 6px 12px; background: #ef4444; color: #fff; border: 0; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; font-family: inherit; opacity: 0.5; pointer-events: none; transition: opacity 0.15s; }
+    .bulk-actions label {
+      display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600;
+      min-height: 44px; padding: 0 4px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .bulk-actions input[type="checkbox"] {
+      width: 22px; height: 22px; cursor: pointer; accent-color: #10b981;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-delete-selected {
+      padding: 10px 16px; background: #ef4444; color: #fff; border: 0; border-radius: 6px;
+      cursor: pointer; font-size: 13px; font-weight: 600; font-family: inherit;
+      opacity: 0.5; pointer-events: none; transition: opacity 0.15s;
+      min-height: 44px; min-width: 96px;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
     .btn-delete-selected.active { opacity: 1; pointer-events: auto; }
     .order-history-list { display: flex; flex-direction: column; gap: 16px; width: 100%; }
     .history-card-wrap { display: flex; gap: 12px; align-items: flex-start; width: 100%; }
-    .history-check { width: 22px; height: 22px; cursor: pointer; accent-color: #10b981; margin-top: 20px; flex-shrink: 0; }
+    .history-check {
+      width: 24px; height: 24px; cursor: pointer; accent-color: #10b981;
+      margin-top: 20px; flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
     .history-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; font-size: 14px; line-height: 1.6; color: #222; box-sizing: border-box; width: 100%; flex: 1; min-width: 0; }
     body.dark .history-card { background: #151515; border-color: #222; color: #e5e7eb; }
-    .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #eee; }
+    .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #eee; flex-wrap: wrap; gap: 8px; }
     body.dark .history-header { border-bottom-color: #222; }
     .history-date { font-size: 13px; color: #888; }
     .history-status { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 4px; color: #fff; }
-    .history-order-num { font-weight: 700; color: #1976d2; font-size: 15px; margin-bottom: 12px; display: block; }
+    .history-order-num { font-weight: 700; color: #1976d2; font-size: 15px; margin-bottom: 12px; display: block; word-break: break-all; }
     body.dark .history-order-num { color: #60a5fa; }
     .history-product-item { padding: 10px 0; border-bottom: 1px dashed #eee; }
     body.dark .history-product-item { border-bottom-color: #222; }
     .history-product-item:last-child { border-bottom: none; }
-    .history-item-main { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 14px; }
-    .history-item-main .name { font-weight: 600; }
+    .history-item-main { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 14px; gap: 8px; }
+    .history-item-main .name { font-weight: 600; word-break: break-all; }
     .history-item-main .qty { color: #888; margin-left: 4px; font-weight: normal; font-size: 13px; }
-    .history-item-detail { font-size: 13px; color: #6b7280; line-height: 1.5; }
+    .history-item-detail { font-size: 13px; color: #6b7280; line-height: 1.5; word-break: break-all; }
     body.dark .history-item-detail { color: #9ca3af; }
-    .history-info-box { margin-top: 16px; background: #f9fafb; padding: 12px; border-radius: 6px; font-size: 13px; color: #4b5563; line-height: 1.6; }
+    .history-info-box { margin-top: 16px; background: #f9fafb; padding: 12px; border-radius: 6px; font-size: 13px; color: #4b5563; line-height: 1.6; word-break: break-all; }
     body.dark .history-info-box { background: #0f0f0f; color: #9ca3af; }
     .history-price-summary { margin-top: 16px; padding-top: 16px; border-top: 1px solid #eee; font-size: 14px; color: #4b5563; }
     body.dark .history-price-summary { border-top-color: #222; color: #9ca3af; }
     .history-price-summary .price-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
     .history-price-summary .price-row.total { margin-top: 8px; padding-top: 8px; border-top: 1px dashed #ddd; font-weight: 700; font-size: 16px; color: #e53935; }
     body.dark .history-price-summary .price-row.total { border-top-color: #333; color: #ef4444; }
-    .btn-delete-single { margin-top: 16px; width: 100%; padding: 8px; background: #fff; color: #ef4444; border: 1px solid #ef4444; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; font-family: inherit; transition: all 0.15s; }
+    .btn-delete-single {
+      margin-top: 16px; width: 100%; padding: 12px;
+      background: #fff; color: #ef4444; border: 1px solid #ef4444; border-radius: 6px;
+      cursor: pointer; font-size: 14px; font-weight: 600; font-family: inherit;
+      transition: all 0.15s;
+      min-height: 44px;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
     body.dark .btn-delete-single { background: #151515; color: #ef4444; border-color: #ef4444; }
+    .btn-delete-single:disabled { opacity: 0.6; cursor: not-allowed; }
+    @media (max-width: 480px) {
+      .myorders-header { flex-direction: column; align-items: stretch; }
+      .bulk-actions { justify-content: flex-end; }
+    }
   </style>
 </head>
 <body>
@@ -74,7 +105,7 @@
   </script>
 
   <script>
-    // ⭐ Intl + Asia/Seoul 로 브라우저/DB 무관 KST 표시
+    // ⭐ Intl + Asia/Seoul 로 KST 표시
     function formatKST(dateStr, opts = {}) {
       if (!dateStr) return '-';
       const d = new Date(dateStr);
@@ -121,21 +152,82 @@
       const selectedCount = selectedKeys.size;
       if (total === 0) { checkAllEl.checked = false; checkAllEl.disabled = true; }
       else { checkAllEl.disabled = false; checkAllEl.checked = (selectedCount === total); }
-      if (selectedCount > 0) { deleteSelectedBtn.classList.add('active'); deleteSelectedBtn.textContent = `선택 삭제 (${selectedCount})`; }
-      else { deleteSelectedBtn.classList.remove('active'); deleteSelectedBtn.textContent = '선택 삭제'; }
+      if (selectedCount > 0) {
+        deleteSelectedBtn.classList.add('active');
+        deleteSelectedBtn.textContent = `선택 삭제 (${selectedCount})`;
+      } else {
+        deleteSelectedBtn.classList.remove('active');
+        deleteSelectedBtn.textContent = '선택 삭제';
+      }
+    }
+
+    // ⭐ 안전한 주문 조회: .or() 대신 개별 쿼리 2회 + 병합
+    async function safeFetchOrders() {
+      const name = member.name || '';
+      const phone = member.phone || '';
+
+      const queries = [];
+
+      // 1) 이름 + 연락처 매칭
+      if (name && phone) {
+        queries.push(
+          db.from('orders').select('*')
+            .eq('customer_name', name)
+            .eq('customer_phone', phone)
+            .order('created_at', { ascending: false })
+        );
+      }
+
+      // 2) 이름 + 입금자명 매칭
+      if (name) {
+        queries.push(
+          db.from('orders').select('*')
+            .eq('customer_name', name)
+            .eq('depositor_name', name)
+            .order('created_at', { ascending: false })
+        );
+      }
+
+      // 3) 이름만 매칭 (fallback)
+      if (name) {
+        queries.push(
+          db.from('orders').select('*')
+            .eq('customer_name', name)
+            .order('created_at', { ascending: false })
+        );
+      }
+
+      const results = await Promise.all(queries);
+
+      const merged = new Map();
+      for (const res of results) {
+        if (res.error) {
+          console.warn('orders 조회 실패:', res.error.message);
+          continue;
+        }
+        (res.data || []).forEach(o => {
+          merged.set(o.id, o);
+        });
+      }
+      return Array.from(merged.values()).sort((a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
     }
 
     async function loadOrderHistory() {
       historyListEl.innerHTML = '<p style="color:#888; font-size:14px;">주문 내역을 불러오는 중입니다...</p>';
       selectedKeys.clear();
-      const { data, error } = await db.from('orders').select('*')
-        .or(`and(customer_name.eq.${member.name},customer_phone.eq.${member.phone}),and(customer_name.eq.${member.name},depositor_name.eq.${member.name})`)
-        .order('created_at', { ascending: false });
+
       let orders = [];
-      if (error) {
-        const fb = await db.from('orders').select('*').eq('customer_name', member.name).order('created_at', { ascending: false });
-        orders = fb.data;
-      } else orders = data;
+      try {
+        orders = await safeFetchOrders();
+      } catch (e) {
+        console.error(e);
+        historyListEl.innerHTML = '<p style="color:#ef4444; font-size:14px; text-align:center;">주문 내역 조회 중 오류가 발생했습니다.<br>잠시 후 다시 시도해주세요.</p>';
+        currentGroups = {};
+        updateBulkActions();
+        return;
+      }
 
       if (!orders || orders.length === 0) {
         historyListEl.innerHTML = '<p style="color:#888; font-size:14px; text-align:center;">주문 내역이 없습니다.</p>';
@@ -143,6 +235,7 @@
         updateBulkActions();
         return;
       }
+
       currentGroups = {};
       orders.forEach(o => {
         const key = o.order_number || `single_${o.id}`;
@@ -217,6 +310,28 @@
       updateBulkActions();
     }
 
+    // ⭐ 삭제 헬퍼: 삭제된 행 수를 반환 (에러 시 throw)
+    async function deleteOrderGroup(items) {
+      if (!items || items.length === 0) return 0;
+      const first = items[0];
+
+      if (first.order_number) {
+        const { data, error } = await db.from('orders')
+          .delete()
+          .eq('order_number', first.order_number)
+          .select();
+        if (error) throw error;
+        return Array.isArray(data) ? data.length : 0;
+      } else {
+        const { data, error } = await db.from('orders')
+          .delete()
+          .eq('id', first.id)
+          .select();
+        if (error) throw error;
+        return Array.isArray(data) ? data.length : 0;
+      }
+    }
+
     function bindEvents() {
       historyListEl.querySelectorAll('.history-check').forEach(cb => {
         cb.addEventListener('change', () => {
@@ -226,6 +341,7 @@
           updateBulkActions();
         });
       });
+
       historyListEl.querySelectorAll('.btn-delete-single').forEach(btn => {
         btn.addEventListener('click', async () => {
           const key = btn.dataset.key;
@@ -234,14 +350,24 @@
           const first = items[0];
           const label = first.order_number ? `주문번호 "${first.order_number}"` : `해당 주문`;
           if (!confirm(`${label} 을(를) 삭제할까요?\n삭제된 내역은 복구할 수 없습니다.`)) return;
+
+          const originalText = btn.textContent;
           btn.disabled = true;
           btn.textContent = '삭제 중...';
-          let error;
-          if (first.order_number) ({ error } = await db.from('orders').delete().eq('order_number', first.order_number));
-          else ({ error } = await db.from('orders').delete().eq('id', first.id));
-          if (error) { alert('❌ 삭제 실패: ' + error.message); btn.disabled = false; btn.textContent = '이 주문 삭제'; return; }
-          alert('✅ 주문이 삭제되었습니다.');
-          loadOrderHistory();
+
+          try {
+            const deletedCount = await deleteOrderGroup(items);
+            if (deletedCount === 0) {
+              throw new Error('삭제 권한이 없거나 이미 삭제된 주문입니다. (Supabase RLS DELETE 정책을 확인하세요)');
+            }
+            alert('✅ 주문이 삭제되었습니다.');
+            loadOrderHistory();
+          } catch (err) {
+            console.error('삭제 실패:', err);
+            alert('❌ 삭제 실패: ' + (err.message || err));
+            btn.disabled = false;
+            btn.textContent = originalText;
+          }
         });
       });
     }
@@ -256,8 +382,11 @@
     deleteSelectedBtn.addEventListener('click', async () => {
       if (selectedKeys.size === 0) return;
       if (!confirm(`선택한 ${selectedKeys.size}건의 주문을 삭제할까요?\n삭제된 내역은 복구할 수 없습니다.`)) return;
+
+      const originalText = deleteSelectedBtn.textContent;
       deleteSelectedBtn.disabled = true;
       deleteSelectedBtn.textContent = '삭제 중...';
+
       const orderNumbers = [], singleIds = [];
       selectedKeys.forEach(key => {
         const items = currentGroups[key];
@@ -266,18 +395,47 @@
         if (first.order_number) orderNumbers.push(first.order_number);
         else singleIds.push(first.id);
       });
-      let hasError = false, errorMsg = '';
+
+      let successCount = 0;
+      let errorMsg = '';
+
       if (orderNumbers.length > 0) {
-        const { error } = await db.from('orders').delete().in('order_number', orderNumbers);
-        if (error) { hasError = true; errorMsg += error.message + '\n'; }
+        try {
+          const { data, error } = await db.from('orders')
+            .delete()
+            .in('order_number', orderNumbers)
+            .select();
+          if (error) throw error;
+          successCount += Array.isArray(data) ? data.length : 0;
+        } catch (err) {
+          console.error(err);
+          errorMsg += (err.message || err) + '\n';
+        }
       }
+
       if (singleIds.length > 0) {
-        const { error } = await db.from('orders').delete().in('id', singleIds);
-        if (error) { hasError = true; errorMsg += error.message + '\n'; }
+        try {
+          const { data, error } = await db.from('orders')
+            .delete()
+            .in('id', singleIds)
+            .select();
+          if (error) throw error;
+          successCount += Array.isArray(data) ? data.length : 0;
+        } catch (err) {
+          console.error(err);
+          errorMsg += (err.message || err) + '\n';
+        }
       }
+
       deleteSelectedBtn.disabled = false;
-      if (hasError) alert('❌ 일부 삭제 실패:\n' + errorMsg);
-      else alert('✅ 선택한 주문이 삭제되었습니다.');
+
+      if (errorMsg) {
+        alert('❌ 일부 삭제 실패:\n' + errorMsg + '\n⚠️ Supabase orders 테이블의 DELETE 권한(RLS)을 확인하세요.');
+      } else if (successCount === 0) {
+        alert('⚠️ 삭제된 항목이 없습니다.\nSupabase orders 테이블의 DELETE 권한(RLS)을 확인하세요.');
+      } else {
+        alert(`✅ ${successCount}건의 주문이 삭제되었습니다.`);
+      }
       loadOrderHistory();
     });
 
