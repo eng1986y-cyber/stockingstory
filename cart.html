@@ -13,6 +13,63 @@
     .rule-card { background: #151515; border: 1px solid #222; border-radius: 8px; padding: 14px 16px; margin-bottom: 16px; font-size: 13px; color: #e5e7eb; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
     .rule-card .rule-text { color: #aaa; }
     .rule-card .rule-status { font-weight: 700; }
+
+    /* ⭐⭐⭐ 모바일 주문 모달 강제 표시 스타일 ⭐⭐⭐ */
+    .checkout-modal-backdrop {
+      position: fixed !important;
+      top: 0; left: 0; right: 0; bottom: 0;
+      width: 100vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      background: rgba(0,0,0,.8);
+      z-index: 999999 !important;
+      display: flex !important;
+      align-items: flex-start !important;
+      justify-content: center !important;
+      padding: 10px !important;
+      overflow-y: auto !important;
+      -webkit-overflow-scrolling: touch;
+      box-sizing: border-box;
+    }
+    .checkout-modal-box {
+      background: #151515;
+      border: 1px solid #222;
+      padding: 20px 16px;
+      border-radius: 12px;
+      width: 100% !important;
+      max-width: 460px !important;
+      margin: 20px auto !important;
+      color: #e5e7eb;
+      box-sizing: border-box;
+      position: relative;
+    }
+    .checkout-modal-box .checkout-form {
+      display: grid !important;
+      gap: 10px !important;
+      background: none !important;
+      padding: 0 !important;
+      border: 0 !important;
+      max-width: none !important;
+      width: 100% !important;
+    }
+    .checkout-modal-box h2 {
+      margin: 0 0 16px !important;
+      font-size: 18px !important;
+      color: #fff !important;
+    }
+    @media (max-width: 768px) {
+      .checkout-modal-backdrop {
+        align-items: flex-start !important;
+        padding: 0 !important;
+        padding-top: 10px !important;
+        padding-bottom: 10px !important;
+      }
+      .checkout-modal-box {
+        margin: 0 auto !important;
+        border-radius: 8px !important;
+        max-height: none !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -166,19 +223,20 @@
       };
     }
 
+    // ⭐⭐⭐ 모달: body에 붙이고 position:fixed 강제 + 오버레이 스크롤 ⭐⭐⭐
     function showCheckoutModal(cart) {
       const subTotal = cart.reduce((s, it) => s + it.product_price * it.quantity, 0);
       const total = subTotal + globalShipping;
       const m = getMember();
-      const inputStyle = 'width:100%; padding:10px 12px; background:#0f0f0f; border:1px solid #2a2a2a; border-radius:8px; color:#e5e7eb; font-family:inherit; font-size:14px;';
+      const inputStyle = 'width:100%; padding:10px 12px; background:#0f0f0f; border:1px solid #2a2a2a; border-radius:8px; color:#e5e7eb; font-family:inherit; font-size:14px; box-sizing:border-box;';
       const labelStyle = 'font-size:13px; font-weight:600; color:#ccc; display:block; margin-bottom:4px;';
 
       const modal = document.createElement('div');
-      modal.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,.75); display:flex; align-items:flex-start; justify-content:center; z-index:1000; padding:10px; overflow-y:auto; -webkit-overflow-scrolling:touch;`;
+      modal.className = 'checkout-modal-backdrop';
       modal.innerHTML = `
-        <div style="background:#151515; border:1px solid #222; padding:20px 16px; border-radius:12px; width:100%; max-width:460px; max-height:92vh; overflow-y:auto; color:#e5e7eb; -webkit-overflow-scrolling:touch; padding-bottom:calc(20px + env(safe-area-inset-bottom)); box-sizing:border-box; margin:auto 0;">
-          <h2 style="margin:0 0 16px; font-size:18px; color:#fff;">주문 정보 입력</h2>
-          <form id="checkout-form" style="display:grid; gap:10px; background:none; padding:0; border:0; max-width:none;">
+        <div class="checkout-modal-box">
+          <h2>주문 정보 입력</h2>
+          <form id="checkout-form" class="checkout-form">
             <label style="${labelStyle}">주문자 이름 *</label>
             <input name="customer_name" required value="${m?.name || ''}" style="${inputStyle}">
             <label style="${labelStyle}">연락처 *</label>
@@ -198,13 +256,20 @@
               배송비: ${globalShipping > 0 ? globalShipping.toLocaleString() + '원' : '무료'}<br>
               <span style="font-size:17px;">총액: ${total.toLocaleString()}원</span>
             </div>
-            <button type="submit" style="padding:12px; background:#e5e7eb; color:#111; border:0; border-radius:8px; cursor:pointer; font-weight:600; font-family:inherit;">주문 완료</button>
-            <button type="button" id="close-modal" style="padding:10px; background:#222; color:#e5e7eb; border:1px solid #333; border-radius:8px; cursor:pointer; font-family:inherit;">취소</button>
+            <button type="submit" style="padding:12px; background:#e5e7eb; color:#111; border:0; border-radius:8px; cursor:pointer; font-weight:600; font-family:inherit; font-size:15px;">주문 완료</button>
+            <button type="button" id="close-modal" style="padding:10px; background:#222; color:#e5e7eb; border:1px solid #333; border-radius:8px; cursor:pointer; font-family:inherit; font-size:14px;">취소</button>
           </form>
         </div>
       `;
       document.body.appendChild(modal);
-      modal.querySelector('#close-modal').onclick = () => modal.remove();
+
+      const prevBodyOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      const closeModal = () => {
+        document.body.style.overflow = prevBodyOverflow;
+        modal.remove();
+      };
+      modal.querySelector('#close-modal').onclick = closeModal;
 
       modal.querySelector('#checkout-form').addEventListener('submit', async (ev) => {
         ev.preventDefault();
@@ -225,12 +290,12 @@
         saveCart(remainingCart);
         selectedIndexes.clear();
         if (document.getElementById('app-header')) renderHeader('cart');
-        showOrderComplete(modal, orderNumber, total);
+        showOrderComplete(modal, orderNumber, total, closeModal);
         render();
       });
     }
 
-        function generateOrderNumber() {
+    function generateOrderNumber() {
       const d = new Date();
       const parts = new Intl.DateTimeFormat('ko-KR', {
         timeZone: 'Asia/Seoul',
@@ -241,8 +306,9 @@
       return `ORD-${ymd}-${Math.random().toString(36).slice(2,6).toUpperCase()}`;
     }
 
-    function showOrderComplete(modal, orderNumber, total) {
-      modal.querySelector('div').innerHTML = `
+    function showOrderComplete(modal, orderNumber, total, closeModal) {
+      const box = modal.querySelector('.checkout-modal-box');
+      box.innerHTML = `
         <h2 style="margin-bottom:16px; color:#10b981;">✅ 주문 접수 완료</h2>
         <div style="background:#0f0f0f; padding:16px; border-radius:8px; margin-bottom:16px; line-height:1.8; font-size:14px; border:1px solid #222;">
           <div style="font-size:13px; color:#888;">주문번호</div>
@@ -256,10 +322,11 @@
           <br>예금주: <b>홍길동</b><br>입금액: <b>${total.toLocaleString()}원</b>
         </div>
         <p style="font-size:12px; color:#666; margin-bottom:16px;">주문번호를 꼭 저장해두세요.</p>
-        <button onclick="location.href='index.html'" style="width:100%; padding:12px; background:#e5e7eb; color:#111; border:0; border-radius:8px; cursor:pointer; font-weight:600; font-family:inherit;">메인으로</button>
+        <button id="go-main" style="width:100%; padding:12px; background:#e5e7eb; color:#111; border:0; border-radius:8px; cursor:pointer; font-weight:600; font-family:inherit;">메인으로</button>
       `;
-      modal.querySelector('#copy-order-number').onclick = () => { navigator.clipboard.writeText(orderNumber).then(() => alert('주문번호가 복사되었습니다.')); };
-      modal.querySelector('#copy-account').onclick = () => { navigator.clipboard.writeText('123-456-789012').then(() => alert('계좌번호가 복사되었습니다.')); };
+      box.querySelector('#copy-order-number').onclick = () => { navigator.clipboard.writeText(orderNumber).then(() => alert('주문번호가 복사되었습니다.')); };
+      box.querySelector('#copy-account').onclick = () => { navigator.clipboard.writeText('123-456-789012').then(() => alert('계좌번호가 복사되었습니다.')); };
+      box.querySelector('#go-main').onclick = () => { closeModal(); location.href = 'index.html'; };
     }
 
     (async () => { await loadShipping(); render(); })();
