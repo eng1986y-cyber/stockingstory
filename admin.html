@@ -38,8 +38,8 @@
     .card-title { font-size: 15px; font-weight: 600; color: #111827; margin: 0 0 16px; }
     .card-title .hint { font-size: 12px; font-weight: 400; color: #9ca3af; }
 
-    .input, .card input, .card textarea { width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; font-family: inherit; color: #111827 !important; background: #fff !important; box-sizing: border-box; }
-    .card input:focus, .card textarea:focus { outline: none; border-color: #111827; }
+    .input, .card input, .card textarea, .card select { width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; font-family: inherit; color: #111827 !important; background: #fff !important; box-sizing: border-box; }
+    .card input:focus, .card textarea:focus, .card select:focus { outline: none; border-color: #111827; }
     .card input[readonly] { background: #f9fafb !important; color: #6b7280 !important; }
     .card textarea { resize: vertical; min-height: 70px; }
 
@@ -141,6 +141,12 @@
     .grade-도매회원 { background: #2563eb; color: #fff; }
     .grade-VIP회원 { background: #9f1239; color: #fff; }
 
+    /* ⭐ 쿠폰 배지 */
+    .coupon-badge { padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+    .coupon-active { background: #fef3c7; color: #92400e; border: 1px solid #f59e0b; }
+    .coupon-used { background: #f3f4f6; color: #6b7280; }
+    .coupon-expired { background: #fee2e2; color: #991b1b; }
+
     .banner-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
     .banner-item { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; width: 100%; box-sizing: border-box; }
     .banner-item-thumb { width: 80px; height: 50px; flex: 0 0 80px; border-radius: 6px; border: 1px solid #e5e7eb; object-fit: cover; background: #f3f4f6; }
@@ -225,9 +231,9 @@
       body { background: #fff !important; }
       .admin-header, .admin-tabbar, .edge-scroll-controls,
       .list-action-bar, .admin-list-pagination, .row-actions,
-      #order-pagination, #member-pagination,
+      #order-pagination, #member-pagination, #coupon-pagination,
       .card-title, .btn, .btn-excel, .btn-print,
-      #order-list, #member-list,
+      #order-list, #member-list, #coupon-list,
       .page-title, .page-subtitle { display: none !important; }
       .admin-layout { height: auto !important; margin-top: 0 !important; padding: 0 !important; overflow: visible !important; }
       .admin-content { max-width: 100% !important; }
@@ -239,46 +245,20 @@
     }
     .print-only { display: none; }
 
-    /* ⭐ 인쇄 전용 상세 카드 */
     #order-print-detail-area,
     #member-print-detail-area { display: none; }
     @media print {
       #order-print-detail-area,
       #member-print-detail-area { display: block !important; }
     }
-    .print-detail-card {
-      border: 1px solid #999 !important;
-      border-radius: 8px;
-      padding: 12px 14px;
-      margin-bottom: 10px;
-      page-break-inside: avoid;
-      font-size: 12px;
-      line-height: 1.5;
-      color: #111;
-      background: #fff;
-    }
-    .print-detail-card .pdc-title {
-      font-size: 14px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      padding-bottom: 6px;
-      border-bottom: 1px dashed #999;
-    }
-    .print-detail-card .pdc-row {
-      display: flex; gap: 8px; margin-bottom: 3px;
-    }
+    .print-detail-card { border: 1px solid #999 !important; border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; page-break-inside: avoid; font-size: 12px; line-height: 1.5; color: #111; background: #fff; }
+    .print-detail-card .pdc-title { font-size: 14px; font-weight: 700; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px dashed #999; }
+    .print-detail-card .pdc-row { display: flex; gap: 8px; margin-bottom: 3px; }
     .print-detail-card .pdc-label { color: #555; font-weight: 600; flex: 0 0 80px; }
     .print-detail-card .pdc-val { flex: 1; word-break: break-all; }
-    .print-detail-card .pdc-section {
-      margin-top: 8px; padding-top: 8px; border-top: 1px dashed #ccc;
-    }
-    .print-detail-card .pdc-section-title {
-      font-weight: 700; margin-bottom: 4px; color: #111;
-    }
-    .print-detail-card .pdc-item {
-      display: flex; justify-content: space-between; gap: 8px;
-      padding: 3px 0; border-bottom: 1px dotted #ddd;
-    }
+    .print-detail-card .pdc-section { margin-top: 8px; padding-top: 8px; border-top: 1px dashed #ccc; }
+    .print-detail-card .pdc-section-title { font-weight: 700; margin-bottom: 4px; color: #111; }
+    .print-detail-card .pdc-item { display: flex; justify-content: space-between; gap: 8px; padding: 3px 0; border-bottom: 1px dotted #ddd; }
   </style>
 </head>
 <body>
@@ -309,6 +289,7 @@
         <button class="nav-item active" data-tab="products">📦 상품</button>
         <button class="nav-item" data-tab="orders">🧾 주문</button>
         <button class="nav-item" data-tab="members">👥 회원</button>
+        <button class="nav-item" data-tab="coupons">🎟️ 쿠폰</button>
         <button class="nav-item" data-tab="stats">📊 접속통계</button>
         <button class="nav-item" data-tab="settings">⚙️ 사이트 설정</button>
       </div>
@@ -414,6 +395,61 @@
           <div id="member-list" class="row-list">로딩중...</div>
           <div id="member-pagination" class="admin-list-pagination"></div>
           <div id="member-print-detail-area"></div>
+        </section>
+
+        <!-- ⭐ 쿠폰 관리 -->
+        <section id="tab-coupons" class="admin-section">
+          <h1 class="page-title">쿠폰 관리</h1>
+          <p class="page-subtitle">회원별 쿠폰을 발급하고, 발급된 쿠폰을 관리합니다</p>
+
+          <div class="card" style="background:#fef3c7 !important; border-color:#f59e0b;">
+            <div class="card-title" style="color:#92400e;">🎁 새 쿠폰 발급</div>
+            <form id="coupon-issue-form" style="display:grid; grid-template-columns: 1.2fr 1fr 1fr 1fr 1.4fr auto; gap:8px; align-items:end;">
+              <div>
+                <label style="font-size:12px; font-weight:600; color:#92400e; display:block; margin-bottom:4px;">회원</label>
+                <select id="coupon-member-select" required style="width:100%; padding:8px 10px; border:1px solid #e5e7eb; border-radius:6px; font-family:inherit; font-size:13px;">
+                  <option value="">회원 선택...</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:12px; font-weight:600; color:#92400e; display:block; margin-bottom:4px;">할인 유형</label>
+                <select id="coupon-type-select" style="width:100%; padding:8px 10px; border:1px solid #e5e7eb; border-radius:6px; font-family:inherit; font-size:13px;">
+                  <option value="percent">% 할인</option>
+                  <option value="fixed">원 할인</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:12px; font-weight:600; color:#92400e; display:block; margin-bottom:4px;">할인값</label>
+                <input id="coupon-value-input" type="number" min="1" value="10" required style="width:100%; padding:8px 10px; border:1px solid #e5e7eb; border-radius:6px; font-family:inherit; font-size:13px;">
+              </div>
+              <div>
+                <label style="font-size:12px; font-weight:600; color:#92400e; display:block; margin-bottom:4px;">유효기간(일)</label>
+                <input id="coupon-days-input" type="number" min="1" value="30" required style="width:100%; padding:8px 10px; border:1px solid #e5e7eb; border-radius:6px; font-family:inherit; font-size:13px;">
+              </div>
+              <div>
+                <label style="font-size:12px; font-weight:600; color:#92400e; display:block; margin-bottom:4px;">쿠폰명 (선택)</label>
+                <input id="coupon-name-input" placeholder="예: 감사 쿠폰" style="width:100%; padding:8px 10px; border:1px solid #e5e7eb; border-radius:6px; font-family:inherit; font-size:13px;">
+              </div>
+              <button type="submit" class="btn btn-success" style="white-space:nowrap;">발급하기</button>
+            </form>
+            <p id="coupon-issue-msg" class="msg"></p>
+          </div>
+
+          <div class="card">
+            <div class="list-action-bar">
+              <div class="search-group">
+                <input id="coupon-search" placeholder="회원 이름 / 아이디 / 쿠폰코드 검색" style="flex:1;">
+                <button id="coupon-search-btn" class="btn btn-primary" style="flex:0 0 auto;">검색</button>
+                <button id="coupon-reset-btn" class="btn btn-secondary" style="flex:0 0 auto;">전체</button>
+              </div>
+              <div class="export-group">
+                <button id="coupon-excel-btn" class="btn btn-excel btn-sm">📊 엑셀 다운로드</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="coupon-list" class="row-list">로딩중...</div>
+          <div id="coupon-pagination" class="admin-list-pagination"></div>
         </section>
 
         <section id="tab-stats" class="admin-section">
@@ -585,7 +621,6 @@
   </script>
 
   <script>
-    // ⭐ KST 표시
     function formatKST(dateStr, opts = {}) {
       if (!dateStr) return '-';
       let normalized = String(dateStr).trim();
@@ -626,6 +661,7 @@
         document.getElementById(tabId).classList.add('active');
         document.querySelector('.admin-layout').scrollTop = 0;
         if (btn.dataset.tab === 'stats') loadStats();
+        if (btn.dataset.tab === 'coupons') loadCouponsAndMembers();
       });
     });
 
@@ -644,6 +680,7 @@
       loadLogo(); loadFooter(); loadBanner(); loadShippingSetting(); loadSnsLinks();
       loadPromoVideo();
       loadAdminList(); loadOrders(); loadMembers();
+      loadCouponsAndMembers();
     }
 
     loginForm.addEventListener('submit', async (e) => {
@@ -1212,7 +1249,7 @@
       });
     }
 
-    const secondaryListPages = { orders: 1, members: 1 };
+    const secondaryListPages = { orders: 1, members: 1, coupons: 1 };
     function paginateRenderedList(listId, paginationId, type) {
       const lel = document.getElementById(listId);
       const pager = document.getElementById(paginationId);
@@ -1236,7 +1273,6 @@
       }));
     }
 
-    // ===== CSV 다운로드 =====
     function downloadCSV(filename, rows) {
       const escapeCell = (v) => { const s = String(v ?? ''); if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"'; return s; };
       const csv = rows.map(r => r.map(escapeCell).join(',')).join('\r\n');
@@ -1416,20 +1452,16 @@
       return { '입금대기':'#f59e0b', '입금완료':'#059669', '배송중':'#1976d2', '완료':'#6b7280', '취소':'#dc2626' }[s] || '#9ca3af';
     }
 
-    // ⭐ 주문 선택 인쇄
     document.getElementById('order-print-btn').addEventListener('click', () => {
       if (!allOrdersRaw || allOrdersRaw.length === 0) { alert('인쇄할 주문이 없습니다.'); return; }
-
       const printArea = document.getElementById('order-print-detail-area');
       if (!printArea) { alert('인쇄 영역을 찾을 수 없습니다.'); return; }
-
       const groups = {};
       allOrdersRaw.forEach(o => {
         const key = o.order_number || `single_${o.id}`;
         if (!groups[key]) groups[key] = [];
         groups[key].push(o);
       });
-
       let keys;
       if (selectedOrderKeys.size > 0) keys = Array.from(selectedOrderKeys);
       else keys = Object.keys(groups);
@@ -1441,7 +1473,6 @@
         const displayNum = first.order_number || `(주문번호 없음 / ID: ${first.id})`;
         const dateStr = formatKST(first.created_at, { full: true });
         const fullAddress = `${first.postcode ? `[${first.postcode}] ` : ''}${first.address || ''} ${first.address_detail || ''}`.trim();
-
         const itemsHtml = items.map(o => {
           const opts = [];
           if (o.selected_color) opts.push(`색상: ${o.selected_color}`);
@@ -1461,7 +1492,6 @@
             </div>
           `;
         }).join('');
-
         let productTotal = 0, shippingTotal = 0;
         items.forEach(o => {
           const rt = Number(o.total_price || 0);
@@ -1470,7 +1500,6 @@
           shippingTotal += rs;
         });
         const totalAll = productTotal + shippingTotal;
-
         return `
           <div class="print-detail-card">
             <div class="pdc-title">주문번호: ${displayNum}</div>
@@ -1495,12 +1524,10 @@
       }).join('');
 
       printArea.innerHTML = cardsHtml;
-
       const header = document.getElementById('order-print-header');
       header.textContent = selectedOrderKeys.size > 0
         ? `주문 목록 (선택 ${selectedOrderKeys.size}건)`
         : `주문 목록 (전체 ${keys.length}건)`;
-
       setTimeout(() => {
         window.print();
         setTimeout(() => { printArea.innerHTML = ''; }, 500);
@@ -1729,6 +1756,7 @@
             <span class="row-muted">📞 ${m.phone || '-'}</span>
             ${m.email ? `<span class="row-sep">|</span><span class="row-muted">✉️ ${m.email}</span>` : ''}
             <div class="row-actions">
+              <button class="btn btn-success btn-sm member-coupon" data-id="${m.id}" title="쿠폰 발급">🎟️ 쿠폰</button>
               <button class="btn btn-secondary btn-sm member-view" data-id="${m.id}">상세보기</button>
               <button class="btn btn-primary btn-sm member-edit" data-id="${m.id}">수정</button>
               <button class="btn btn-danger btn-sm member-del" data-id="${m.id}">삭제</button>
@@ -1746,6 +1774,12 @@
       });
       updateMemberBulkUI();
       paginateRenderedList('member-list', 'member-pagination', 'members');
+      el.querySelectorAll('.member-coupon').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const m = allMembers.find(x => String(x.id) === String(btn.dataset.id));
+          if (m) openQuickCouponIssue(m);
+        });
+      });
       el.querySelectorAll('.member-view').forEach(btn => {
         btn.addEventListener('click', () => {
           const m = allMembers.find(x => String(x.id) === String(btn.dataset.id));
@@ -1797,19 +1831,13 @@
     document.getElementById('member-reset-btn').addEventListener('click', () => { selectedMemberIds.clear(); document.getElementById('member-search').value = ''; renderMembers(); });
     document.getElementById('member-search').addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('member-search-btn').click(); });
 
-    // ⭐ 회원 선택 인쇄 (회원 상세 정보 인쇄)
     document.getElementById('member-print-btn').addEventListener('click', () => {
       if (!allMembers || allMembers.length === 0) { alert('인쇄할 회원이 없습니다.'); return; }
-
       const printArea = document.getElementById('member-print-detail-area');
       if (!printArea) { alert('인쇄 영역을 찾을 수 없습니다.'); return; }
-
       let list;
-      if (selectedMemberIds.size > 0) {
-        list = allMembers.filter(m => selectedMemberIds.has(String(m.id)));
-      } else {
-        list = allMembers;
-      }
+      if (selectedMemberIds.size > 0) list = allMembers.filter(m => selectedMemberIds.has(String(m.id)));
+      else list = allMembers;
 
       const cardsHtml = list.map(m => {
         const status = m.status || '정상';
@@ -1830,12 +1858,10 @@
       }).join('');
 
       printArea.innerHTML = cardsHtml;
-
       const header = document.getElementById('member-print-header');
       header.textContent = selectedMemberIds.size > 0
         ? `회원 목록 (선택 ${selectedMemberIds.size}명)`
         : `회원 목록 (전체 ${list.length}명)`;
-
       setTimeout(() => {
         window.print();
         setTimeout(() => { printArea.innerHTML = ''; }, 500);
@@ -1944,6 +1970,254 @@
         loadMembers(document.getElementById('member-search').value.trim() || null);
       });
     }
+
+    function openQuickCouponIssue(member) {
+      const modal = document.createElement('div');
+      modal.className = 'modal-backdrop';
+      modal.innerHTML = `
+        <div class="modal-box" style="max-width: 460px;">
+          <h2>🎁 쿠폰 발급</h2>
+          <p style="font-size:13px; color:#6b7280; margin:0 0 16px;">
+            대상 회원: <b style="color:#111827;">${member.name || '-'} (${member.username || '-'})</b>
+          </p>
+          <form id="quick-coupon-form" class="modal-form">
+            <label>할인 유형</label>
+            <select name="type">
+              <option value="percent">% 할인</option>
+              <option value="fixed">원 할인</option>
+            </select>
+            <label>할인값</label>
+            <input name="value" type="number" min="1" value="10" required>
+            <label>유효기간 (일)</label>
+            <input name="days" type="number" min="1" value="30" required>
+            <label>쿠폰명 (선택)</label>
+            <input name="name" placeholder="예: 감사 쿠폰">
+            <div class="modal-actions">
+              <button type="submit" class="btn btn-success">발급</button>
+              <button type="button" id="cancel-quick" class="btn btn-secondary">취소</button>
+            </div>
+          </form>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      modal.querySelector('#cancel-quick').onclick = () => modal.remove();
+      modal.querySelector('#quick-coupon-form').addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        const f = ev.target;
+        const submitBtn = f.querySelector('button[type="submit"]');
+        submitBtn.disabled = true; submitBtn.textContent = '발급 중...';
+        try {
+          await issueCouponToMember(member.id, f.type.value, Number(f.value.value), Number(f.days.value), f.name.value.trim());
+          alert('✅ 쿠폰이 발급되었습니다.');
+          modal.remove();
+          loadCoupons();
+        } catch (err) {
+          alert('❌ 발급 실패: ' + (err.message || err));
+          submitBtn.disabled = false; submitBtn.textContent = '발급';
+        }
+      });
+    }
+
+    // ===== 쿠폰 관리 =====
+    let allCoupons = [];
+    let couponMemberMap = {};
+
+    async function loadCouponsAndMembers() {
+      await loadCouponMemberSelect();
+      await loadCoupons();
+    }
+
+    async function loadCouponMemberSelect() {
+      const sel = document.getElementById('coupon-member-select');
+      if (!sel) return;
+      try {
+        const { data } = await db.from('members').select('id, name, username, phone').order('name', { ascending: true });
+        const members = data || [];
+        couponMemberMap = {};
+        members.forEach(m => { couponMemberMap[String(m.id)] = m; });
+        sel.innerHTML = `<option value="">회원 선택...</option>` + members.map(m =>
+          `<option value="${m.id}">${m.name || '-'} (${m.username || '-'}) ${m.phone ? '· ' + m.phone : ''}</option>`
+        ).join('');
+      } catch (e) {
+        console.warn('회원 목록 로드 실패:', e);
+      }
+    }
+
+    function genCouponCode(prefix) {
+      const rand = Math.random().toString(36).slice(2, 8).toUpperCase();
+      return (prefix || 'ADMIN') + '-' + rand;
+    }
+
+    async function issueCouponToMember(memberId, type, value, days, name) {
+      const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+      const code = genCouponCode(type === 'percent' ? 'PCT' : 'WON');
+      const payload = {
+        member_id: memberId,
+        code,
+        type,
+        discount_value: value,
+        min_order_amount: 0,
+        max_discount_amount: null,
+        is_used: false,
+        expires_at: expiresAt,
+      };
+      const { error } = await db.from('coupons').insert(payload);
+      if (error) throw error;
+      return code;
+    }
+
+    document.getElementById('coupon-issue-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msgEl = document.getElementById('coupon-issue-msg');
+      msgEl.className = 'msg'; msgEl.textContent = '발급 중...';
+
+      const memberId = document.getElementById('coupon-member-select').value;
+      const type = document.getElementById('coupon-type-select').value;
+      const value = Number(document.getElementById('coupon-value-input').value) || 0;
+      const days = Number(document.getElementById('coupon-days-input').value) || 30;
+
+      if (!memberId) { msgEl.className = 'msg error'; msgEl.textContent = '❌ 회원을 선택하세요.'; return; }
+      if (value <= 0) { msgEl.className = 'msg error'; msgEl.textContent = '❌ 할인값은 1 이상이어야 합니다.'; return; }
+      if (days <= 0) { msgEl.className = 'msg error'; msgEl.textContent = '❌ 유효기간은 1일 이상이어야 합니다.'; return; }
+
+      try {
+        const code = await issueCouponToMember(memberId, type, value, days);
+        msgEl.className = 'msg success';
+        msgEl.textContent = `✅ 발급 완료! 쿠폰코드: ${code}`;
+        document.getElementById('coupon-value-input').value = 10;
+        document.getElementById('coupon-days-input').value = 30;
+        loadCoupons();
+        setTimeout(() => msgEl.textContent = '', 3000);
+      } catch (err) {
+        msgEl.className = 'msg error';
+        msgEl.textContent = '❌ 발급 실패: ' + (err.message || err);
+      }
+    });
+
+    document.getElementById('coupon-type-select').addEventListener('change', (e) => {
+      const valInput = document.getElementById('coupon-value-input');
+      if (e.target.value === 'percent') { valInput.value = 10; valInput.max = 100; }
+      else { valInput.value = 1000; valInput.removeAttribute('max'); }
+    });
+
+    async function loadCoupons(filterText) {
+      secondaryListPages.coupons = 1;
+      const el = document.getElementById('coupon-list');
+      el.innerHTML = '로딩중...';
+
+      const { data, error } = await db.from('coupons').select('*').order('created_at', { ascending: false });
+
+      if (error) {
+        el.innerHTML = '<p style="color:#dc2626; padding:20px; text-align:center;">쿠폰 조회 실패: ' + error.message + '</p>';
+        return;
+      }
+
+      allCoupons = data || [];
+
+      if (Object.keys(couponMemberMap).length === 0) {
+        const memberIds = [...new Set(allCoupons.map(c => c.member_id))];
+        if (memberIds.length > 0) {
+          const { data: mems } = await db.from('members').select('id, name, username, phone').in('id', memberIds);
+          (mems || []).forEach(m => { couponMemberMap[String(m.id)] = m; });
+        }
+      }
+
+      let list = allCoupons;
+      if (filterText) {
+        const f = filterText.toLowerCase();
+        list = allCoupons.filter(c => {
+          const mem = couponMemberMap[String(c.member_id)] || {};
+          return (
+            (mem.name || '').toLowerCase().includes(f) ||
+            (mem.username || '').toLowerCase().includes(f) ||
+            (c.code || '').toLowerCase().includes(f)
+          );
+        });
+      }
+
+      if (list.length === 0) {
+        el.innerHTML = '<p style="text-align:center; color:#9ca3af; padding:20px;">발급된 쿠폰이 없습니다</p>';
+        return;
+      }
+
+      const now = Date.now();
+      el.innerHTML = list.slice(0, 100).map(c => {
+        const mem = couponMemberMap[String(c.member_id)] || {};
+        const isExpired = new Date(c.expires_at).getTime() < now;
+        const isUsed = !!c.is_used;
+        const discountLabel = c.type === 'percent'
+          ? `${c.discount_value}% 할인`
+          : `${Number(c.discount_value).toLocaleString()}원 할인`;
+
+        const badgeClass = isUsed ? 'coupon-used' : isExpired ? 'coupon-expired' : 'coupon-active';
+        const badgeText = isUsed ? '사용완료' : isExpired ? '만료' : '사용가능';
+
+        return `
+          <div class="row-item" data-id="${c.id}">
+            <span class="coupon-badge ${badgeClass}">${badgeText}</span>
+            <span><b class="row-strong">${mem.name || '(알수없음)'}</b> <span class="row-muted">(${mem.username || '-'})</span></span>
+            <span class="row-sep">|</span>
+            <span style="font-weight:700; color:#2563eb;">${discountLabel}</span>
+            <span class="row-sep">|</span>
+            <span class="row-muted">CODE: ${c.code || '-'}</span>
+            <span class="row-sep">|</span>
+            <span class="row-muted">발급: ${formatKST(c.created_at, { dateOnly: true })}</span>
+            <span class="row-sep">|</span>
+            <span class="row-muted" style="${isExpired && !isUsed ? 'color:#dc2626;' : ''}">만료: ${formatKST(c.expires_at, { dateOnly: true })}</span>
+            ${isUsed ? `<span class="row-sep">|</span><span class="row-muted">사용일: ${formatKST(c.used_at, { dateOnly: true })}</span>` : ''}
+            <div class="row-actions">
+              <button class="btn btn-danger btn-sm coupon-del" data-id="${c.id}">삭제</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      el.querySelectorAll('.coupon-del').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('이 쿠폰을 삭제할까요?\n사용 여부와 관계없이 완전 삭제됩니다.')) return;
+          const id = btn.dataset.id;
+          btn.disabled = true; btn.textContent = '...';
+          const { error } = await db.from('coupons').delete().eq('id', id);
+          if (error) { alert('❌ 삭제 실패: ' + error.message); btn.disabled = false; btn.textContent = '삭제'; }
+          else { alert('✅ 쿠폰이 삭제되었습니다.'); loadCoupons(document.getElementById('coupon-search').value.trim() || null); }
+        });
+      });
+
+      paginateRenderedList('coupon-list', 'coupon-pagination', 'coupons');
+    }
+
+    document.getElementById('coupon-search-btn').addEventListener('click', () => {
+      loadCoupons(document.getElementById('coupon-search').value.trim() || null);
+    });
+    document.getElementById('coupon-reset-btn').addEventListener('click', () => {
+      document.getElementById('coupon-search').value = '';
+      loadCoupons();
+    });
+    document.getElementById('coupon-search').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') document.getElementById('coupon-search-btn').click();
+    });
+
+    document.getElementById('coupon-excel-btn').addEventListener('click', () => {
+      if (!allCoupons || allCoupons.length === 0) { alert('다운로드할 쿠폰이 없습니다.'); return; }
+      const header = ['회원이름','회원아이디','회원연락처','쿠폰코드','할인유형','할인값','사용여부','사용일','발급일','만료일'];
+      const rows = [header];
+      allCoupons.forEach(c => {
+        const mem = couponMemberMap[String(c.member_id)] || {};
+        rows.push([
+          mem.name || '',
+          mem.username || '',
+          mem.phone || '',
+          c.code || '',
+          c.type === 'percent' ? '%' : '원',
+          c.discount_value ?? '',
+          c.is_used ? '사용완료' : '사용가능',
+          c.used_at ? formatKST(c.used_at, { full: true }) : '',
+          formatKST(c.created_at, { full: true }),
+          formatKST(c.expires_at, { full: true }),
+        ]);
+      });
+      downloadCSV('쿠폰목록', rows);
+    });
 
     // ===== 통계 =====
     let statsRange = 7;
