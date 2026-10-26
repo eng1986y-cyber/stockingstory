@@ -136,7 +136,6 @@
     .list-action-bar .search-group { display: flex; gap: 6px; flex: 1 1 400px; min-width: 0; max-width: 640px; }
     .list-action-bar .export-group { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; align-items: center; }
 
-    /* ⭐ 등급 배지 */
     .grade-badge { padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; white-space: nowrap; }
     .grade-일반회원 { background: #6b7280; color: #fff; }
     .grade-도매회원 { background: #2563eb; color: #fff; }
@@ -228,22 +227,24 @@
       .list-action-bar, .admin-list-pagination, .row-actions,
       #order-pagination, #member-pagination,
       .card-title, .btn, .btn-excel, .btn-print,
-      #order-list, #member-list { display: none !important; }
+      #order-list, #member-list,
+      .page-title, .page-subtitle { display: none !important; }
       .admin-layout { height: auto !important; margin-top: 0 !important; padding: 0 !important; overflow: visible !important; }
       .admin-content { max-width: 100% !important; }
       .admin-section { display: none !important; }
       .admin-section.active { display: block !important; }
       .card { border: 0 !important; padding: 0 !important; margin: 0 0 10px 0 !important; }
-      .page-title { font-size: 16px !important; margin: 0 0 10px !important; }
       .print-only { display: block !important; }
       @page { margin: 12mm; }
     }
     .print-only { display: none; }
 
     /* ⭐ 인쇄 전용 상세 카드 */
-    #print-detail-area { display: none; }
+    #order-print-detail-area,
+    #member-print-detail-area { display: none; }
     @media print {
-      #print-detail-area { display: block !important; }
+      #order-print-detail-area,
+      #member-print-detail-area { display: block !important; }
     }
     .print-detail-card {
       border: 1px solid #999 !important;
@@ -384,7 +385,7 @@
           <div class="print-only" id="order-print-header" style="padding:0 0 12px 0; font-size:14px; font-weight:700; color:#111; text-align:center;">주문 목록</div>
           <div id="order-list" class="row-list">로딩중...</div>
           <div id="order-pagination" class="admin-list-pagination"></div>
-          <div id="print-detail-area"></div>
+          <div id="order-print-detail-area"></div>
         </section>
 
         <section id="tab-members" class="admin-section">
@@ -412,6 +413,7 @@
           <div class="print-only" id="member-print-header" style="padding:0 0 12px 0; font-size:14px; font-weight:700; color:#111; text-align:center;">회원 목록</div>
           <div id="member-list" class="row-list">로딩중...</div>
           <div id="member-pagination" class="admin-list-pagination"></div>
+          <div id="member-print-detail-area"></div>
         </section>
 
         <section id="tab-stats" class="admin-section">
@@ -1414,11 +1416,13 @@
       return { '입금대기':'#f59e0b', '입금완료':'#059669', '배송중':'#1976d2', '완료':'#6b7280', '취소':'#dc2626' }[s] || '#9ca3af';
     }
 
-    // ⭐ 주문 선택 인쇄 (선택 없으면 전체)
+    // ⭐ 주문 선택 인쇄
     document.getElementById('order-print-btn').addEventListener('click', () => {
       if (!allOrdersRaw || allOrdersRaw.length === 0) { alert('인쇄할 주문이 없습니다.'); return; }
 
-      const printArea = document.getElementById('print-detail-area');
+      const printArea = document.getElementById('order-print-detail-area');
+      if (!printArea) { alert('인쇄 영역을 찾을 수 없습니다.'); return; }
+
       const groups = {};
       allOrdersRaw.forEach(o => {
         const key = o.order_number || `single_${o.id}`;
@@ -1797,7 +1801,9 @@
     document.getElementById('member-print-btn').addEventListener('click', () => {
       if (!allMembers || allMembers.length === 0) { alert('인쇄할 회원이 없습니다.'); return; }
 
-      const printArea = document.getElementById('print-detail-area');
+      const printArea = document.getElementById('member-print-detail-area');
+      if (!printArea) { alert('인쇄 영역을 찾을 수 없습니다.'); return; }
+
       let list;
       if (selectedMemberIds.size > 0) {
         list = allMembers.filter(m => selectedMemberIds.has(String(m.id)));
