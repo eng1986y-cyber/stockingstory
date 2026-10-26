@@ -227,13 +227,12 @@
       .admin-header, .admin-tabbar, .edge-scroll-controls,
       .list-action-bar, .admin-list-pagination, .row-actions,
       #order-pagination, #member-pagination,
-      .card-title, .btn, .btn-excel, .btn-print { display: none !important; }
+      .card-title, .btn, .btn-excel, .btn-print,
+      #order-list, #member-list { display: none !important; }
       .admin-layout { height: auto !important; margin-top: 0 !important; padding: 0 !important; overflow: visible !important; }
       .admin-content { max-width: 100% !important; }
       .admin-section { display: none !important; }
       .admin-section.active { display: block !important; }
-      .row-item { page-break-inside: avoid; border: 1px solid #999 !important; margin-bottom: 6px !important; padding: 8px !important; }
-      .row-list { min-height: 0 !important; }
       .card { border: 0 !important; padding: 0 !important; margin: 0 0 10px 0 !important; }
       .page-title { font-size: 16px !important; margin: 0 0 10px !important; }
       .print-only { display: block !important; }
@@ -1794,7 +1793,7 @@
     document.getElementById('member-reset-btn').addEventListener('click', () => { selectedMemberIds.clear(); document.getElementById('member-search').value = ''; renderMembers(); });
     document.getElementById('member-search').addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('member-search-btn').click(); });
 
-    // ⭐ 회원 선택 인쇄
+    // ⭐ 회원 선택 인쇄 (회원 상세 정보 인쇄)
     document.getElementById('member-print-btn').addEventListener('click', () => {
       if (!allMembers || allMembers.length === 0) { alert('인쇄할 회원이 없습니다.'); return; }
 
