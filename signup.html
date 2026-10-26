@@ -37,7 +37,7 @@
     <div class="auth-wrap">
       <h2 class="auth-title">회원가입</h2>
       <div class="coupon-notice">
-        🎉 <b>신규 회원가입 축하 쿠폰</b><br>
+        🎉 <b>신규 회원 감사 쿠폰</b><br>
         10% 할인 쿠폰 (유효기간 30일)이 자동 발급됩니다!
       </div>
       <form id="signup-form" class="auth-form">
@@ -99,7 +99,7 @@
         return;
       }
 
-      // ⭐ 신규 회원에게 10% 할인 쿠폰 자동 발급
+      // ⭐ 신규 회원에게 10% 할인 쿠폰 자동 발급 (쿠폰명: 가입감사 10% 쿠폰)
       try {
         const now = new Date();
         const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
@@ -108,6 +108,7 @@
         await db.from('coupons').insert({
           member_id: data.id,
           code: code,
+          name: '가입 감사 10% 할인 쿠폰',
           type: 'percent',
           discount_value: 10,
           min_order_amount: 0,

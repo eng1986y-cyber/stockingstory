@@ -252,24 +252,25 @@
           : `${Number(c.discount_value).toLocaleString()}원 할인`;
         const expDate = formatKSTShort(c.expires_at);
 
-        return `
-          <div class="coupon-card ${isUsed || isExpired ? 'used' : ''}">
-            <div class="c-info">
-              <div class="c-title">🎁 신규 회원가입 축하 쿠폰</div>
-              <div class="c-meta">
-                <b>${discountLabel}</b> · ${c.code || '-'}<br>
-                ${isUsed
-                  ? `사용완료 (${c.used_at ? formatKSTShort(c.used_at) : '-'})`
-                  : isExpired
-                    ? `만료됨 (${expDate}까지)`
-                    : `유효기간: ${expDate}까지`}
-              </div>
-            </div>
-            <div class="c-badge">
-              ${isUsed ? '사용완료' : isExpired ? '만료' : '사용가능'}
-            </div>
-          </div>
-        `;
+        // mypage.html 의 loadCoupons() 함수 내 return 부분 (쿠폰 카드 렌더링)
+return `
+  <div class="coupon-card ${isUsed || isExpired ? 'used' : ''}">
+    <div class="c-info">
+      <div class="c-title">🎁 ${c.name || '쿠폰'}</div>
+      <div class="c-meta">
+        <b>${discountLabel}</b> · ${c.code || '-'}<br>
+        ${isUsed
+          ? `사용완료 (${c.used_at ? formatKSTShort(c.used_at) : '-'})`
+          : isExpired
+            ? `만료됨 (${expDate}까지)`
+            : `유효기간: ${expDate}까지`}
+      </div>
+    </div>
+    <div class="c-badge">
+      ${isUsed ? '사용완료' : isExpired ? '만료' : '사용가능'}
+    </div>
+  </div>
+`;
       }).join('');
     }
 

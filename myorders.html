@@ -61,6 +61,27 @@
     .history-price-summary .price-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
     .history-price-summary .price-row.total { margin-top: 8px; padding-top: 8px; border-top: 1px dashed #ddd; font-weight: 700; font-size: 16px; color: #e53935; }
     body.dark .history-price-summary .price-row.total { border-top-color: #333; color: #ef4444; }
+
+    /* ⭐ 쿠폰 사용내역 박스 */
+    .history-coupon-box {
+      margin-top: 12px;
+      padding: 12px 14px;
+      background: #fef3c7;
+      border: 1px dashed #f59e0b;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #92400e;
+      line-height: 1.6;
+      word-break: break-all;
+    }
+    .history-coupon-box .cc-title {
+      font-weight: 700;
+      margin-bottom: 4px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .history-coupon-box .cc-row { display: flex; gap: 8px; font-size: 12px; }
+    .history-coupon-box .cc-row b { color: #78350f; }
+
     .btn-delete-single {
       margin-top: 16px; width: 100%; padding: 12px;
       background: #fff; color: #ef4444; border: 1px solid #ef4444; border-radius: 6px;
@@ -105,7 +126,6 @@
   </script>
 
   <script>
-    // ⭐ 한국 표준시(KST) 표시 함수 (수정됨 - 문법 오류 해결)
     function formatKST(dateStr, opts = {}) {
       if (!dateStr) return '-';
       let normalized = String(dateStr).trim();
@@ -149,9 +169,16 @@
 
     let currentGroups = {};
     let selectedKeys = new Set();
+    let usedCouponsByOrder = {}; // ⭐ 주문번호별 사용 쿠폰 매핑
 
     function statusColor(s) {
       return { '입금대기':'#f59e0b', '입금완료':'#059669', '배송중':'#1976d2', '완료':'#6b7280', '취소':'#dc2626' }[s] || '#9ca3af';
+    }
+
+    function getCouponDiscountLabel(coupon) {
+      if (!coupon) return '';
+      if (coupon.type === 'percent') return `${coupon.discount_value}% 할인`;
+      return `${Number(coupon.discount_value).toLocaleString()}원 할인`;
     }
 
     function updateBulkActions() {
@@ -168,7 +195,6 @@
       }
     }
 
-    // ⭐ 안전한 주문 조회: .or() 대신 개별 쿼리 3회 + 병합
     async function safeFetchOrders() {
       const name = member.name || '';
       const phone = member.phone || '';
@@ -218,9 +244,32 @@
       );
     }
 
+    // ⭐ 주문에 사용된 쿠폰 정보 로드 (본인 주문번호만)
+    async function loadUsedCoupons(orderNumbers) {
+      const map = {};
+      if (!orderNumbers || orderNumbers.length === 0) return map;
+      try {
+        const { data, error } = await db
+          .from('coupons')
+          .select('*')
+          .eq('member_id', member.id)
+          .eq('is_used', true)
+          .in('used_order_number', orderNumbers);
+        if (error) {
+          console.warn('쿠폰 사용내역 로드 실패:', error.message);
+          return map;
+        }
+        (data || []).forEach(c => {
+          if (c.used_order_number) map[c.used_order_number] = c;
+        });
+      } catch (e) { console.warn(e); }
+      return map;
+    }
+
     async function loadOrderHistory() {
       historyListEl.innerHTML = '<p style="color:#888; font-size:14px;">주문 내역을 불러오는 중입니다...</p>';
       selectedKeys.clear();
+      usedCouponsByOrder = {};
 
       let orders = [];
       try {
@@ -241,11 +290,17 @@
       }
 
       currentGroups = {};
+      const orderNumbers = [];
       orders.forEach(o => {
         const key = o.order_number || `single_${o.id}`;
         if (!currentGroups[key]) currentGroups[key] = [];
         currentGroups[key].push(o);
+        if (o.order_number) orderNumbers.push(o.order_number);
       });
+
+      // ⭐ 사용 쿠폰 로드
+      usedCouponsByOrder = await loadUsedCoupons([...new Set(orderNumbers)]);
+
       renderHistory();
     }
 
@@ -266,6 +321,19 @@
         });
         const totalAll = productTotal + shippingTotal;
         const isChecked = selectedKeys.has(key);
+
+        // ⭐ 사용 쿠폰 표시
+        const usedCoupon = first.order_number ? usedCouponsByOrder[first.order_number] : null;
+        const couponBox = usedCoupon ? `
+          <div class="history-coupon-box">
+            <div class="cc-title">🎟️ 사용한 쿠폰</div>
+            <div class="cc-row"><span>쿠폰명:</span><b>${usedCoupon.name || '쿠폰'}</b></div>
+            <div class="cc-row"><span>할인:</span><b>${getCouponDiscountLabel(usedCoupon)}</b></div>
+            <div class="cc-row"><span>코드:</span><b>${usedCoupon.code || '-'}</b></div>
+            <div class="cc-row"><span>사용일:</span><b>${usedCoupon.used_at ? formatKST(usedCoupon.used_at, { dateOnly: true }) : '-'}</b></div>
+          </div>
+        ` : '';
+
         return `
           <div class="history-card-wrap">
             <input type="checkbox" class="history-check" data-key="${key}" ${isChecked ? 'checked' : ''}>
@@ -300,6 +368,7 @@
                 ${first.memo ? `<div style="margin-top:4px;">📝 <b>요청사항:</b> ${first.memo}</div>` : ''}
                 ${(first.courier || first.tracking_number) ? `<div style="margin-top:8px; padding-top:8px; border-top:1px dashed #ddd; color:#1976d2;">🚚 <b>배송정보:</b> ${first.courier || '택배사 미정'} | ${first.tracking_number || '운송장 없음'}</div>` : ''}
               </div>
+              ${couponBox}
               <div class="history-price-summary">
                 <div class="price-row"><span>상품 금액</span><span>${productTotal.toLocaleString()}원</span></div>
                 <div class="price-row"><span>배송비</span><span>${shippingTotal > 0 ? shippingTotal.toLocaleString() + '원' : '무료'}</span></div>

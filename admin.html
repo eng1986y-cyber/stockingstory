@@ -147,6 +147,16 @@
     .coupon-used { background: #f3f4f6; color: #6b7280; }
     .coupon-expired { background: #fee2e2; color: #991b1b; }
 
+    /* ⭐ 쿠폰 사용내역 태그 */
+    .coupon-used-tag {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 8px; border-radius: 4px;
+      background: #fef3c7; color: #92400e;
+      font-size: 11px; font-weight: 600;
+      border: 1px solid #f59e0b;
+      white-space: nowrap;
+    }
+
     .banner-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
     .banner-item { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; width: 100%; box-sizing: border-box; }
     .banner-item-thumb { width: 80px; height: 50px; flex: 0 0 80px; border-radius: 6px; border: 1px solid #e5e7eb; object-fit: cover; background: #f3f4f6; }
@@ -196,6 +206,31 @@
     .modal-box input[readonly] { background: #f9fafb; color: #6b7280; }
     .modal-box .modal-actions { display: flex; gap: 8px; margin-top: 10px; }
     .modal-box .modal-actions > * { flex: 1; }
+
+    /* ⭐ 쿠폰 발급 폼 정렬 개선 (노란 배경 카드 내부) */
+    #coupon-issue-form {
+      display: grid !important;
+      grid-template-columns: 1.2fr 0.9fr 0.7fr 0.7fr 1.4fr 0.7fr !important;
+      gap: 8px !important;
+      align-items: end !important;
+      width: 100% !important;
+      box-sizing: border-box;
+    }
+    #coupon-issue-form > div { min-width: 0; }
+    #coupon-issue-form select,
+    #coupon-issue-form input,
+    #coupon-issue-form button {
+      width: 100% !important;
+      height: 38px !important;
+      padding: 8px 10px !important;
+      font-size: 13px !important;
+      box-sizing: border-box !important;
+    }
+    #coupon-issue-form button { white-space: nowrap; }
+    @media (max-width: 1000px) {
+      #coupon-issue-form { grid-template-columns: 1fr 1fr !important; }
+      #coupon-issue-form button { grid-column: 1 / -1; }
+    }
 
     @media (max-width: 1000px) {
       .admin-header { padding: 0 16px; }
@@ -404,33 +439,36 @@
 
           <div class="card" style="background:#fef3c7 !important; border-color:#f59e0b;">
             <div class="card-title" style="color:#92400e;">🎁 새 쿠폰 발급</div>
-            <form id="coupon-issue-form" style="display:grid; grid-template-columns: 1.2fr 1fr 1fr 1fr 1.4fr auto; gap:8px; align-items:end;">
+            <form id="coupon-issue-form">
               <div>
                 <label style="font-size:12px; font-weight:600; color:#92400e; display:block; margin-bottom:4px;">회원</label>
-                <select id="coupon-member-select" required style="width:100%; padding:8px 10px; border:1px solid #e5e7eb; border-radius:6px; font-family:inherit; font-size:13px;">
+                <select id="coupon-member-select" required>
                   <option value="">회원 선택...</option>
                 </select>
               </div>
               <div>
                 <label style="font-size:12px; font-weight:600; color:#92400e; display:block; margin-bottom:4px;">할인 유형</label>
-                <select id="coupon-type-select" style="width:100%; padding:8px 10px; border:1px solid #e5e7eb; border-radius:6px; font-family:inherit; font-size:13px;">
+                <select id="coupon-type-select">
                   <option value="percent">% 할인</option>
                   <option value="fixed">원 할인</option>
                 </select>
               </div>
               <div>
                 <label style="font-size:12px; font-weight:600; color:#92400e; display:block; margin-bottom:4px;">할인값</label>
-                <input id="coupon-value-input" type="number" min="1" value="10" required style="width:100%; padding:8px 10px; border:1px solid #e5e7eb; border-radius:6px; font-family:inherit; font-size:13px;">
+                <input id="coupon-value-input" type="number" min="1" value="10" required>
               </div>
               <div>
                 <label style="font-size:12px; font-weight:600; color:#92400e; display:block; margin-bottom:4px;">유효기간(일)</label>
-                <input id="coupon-days-input" type="number" min="1" value="30" required style="width:100%; padding:8px 10px; border:1px solid #e5e7eb; border-radius:6px; font-family:inherit; font-size:13px;">
+                <input id="coupon-days-input" type="number" min="1" value="30" required>
               </div>
               <div>
                 <label style="font-size:12px; font-weight:600; color:#92400e; display:block; margin-bottom:4px;">쿠폰명 (선택)</label>
-                <input id="coupon-name-input" placeholder="예: 감사 쿠폰" style="width:100%; padding:8px 10px; border:1px solid #e5e7eb; border-radius:6px; font-family:inherit; font-size:13px;">
+                <input id="coupon-name-input" placeholder="예: 감사 쿠폰">
               </div>
-              <button type="submit" class="btn btn-success" style="white-space:nowrap;">발급하기</button>
+              <div>
+                <label style="font-size:12px; font-weight:600; color:#92400e; display:block; margin-bottom:4px;">&nbsp;</label>
+                <button type="submit" class="btn btn-success">발급하기</button>
+              </div>
             </form>
             <p id="coupon-issue-msg" class="msg"></p>
           </div>
@@ -1286,8 +1324,9 @@
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
-    // ===== 주문 =====
+    // ===== 주문 (⭐ 쿠폰 사용내역 포함) =====
     let allOrdersRaw = [];
+    let allCouponsForOrders = [];   // ⭐ 주문에 사용된 쿠폰 매핑용
     let selectedOrderKeys = new Set();
 
     function updateOrderBulkUI() {
@@ -1308,10 +1347,30 @@
       else { checkAll.disabled = false; checkAll.checked = Array.from(checkboxes).every(cb => cb.checked); }
     }
 
+    // ⭐ 주문번호에 매핑된 쿠폰 찾기
+    function findCouponByOrderNumber(orderNumber) {
+      if (!orderNumber) return null;
+      return allCouponsForOrders.find(c => c.used_order_number === orderNumber && c.is_used) || null;
+    }
+
+    // ⭐ 쿠폰 할인금액 표시 문자열
+    function getCouponDiscountLabel(coupon) {
+      if (!coupon) return '';
+      if (coupon.type === 'percent') return `${coupon.discount_value}% 할인`;
+      return `${Number(coupon.discount_value).toLocaleString()}원 할인`;
+    }
+
     async function loadOrders(filterText) {
       secondaryListPages.orders = 1;
       const el = document.getElementById('order-list');
       el.innerHTML = '로딩중...';
+
+      // ⭐ 사용된 쿠폰도 함께 로드
+      try {
+        const { data: couponData } = await db.from('coupons').select('*').eq('is_used', true).not('used_order_number', 'is', null);
+        allCouponsForOrders = couponData || [];
+      } catch (e) { allCouponsForOrders = []; }
+
       const { data, error } = await db.from('orders').select('*').order('created_at', { ascending: false });
       if (error) { el.innerHTML = '<p style="color:#dc2626;">' + error.message + '</p>'; return; }
       allOrdersRaw = data || [];
@@ -1353,6 +1412,13 @@
         const timeStr = formatKST(first.created_at, { timeOnly: true });
         const itemCount = items.length;
         const isChecked = selectedOrderKeys.has(key);
+
+        // ⭐ 쿠폰 사용 태그
+        const usedCoupon = findCouponByOrderNumber(realOrderNum);
+        const couponTag = usedCoupon
+          ? `<span class="coupon-used-tag" title="쿠폰코드: ${usedCoupon.code || ''}">🎟️ ${getCouponDiscountLabel(usedCoupon)}</span>`
+          : '';
+
         return `
           <div class="row-item" data-key="${key}">
             <input type="checkbox" class="row-check order-row-check" data-key="${key}" ${isChecked ? 'checked' : ''}>
@@ -1362,6 +1428,7 @@
             <span><b class="row-strong">${first.customer_name || '-'}</b> <span class="row-muted">(${first.customer_phone || '-'})</span></span>
             <span class="row-sep">|</span>
             <span class="row-muted">${itemCount}건 · ${totalQty}개 · <b class="row-total">${totalAll.toLocaleString()}원</b></span>
+            ${couponTag ? `<span class="row-sep">|</span>${couponTag}` : ''}
             <span class="row-sep">|</span>
             <span class="row-muted">${dateStr} ${timeStr}</span>
             ${first.tracking_number ? `<span class="row-sep">|</span><span class="row-muted">🚚 ${first.courier || ''} ${first.tracking_number}</span>` : ''}
@@ -1500,6 +1567,13 @@
           shippingTotal += rs;
         });
         const totalAll = productTotal + shippingTotal;
+
+        // ⭐ 인쇄: 쿠폰 사용내역
+        const usedCoupon = findCouponByOrderNumber(first.order_number);
+        const couponLine = usedCoupon
+          ? `<div class="pdc-row"><span class="pdc-label">사용 쿠폰</span><span class="pdc-val">🎟️ ${usedCoupon.name || '쿠폰'} (${getCouponDiscountLabel(usedCoupon)}) · 코드: ${usedCoupon.code || '-'}</span></div>`
+          : '';
+
         return `
           <div class="print-detail-card">
             <div class="pdc-title">주문번호: ${displayNum}</div>
@@ -1510,6 +1584,7 @@
             <div class="pdc-row"><span class="pdc-label">배송지</span><span class="pdc-val">${fullAddress || '주소 정보 없음'}</span></div>
             ${first.memo ? `<div class="pdc-row"><span class="pdc-label">요청사항</span><span class="pdc-val">${first.memo}</span></div>` : ''}
             ${(first.courier || first.tracking_number) ? `<div class="pdc-row"><span class="pdc-label">배송정보</span><span class="pdc-val">${first.courier || '택배사 미정'} | ${first.tracking_number || '운송장 없음'}</span></div>` : ''}
+            ${couponLine}
             <div class="pdc-section">
               <div class="pdc-section-title">📦 주문 상품 (${items.length}건)</div>
               ${itemsHtml}
@@ -1566,6 +1641,21 @@
           </div>
         `;
       }).join('');
+
+      // ⭐ 쿠폰 사용내역
+      const usedCoupon = findCouponByOrderNumber(first.order_number);
+      const couponBlock = usedCoupon
+        ? `
+          <div style="background:#fef3c7; border:1px dashed #f59e0b; border-radius:8px; padding:12px; margin-bottom:16px; font-size:13px; color:#92400e;">
+            <div style="font-weight:700; margin-bottom:4px;">🎟️ 사용한 쿠폰</div>
+            <div>쿠폰명: <b>${usedCoupon.name || '쿠폰'}</b></div>
+            <div>할인: <b>${getCouponDiscountLabel(usedCoupon)}</b></div>
+            <div>코드: ${usedCoupon.code || '-'}</div>
+            <div>사용일: ${usedCoupon.used_at ? formatKST(usedCoupon.used_at, { full: true }) : '-'}</div>
+          </div>
+        `
+        : '';
+
       const modal = document.createElement('div');
       modal.className = 'modal-backdrop';
       modal.innerHTML = `
@@ -1581,6 +1671,7 @@
             ${first.memo ? `<div style="display:flex; justify-content:space-between; gap:12px; margin-bottom:6px;"><span style="color:#6b7280; flex-shrink:0;">요청사항</span><span style="text-align:right; word-break:break-all;">${first.memo}</span></div>` : ''}
             ${(first.courier || first.tracking_number) ? `<div style="display:flex; justify-content:space-between; gap:12px; padding-top:8px; border-top:1px dashed #e5e7eb; margin-top:8px;"><span style="color:#6b7280; flex-shrink:0;">배송정보</span><span style="color:#1976d2; font-weight:600; text-align:right;">🚚 ${first.courier || '택배사 미정'} | ${first.tracking_number || '운송장 없음'}</span></div>` : ''}
           </div>
+          ${couponBlock}
           <div style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:12px; margin-bottom:16px;">
             <div style="font-size:13px; font-weight:700; color:#111827; margin-bottom:6px;">주문 상품 (${items.length}건)</div>
             ${itemsHtml}
@@ -1668,9 +1759,11 @@
       if (selectedOrderKeys.size > 0) ordersToExport = allOrdersRaw.filter(o => { const key = o.order_number || `single_${o.id}`; return selectedOrderKeys.has(key); });
       else ordersToExport = allOrdersRaw;
       if (!ordersToExport || ordersToExport.length === 0) { alert('다운로드할 주문이 없습니다.'); return; }
-      const header = ['주문번호','주문일시(KST)','상태','주문자','연락처','입금자명','우편번호','주소','상세주소','요청사항','제품번호','상품명','가격','수량','총금액','배송비','색상','사이즈','밑단','기타옵션','택배사','운송장번호'];
+      // ⭐ 사용 쿠폰 정보 컬럼 추가
+      const header = ['주문번호','주문일시(KST)','상태','주문자','연락처','입금자명','우편번호','주소','상세주소','요청사항','제품번호','상품명','가격','수량','총금액','배송비','색상','사이즈','밑단','기타옵션','택배사','운송장번호','사용쿠폰명','쿠폰할인','쿠폰코드'];
       const rows = [header];
       ordersToExport.forEach(o => {
+        const usedCoupon = findCouponByOrderNumber(o.order_number);
         rows.push([
           o.order_number || '',
           formatKST(o.created_at, { full: true }),
@@ -1694,6 +1787,9 @@
           o.selected_other || '',
           o.courier || '',
           o.tracking_number || '',
+          usedCoupon ? (usedCoupon.name || '쿠폰') : '',
+          usedCoupon ? getCouponDiscountLabel(usedCoupon) : '',
+          usedCoupon ? (usedCoupon.code || '') : '',
         ]);
       });
       const suffix = selectedOrderKeys.size > 0 ? `_선택${selectedOrderKeys.size}건` : '_전체';
@@ -1991,7 +2087,7 @@
             <label>유효기간 (일)</label>
             <input name="days" type="number" min="1" value="30" required>
             <label>쿠폰명 (선택)</label>
-            <input name="name" placeholder="예: 감사 쿠폰">
+            <input name="name" placeholder="예: 감사 쿠폰" value="">
             <div class="modal-actions">
               <button type="submit" class="btn btn-success">발급</button>
               <button type="button" id="cancel-quick" class="btn btn-secondary">취소</button>
@@ -2048,12 +2144,14 @@
       return (prefix || 'ADMIN') + '-' + rand;
     }
 
+    // ⭐ 쿠폰명 저장 추가
     async function issueCouponToMember(memberId, type, value, days, name) {
       const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
       const code = genCouponCode(type === 'percent' ? 'PCT' : 'WON');
       const payload = {
         member_id: memberId,
         code,
+        name: (name && name.trim()) ? name.trim() : '관리자 발급 쿠폰',
         type,
         discount_value: value,
         min_order_amount: 0,
@@ -2075,17 +2173,19 @@
       const type = document.getElementById('coupon-type-select').value;
       const value = Number(document.getElementById('coupon-value-input').value) || 0;
       const days = Number(document.getElementById('coupon-days-input').value) || 30;
+      const name = document.getElementById('coupon-name-input').value.trim();
 
       if (!memberId) { msgEl.className = 'msg error'; msgEl.textContent = '❌ 회원을 선택하세요.'; return; }
       if (value <= 0) { msgEl.className = 'msg error'; msgEl.textContent = '❌ 할인값은 1 이상이어야 합니다.'; return; }
       if (days <= 0) { msgEl.className = 'msg error'; msgEl.textContent = '❌ 유효기간은 1일 이상이어야 합니다.'; return; }
 
       try {
-        const code = await issueCouponToMember(memberId, type, value, days);
+        const code = await issueCouponToMember(memberId, type, value, days, name);
         msgEl.className = 'msg success';
         msgEl.textContent = `✅ 발급 완료! 쿠폰코드: ${code}`;
         document.getElementById('coupon-value-input').value = 10;
         document.getElementById('coupon-days-input').value = 30;
+        document.getElementById('coupon-name-input').value = '';
         loadCoupons();
         setTimeout(() => msgEl.textContent = '', 3000);
       } catch (err) {
@@ -2151,11 +2251,12 @@
 
         const badgeClass = isUsed ? 'coupon-used' : isExpired ? 'coupon-expired' : 'coupon-active';
         const badgeText = isUsed ? '사용완료' : isExpired ? '만료' : '사용가능';
+        const displayName = c.name || '쿠폰';
 
         return `
           <div class="row-item" data-id="${c.id}">
             <span class="coupon-badge ${badgeClass}">${badgeText}</span>
-            <span><b class="row-strong">${mem.name || '(알수없음)'}</b> <span class="row-muted">(${mem.username || '-'})</span></span>
+            <span><b class="row-strong">${displayName}</b> <span class="row-muted">· ${mem.name || '(알수없음)'} (${mem.username || '-'})</span></span>
             <span class="row-sep">|</span>
             <span style="font-weight:700; color:#2563eb;">${discountLabel}</span>
             <span class="row-sep">|</span>
@@ -2164,7 +2265,7 @@
             <span class="row-muted">발급: ${formatKST(c.created_at, { dateOnly: true })}</span>
             <span class="row-sep">|</span>
             <span class="row-muted" style="${isExpired && !isUsed ? 'color:#dc2626;' : ''}">만료: ${formatKST(c.expires_at, { dateOnly: true })}</span>
-            ${isUsed ? `<span class="row-sep">|</span><span class="row-muted">사용일: ${formatKST(c.used_at, { dateOnly: true })}</span>` : ''}
+            ${isUsed ? `<span class="row-sep">|</span><span class="row-muted" style="color:#2563eb;">사용일: ${formatKST(c.used_at, { dateOnly: true })}${c.used_order_number ? ` · 주문 ${c.used_order_number}` : ''}</span>` : ''}
             <div class="row-actions">
               <button class="btn btn-danger btn-sm coupon-del" data-id="${c.id}">삭제</button>
             </div>
@@ -2199,11 +2300,12 @@
 
     document.getElementById('coupon-excel-btn').addEventListener('click', () => {
       if (!allCoupons || allCoupons.length === 0) { alert('다운로드할 쿠폰이 없습니다.'); return; }
-      const header = ['회원이름','회원아이디','회원연락처','쿠폰코드','할인유형','할인값','사용여부','사용일','발급일','만료일'];
+      const header = ['쿠폰명','회원이름','회원아이디','회원연락처','쿠폰코드','할인유형','할인값','사용여부','사용일','사용주문번호','발급일','만료일'];
       const rows = [header];
       allCoupons.forEach(c => {
         const mem = couponMemberMap[String(c.member_id)] || {};
         rows.push([
+          c.name || '쿠폰',
           mem.name || '',
           mem.username || '',
           mem.phone || '',
@@ -2212,6 +2314,7 @@
           c.discount_value ?? '',
           c.is_used ? '사용완료' : '사용가능',
           c.used_at ? formatKST(c.used_at, { full: true }) : '',
+          c.used_order_number || '',
           formatKST(c.created_at, { full: true }),
           formatKST(c.expires_at, { full: true }),
         ]);
