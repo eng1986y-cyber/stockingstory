@@ -207,29 +207,48 @@
     .modal-box .modal-actions { display: flex; gap: 8px; margin-top: 10px; }
     .modal-box .modal-actions > * { flex: 1; }
 
-    /* ⭐ 쿠폰 발급 폼 정렬 개선 (노란 배경 카드 내부) */
+    /* ⭐ 쿠폰 발급 폼 가로 폭 꽉 차게 수정 */
     #coupon-issue-form {
       display: grid !important;
-      grid-template-columns: 1.2fr 0.9fr 0.7fr 0.7fr 1.4fr 0.7fr !important;
-      gap: 8px !important;
+      grid-template-columns: 1.5fr 1fr 1fr 1fr 1.5fr auto !important; /* 비율 조정 */
+      gap: 10px !important;
       align-items: end !important;
       width: 100% !important;
-      box-sizing: border-box;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+      margin: 0 !important;
     }
-    #coupon-issue-form > div { min-width: 0; }
+    #coupon-issue-form > div { min-width: 0; width: 100%; }
+    
     #coupon-issue-form select,
-    #coupon-issue-form input,
-    #coupon-issue-form button {
+    #coupon-issue-form input {
       width: 100% !important;
-      height: 38px !important;
-      padding: 8px 10px !important;
-      font-size: 13px !important;
+      height: 40px !important;
+      padding: 8px 12px !important;
+      font-size: 14px !important;
+      box-sizing: border-box !important;
+      background: #fff !important;
+      border: 1px solid #e5e7eb !important;
+      border-radius: 6px !important;
+      color: #111827 !important;
+    }
+    
+    #coupon-issue-form button {
+      height: 40px !important;
+      padding: 0 20px !important;
+      font-size: 14px !important;
+      white-space: nowrap !important;
+      border-radius: 6px !important;
       box-sizing: border-box !important;
     }
-    #coupon-issue-form button { white-space: nowrap; }
+
     @media (max-width: 1000px) {
-      #coupon-issue-form { grid-template-columns: 1fr 1fr !important; }
-      #coupon-issue-form button { grid-column: 1 / -1; }
+      #coupon-issue-form {
+        grid-template-columns: 1fr 1fr !important;
+      }
+      #coupon-issue-form button {
+        grid-column: 1 / -1 !important;
+      }
     }
 
     @media (max-width: 1000px) {
