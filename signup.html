@@ -21,6 +21,13 @@
     .auth-form button { padding: 14px; background: #03c75a; color: #fff; border: 0; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 15px; font-family: inherit; margin-top: 4px; }
     .auth-form button:hover { background: #02b151; }
     #msg { margin-top: 12px; font-weight: 600; text-align: center; }
+    .coupon-notice {
+      background: #fef3c7; color: #92400e;
+      padding: 12px 14px; border-radius: 8px;
+      font-size: 13px; line-height: 1.6;
+      margin-bottom: 16px; border: 1px dashed #f59e0b;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
@@ -29,6 +36,10 @@
   <main>
     <div class="auth-wrap">
       <h2 class="auth-title">회원가입</h2>
+      <div class="coupon-notice">
+        🎉 <b>신규 회원가입 축하 쿠폰</b><br>
+        10% 할인 쿠폰 (유효기간 30일)이 자동 발급됩니다!
+      </div>
       <form id="signup-form" class="auth-form">
         <label>아이디</label>
         <input name="username" placeholder="아이디" required>
@@ -70,7 +81,7 @@
         password: form.password.value,
         name: form.name.value.trim(),
         phone: form.phone.value.trim(),
-        grade: '일반회원',   // ⭐ 신규 가입 시 기본 등급
+        grade: '일반회원',
       };
 
       const { data: exist } = await db.from('members').select('id').eq('username', payload.username).maybeSingle();
@@ -88,6 +99,26 @@
         return;
       }
 
+      // ⭐ 신규 회원에게 10% 할인 쿠폰 자동 발급
+      try {
+        const now = new Date();
+        const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+        const code = 'WELCOME10-' + Math.random().toString(36).slice(2, 8).toUpperCase();
+
+        await db.from('coupons').insert({
+          member_id: data.id,
+          code: code,
+          type: 'percent',
+          discount_value: 10,
+          min_order_amount: 0,
+          max_discount_amount: null,
+          is_used: false,
+          expires_at: expiresAt.toISOString(),
+        });
+      } catch (couponErr) {
+        console.warn('쿠폰 발급 실패 (가입은 완료):', couponErr);
+      }
+
       localStorage.setItem('member', JSON.stringify({
         id: data.id,
         username: data.username,
@@ -97,8 +128,8 @@
       }));
 
       msg.style.color = '#10b981';
-      msg.textContent = '✅ 가입 완료! 메인으로 이동...';
-      setTimeout(() => location.href = 'index.html', 1000);
+      msg.textContent = '✅ 가입 완료! 10% 할인쿠폰이 발급되었습니다.';
+      setTimeout(() => location.href = 'index.html', 1500);
     });
   </script>
 </body>

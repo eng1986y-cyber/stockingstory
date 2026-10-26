@@ -31,11 +31,7 @@
     .mypage-form button[type="submit"]:hover { background: #02b151; }
     #msg { margin-top: 12px; margin-bottom: 0; font-weight: 600; text-align: center; min-height: 20px; }
 
-    /* ⭐ 등급별 색상 */
-    .grade-badge {
-      display: inline-block; padding: 12px; border-radius: 6px; font-weight: 700; text-align: center;
-      font-size: 14px; box-sizing: border-box; width: 100%;
-    }
+    .grade-badge { display: inline-block; padding: 12px; border-radius: 6px; font-weight: 700; text-align: center; font-size: 14px; box-sizing: border-box; width: 100%; }
     .grade-일반회원 { background: #f3f4f6; color: #374151; }
     .grade-도매회원 { background: #dbeafe; color: #1e40af; }
     .grade-VIP회원 { background: #fce7f3; color: #9f1239; }
@@ -43,6 +39,46 @@
     body.dark .grade-도매회원 { background: #1e3a8a; color: #bfdbfe; }
     body.dark .grade-VIP회원 { background: #831843; color: #fbcfe8; }
 
+    /* ⭐ 쿠폰함 */
+    .coupon-section {
+      background: #fff; padding: 20px; border-radius: 8px;
+      border: 1px solid #e5e7eb; margin-bottom: 32px;
+      box-sizing: border-box; width: 100%;
+    }
+    body.dark .coupon-section { background: #151515; border-color: #222; }
+    .coupon-section h3 {
+      font-size: 16px; font-weight: 700; color: #111827; margin: 0 0 12px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    body.dark .coupon-section h3 { color: #fff; }
+    .coupon-count { font-size: 12px; color: #6b7280; font-weight: 500; }
+
+    .coupon-list { display: flex; flex-direction: column; gap: 10px; }
+    .coupon-card {
+      display: flex; justify-content: space-between; align-items: center;
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border-radius: 10px; padding: 14px 16px;
+      border: 1px dashed #f59e0b;
+      color: #78350f;
+      position: relative;
+    }
+    .coupon-card.used {
+      background: #f3f4f6; border-color: #d1d5db; color: #9ca3af;
+      opacity: 0.7;
+    }
+    .coupon-card .c-info { flex: 1; min-width: 0; }
+    .coupon-card .c-title { font-weight: 700; font-size: 15px; margin-bottom: 2px; }
+    .coupon-card .c-meta { font-size: 12px; line-height: 1.5; }
+    .coupon-card .c-badge {
+      background: #dc2626; color: #fff;
+      padding: 4px 10px; border-radius: 6px;
+      font-size: 12px; font-weight: 700; white-space: nowrap;
+    }
+    .coupon-card.used .c-badge { background: #9ca3af; }
+
+    .empty-coupons {
+      text-align: center; color: #9ca3af; font-size: 13px; padding: 20px;
+    }
     @media (max-width: 768px) { #mypage-form input:focus { outline: none; } }
   </style>
 </head>
@@ -104,6 +140,17 @@
         <button type="submit">저장</button>
       </form>
       <p id="msg"></p>
+
+      <!-- ⭐ 내 쿠폰함 -->
+      <div class="coupon-section">
+        <h3>
+          🎟️ 내 쿠폰함
+          <span class="coupon-count" id="coupon-count"></span>
+        </h3>
+        <div class="coupon-list" id="coupon-list">
+          <p class="empty-coupons">쿠폰을 불러오는 중...</p>
+        </div>
+      </div>
     </div>
   </main>
 
@@ -119,11 +166,29 @@
     const form = document.getElementById('mypage-form');
     const msg = document.getElementById('msg');
     const gradeBadge = document.getElementById('grade-badge');
+    const couponListEl = document.getElementById('coupon-list');
+    const couponCountEl = document.getElementById('coupon-count');
 
     let member = JSON.parse(localStorage.getItem('member') || 'null');
     if (!member || !member.id) {
       alert('로그인이 필요합니다.');
       location.href = 'login.html';
+    }
+
+    function formatKSTShort(dateStr) {
+      if (!dateStr) return '-';
+      let n = String(dateStr).trim();
+      if (/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/.test(n) && !/(Z|[+-]\d{2}:?\d{2})$/i.test(n)) {
+        n = n.replace(' ', 'T') + 'Z';
+      }
+      const d = new Date(n);
+      if (isNaN(d.getTime())) return '-';
+      const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Seoul',
+        year: 'numeric', month: '2-digit', day: '2-digit',
+      }).formatToParts(d);
+      const get = (t) => parts.find(p => p.type === t)?.value || '00';
+      return `${get('year')}-${get('month')}-${get('day')}`;
     }
 
     function renderGradeBadge(grade) {
@@ -153,6 +218,59 @@
       form.address_detail.value = data.address_detail || '';
 
       renderGradeBadge(data.grade);
+
+      await loadCoupons();
+    }
+
+    async function loadCoupons() {
+      const { data, error } = await db
+        .from('coupons')
+        .select('*')
+        .eq('member_id', member.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        couponListEl.innerHTML = '<p class="empty-coupons">쿠폰을 불러올 수 없습니다.</p>';
+        couponCountEl.textContent = '';
+        return;
+      }
+
+      const list = data || [];
+      const usable = list.filter(c => !c.is_used && new Date(c.expires_at).getTime() > Date.now());
+      couponCountEl.textContent = `사용 가능 ${usable.length}장 / 전체 ${list.length}장`;
+
+      if (list.length === 0) {
+        couponListEl.innerHTML = '<p class="empty-coupons">보유한 쿠폰이 없습니다.</p>';
+        return;
+      }
+
+      couponListEl.innerHTML = list.map(c => {
+        const isUsed = !!c.is_used;
+        const isExpired = new Date(c.expires_at).getTime() < Date.now();
+        const discountLabel = c.type === 'percent'
+          ? `${c.discount_value}% 할인`
+          : `${Number(c.discount_value).toLocaleString()}원 할인`;
+        const expDate = formatKSTShort(c.expires_at);
+
+        return `
+          <div class="coupon-card ${isUsed || isExpired ? 'used' : ''}">
+            <div class="c-info">
+              <div class="c-title">🎁 신규 회원가입 축하 쿠폰</div>
+              <div class="c-meta">
+                <b>${discountLabel}</b> · ${c.code || '-'}<br>
+                ${isUsed
+                  ? `사용완료 (${c.used_at ? formatKSTShort(c.used_at) : '-'})`
+                  : isExpired
+                    ? `만료됨 (${expDate}까지)`
+                    : `유효기간: ${expDate}까지`}
+              </div>
+            </div>
+            <div class="c-badge">
+              ${isUsed ? '사용완료' : isExpired ? '만료' : '사용가능'}
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
     loadFromServer();

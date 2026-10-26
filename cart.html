@@ -14,62 +14,32 @@
     .rule-card .rule-text { color: #aaa; }
     .rule-card .rule-status { font-weight: 700; }
 
-    /* ⭐⭐⭐ 모바일 주문 모달 강제 표시 스타일 ⭐⭐⭐ */
-    .checkout-modal-backdrop {
-      position: fixed !important;
-      top: 0; left: 0; right: 0; bottom: 0;
-      width: 100vw !important;
-      height: 100vh !important;
-      height: 100dvh !important;
-      background: rgba(0,0,0,.8);
-      z-index: 999999 !important;
-      display: flex !important;
-      align-items: flex-start !important;
-      justify-content: center !important;
-      padding: 10px !important;
-      overflow-y: auto !important;
-      -webkit-overflow-scrolling: touch;
-      box-sizing: border-box;
-    }
-    .checkout-modal-box {
-      background: #151515;
-      border: 1px solid #222;
-      padding: 20px 16px;
-      border-radius: 12px;
-      width: 100% !important;
-      max-width: 460px !important;
-      margin: 20px auto !important;
-      color: #e5e7eb;
-      box-sizing: border-box;
-      position: relative;
-    }
-    .checkout-modal-box .checkout-form {
-      display: grid !important;
-      gap: 10px !important;
-      background: none !important;
-      padding: 0 !important;
-      border: 0 !important;
-      max-width: none !important;
-      width: 100% !important;
-    }
-    .checkout-modal-box h2 {
-      margin: 0 0 16px !important;
-      font-size: 18px !important;
-      color: #fff !important;
-    }
+    .checkout-modal-backdrop { position: fixed !important; top: 0; left: 0; right: 0; bottom: 0; width: 100vw !important; height: 100vh !important; height: 100dvh !important; background: rgba(0,0,0,.8); z-index: 999999 !important; display: flex !important; align-items: flex-start !important; justify-content: center !important; padding: 10px !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch; box-sizing: border-box; }
+    .checkout-modal-box { background: #151515; border: 1px solid #222; padding: 20px 16px; border-radius: 12px; width: 100% !important; max-width: 460px !important; margin: 20px auto !important; color: #e5e7eb; box-sizing: border-box; position: relative; }
+    .checkout-modal-box .checkout-form { display: grid !important; gap: 10px !important; background: none !important; padding: 0 !important; border: 0 !important; max-width: none !important; width: 100% !important; }
+    .checkout-modal-box h2 { margin: 0 0 16px !important; font-size: 18px !important; color: #fff !important; }
     @media (max-width: 768px) {
-      .checkout-modal-backdrop {
-        align-items: flex-start !important;
-        padding: 0 !important;
-        padding-top: 10px !important;
-        padding-bottom: 10px !important;
-      }
-      .checkout-modal-box {
-        margin: 0 auto !important;
-        border-radius: 8px !important;
-        max-height: none !important;
-      }
+      .checkout-modal-backdrop { align-items: flex-start !important; padding: 0 !important; padding-top: 10px !important; padding-bottom: 10px !important; }
+      .checkout-modal-box { margin: 0 auto !important; border-radius: 8px !important; max-height: none !important; }
     }
+
+    /* ⭐ 쿠폰 선택 UI */
+    .coupon-picker {
+      background: #0f0f0f; border: 1px solid #2a2a2a;
+      border-radius: 8px; padding: 12px;
+      margin-top: 8px;
+    }
+    .coupon-picker .cp-title {
+      font-size: 13px; font-weight: 700; color: #fbbf24;
+      margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+    }
+    .coupon-picker select {
+      width: 100%; padding: 10px 12px;
+      background: #151515; border: 1px solid #333;
+      border-radius: 6px; color: #e5e7eb;
+      font-family: inherit; font-size: 13px;
+    }
+    .coupon-picker select:disabled { opacity: 0.6; }
   </style>
 </head>
 <body>
@@ -223,11 +193,27 @@
       };
     }
 
-    // ⭐⭐⭐ 모달: body에 붙이고 position:fixed 강제 + 오버레이 스크롤 ⭐⭐⭐
-    function showCheckoutModal(cart) {
-      const subTotal = cart.reduce((s, it) => s + it.product_price * it.quantity, 0);
-      const total = subTotal + globalShipping;
+    async function loadUsableCoupons() {
       const m = getMember();
+      if (!m || !m.id) return [];
+      try {
+        const { data, error } = await db
+          .from('coupons')
+          .select('*')
+          .eq('member_id', m.id)
+          .eq('is_used', false)
+          .gte('expires_at', new Date().toISOString())
+          .order('created_at', { ascending: false });
+        if (error) return [];
+        return data || [];
+      } catch { return []; }
+    }
+
+    async function showCheckoutModal(cart) {
+      const subTotal = cart.reduce((s, it) => s + it.product_price * it.quantity, 0);
+      const m = getMember();
+      const coupons = await loadUsableCoupons();
+
       const inputStyle = 'width:100%; padding:10px 12px; background:#0f0f0f; border:1px solid #2a2a2a; border-radius:8px; color:#e5e7eb; font-family:inherit; font-size:14px; box-sizing:border-box;';
       const labelStyle = 'font-size:13px; font-weight:600; color:#ccc; display:block; margin-bottom:4px;';
 
@@ -251,11 +237,29 @@
             <input name="depositor_name" required style="${inputStyle}">
             <label style="${labelStyle}">요청사항</label>
             <textarea name="memo" style="${inputStyle} min-height:60px;"></textarea>
-            <div style="text-align:right; font-size:14px; font-weight:600; color:#ef4444; line-height:1.7; margin-top:8px;">
-              상품: ${subTotal.toLocaleString()}원<br>
-              배송비: ${globalShipping > 0 ? globalShipping.toLocaleString() + '원' : '무료'}<br>
-              <span style="font-size:17px;">총액: ${total.toLocaleString()}원</span>
+
+            ${coupons.length > 0 ? `
+              <div class="coupon-picker">
+                <div class="cp-title">🎟️ 쿠폰 사용</div>
+                <select id="coupon-select">
+                  <option value="">쿠폰 선택 안 함</option>
+                  ${coupons.map(c => {
+                    const label = c.type === 'percent'
+                      ? `${c.discount_value}% 할인`
+                      : `${Number(c.discount_value).toLocaleString()}원 할인`;
+                    return `<option value="${c.id}" data-type="${c.type}" data-value="${c.discount_value}">${label} (${c.code})</option>`;
+                  }).join('')}
+                </select>
+              </div>
+            ` : ''}
+
+            <div id="price-summary" style="text-align:right; font-size:14px; font-weight:600; color:#ef4444; line-height:1.7; margin-top:8px;">
+              <div>상품: <b id="p-subtotal">${subTotal.toLocaleString()}</b>원</div>
+              <div id="p-discount-row" style="display:none;">쿠폰 할인: <b id="p-discount">0</b>원</div>
+              <div>배송비: <b>${globalShipping > 0 ? globalShipping.toLocaleString() + '원' : '무료'}</b></div>
+              <div style="font-size:17px;">총액: <b id="p-total">${(subTotal + globalShipping).toLocaleString()}</b>원</div>
             </div>
+
             <button type="submit" style="padding:12px; background:#e5e7eb; color:#111; border:0; border-radius:8px; cursor:pointer; font-weight:600; font-family:inherit; font-size:15px;">주문 완료</button>
             <button type="button" id="close-modal" style="padding:10px; background:#222; color:#e5e7eb; border:1px solid #333; border-radius:8px; cursor:pointer; font-family:inherit; font-size:14px;">취소</button>
           </form>
@@ -271,14 +275,58 @@
       };
       modal.querySelector('#close-modal').onclick = closeModal;
 
+      // ⭐ 쿠폰 선택 시 금액 갱신
+      const couponSelect = modal.querySelector('#coupon-select');
+      let currentDiscount = 0;
+      let currentCouponId = null;
+
+      function calcDiscount(sub, type, value) {
+        if (type === 'percent') return Math.floor(sub * (Number(value) / 100));
+        if (type === 'fixed') return Math.min(sub, Number(value));
+        return 0;
+      }
+
+      function updatePriceUI() {
+        const opt = couponSelect ? couponSelect.selectedOptions[0] : null;
+        if (opt && opt.value) {
+          const type = opt.dataset.type;
+          const value = Number(opt.dataset.value);
+          currentCouponId = opt.value;
+          currentDiscount = calcDiscount(subTotal, type, value);
+        } else {
+          currentCouponId = null;
+          currentDiscount = 0;
+        }
+        const finalTotal = Math.max(0, subTotal - currentDiscount) + globalShipping;
+        modal.querySelector('#p-discount-row').style.display = currentDiscount > 0 ? 'block' : 'none';
+        modal.querySelector('#p-discount').textContent = currentDiscount.toLocaleString();
+        modal.querySelector('#p-total').textContent = finalTotal.toLocaleString();
+      }
+
+      if (couponSelect) {
+        couponSelect.addEventListener('change', updatePriceUI);
+        updatePriceUI();
+      }
+
       modal.querySelector('#checkout-form').addEventListener('submit', async (ev) => {
         ev.preventDefault();
         const f = ev.target;
+
+        // 최종 할인 금액 재계산
+        let couponIdToUse = null;
+        let discountAmount = 0;
+        if (couponSelect && couponSelect.value) {
+          const opt = couponSelect.selectedOptions[0];
+          couponIdToUse = couponSelect.value;
+          discountAmount = calcDiscount(subTotal, opt.dataset.type, Number(opt.dataset.value));
+        }
+        const finalTotal = Math.max(0, subTotal - discountAmount) + globalShipping;
+
         const orderNumber = generateOrderNumber();
         const rows = cart.map((it, idx) => ({
           order_number: orderNumber, product_id: it.product_id, product_code: it.product_code || '', product_name: it.product_name,
           product_price: it.product_price, quantity: it.quantity,
-          total_price: idx === 0 ? it.product_price * it.quantity + globalShipping : it.product_price * it.quantity,
+          total_price: idx === 0 ? Math.max(0, it.product_price * it.quantity - discountAmount) + globalShipping : it.product_price * it.quantity,
           customer_name: f.customer_name.value.trim(), customer_phone: f.customer_phone.value.trim(), depositor_name: f.depositor_name.value.trim(),
           memo: f.memo.value.trim(), address: f.address.value.trim(), address_detail: f.address_detail.value.trim(), postcode: f.postcode.value.trim(),
           selected_color: it.selected_color, selected_size: it.selected_size, selected_hem: it.selected_hem, selected_other: it.selected_other,
@@ -286,11 +334,25 @@
         }));
         const { error } = await db.from('orders').insert(rows);
         if (error) { alert('❌ 주문 실패: ' + error.message); return; }
+
+        // ⭐ 쿠폰 사용 처리
+        if (couponIdToUse) {
+          try {
+            await db.from('coupons').update({
+              is_used: true,
+              used_at: new Date().toISOString(),
+              used_order_number: orderNumber,
+            }).eq('id', couponIdToUse);
+          } catch (couponErr) {
+            console.warn('쿠폰 사용 처리 실패:', couponErr);
+          }
+        }
+
         const remainingCart = getCart().filter((_, idx) => !selectedIndexes.has(idx));
         saveCart(remainingCart);
         selectedIndexes.clear();
         if (document.getElementById('app-header')) renderHeader('cart');
-        showOrderComplete(modal, orderNumber, total, closeModal);
+        showOrderComplete(modal, orderNumber, finalTotal, closeModal);
         render();
       });
     }
