@@ -9,8 +9,21 @@
   <style>
     main { max-width: none !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
     .mypage-wrap { max-width: 640px; width: 100%; margin-left: auto !important; margin-right: auto !important; margin-top: 40px; margin-bottom: 40px; padding: 0 16px; box-sizing: border-box; display: flex; flex-direction: column; align-items: stretch; }
-    .mypage-title { font-size: 22px; font-weight: 700; margin-bottom: 16px; color: #222; padding: 0 4px; text-align: left; width: 100%; }
+    
+    /* ⭐ 제목과 등급 뱃지 정렬 */
+    .mypage-title-wrap { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding: 0 4px; width: 100%; }
+    .mypage-title { font-size: 22px; font-weight: 700; margin: 0; color: #222; text-align: left; }
     body.dark .mypage-title { color: #fff; }
+    
+    /* ⭐ 헤더 옆 등급 뱃지 스타일 */
+    .title-grade-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 12px; line-height: 1.2; }
+    .title-grade-일반회원 { background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
+    .title-grade-도매회원 { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+    .title-grade-VIP회원 { background: #fce7f3; color: #9f1239; border: 1px solid #fbcfe8; }
+    body.dark .title-grade-일반회원 { background: #1f2937; color: #d1d5db; border-color: #374151; }
+    body.dark .title-grade-도매회원 { background: #1e3a8a; color: #bfdbfe; border-color: #1e40af; }
+    body.dark .title-grade-VIP회원 { background: #831843; color: #fbcfe8; border-color: #9f1239; }
+
     .mypage-form { background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 32px; box-sizing: border-box; width: 100%; display: block; }
     body.dark .mypage-form { background: #151515; border: 1px solid #222; border-radius: 12px; }
     .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 12px; }
@@ -30,14 +43,6 @@
     .mypage-form button[type="submit"] { width: 100%; padding: 14px; background: #03c75a; color: #fff; border: 0; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 15px; font-family: inherit; margin-top: 24px; }
     .mypage-form button[type="submit"]:hover { background: #02b151; }
     #msg { margin-top: 12px; margin-bottom: 0; font-weight: 600; text-align: center; min-height: 20px; }
-
-    .grade-badge { display: inline-block; padding: 12px; border-radius: 6px; font-weight: 700; text-align: center; font-size: 14px; box-sizing: border-box; width: 100%; }
-    .grade-일반회원 { background: #f3f4f6; color: #374151; }
-    .grade-도매회원 { background: #dbeafe; color: #1e40af; }
-    .grade-VIP회원 { background: #fce7f3; color: #9f1239; }
-    body.dark .grade-일반회원 { background: #1f2937; color: #d1d5db; }
-    body.dark .grade-도매회원 { background: #1e3a8a; color: #bfdbfe; }
-    body.dark .grade-VIP회원 { background: #831843; color: #fbcfe8; }
 
     /* ⭐ 쿠폰함 */
     .coupon-section {
@@ -87,18 +92,17 @@
 
   <main>
     <div class="mypage-wrap">
-      <h2 class="mypage-title">내 정보</h2>
+      <!-- ⭐ 내 정보 제목과 등급 뱃지 -->
+      <div class="mypage-title-wrap">
+        <h2 class="mypage-title">내 정보</h2>
+        <span id="title-grade-badge" class="title-grade-badge title-grade-일반회원">일반회원</span>
+      </div>
       
       <form id="mypage-form" class="mypage-form">
         <div class="form-grid-2">
           <div class="form-group">
             <label>아이디 (변경 불가)</label>
             <input name="username" readonly>
-          </div>
-
-          <div class="form-group">
-            <label>회원 등급</label>
-            <div id="grade-badge" class="grade-badge grade-일반회원">일반회원</div>
           </div>
           
           <div class="form-group">
@@ -165,7 +169,7 @@
   <script>
     const form = document.getElementById('mypage-form');
     const msg = document.getElementById('msg');
-    const gradeBadge = document.getElementById('grade-badge');
+    const titleGradeBadge = document.getElementById('title-grade-badge');
     const couponListEl = document.getElementById('coupon-list');
     const couponCountEl = document.getElementById('coupon-count');
 
@@ -191,10 +195,11 @@
       return `${get('year')}-${get('month')}-${get('day')}`;
     }
 
-    function renderGradeBadge(grade) {
+    // ⭐ 제목 옆 등급 뱃지 렌더링
+    function renderTitleGradeBadge(grade) {
       const g = grade || '일반회원';
-      gradeBadge.textContent = g;
-      gradeBadge.className = 'grade-badge grade-' + g;
+      titleGradeBadge.textContent = g;
+      titleGradeBadge.className = 'title-grade-badge title-grade-' + g;
     }
 
     async function loadFromServer() {
@@ -217,7 +222,7 @@
       form.address.value = data.address || '';
       form.address_detail.value = data.address_detail || '';
 
-      renderGradeBadge(data.grade);
+      renderTitleGradeBadge(data.grade);
 
       await loadCoupons();
     }
@@ -252,25 +257,24 @@
           : `${Number(c.discount_value).toLocaleString()}원 할인`;
         const expDate = formatKSTShort(c.expires_at);
 
-        // mypage.html 의 loadCoupons() 함수 내 return 부분 (쿠폰 카드 렌더링)
-return `
-  <div class="coupon-card ${isUsed || isExpired ? 'used' : ''}">
-    <div class="c-info">
-      <div class="c-title">🎁 ${c.name || '쿠폰'}</div>
-      <div class="c-meta">
-        <b>${discountLabel}</b> · ${c.code || '-'}<br>
-        ${isUsed
-          ? `사용완료 (${c.used_at ? formatKSTShort(c.used_at) : '-'})`
-          : isExpired
-            ? `만료됨 (${expDate}까지)`
-            : `유효기간: ${expDate}까지`}
-      </div>
-    </div>
-    <div class="c-badge">
-      ${isUsed ? '사용완료' : isExpired ? '만료' : '사용가능'}
-    </div>
-  </div>
-`;
+        return `
+          <div class="coupon-card ${isUsed || isExpired ? 'used' : ''}">
+            <div class="c-info">
+              <div class="c-title">🎁 ${c.name || '쿠폰'}</div>
+              <div class="c-meta">
+                <b>${discountLabel}</b> · ${c.code || '-'}<br>
+                ${isUsed
+                  ? `사용완료 (${c.used_at ? formatKSTShort(c.used_at) : '-'})`
+                  : isExpired
+                    ? `만료됨 (${expDate}까지)`
+                    : `유효기간: ${expDate}까지`}
+              </div>
+            </div>
+            <div class="c-badge">
+              ${isUsed ? '사용완료' : isExpired ? '만료' : '사용가능'}
+            </div>
+          </div>
+        `;
       }).join('');
     }
 
