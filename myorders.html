@@ -106,7 +106,39 @@
 
   <script>
     // ⭐ Intl + Asia/Seoul 로 KST 표시
+    // 한국 표준시(KST) 표시 함수
+    // DB의 절대 시각은 변경하지 않고 화면 표시만 Asia/Seoul로 변환합니다.
+    // timezone 오프셋이 없는 ISO 날짜 문자열은 UTC로 해석합니다.
     function formatKST(dateStr, opts = {}) {
+      if (!dateStr) return '-';
+      let normalized = String(dateStr).trim();
+      if (!normalized) return '-';
+
+      if (/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/.test(normalized) &&
+          !/(Z|[+-]\d{2}:?\d{2})$/i.test(normalized)) {
+        normalized = normalized.replace(' ', 'T') + 'Z';
+      }
+
+      const d = new Date(normalized);
+      if (Number.isNaN(d.getTime())) return '-';
+
+      const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Seoul',
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
+        hourCycle: 'h23'
+      }).formatToParts(d);
+      const get = (type) => parts.find(part => part.type === type)?.value || '00';
+      const y = get('year'), mo = get('month'), da = get('day');
+      const hh = get('hour') === '24' ? '00' : get('hour');
+      const mi = get('minute'), ss = get('second');
+
+      if (opts.dateOnly) return `${y}-${mo}-${da}`;
+      if (opts.shortDate) return `${mo}/${da}`;
+      if (opts.timeOnly) return `${hh}:${mi}`;
+      if (opts.full) return `${y}-${mo}-${da} ${hh}:${mi}:${ss}`;
+      return `${y}-${mo}-${da} ${hh}:${mi}`;
+    }) {
       if (!dateStr) return '-';
       const d = new Date(dateStr);
       if (isNaN(d.getTime())) return '-';
