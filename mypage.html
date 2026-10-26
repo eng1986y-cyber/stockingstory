@@ -7,141 +7,43 @@
   <link rel="stylesheet" href="style.css">
   <script src="common.js"></script>
   <style>
-    /* ⭐ [핵심 1] main 태그의 기본 여백과 최대 넓이를 완전히 없앰 */
-    main {
-      max-width: none !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      width: 100% !important;
-    }
-
-    /* ⭐ [핵심 2] 카드 래퍼를 무조건 중앙에 배치 */
-    .mypage-wrap { 
-      max-width: 640px; 
-      width: 100%;
-      margin-left: auto !important;
-      margin-right: auto !important;
-      margin-top: 40px;
-      margin-bottom: 40px;
-      padding: 0 16px; 
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-    }
-    
-    .mypage-title {
-      font-size: 22px;
-      font-weight: 700;
-      margin-bottom: 16px;
-      color: #222;
-      padding: 0 4px;
-      text-align: left;
-      width: 100%;
-    }
+    main { max-width: none !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
+    .mypage-wrap { max-width: 640px; width: 100%; margin-left: auto !important; margin-right: auto !important; margin-top: 40px; margin-bottom: 40px; padding: 0 16px; box-sizing: border-box; display: flex; flex-direction: column; align-items: stretch; }
+    .mypage-title { font-size: 22px; font-weight: 700; margin-bottom: 16px; color: #222; padding: 0 4px; text-align: left; width: 100%; }
     body.dark .mypage-title { color: #fff; }
-    
-    /* ⭐ [내 정보] 폼 카드 */
-    .mypage-form {
-      background: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      border: 1px solid #e5e7eb;
-      margin-bottom: 32px;
-      box-sizing: border-box;
-      width: 100%;
-      display: block;
-    }
-    body.dark .mypage-form {
-      background: #151515;
-      border: 1px solid #222;
-      border-radius: 12px;
-    }
-
-    /* ⭐ 내부 2열 그리드 */
-    .form-grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px 12px;
-    }
+    .mypage-form { background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 32px; box-sizing: border-box; width: 100%; display: block; }
+    body.dark .mypage-form { background: #151515; border: 1px solid #222; border-radius: 12px; }
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 12px; }
     @media (max-width: 768px) {
-      .form-grid-2 {
-        grid-template-columns: 1fr;
-        gap: 10px;
-      }
-      .mypage-wrap {
-        margin-top: 24px;
-        margin-bottom: 24px;
-        padding: 0 12px;
-      }
+      .form-grid-2 { grid-template-columns: 1fr; gap: 10px; }
+      .mypage-wrap { margin-top: 24px; margin-bottom: 24px; padding: 0 12px; }
     }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .mypage-form label {
-      font-size: 13px;
-      color: #666;
-      font-weight: 500;
-    }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .mypage-form label { font-size: 13px; color: #666; font-weight: 500; }
     body.dark .mypage-form label { color: #999; }
-    
-    .mypage-form input {
-      padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      font-size: 14px;
-      font-family: inherit;
-      box-sizing: border-box;
-      width: 100%;
-    }
-    body.dark .mypage-form input {
-      background: #0f0f0f;
-      border-color: #2a2a2a;
-      color: #e5e7eb;
-    }
+    .mypage-form input { padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-family: inherit; box-sizing: border-box; width: 100%; }
+    body.dark .mypage-form input { background: #0f0f0f; border-color: #2a2a2a; color: #e5e7eb; }
     body.dark .mypage-form input::placeholder { color: #555; }
-    .mypage-form input[readonly] {
-      background: #f5f5f5;
-      color: #888;
-    }
-    body.dark .mypage-form input[readonly] {
-      background: #1a1a1a;
-      color: #666;
-    }
-    body.dark .mypage-form input:focus {
-      outline: none;
-      border-color: #555;
-      box-shadow: 0 0 0 3px rgba(255,255,255,.05);
-    }
-
-    /* ⭐ 저장 버튼 */
-    .mypage-form button[type="submit"] {
-      width: 100%;
-      padding: 14px;
-      background: #03c75a;
-      color: #fff;
-      border: 0;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 15px;
-      font-family: inherit;
-      margin-top: 24px;
-    }
+    .mypage-form input[readonly] { background: #f5f5f5; color: #888; }
+    body.dark .mypage-form input[readonly] { background: #1a1a1a; color: #666; }
+    body.dark .mypage-form input:focus { outline: none; border-color: #555; box-shadow: 0 0 0 3px rgba(255,255,255,.05); }
+    .mypage-form button[type="submit"] { width: 100%; padding: 14px; background: #03c75a; color: #fff; border: 0; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 15px; font-family: inherit; margin-top: 24px; }
     .mypage-form button[type="submit"]:hover { background: #02b151; }
-    
     #msg { margin-top: 12px; margin-bottom: 0; font-weight: 600; text-align: center; min-height: 20px; }
 
-    /* ⭐⭐⭐ 모바일에서만: 첫 input 자동 포커스/스크롤 방지 (PC 영향 없음) ⭐⭐⭐ */
-    @media (max-width: 768px) {
-      #mypage-form input:focus {
-        outline: none;
-      }
+    /* ⭐ 등급별 색상 */
+    .grade-badge {
+      display: inline-block; padding: 12px; border-radius: 6px; font-weight: 700; text-align: center;
+      font-size: 14px; box-sizing: border-box; width: 100%;
     }
+    .grade-일반회원 { background: #f3f4f6; color: #374151; }
+    .grade-도매회원 { background: #dbeafe; color: #1e40af; }
+    .grade-VIP회원 { background: #fce7f3; color: #9f1239; }
+    body.dark .grade-일반회원 { background: #1f2937; color: #d1d5db; }
+    body.dark .grade-도매회원 { background: #1e3a8a; color: #bfdbfe; }
+    body.dark .grade-VIP회원 { background: #831843; color: #fbcfe8; }
+
+    @media (max-width: 768px) { #mypage-form input:focus { outline: none; } }
   </style>
 </head>
 <body>
@@ -156,6 +58,11 @@
           <div class="form-group">
             <label>아이디 (변경 불가)</label>
             <input name="username" readonly>
+          </div>
+
+          <div class="form-group">
+            <label>회원 등급</label>
+            <div id="grade-badge" class="grade-badge grade-일반회원">일반회원</div>
           </div>
           
           <div class="form-group">
@@ -211,11 +118,18 @@
   <script>
     const form = document.getElementById('mypage-form');
     const msg = document.getElementById('msg');
+    const gradeBadge = document.getElementById('grade-badge');
 
     let member = JSON.parse(localStorage.getItem('member') || 'null');
     if (!member || !member.id) {
       alert('로그인이 필요합니다.');
       location.href = 'login.html';
+    }
+
+    function renderGradeBadge(grade) {
+      const g = grade || '일반회원';
+      gradeBadge.textContent = g;
+      gradeBadge.className = 'grade-badge grade-' + g;
     }
 
     async function loadFromServer() {
@@ -237,6 +151,8 @@
       form.postcode.value = data.postcode || '';
       form.address.value = data.address || '';
       form.address_detail.value = data.address_detail || '';
+
+      renderGradeBadge(data.grade);
     }
 
     loadFromServer();
@@ -276,34 +192,20 @@
       setTimeout(() => msg.textContent = '', 2000);
     });
 
-    // ⭐⭐⭐ 모바일 전용: 비밀번호 칸 자동 포커스/자동완성 방지 ⭐⭐⭐
     if (window.matchMedia('(max-width: 768px)').matches) {
       const pwEl = form.querySelector('input[name="password"]');
       if (pwEl) {
-        // 브라우저 자동완성 트리거 방지
         pwEl.setAttribute('autocomplete', 'new-password');
-        // Tab 포커스 순서에서 제외
         pwEl.setAttribute('tabindex', '-1');
-
         const blurActive = () => {
-          if (document.activeElement && document.activeElement.tagName === 'INPUT') {
-            document.activeElement.blur();
-          }
+          if (document.activeElement && document.activeElement.tagName === 'INPUT') document.activeElement.blur();
           pwEl.blur();
         };
-
-        // 즉시 + 지연 재시도 (모바일 브라우저 지연 포커스 대응)
         blurActive();
         setTimeout(blurActive, 100);
         setTimeout(blurActive, 300);
         setTimeout(blurActive, 600);
-
-        // 탭 복귀 시에도 blur
-        document.addEventListener('visibilitychange', () => {
-          if (document.visibilityState === 'visible') blurActive();
-        });
-
-        // 페이지가 pageshow 될 때 (bfcache 복원 포함)
+        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') blurActive(); });
         window.addEventListener('pageshow', blurActive);
       }
     }

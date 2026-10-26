@@ -11,51 +11,18 @@
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; }
     * { box-sizing: border-box; transition: none !important; animation: none !important; transform: none !important; box-shadow: none !important; }
 
-    .admin-header {
-      background: #fff !important; border-bottom: 1px solid #e5e7eb;
-      padding: 0 24px; display: flex; justify-content: space-between;
-      align-items: center; 
-      position: fixed !important; top: 0 !important; left: 0 !important;
-      width: 100% !important; height: 65px; z-index: 99999 !important;
-    }
+    .admin-header { background: #fff !important; border-bottom: 1px solid #e5e7eb; padding: 0 24px; display: flex; justify-content: space-between; align-items: center; position: fixed !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 65px; z-index: 99999 !important; }
     .admin-header-left { display: flex; align-items: center; gap: 16px; }
     .admin-header .logo { font-size: 18px; font-weight: 700; color: #111827 !important; letter-spacing: 0.5px; cursor: default; }
-    .admin-header .main-btn {
-      padding: 6px 12px; background: #fff; color: #374151; border: 1px solid #d1d5db;
-      border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500; font-family: inherit;
-      text-decoration: none;
-    }
-    .admin-header .logout-btn {
-      padding: 8px 16px; background: #fff; color: #374151;
-      border: 1px solid #d1d5db; border-radius: 6px;
-      cursor: pointer; font-size: 13px; font-weight: 500; font-family: inherit;
-    }
+    .admin-header .main-btn { padding: 6px 12px; background: #fff; color: #374151; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500; font-family: inherit; text-decoration: none; }
+    .admin-header .logout-btn { padding: 8px 16px; background: #fff; color: #374151; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; font-family: inherit; }
 
-    .admin-tabbar {
-      position: fixed !important; top: 65px !important; left: 0 !important;
-      width: 100% !important; background: #f4f6f8 !important;
-      z-index: 99998 !important; padding: 12px 24px 12px;
-      border-bottom: 1px solid #e5e7eb;
-    }
-    .admin-tabbar-inner {
-      max-width: 1600px; margin: 0 auto; background: #fff;
-      border-radius: 10px; padding: 8px; border: 1px solid #e5e7eb;
-      display: flex; flex-direction: row; flex-wrap: nowrap; gap: 8px; width: 100%;
-    }
-    .admin-tabbar .nav-item {
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      padding: 11px 18px; border-radius: 6px; cursor: pointer;
-      color: #4b5563; font-size: 14px; font-weight: 500;
-      border: 0; background: none; flex: 1 1 0; min-width: 0; white-space: nowrap;
-      text-align: center; font-family: inherit;
-    }
+    .admin-tabbar { position: fixed !important; top: 65px !important; left: 0 !important; width: 100% !important; background: #f4f6f8 !important; z-index: 99998 !important; padding: 12px 24px 12px; border-bottom: 1px solid #e5e7eb; }
+    .admin-tabbar-inner { max-width: 1600px; margin: 0 auto; background: #fff; border-radius: 10px; padding: 8px; border: 1px solid #e5e7eb; display: flex; flex-direction: row; flex-wrap: nowrap; gap: 8px; width: 100%; }
+    .admin-tabbar .nav-item { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 18px; border-radius: 6px; cursor: pointer; color: #4b5563; font-size: 14px; font-weight: 500; border: 0; background: none; flex: 1 1 0; min-width: 0; white-space: nowrap; text-align: center; font-family: inherit; }
     .admin-tabbar .nav-item.active { background: #111827; color: #fff; }
 
-    .admin-layout { 
-      display: flex; flex-direction: column; gap: 18px; max-width: 1600px; 
-      margin: 0 auto; padding: 24px; height: calc(100vh - 65px - 74px);
-      margin-top: calc(65px + 74px); overflow-y: auto; overflow-x: hidden;
-    }
+    .admin-layout { display: flex; flex-direction: column; gap: 18px; max-width: 1600px; margin: 0 auto; padding: 24px; height: calc(100vh - 65px - 74px); margin-top: calc(65px + 74px); overflow-y: auto; overflow-x: hidden; }
     .admin-layout::-webkit-scrollbar { width: 10px; }
     .admin-layout::-webkit-scrollbar-track { background: #f4f6f8; }
     .admin-layout::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 5px; border: 2px solid #f4f6f8; }
@@ -71,42 +38,22 @@
     .card-title { font-size: 15px; font-weight: 600; color: #111827; margin: 0 0 16px; }
     .card-title .hint { font-size: 12px; font-weight: 400; color: #9ca3af; }
 
-    .input, .card input, .card textarea {
-      width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb;
-      border-radius: 8px; font-size: 14px; font-family: inherit;
-      color: #111827 !important; background: #fff !important; box-sizing: border-box;
-    }
+    .input, .card input, .card textarea { width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; font-family: inherit; color: #111827 !important; background: #fff !important; box-sizing: border-box; }
     .card input:focus, .card textarea:focus { outline: none; border-color: #111827; }
     .card input[readonly] { background: #f9fafb !important; color: #6b7280 !important; }
     .card textarea { resize: vertical; min-height: 70px; }
 
-    .settings-split {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 16px; align-items: start; margin-bottom: 16px;
-    }
+    .settings-split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; margin-bottom: 16px; }
     .settings-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
     .settings-col > .card { margin-bottom: 0 !important; min-width: 0; width: 100%; }
-    .settings-col .card input, .settings-col .card textarea, .settings-col .card button {
-      max-width: 100%; box-sizing: border-box;
-    }
-    @media (max-width: 1000px) {
-      .settings-split { grid-template-columns: 1fr; gap: 12px; }
-    }
+    .settings-col .card input, .settings-col .card textarea, .settings-col .card button { max-width: 100%; box-sizing: border-box; }
+    @media (max-width: 1000px) { .settings-split { grid-template-columns: 1fr; gap: 12px; } }
 
     #product-register-card { min-width: 0; width: 100%; }
-    #product-register-card > #product-form {
-      display: grid !important;
-      grid-template-columns: 0.9fr 1.2fr 0.55fr 2fr 0.9fr 0.9fr 1fr 0.9fr 0.5fr 2fr 0.5fr !important;
-      gap: 8px; align-items: stretch; width: 100% !important; max-width: none !important;
-      min-width: 0 !important; margin: 0 !important; padding: 0 !important;
-      overflow: visible !important; box-sizing: border-box;
-    }
+    #product-register-card > #product-form { display: grid !important; grid-template-columns: 0.9fr 1.2fr 0.55fr 2fr 0.9fr 0.9fr 1fr 0.9fr 0.5fr 2fr 0.5fr !important; gap: 8px; align-items: stretch; width: 100% !important; max-width: none !important; min-width: 0 !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; box-sizing: border-box; }
     #product-register-card > #product-form input,
     #product-register-card > #product-form textarea,
-    #product-register-card > #product-form button {
-      display: block; width: 100% !important; max-width: 100% !important;
-      min-width: 0 !important; margin: 0 !important; box-sizing: border-box;
-    }
+    #product-register-card > #product-form button { display: block; width: 100% !important; max-width: 100% !important; min-width: 0 !important; margin: 0 !important; box-sizing: border-box; }
     #product-register-card > #product-form input { min-height: 42px; padding: 8px 7px; font-size: 12px; }
     #product-register-card > #product-form textarea { min-height: 42px; height: 42px; padding: 8px 7px; font-size: 12px; resize: vertical; }
     #product-register-card > #product-form input[name="price"] { padding-left: 4px; padding-right: 4px; }
@@ -115,12 +62,7 @@
 
     .form-row { display: flex; gap: 8px; flex-wrap: wrap; }
     .form-row > * { flex: 1; min-width: 150px; }
-    .btn {
-      padding: 10px 18px; border-radius: 8px; border: 0; cursor: pointer;
-      font-size: 14px; font-weight: 600; font-family: inherit;
-      display: inline-flex; align-items: center; justify-content: center;
-      gap: 6px; text-decoration: none;
-    }
+    .btn { padding: 10px 18px; border-radius: 8px; border: 0; cursor: pointer; font-size: 14px; font-weight: 600; font-family: inherit; display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; }
     .btn-primary { background: #111827; color: #fff; }
     .btn-success { background: #059669; color: #fff; }
     .btn-danger { background: #dc2626; color: #fff; }
@@ -134,34 +76,19 @@
     .msg.error { color: #dc2626; }
     .product-layout { display: flex; flex-direction: column; gap: 16px; }
 
-    .list-controls {
-      display: grid; grid-template-columns: 1fr auto 1fr;
-      align-items: center; margin-bottom: 12px; gap: 10px;
-    }
-    .list-search {
-      display: flex; gap: 6px; width: 100%; min-width: 0; max-width: 560px;
-      grid-column: 2; justify-self: center;
-    }
+    .list-controls { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; margin-bottom: 12px; gap: 10px; }
+    .list-search { display: flex; gap: 6px; width: 100%; min-width: 0; max-width: 560px; grid-column: 2; justify-self: center; }
     .list-search input { padding: 8px 12px; font-size: 13px; min-width: 0; }
     .list-search button { padding: 8px 14px; font-size: 13px; flex-shrink: 0; }
     .bulk-actions { display: flex; align-items: center; gap: 8px; font-size: 13px; grid-column: 3; justify-self: end; }
     .bulk-actions label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600; color: #374151; white-space: nowrap; }
     .bulk-actions input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #111827; }
-    .btn-bulk-del {
-      padding: 8px 12px; background: #dc2626; color: #fff; border: 0; border-radius: 6px;
-      font-size: 12px; font-weight: 600; cursor: pointer; opacity: 0.5; pointer-events: none; white-space: nowrap;
-    }
+    .btn-bulk-del { padding: 8px 12px; background: #dc2626; color: #fff; border: 0; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; opacity: 0.5; pointer-events: none; white-space: nowrap; }
     .btn-bulk-del.active { opacity: 1; pointer-events: auto; }
     #admin-list-wrap { background: #f9fafb; border-radius: 8px; padding: 10px; overflow-x: auto; }
     #admin-list { display: flex; flex-direction: column; gap: 7px; min-width: 0; min-height: 338px; }
     #admin-list-wrap { min-height: 360px; box-sizing: border-box; }
-    .product-row {
-      background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
-      padding: 8px 10px; display: grid;
-      grid-template-columns: 20px 42px minmax(180px, 1fr) 170px auto;
-      align-items: center; gap: 10px; font-size: 13px; color: #374151; width: 100%;
-      min-width: 720px;
-    }
+    .product-row { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px 10px; display: grid; grid-template-columns: 20px 42px minmax(180px, 1fr) 170px auto; align-items: center; gap: 10px; font-size: 13px; color: #374151; width: 100%; min-width: 720px; }
     .product-row:hover { border-color: #d1d5db; }
     .product-check { width: 18px; height: 18px; cursor: pointer; accent-color: #111827; margin: 0; }
     .product-row img { width: 42px; height: 42px; object-fit: cover; border-radius: 6px; background: #f3f4f6; border: 1px solid #e5e7eb; }
@@ -175,10 +102,7 @@
     .admin-list-pagination { display:flex; justify-content:center; align-items:center; gap:6px; flex-wrap:wrap; width:100%; margin:14px 0 4px; }
     .admin-list-pagination button { min-width:34px; min-height:32px; }
     .admin-list-pagination button:disabled { opacity:.35; cursor:not-allowed; }
-    #admin-pagination {
-      display: flex; justify-content: center; align-items: center; gap: 6px;
-      margin-top: 14px; flex-wrap: wrap; width: 100%;
-    }
+    #admin-pagination { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 14px; flex-wrap: wrap; width: 100%; }
     #admin-pagination button { min-width: 34px; min-height: 32px; }
     #admin-pagination button:disabled { opacity: .35; cursor: not-allowed; }
     .preview-box { margin-top: 12px; padding: 12px; background: #f9fafb; border-radius: 8px; border: 1px dashed #e5e7eb; }
@@ -188,22 +112,11 @@
     .login-wrap h2 { font-size: 22px; font-weight: 700; color: #111827; margin: 0 0 6px; }
     .login-wrap p.sub { font-size: 13px; color: #6b7280; margin: 0 0 24px; }
     .login-wrap form { display: grid; gap: 10px; }
-    .login-wrap input {
-      padding: 12px 14px; border: 1px solid #e5e7eb; border-radius: 8px;
-      font-size: 14px; font-family: inherit; width: 100%; box-sizing: border-box;
-      background: #fff !important; color: #111827 !important;
-    }
-    .login-wrap button {
-      padding: 12px; background: #111827; color: #fff; border: 0; border-radius: 8px;
-      cursor: pointer; font-size: 14px; font-weight: 600; font-family: inherit;
-    }
+    .login-wrap input { padding: 12px 14px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; font-family: inherit; width: 100%; box-sizing: border-box; background: #fff !important; color: #111827 !important; }
+    .login-wrap button { padding: 12px; background: #111827; color: #fff; border: 0; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; font-family: inherit; }
 
     .row-list { display: flex; flex-direction: column; gap: 8px; min-height: 420px; box-sizing: border-box; }
-    .row-item {
-      background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
-      padding: 12px 14px; display: flex; align-items: center; gap: 12px;
-      flex-wrap: wrap; font-size: 13px; color: #374151;
-    }
+    .row-item { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 13px; color: #374151; }
     .row-item .row-actions { display: flex; gap: 6px; flex-shrink: 0; margin-left: auto; }
     .badge { padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; color: #fff; white-space: nowrap; }
     .order-num { color: #1976d2; font-weight: 700; font-size: 13px; white-space: nowrap; }
@@ -212,84 +125,38 @@
     .row-total { color: #e53935; font-weight: 700; font-size: 13px; white-space: nowrap; }
     .row-sep { color: #d1d5db; }
 
-    .row-item .row-check {
-      width: 18px; height: 18px; cursor: pointer;
-      accent-color: #111827; flex-shrink: 0; margin: 0;
-    }
-    .list-action-bar .select-all-wrap {
-      display: flex; align-items: center; gap: 6px;
-      font-size: 13px; font-weight: 600; color: #374151;
-      white-space: nowrap; cursor: pointer; user-select: none;
-    }
-    .list-action-bar .select-all-wrap input[type="checkbox"] {
-      width: 18px; height: 18px; cursor: pointer; accent-color: #111827; margin: 0;
-    }
-    .list-action-bar .select-del-btn {
-      padding: 6px 12px; background: #dc2626; color: #fff; border: 0;
-      border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;
-      font-family: inherit; white-space: nowrap; opacity: 0.5; pointer-events: none;
-    }
+    .row-item .row-check { width: 18px; height: 18px; cursor: pointer; accent-color: #111827; flex-shrink: 0; margin: 0; }
+    .list-action-bar .select-all-wrap { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #374151; white-space: nowrap; cursor: pointer; user-select: none; }
+    .list-action-bar .select-all-wrap input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #111827; margin: 0; }
+    .list-action-bar .select-del-btn { padding: 6px 12px; background: #dc2626; color: #fff; border: 0; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap; opacity: 0.5; pointer-events: none; }
     .list-action-bar .select-del-btn.active { opacity: 1; pointer-events: auto; }
     .list-action-bar .select-del-btn:disabled { opacity: 0.5; pointer-events: none; }
 
-    .list-action-bar {
-      display: flex; justify-content: space-between; align-items: center;
-      gap: 10px; flex-wrap: wrap; margin-bottom: 12px;
-    }
+    .list-action-bar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
     .list-action-bar .search-group { display: flex; gap: 6px; flex: 1 1 400px; min-width: 0; max-width: 640px; }
     .list-action-bar .export-group { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; align-items: center; }
 
+    /* ⭐ 등급 배지 */
+    .grade-badge { padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+    .grade-일반회원 { background: #6b7280; color: #fff; }
+    .grade-도매회원 { background: #2563eb; color: #fff; }
+    .grade-VIP회원 { background: #9f1239; color: #fff; }
+
     .banner-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
-    .banner-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff;
-      width: 100%; box-sizing: border-box;
-    }
-    .banner-item-thumb {
-      width: 80px; height: 50px; flex: 0 0 80px;
-      border-radius: 6px; border: 1px solid #e5e7eb; object-fit: cover;
-      background: #f3f4f6;
-    }
+    .banner-item { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; width: 100%; box-sizing: border-box; }
+    .banner-item-thumb { width: 80px; height: 50px; flex: 0 0 80px; border-radius: 6px; border: 1px solid #e5e7eb; object-fit: cover; background: #f3f4f6; }
     .banner-item-info { flex: 1 1 0; min-width: 0; font-size: 12px; overflow: hidden; }
-    .banner-item-info .b-link {
-      color: #1976d2; text-decoration: none;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;
-      max-width: 100%;
-    }
+    .banner-item-info .b-link { color: #1976d2; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; max-width: 100%; }
     .banner-item-info .b-link.none { color: #9ca3af; }
     .banner-item .b-actions { display: flex; gap: 6px; flex: 0 0 auto; }
-    .banner-item .b-edit-btn {
-      flex: 0 0 auto; min-width: 56px; padding: 6px 12px;
-      background: #111827; color: #fff; border: 0; border-radius: 6px;
-      font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
-      white-space: nowrap; display: inline-flex; align-items: center; justify-content: center;
-    }
-    .banner-item .b-del-btn {
-      flex: 0 0 auto; min-width: 56px; padding: 6px 12px;
-      background: #dc2626; color: #fff; border: 0; border-radius: 6px;
-      font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
-      white-space: nowrap; display: inline-flex; align-items: center; justify-content: center;
-    }
+    .banner-item .b-edit-btn { flex: 0 0 auto; min-width: 56px; padding: 6px 12px; background: #111827; color: #fff; border: 0; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; }
+    .banner-item .b-del-btn { flex: 0 0 auto; min-width: 56px; padding: 6px 12px; background: #dc2626; color: #fff; border: 0; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; }
 
-    #promo-video-preview-inner {
-      position: relative; width: 100%; padding-bottom: 56.25%;
-      background: #000; border-radius: 6px; overflow: hidden;
-    }
-    #promo-video-preview-inner iframe {
-      position: absolute; top: 0; left: 0;
-      width: 100%; height: 100%; border: 0;
-    }
+    #promo-video-preview-inner { position: relative; width: 100%; padding-bottom: 56.25%; background: #000; border-radius: 6px; overflow: hidden; }
+    #promo-video-preview-inner iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
 
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-    .stat-card {
-      background: #fff; border: 1px solid #e5e7eb; border-radius: 10px;
-      padding: 16px 18px; display: flex; flex-direction: column; gap: 4px;
-    }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .stat-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px 18px; display: flex; flex-direction: column; gap: 4px; }
     .stat-card .stat-label { font-size: 12px; color: #6b7280; font-weight: 500; }
     .stat-card .stat-value { font-size: 26px; font-weight: 700; color: #111827; line-height: 1.2; }
     .stat-card .stat-sub { font-size: 11px; color: #9ca3af; margin-top: 2px; }
@@ -298,36 +165,20 @@
     .stat-card.accent .stat-value { color: #fff; }
     .stat-card.accent .stat-sub { color: #9ca3af; }
 
-    .chart-wrap {
-      background: #fff; border: 1px solid #e5e7eb; border-radius: 10px;
-      padding: 18px; margin-bottom: 16px;
-    }
-    .chart-header {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 14px; flex-wrap: wrap; gap: 8px;
-    }
+    .chart-wrap { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px; margin-bottom: 16px; }
+    .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
     .chart-title { font-size: 14px; font-weight: 700; color: #111827; }
     .chart-controls { display: flex; gap: 6px; }
-    .chart-controls .range-btn {
-      padding: 6px 12px; border: 1px solid #e5e7eb; background: #fff;
-      color: #374151; border-radius: 6px; cursor: pointer; font-size: 12px;
-      font-family: inherit; font-weight: 500;
-    }
+    .chart-controls .range-btn { padding: 6px 12px; border: 1px solid #e5e7eb; background: #fff; color: #374151; border-radius: 6px; cursor: pointer; font-size: 12px; font-family: inherit; font-weight: 500; }
     .chart-controls .range-btn.active { background: #111827; color: #fff; border-color: #111827; }
 
     #chart-svg { width: 100%; height: 280px; display: block; }
     .chart-empty { padding: 40px 20px; text-align: center; color: #9ca3af; font-size: 13px; }
 
     .top-pages-list { display: flex; flex-direction: column; gap: 6px; }
-    .top-page-item {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 10px 12px; background: #f9fafb; border-radius: 8px; font-size: 13px;
-    }
+    .top-page-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #f9fafb; border-radius: 8px; font-size: 13px; }
     .top-page-item .tp-name { color: #111827; font-weight: 600; }
-    .top-page-item .tp-bar-wrap {
-      flex: 1; height: 6px; background: #e5e7eb; border-radius: 3px;
-      margin: 0 12px; overflow: hidden;
-    }
+    .top-page-item .tp-bar-wrap { flex: 1; height: 6px; background: #e5e7eb; border-radius: 3px; margin: 0 12px; overflow: hidden; }
     .top-page-item .tp-bar { height: 100%; background: #3b82f6; border-radius: 3px; }
     .top-page-item .tp-count { color: #6b7280; font-size: 12px; white-space: nowrap; }
 
@@ -336,11 +187,7 @@
     .modal-box h2 { margin: 0 0 16px; font-size: 18px; color: #111827; }
     .modal-box .modal-form { display: grid; gap: 10px; }
     .modal-box label { font-size: 13px; font-weight: 600; color: #374151; }
-    .modal-box input, .modal-box select, .modal-box textarea {
-      padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px;
-      font-family: inherit; font-size: 14px; width: 100%; box-sizing: border-box;
-      background: #fff; color: #111827;
-    }
+    .modal-box input, .modal-box select, .modal-box textarea { padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; width: 100%; box-sizing: border-box; background: #fff; color: #111827; }
     .modal-box input[readonly] { background: #f9fafb; color: #6b7280; }
     .modal-box .modal-actions { display: flex; gap: 8px; margin-top: 10px; }
     .modal-box .modal-actions > * { flex: 1; }
@@ -370,23 +217,10 @@
       .stat-card .stat-value { font-size: 22px; }
     }
 
-    .edge-scroll-controls {
-      position: fixed; right: 14px; top: 50%;
-      transform: translateY(-50%); display: flex; flex-direction: column;
-      gap: 8px; z-index: 99998;
-    }
-    .edge-scroll-controls button {
-      width: 44px; height: 44px; border-radius: 50%;
-      border: 1px solid #d1d5db; background: rgba(255,255,255,.96);
-      color: #222; font-size: 19px; font-weight: 700; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,.08);
-    }
+    .edge-scroll-controls { position: fixed; right: 14px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 99998; }
+    .edge-scroll-controls button { width: 44px; height: 44px; border-radius: 50%; border: 1px solid #d1d5db; background: rgba(255,255,255,.96); color: #222; font-size: 19px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
     .edge-scroll-controls button:hover { background: #f3f4f6; }
-    @media (max-width: 600px) {
-      .edge-scroll-controls { right: 8px; }
-      .edge-scroll-controls button { width: 38px; height: 38px; font-size: 17px; }
-    }
+    @media (max-width: 600px) { .edge-scroll-controls { right: 8px; } .edge-scroll-controls button { width: 38px; height: 38px; font-size: 17px; } }
 
     @media print {
       body { background: #fff !important; }
@@ -406,6 +240,45 @@
       @page { margin: 12mm; }
     }
     .print-only { display: none; }
+
+    /* ⭐ 인쇄 전용 상세 카드 */
+    #print-detail-area { display: none; }
+    @media print {
+      #print-detail-area { display: block !important; }
+    }
+    .print-detail-card {
+      border: 1px solid #999 !important;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      page-break-inside: avoid;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #111;
+      background: #fff;
+    }
+    .print-detail-card .pdc-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px dashed #999;
+    }
+    .print-detail-card .pdc-row {
+      display: flex; gap: 8px; margin-bottom: 3px;
+    }
+    .print-detail-card .pdc-label { color: #555; font-weight: 600; flex: 0 0 80px; }
+    .print-detail-card .pdc-val { flex: 1; word-break: break-all; }
+    .print-detail-card .pdc-section {
+      margin-top: 8px; padding-top: 8px; border-top: 1px dashed #ccc;
+    }
+    .print-detail-card .pdc-section-title {
+      font-weight: 700; margin-bottom: 4px; color: #111;
+    }
+    .print-detail-card .pdc-item {
+      display: flex; justify-content: space-between; gap: 8px;
+      padding: 3px 0; border-bottom: 1px dotted #ddd;
+    }
   </style>
 </head>
 <body>
@@ -468,7 +341,6 @@
 
             <div class="card" style="display:flex; flex-direction:column; margin-bottom:0;">
               <div class="card-title">📋 등록된 상품 <span id="product-count" class="hint"></span></div>
-              
               <div class="list-controls">
                 <div class="list-search">
                   <input id="product-search" placeholder="상품명 / 제품번호 검색">
@@ -476,13 +348,10 @@
                   <button type="button" id="product-reset-btn" class="btn btn-secondary">전체</button>
                 </div>
                 <div class="bulk-actions">
-                  <label>
-                    <input type="checkbox" id="check-all-products"> 전체 선택
-                  </label>
+                  <label><input type="checkbox" id="check-all-products"> 전체 선택</label>
                   <button type="button" id="bulk-del-btn" class="btn-bulk-del">선택 삭제</button>
                 </div>
               </div>
-
               <div id="admin-list-wrap">
                 <div id="admin-list">로딩중...</div>
               </div>
@@ -516,6 +385,7 @@
           <div class="print-only" id="order-print-header" style="padding:0 0 12px 0; font-size:14px; font-weight:700; color:#111; text-align:center;">주문 목록</div>
           <div id="order-list" class="row-list">로딩중...</div>
           <div id="order-pagination" class="admin-list-pagination"></div>
+          <div id="print-detail-area"></div>
         </section>
 
         <section id="tab-members" class="admin-section">
@@ -695,7 +565,6 @@
                 <p id="shipping-msg" class="msg"></p>
               </div>
             </div>
-
           </div>
         </section>
       </div>
@@ -715,27 +584,26 @@
   </script>
 
   <script>
-    // ⭐⭐⭐ [수정] Intl + Asia/Seoul 로 브라우저 타임존/DB 형식 무관 KST 표시 ⭐⭐⭐
+    // ⭐ KST 표시
     function formatKST(dateStr, opts = {}) {
       if (!dateStr) return '-';
-      const d = new Date(dateStr);
-      if (isNaN(d.getTime())) return '-';
-
-      const parts = new Intl.DateTimeFormat('ko-KR', {
+      let normalized = String(dateStr).trim();
+      if (!normalized) return '-';
+      if (/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/.test(normalized) && !/(Z|[+-]\d{2}:?\d{2})$/i.test(normalized)) {
+        normalized = normalized.replace(' ', 'T') + 'Z';
+      }
+      const d = new Date(normalized);
+      if (Number.isNaN(d.getTime())) return '-';
+      const parts = new Intl.DateTimeFormat('en-CA', {
         timeZone: 'Asia/Seoul',
         year: 'numeric', month: '2-digit', day: '2-digit',
         hour: '2-digit', minute: '2-digit', second: '2-digit',
-        hour12: false,
+        hourCycle: 'h23'
       }).formatToParts(d);
-
-      const get = (t) => parts.find(p => p.type === t)?.value || '00';
-      const y = get('year');
-      const mo = get('month');
-      const da = get('day');
+      const get = (type) => parts.find(part => part.type === type)?.value || '00';
+      const y = get('year'), mo = get('month'), da = get('day');
       const hh = get('hour') === '24' ? '00' : get('hour');
-      const mi = get('minute');
-      const ss = get('second');
-
+      const mi = get('minute'), ss = get('second');
       if (opts.dateOnly) return `${y}-${mo}-${da}`;
       if (opts.shortDate) return `${mo}/${da}`;
       if (opts.timeOnly) return `${hh}:${mi}`;
@@ -823,23 +691,13 @@
       const msg = document.getElementById('logo-msg');
       const siteName = document.getElementById('logo-site-name').value.trim();
       const imageUrl = document.getElementById('logo-image-url').value.trim();
-      if (!siteName && !imageUrl) {
-        msg.className = 'msg error';
-        msg.textContent = '❌ 사이트명 또는 이미지 URL 중 하나는 필요합니다.';
-        return;
-      }
-      msg.className = 'msg';
-      msg.textContent = '저장 중...';
+      if (!siteName && !imageUrl) { msg.className = 'msg error'; msg.textContent = '❌ 사이트명 또는 이미지 URL 중 하나는 필요합니다.'; return; }
+      msg.className = 'msg'; msg.textContent = '저장 중...';
       let error;
       if (currentLogoId) {
-        ({ error } = await db.from('logos').update({
-          site_name: siteName || null, image_url: imageUrl || null,
-          updated_at: new Date().toISOString(),
-        }).eq('id', currentLogoId));
+        ({ error } = await db.from('logos').update({ site_name: siteName || null, image_url: imageUrl || null, updated_at: new Date().toISOString() }).eq('id', currentLogoId));
       } else {
-        const res = await db.from('logos').insert({
-          site_name: siteName || null, image_url: imageUrl || null,
-        }).select().single();
+        const res = await db.from('logos').insert({ site_name: siteName || null, image_url: imageUrl || null }).select().single();
         error = res.error;
         if (res.data) currentLogoId = res.data.id;
       }
@@ -1118,7 +976,6 @@
       }
     });
 
-    // ===== 상품 목록 =====
     let allProducts = [];
     let filteredProducts = [];
     let currentPage = 1;
@@ -1378,6 +1235,7 @@
       }));
     }
 
+    // ===== CSV 다운로드 =====
     function downloadCSV(filename, rows) {
       const escapeCell = (v) => { const s = String(v ?? ''); if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"'; return s; };
       const csv = rows.map(r => r.map(escapeCell).join(',')).join('\r\n');
@@ -1390,79 +1248,6 @@
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
-
-    document.getElementById('order-excel-btn').addEventListener('click', () => {
-      let ordersToExport;
-      if (selectedOrderKeys.size > 0) ordersToExport = allOrdersRaw.filter(o => { const key = o.order_number || `single_${o.id}`; return selectedOrderKeys.has(key); });
-      else ordersToExport = allOrdersRaw;
-      if (!ordersToExport || ordersToExport.length === 0) { alert('다운로드할 주문이 없습니다.'); return; }
-      const header = ['주문번호','주문일시(KST)','상태','주문자','연락처','입금자명','우편번호','주소','상세주소','요청사항','제품번호','상품명','가격','수량','총금액','배송비','색상','사이즈','밑단','기타옵션','택배사','운송장번호'];
-      const rows = [header];
-      ordersToExport.forEach(o => {
-        rows.push([
-          o.order_number || '',
-          formatKST(o.created_at, { full: true }),
-          o.status || '',
-          o.customer_name || '',
-          o.customer_phone || '',
-          o.depositor_name || '',
-          o.postcode || '',
-          o.address || '',
-          o.address_detail || '',
-          o.memo || '',
-          o.product_code || '',
-          o.product_name || '',
-          o.product_price ?? '',
-          o.quantity ?? '',
-          o.total_price ?? '',
-          o.shipping_fee ?? '',
-          o.selected_color || '',
-          o.selected_size || '',
-          o.selected_hem || '',
-          o.selected_other || '',
-          o.courier || '',
-          o.tracking_number || '',
-        ]);
-      });
-      const suffix = selectedOrderKeys.size > 0 ? `_선택${selectedOrderKeys.size}건` : '_전체';
-      downloadCSV('주문목록' + suffix, rows);
-    });
-
-    document.getElementById('member-excel-btn').addEventListener('click', () => {
-      let membersToExport;
-      if (selectedMemberIds.size > 0) membersToExport = allMembers.filter(m => selectedMemberIds.has(String(m.id)));
-      else membersToExport = allMembers;
-      if (!membersToExport || membersToExport.length === 0) { alert('다운로드할 회원이 없습니다.'); return; }
-      const header = ['아이디','이름','연락처','이메일','우편번호','주소','상세주소','상태','가입일시(KST)'];
-      const rows = [header];
-      membersToExport.forEach(m => {
-        rows.push([
-          m.username || '',
-          m.name || '',
-          m.phone || '',
-          m.email || '',
-          m.postcode || '',
-          m.address || '',
-          m.address_detail || '',
-          m.status || '정상',
-          formatKST(m.created_at, { full: true }),
-        ]);
-      });
-      const suffix = selectedMemberIds.size > 0 ? `_선택${selectedMemberIds.size}명` : '_전체';
-      downloadCSV('회원목록' + suffix, rows);
-    });
-
-    document.getElementById('order-print-btn').addEventListener('click', () => {
-      if (!allOrdersRaw || allOrdersRaw.length === 0) { alert('인쇄할 주문이 없습니다.'); return; }
-      document.querySelectorAll('#order-list .row-item').forEach(r => r.style.display = '');
-      setTimeout(() => window.print(), 50);
-    });
-
-    document.getElementById('member-print-btn').addEventListener('click', () => {
-      if (!allMembers || allMembers.length === 0) { alert('인쇄할 회원이 없습니다.'); return; }
-      document.querySelectorAll('#member-list .row-item').forEach(r => r.style.display = '');
-      setTimeout(() => window.print(), 50);
-    });
 
     // ===== 주문 =====
     let allOrdersRaw = [];
@@ -1630,6 +1415,95 @@
       return { '입금대기':'#f59e0b', '입금완료':'#059669', '배송중':'#1976d2', '완료':'#6b7280', '취소':'#dc2626' }[s] || '#9ca3af';
     }
 
+    // ⭐ 주문 선택 인쇄 (선택 없으면 전체)
+    document.getElementById('order-print-btn').addEventListener('click', () => {
+      if (!allOrdersRaw || allOrdersRaw.length === 0) { alert('인쇄할 주문이 없습니다.'); return; }
+
+      const printArea = document.getElementById('print-detail-area');
+      const groups = {};
+      allOrdersRaw.forEach(o => {
+        const key = o.order_number || `single_${o.id}`;
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(o);
+      });
+
+      let keys;
+      if (selectedOrderKeys.size > 0) keys = Array.from(selectedOrderKeys);
+      else keys = Object.keys(groups);
+
+      const cardsHtml = keys.map(key => {
+        const items = groups[key];
+        if (!items || !items.length) return '';
+        const first = items[0];
+        const displayNum = first.order_number || `(주문번호 없음 / ID: ${first.id})`;
+        const dateStr = formatKST(first.created_at, { full: true });
+        const fullAddress = `${first.postcode ? `[${first.postcode}] ` : ''}${first.address || ''} ${first.address_detail || ''}`.trim();
+
+        const itemsHtml = items.map(o => {
+          const opts = [];
+          if (o.selected_color) opts.push(`색상: ${o.selected_color}`);
+          if (o.selected_size) opts.push(`사이즈: ${o.selected_size}`);
+          if (o.selected_hem) opts.push(`밑단: ${o.selected_hem}`);
+          if (o.selected_other) opts.push(`기타: ${o.selected_other}`);
+          const optStr = opts.length ? opts.join(' | ') : '기본 옵션';
+          const itemPrice = Number(o.total_price) - Number(o.shipping_fee || 0);
+          return `
+            <div class="pdc-item">
+              <div>
+                <b>${o.product_name || '-'}</b> × ${o.quantity}
+                ${o.product_code ? `<span style="color:#555;">[${o.product_code}]</span>` : ''}
+                <div style="color:#666; font-size:11px;">${optStr}</div>
+              </div>
+              <div style="text-align:right; font-weight:700;">${itemPrice.toLocaleString()}원</div>
+            </div>
+          `;
+        }).join('');
+
+        let productTotal = 0, shippingTotal = 0;
+        items.forEach(o => {
+          const rt = Number(o.total_price || 0);
+          const rs = Number(o.shipping_fee || 0);
+          productTotal += (rt - rs);
+          shippingTotal += rs;
+        });
+        const totalAll = productTotal + shippingTotal;
+
+        return `
+          <div class="print-detail-card">
+            <div class="pdc-title">주문번호: ${displayNum}</div>
+            <div class="pdc-row"><span class="pdc-label">주문일시</span><span class="pdc-val">${dateStr} (KST)</span></div>
+            <div class="pdc-row"><span class="pdc-label">상태</span><span class="pdc-val">${first.status || '-'}</span></div>
+            <div class="pdc-row"><span class="pdc-label">주문자</span><span class="pdc-val">${first.customer_name || '-'} (${first.customer_phone || '-'})</span></div>
+            <div class="pdc-row"><span class="pdc-label">입금자명</span><span class="pdc-val">${first.depositor_name || '-'}</span></div>
+            <div class="pdc-row"><span class="pdc-label">배송지</span><span class="pdc-val">${fullAddress || '주소 정보 없음'}</span></div>
+            ${first.memo ? `<div class="pdc-row"><span class="pdc-label">요청사항</span><span class="pdc-val">${first.memo}</span></div>` : ''}
+            ${(first.courier || first.tracking_number) ? `<div class="pdc-row"><span class="pdc-label">배송정보</span><span class="pdc-val">${first.courier || '택배사 미정'} | ${first.tracking_number || '운송장 없음'}</span></div>` : ''}
+            <div class="pdc-section">
+              <div class="pdc-section-title">📦 주문 상품 (${items.length}건)</div>
+              ${itemsHtml}
+            </div>
+            <div class="pdc-section">
+              <div class="pdc-item"><span>상품 금액</span><b>${productTotal.toLocaleString()}원</b></div>
+              <div class="pdc-item"><span>배송비</span><b>${shippingTotal > 0 ? shippingTotal.toLocaleString() + '원' : '무료'}</b></div>
+              <div class="pdc-item" style="border-top:1px solid #999; padding-top:6px; margin-top:4px;"><span><b>총 결제금액</b></span><b style="font-size:14px;">${totalAll.toLocaleString()}원</b></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      printArea.innerHTML = cardsHtml;
+
+      const header = document.getElementById('order-print-header');
+      header.textContent = selectedOrderKeys.size > 0
+        ? `주문 목록 (선택 ${selectedOrderKeys.size}건)`
+        : `주문 목록 (전체 ${keys.length}건)`;
+
+      setTimeout(() => {
+        window.print();
+        setTimeout(() => { printArea.innerHTML = ''; }, 500);
+      }, 100);
+    });
+
     function showOrderDetailModal(key, items) {
       const first = items[0];
       const displayNum = first.order_number || `(주문번호 없음 / ID: ${first.id})`;
@@ -1759,6 +1633,43 @@
     document.getElementById('order-reset-btn').addEventListener('click', () => { selectedOrderKeys.clear(); document.getElementById('order-search').value = ''; loadOrders(); });
     document.getElementById('order-search').addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('order-search-btn').click(); });
 
+    document.getElementById('order-excel-btn').addEventListener('click', () => {
+      let ordersToExport;
+      if (selectedOrderKeys.size > 0) ordersToExport = allOrdersRaw.filter(o => { const key = o.order_number || `single_${o.id}`; return selectedOrderKeys.has(key); });
+      else ordersToExport = allOrdersRaw;
+      if (!ordersToExport || ordersToExport.length === 0) { alert('다운로드할 주문이 없습니다.'); return; }
+      const header = ['주문번호','주문일시(KST)','상태','주문자','연락처','입금자명','우편번호','주소','상세주소','요청사항','제품번호','상품명','가격','수량','총금액','배송비','색상','사이즈','밑단','기타옵션','택배사','운송장번호'];
+      const rows = [header];
+      ordersToExport.forEach(o => {
+        rows.push([
+          o.order_number || '',
+          formatKST(o.created_at, { full: true }),
+          o.status || '',
+          o.customer_name || '',
+          o.customer_phone || '',
+          o.depositor_name || '',
+          o.postcode || '',
+          o.address || '',
+          o.address_detail || '',
+          o.memo || '',
+          o.product_code || '',
+          o.product_name || '',
+          o.product_price ?? '',
+          o.quantity ?? '',
+          o.total_price ?? '',
+          o.shipping_fee ?? '',
+          o.selected_color || '',
+          o.selected_size || '',
+          o.selected_hem || '',
+          o.selected_other || '',
+          o.courier || '',
+          o.tracking_number || '',
+        ]);
+      });
+      const suffix = selectedOrderKeys.size > 0 ? `_선택${selectedOrderKeys.size}건` : '_전체';
+      downloadCSV('주문목록' + suffix, rows);
+    });
+
     // ===== 회원 =====
     let allMembers = [];
     let selectedMemberIds = new Set();
@@ -1803,10 +1714,13 @@
         const status = m.status || '정상';
         const sc = status === '정상' ? '#059669' : status === '정지' ? '#f59e0b' : '#dc2626';
         const isChecked = selectedMemberIds.has(String(m.id));
+        const grade = m.grade || '일반회원';
+        const gradeClass = 'grade-' + grade;
         return `
           <div class="row-item">
             <input type="checkbox" class="row-check member-row-check" data-id="${m.id}" ${isChecked ? 'checked' : ''}>
             <span class="badge" style="background:${sc};">${status}</span>
+            <span class="grade-badge ${gradeClass}">${grade}</span>
             <span><b class="row-strong">${m.name || '-'}</b> <span class="row-muted">(${m.username || '-'})</span></span>
             <span class="row-sep">|</span>
             <span class="row-muted">📞 ${m.phone || '-'}</span>
@@ -1880,9 +1794,79 @@
     document.getElementById('member-reset-btn').addEventListener('click', () => { selectedMemberIds.clear(); document.getElementById('member-search').value = ''; renderMembers(); });
     document.getElementById('member-search').addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('member-search-btn').click(); });
 
+    // ⭐ 회원 선택 인쇄
+    document.getElementById('member-print-btn').addEventListener('click', () => {
+      if (!allMembers || allMembers.length === 0) { alert('인쇄할 회원이 없습니다.'); return; }
+
+      const printArea = document.getElementById('print-detail-area');
+      let list;
+      if (selectedMemberIds.size > 0) {
+        list = allMembers.filter(m => selectedMemberIds.has(String(m.id)));
+      } else {
+        list = allMembers;
+      }
+
+      const cardsHtml = list.map(m => {
+        const status = m.status || '정상';
+        const grade = m.grade || '일반회원';
+        const fullAddress = `${m.postcode ? `[${m.postcode}] ` : ''}${m.address || ''} ${m.address_detail || ''}`.trim();
+        const joinDate = formatKST(m.created_at, { full: true });
+        return `
+          <div class="print-detail-card">
+            <div class="pdc-title">${m.name || '-'} (${m.username || '-'})</div>
+            <div class="pdc-row"><span class="pdc-label">회원등급</span><span class="pdc-val">${grade}</span></div>
+            <div class="pdc-row"><span class="pdc-label">상태</span><span class="pdc-val">${status}</span></div>
+            <div class="pdc-row"><span class="pdc-label">연락처</span><span class="pdc-val">${m.phone || '-'}</span></div>
+            <div class="pdc-row"><span class="pdc-label">이메일</span><span class="pdc-val">${m.email || '-'}</span></div>
+            <div class="pdc-row"><span class="pdc-label">주소</span><span class="pdc-val">${fullAddress || '-'}</span></div>
+            <div class="pdc-row"><span class="pdc-label">가입일시</span><span class="pdc-val">${joinDate} (KST)</span></div>
+          </div>
+        `;
+      }).join('');
+
+      printArea.innerHTML = cardsHtml;
+
+      const header = document.getElementById('member-print-header');
+      header.textContent = selectedMemberIds.size > 0
+        ? `회원 목록 (선택 ${selectedMemberIds.size}명)`
+        : `회원 목록 (전체 ${list.length}명)`;
+
+      setTimeout(() => {
+        window.print();
+        setTimeout(() => { printArea.innerHTML = ''; }, 500);
+      }, 100);
+    });
+
+    document.getElementById('member-excel-btn').addEventListener('click', () => {
+      let membersToExport;
+      if (selectedMemberIds.size > 0) membersToExport = allMembers.filter(m => selectedMemberIds.has(String(m.id)));
+      else membersToExport = allMembers;
+      if (!membersToExport || membersToExport.length === 0) { alert('다운로드할 회원이 없습니다.'); return; }
+      const header = ['아이디','이름','연락처','이메일','우편번호','주소','상세주소','회원등급','상태','가입일시(KST)'];
+      const rows = [header];
+      membersToExport.forEach(m => {
+        rows.push([
+          m.username || '',
+          m.name || '',
+          m.phone || '',
+          m.email || '',
+          m.postcode || '',
+          m.address || '',
+          m.address_detail || '',
+          m.grade || '일반회원',
+          m.status || '정상',
+          formatKST(m.created_at, { full: true }),
+        ]);
+      });
+      const suffix = selectedMemberIds.size > 0 ? `_선택${selectedMemberIds.size}명` : '_전체';
+      downloadCSV('회원목록' + suffix, rows);
+    });
+
     function showMemberDetailModal(m) {
       const status = m.status || '정상';
       const sc = status === '정상' ? '#059669' : status === '정지' ? '#f59e0b' : '#dc2626';
+      const grade = m.grade || '일반회원';
+      const gradeClass = 'grade-' + grade;
       const fullAddress = `${m.postcode ? `[${m.postcode}] ` : ''}${m.address || ''} ${m.address_detail || ''}`.trim();
       const joinDate = formatKST(m.created_at, { full: true });
       const modal = document.createElement('div');
@@ -1892,6 +1876,7 @@
           <h2 style="margin-bottom:16px;">회원 상세 정보</h2>
           <div style="background:#f9fafb; border-radius:8px; padding:16px; font-size:13px; color:#374151; line-height:1.9;">
             <div style="display:flex; justify-content:space-between; margin-bottom:8px; align-items:center;"><span style="color:#6b7280;">상태</span><span class="badge" style="background:${sc};">${status}</span></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px; align-items:center;"><span style="color:#6b7280;">회원등급</span><span class="grade-badge ${gradeClass}">${grade}</span></div>
             <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="color:#6b7280;">아이디</span><span style="font-weight:600;">${m.username || '-'}</span></div>
             <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="color:#6b7280;">이름</span><span style="font-weight:600;">${m.name || '-'}</span></div>
             <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="color:#6b7280;">연락처</span><span style="font-weight:600;">${m.phone || '-'}</span></div>
@@ -1921,6 +1906,8 @@
             <label>우편번호</label><input name="postcode" value="${m.postcode || ''}">
             <label>주소</label><input name="address" value="${m.address || ''}">
             <label>상세주소</label><input name="address_detail" value="${m.address_detail || ''}">
+            <label>회원 등급</label>
+            <select name="grade">${['일반회원','도매회원','VIP회원'].map(g => `<option ${g === (m.grade || '일반회원') ? 'selected' : ''}>${g}</option>`).join('')}</select>
             <label>회원 상태</label>
             <select name="status">${['정상','정지','탈퇴'].map(s => `<option ${s === (m.status || '정상') ? 'selected' : ''}>${s}</option>`).join('')}</select>
             <div class="modal-actions">
@@ -1943,6 +1930,7 @@
           postcode: f.postcode.value.trim() || null,
           address: f.address.value.trim() || null,
           address_detail: f.address_detail.value.trim() || null,
+          grade: f.grade.value,
           status: f.status.value,
         }).eq('id', m.id);
         if (error) { alert('❌ 저장 실패: ' + error.message); return; }
@@ -1986,9 +1974,8 @@
       document.getElementById('top-pages').innerHTML = '<p style="font-size:13px; color:#9ca3af;">데이터가 없습니다.</p>';
     }
 
-    // ⭐ Intl 기반 KST 날짜 키
     function dateKeyKST(d) {
-      const parts = new Intl.DateTimeFormat('ko-KR', {
+      const parts = new Intl.DateTimeFormat('en-CA', {
         timeZone: 'Asia/Seoul',
         year: 'numeric', month: '2-digit', day: '2-digit',
       }).formatToParts(d);
@@ -1998,7 +1985,6 @@
 
     function renderStats(visits) {
       const dayMap = {}, pageMap = {};
-
       visits.forEach(v => {
         const d = new Date(v.created_at);
         const key = dateKeyKST(d);
