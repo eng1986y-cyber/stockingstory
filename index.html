@@ -8,203 +8,56 @@
   <script src="common.js"></script>
   <style>
     html { overflow-x: hidden; -webkit-text-size-adjust: 100%; }
-    body {
-      overflow-x: hidden;
-      width: 100%; max-width: 100%;
-      margin: 0;
-    }
+    body { overflow-x: hidden; width: 100%; max-width: 100%; margin: 0; }
 
-    /* ⭐ 배너 슬라이드 영역 */
-    #banner-wrap {
-      width: 100%;
-      margin-top: 0;
-      margin-bottom: 0;
-      overflow: hidden;
-      position: relative;
-      background: #f0f0f0;
-    }
-    #banner-slider {
-      position: relative;
-      width: 100%;
-      overflow: hidden;
-    }
-    #banner-track {
-      display: flex;
-      transition: transform 0.5s ease;
-      will-change: transform;
-    }
-    .banner-slide {
-      flex: 0 0 100%;
-      width: 100%;
-      position: relative;
-      overflow: hidden;
-      display: block;
-    }
-    .banner-slide img {
-      width: 100%;
-      height: 700px;
-      object-fit: cover;
-      display: block;
-      pointer-events: none;
-    }
-    .banner-slide a {
-      display: block;
-      width: 100%;
-      height: 100%;
-      pointer-events: auto;
-    }
+    #banner-wrap { width: 100%; margin: 0; overflow: hidden; position: relative; background: #f0f0f0; }
+    #banner-slider { position: relative; width: 100%; overflow: hidden; }
+    #banner-track { display: flex; transition: transform 0.5s ease; will-change: transform; }
+    .banner-slide { flex: 0 0 100%; width: 100%; position: relative; overflow: hidden; display: block; }
+    .banner-slide img { width: 100%; height: 700px; object-fit: cover; display: block; pointer-events: none; }
+    .banner-slide a { display: block; width: 100%; height: 100%; pointer-events: auto; }
 
-    .banner-arrow {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: rgba(0, 0, 0, 0.4);
-      color: #fff;
-      border: 0;
-      cursor: pointer;
-      font-size: 22px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .banner-arrow:hover { background: rgba(0, 0, 0, 0.6); }
+    .banner-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 48px; height: 48px; border-radius: 50%; background: rgba(0,0,0,0.4); color: #fff; border: 0; cursor: pointer; font-size: 22px; font-weight: 700; display: flex; align-items: center; justify-content: center; z-index: 10; -webkit-tap-highlight-color: transparent; }
+    .banner-arrow:hover { background: rgba(0,0,0,0.6); }
     .banner-arrow.prev { left: 20px; }
     .banner-arrow.next { right: 20px; }
     .banner-arrow[hidden] { display: none; }
 
-    .banner-dots {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 8px;
-      z-index: 10;
-    }
-    .banner-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.5);
-      border: 0;
-      cursor: pointer;
-      padding: 0;
-      transition: background 0.2s;
-      -webkit-tap-highlight-color: transparent;
-    }
+    .banner-dots { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 10; }
+    .banner-dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.5); border: 0; cursor: pointer; padding: 0; transition: background 0.2s; -webkit-tap-highlight-color: transparent; }
     .banner-dot.active { background: #fff; }
     .banner-dots[hidden] { display: none; }
 
-    /* ⭐⭐⭐ 홍보 영상 영역 (상품 6개 넓이) ⭐⭐⭐ */
-    #promo-video-wrap {
-      display: none;
-      max-width: 1400px;
-      margin: 16px auto 0;
-      padding: 0 16px;
-      box-sizing: border-box;
-      width: 100%;
-    }
-    #promo-video-inner {
-      position: relative;
-      width: 100%;
-      padding-bottom: 56.25%;
-      background: #000;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-    #promo-video-inner iframe {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      border: 0;
-      display: block;
-    }
-    @media (max-width: 768px) {
-      #promo-video-wrap {
-        padding: 0 12px;
-        margin-top: 12px;
-      }
-      #promo-video-inner { border-radius: 8px; }
-    }
+    #promo-video-wrap { display: none; max-width: 1400px; margin: 16px auto 0; padding: 0 16px; box-sizing: border-box; width: 100%; }
+    #promo-video-inner { position: relative; width: 100%; padding-bottom: 56.25%; background: #000; border-radius: 10px; overflow: hidden; }
+    #promo-video-inner iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; display: block; }
+    @media (max-width: 768px) { #promo-video-wrap { padding: 0 12px; margin-top: 12px; } #promo-video-inner { border-radius: 8px; } }
 
-    /* ⭐ 상품 목록 */
-    #product-container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 0 16px;
-      box-sizing: border-box;
-      width: 100%;
-      margin-top: 16px;
-    }
+    #product-container { max-width: 1400px; margin: 0 auto; padding: 0 16px; box-sizing: border-box; width: 100%; margin-top: 16px; }
     #product-container.no-banner { margin-top: 24px; }
     @media (max-width: 768px) { #product-container { margin-top: 12px; } }
 
-    #product-list {
-      display: grid;
-      gap: 16px;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    #product-list .card {
-      min-width: 0;
-      display: block;
-      box-sizing: border-box;
-      text-decoration: none;
-      color: inherit;
-      -webkit-transform: translate3d(0, 0, 0);
-      transform: translate3d(0, 0, 0);
-      -webkit-backface-visibility: hidden;
-      backface-visibility: hidden;
-    }
-    #product-list .card .thumb {
-      width: 100%;
-      padding-bottom: 100%;
-      position: relative;
-      overflow: hidden;
-      border-radius: 10px;
-      background-color: #f0f0f0;
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      -webkit-background-size: cover;
-      -webkit-transform: translate3d(0, 0, 0);
-      transform: translate3d(0, 0, 0);
-    }
+    #product-list { display: grid; gap: 16px; width: 100%; box-sizing: border-box; }
+    #product-list .card { min-width: 0; display: block; box-sizing: border-box; text-decoration: none; color: inherit; -webkit-transform: translate3d(0, 0, 0); transform: translate3d(0, 0, 0); -webkit-backface-visibility: hidden; backface-visibility: hidden; position: relative; }
+    #product-list .card .thumb { width: 100%; padding-bottom: 100%; position: relative; overflow: hidden; border-radius: 10px; background-color: #f0f0f0; background-size: cover; background-position: center; background-repeat: no-repeat; -webkit-background-size: cover; -webkit-transform: translate3d(0, 0, 0); transform: translate3d(0, 0, 0); }
     #product-list .card .thumb img { display: none; }
     #product-list .card .card-info { padding: 10px 4px; min-width: 0; }
-    #product-list .card .name {
-      font-size: 14px;
-      font-weight: 500;
-      color: #222;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
+    #product-list .card .name { font-size: 14px; font-weight: 500; color: #222; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     body.dark #product-list .card .name { color: #e5e7eb; }
-    #product-list .card .price {
-      color: #e53935;
-      font-weight: 700;
-      font-size: 15px;
-      margin-top: 4px;
+    #product-list .card .price { color: #e53935; font-weight: 700; font-size: 15px; margin-top: 4px; }
+    #product-list .card .price.locked { color: #1976d2; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+
+    /* ⭐ NEW 배지 */
+    #product-list .card .new-badge {
+      position: absolute; top: 8px; left: 8px;
+      background: #e53935; color: #fff;
+      font-size: 11px; font-weight: 700;
+      padding: 3px 8px; border-radius: 4px;
+      letter-spacing: 0.5px; z-index: 2;
+      pointer-events: none;
     }
-    #pagination {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 6px;
-      margin-top: 20px;
-      margin-bottom: 40px;
-      flex-wrap: wrap;
-      width: 100%;
-      box-sizing: border-box;
-      min-height: 50px;
-    }
+
+    #pagination { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 20px; margin-bottom: 40px; flex-wrap: wrap; width: 100%; box-sizing: border-box; min-height: 50px; }
 
     @media (max-width: 768px) {
       .banner-slide img { height: 260px; }
@@ -228,7 +81,6 @@
     </div>
   </div>
 
-  <!-- ⭐⭐⭐ 홍보 영상 (상품목록 바로 위) ⭐⭐⭐ -->
   <div id="promo-video-wrap">
     <div id="promo-video-inner"></div>
   </div>
@@ -257,6 +109,28 @@
     let allProducts = [];
     let currentPage = 1;
 
+    // ⭐ 로그인 여부
+    function isLoggedIn() {
+      try {
+        const m = JSON.parse(localStorage.getItem('member') || 'null');
+        return !!(m && m.id);
+      } catch { return false; }
+    }
+
+    // ⭐ 7일 이내 신상품 여부
+    function isNewProduct(product) {
+      if (!product || !product.created_at) return false;
+      const created = new Date(product.created_at).getTime();
+      if (isNaN(created)) return false;
+      const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+      return (Date.now() - created) < sevenDaysMs;
+    }
+
+    // ⭐ 가격 숨김 여부 (비회원 + 신상품)
+    function shouldHidePrice(product) {
+      return !isLoggedIn() && isNewProduct(product);
+    }
+
     /* ⭐ YouTube URL → embed URL 변환 */
     function getYouTubeEmbedUrl(url) {
       if (!url) return '';
@@ -272,7 +146,6 @@
       return s;
     }
 
-    /* ⭐ 홍보 영상 로드 */
     async function loadPromoVideo() {
       const wrap = document.getElementById('promo-video-wrap');
       const inner = document.getElementById('promo-video-inner');
@@ -306,10 +179,7 @@
       const nextBtn = document.getElementById('banner-next');
       const container = document.getElementById('product-container');
 
-      const { data, error } = await db
-        .from('banners')
-        .select('*')
-        .order('id', { ascending: false });
+      const { data, error } = await db.from('banners').select('*').order('id', { ascending: false });
 
       if (error || !data || data.length === 0) {
         wrap.style.display = 'none';
@@ -350,15 +220,8 @@
           });
         });
 
-        prevBtn.onclick = () => {
-          goToBanner(bannerIndex - 1);
-          restartAuto();
-        };
-        nextBtn.onclick = () => {
-          goToBanner(bannerIndex + 1);
-          restartAuto();
-        };
-
+        prevBtn.onclick = () => { goToBanner(bannerIndex - 1); restartAuto(); };
+        nextBtn.onclick = () => { goToBanner(bannerIndex + 1); restartAuto(); };
         startAuto();
       } else {
         dotsEl.hidden = true;
@@ -376,12 +239,9 @@
       const track = document.getElementById('banner-track');
       const dotsEl = document.getElementById('banner-dots');
       if (!track || bannerList.length === 0) return;
-
       const total = bannerList.length;
       bannerIndex = ((idx % total) + total) % total;
-
       track.style.transform = `translateX(-${bannerIndex * 100}%)`;
-
       if (dotsEl) {
         dotsEl.querySelectorAll('.banner-dot').forEach((d, i) => {
           d.classList.toggle('active', i === bannerIndex);
@@ -389,22 +249,9 @@
       }
     }
 
-    function startAuto() {
-      stopAuto();
-      if (bannerList.length <= 1) return;
-      autoTimer = setInterval(() => {
-        goToBanner(bannerIndex + 1);
-      }, AUTO_INTERVAL);
-    }
-    function stopAuto() {
-      if (autoTimer) {
-        clearInterval(autoTimer);
-        autoTimer = null;
-      }
-    }
-    function restartAuto() {
-      startAuto();
-    }
+    function startAuto() { stopAuto(); if (bannerList.length <= 1) return; autoTimer = setInterval(() => goToBanner(bannerIndex + 1), AUTO_INTERVAL); }
+    function stopAuto() { if (autoTimer) { clearInterval(autoTimer); autoTimer = null; } }
+    function restartAuto() { startAuto(); }
 
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden') stopAuto();
@@ -414,9 +261,7 @@
     (function setupSwipe() {
       const slider = document.getElementById('banner-slider');
       if (!slider) return;
-
       let startX = 0, startY = 0, isSwiping = false;
-
       slider.addEventListener('touchstart', (e) => {
         if (bannerList.length <= 1) return;
         startX = e.touches[0].clientX;
@@ -424,22 +269,17 @@
         isSwiping = true;
         stopAuto();
       }, { passive: true });
-
       slider.addEventListener('touchmove', (e) => {
         if (!isSwiping) return;
         const dx = Math.abs(e.touches[0].clientX - startX);
         const dy = Math.abs(e.touches[0].clientY - startY);
-        if (dx > dy && dx > 10) {
-          e.preventDefault();
-        }
+        if (dx > dy && dx > 10) e.preventDefault();
       }, { passive: false });
-
       slider.addEventListener('touchend', (e) => {
         if (!isSwiping) return;
         isSwiping = false;
         const dx = e.changedTouches[0].clientX - startX;
         const dy = e.changedTouches[0].clientY - startY;
-
         if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
           if (dx < 0) goToBanner(bannerIndex + 1);
           else goToBanner(bannerIndex - 1);
@@ -466,9 +306,7 @@
 
     function applyGridColumns() {
       const list = document.getElementById('product-list');
-      list.style.gridTemplateColumns = isPC()
-        ? 'repeat(6, minmax(0, 1fr))'
-        : 'repeat(2, minmax(0, 1fr))';
+      list.style.gridTemplateColumns = isPC() ? 'repeat(6, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr))';
     }
 
     function getPerPage() { return isPC() ? PC_PER_PAGE : MOBILE_PER_PAGE; }
@@ -486,15 +324,25 @@
       const start = (currentPage - 1) * perPage;
       const items = allProducts.slice(start, start + perPage);
 
-      list.innerHTML = items.map(p => `
-        <a class="card" href="product.html?id=${p.id}">
-          <div class="thumb" style="background-image: ${bgUrl(p.main_image)};"></div>
-          <div class="card-info">
-            <div class="name">${p.name}</div>
-            <div class="price">${Number(p.price).toLocaleString()}원</div>
-          </div>
-        </a>
-      `).join('');
+      list.innerHTML = items.map(p => {
+        const hidePrice = shouldHidePrice(p);
+        const isNew = isNewProduct(p);
+        const newBadge = isNew ? `<span class="new-badge">NEW</span>` : '';
+        const priceHtml = hidePrice
+          ? `<div class="price locked">🔒 로그인 후 가격 확인</div>`
+          : `<div class="price">${Number(p.price).toLocaleString()}원</div>`;
+        return `
+          <a class="card" href="product.html?id=${p.id}">
+            <div class="thumb" style="background-image: ${bgUrl(p.main_image)};">
+              ${newBadge}
+            </div>
+            <div class="card-info">
+              <div class="name">${p.name}</div>
+              ${priceHtml}
+            </div>
+          </a>
+        `;
+      }).join('');
 
       renderPagination();
     }

@@ -11,61 +11,13 @@
     input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 
-    /* ⭐⭐⭐ 모바일 주문 모달 강제 표시 스타일 ⭐⭐⭐ */
-    .checkout-modal-backdrop {
-      position: fixed !important;
-      top: 0; left: 0; right: 0; bottom: 0;
-      width: 100vw !important;
-      height: 100vh !important;
-      height: 100dvh !important;
-      background: rgba(0,0,0,.8);
-      z-index: 999999 !important;
-      display: flex !important;
-      align-items: flex-start !important;
-      justify-content: center !important;
-      padding: 10px !important;
-      overflow-y: auto !important;
-      -webkit-overflow-scrolling: touch;
-      box-sizing: border-box;
-    }
-    .checkout-modal-box {
-      background: #151515;
-      border: 1px solid #222;
-      padding: 20px 16px;
-      border-radius: 12px;
-      width: 100% !important;
-      max-width: 460px !important;
-      margin: 20px auto !important;
-      color: #e5e7eb;
-      box-sizing: border-box;
-      position: relative;
-    }
-    .checkout-modal-box .checkout-form {
-      display: grid !important;
-      gap: 10px !important;
-      background: none !important;
-      padding: 0 !important;
-      border: 0 !important;
-      max-width: none !important;
-      width: 100% !important;
-    }
-    .checkout-modal-box h2 {
-      margin: 0 0 16px !important;
-      font-size: 18px !important;
-      color: #fff !important;
-    }
+    .checkout-modal-backdrop { position: fixed !important; top: 0; left: 0; right: 0; bottom: 0; width: 100vw !important; height: 100vh !important; height: 100dvh !important; background: rgba(0,0,0,.8); z-index: 999999 !important; display: flex !important; align-items: flex-start !important; justify-content: center !important; padding: 10px !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch; box-sizing: border-box; }
+    .checkout-modal-box { background: #151515; border: 1px solid #222; padding: 20px 16px; border-radius: 12px; width: 100% !important; max-width: 460px !important; margin: 20px auto !important; color: #e5e7eb; box-sizing: border-box; position: relative; }
+    .checkout-modal-box .checkout-form { display: grid !important; gap: 10px !important; background: none !important; padding: 0 !important; border: 0 !important; max-width: none !important; width: 100% !important; }
+    .checkout-modal-box h2 { margin: 0 0 16px !important; font-size: 18px !important; color: #fff !important; }
     @media (max-width: 768px) {
-      .checkout-modal-backdrop {
-        align-items: flex-start !important;
-        padding: 0 !important;
-        padding-top: 10px !important;
-        padding-bottom: 10px !important;
-      }
-      .checkout-modal-box {
-        margin: 0 auto !important;
-        border-radius: 8px !important;
-        max-height: none !important;
-      }
+      .checkout-modal-backdrop { align-items: flex-start !important; padding: 0 !important; padding-top: 10px !important; padding-bottom: 10px !important; }
+      .checkout-modal-box { margin: 0 auto !important; border-radius: 8px !important; max-height: none !important; }
     }
   </style>
 </head>
@@ -89,6 +41,25 @@
     let globalShipping = 0;
     let selectedItems = [];
 
+    // ⭐ 로그인/신상품 판별
+    function isLoggedIn() {
+      try {
+        const m = JSON.parse(localStorage.getItem('member') || 'null');
+        return !!(m && m.id);
+      } catch { return false; }
+    }
+
+    function isNewProduct(product) {
+      if (!product || !product.created_at) return false;
+      const created = new Date(product.created_at).getTime();
+      if (isNaN(created)) return false;
+      return (Date.now() - created) < 7 * 24 * 60 * 60 * 1000;
+    }
+
+    function shouldHidePrice(product) {
+      return !isLoggedIn() && isNewProduct(product);
+    }
+
     function getMember() {
       try { return JSON.parse(localStorage.getItem('member') || 'null'); }
       catch { return null; }
@@ -108,6 +79,9 @@
 
       currentProduct = data;
       MIN_QTY = Number(data.min_qty) || 1;
+
+      const hidePrice = shouldHidePrice(data);
+      const isNew = isNewProduct(data);
 
       const detailImgs = (data.detail_images || []).map(url => `<img src="${url}" alt="상세" loading="lazy" style="width:100%; display:block; margin-top:8px; border-radius:8px;">`).join('');
       const shippingLabel = globalShipping > 0 ? `<span style="color:#888;">배송비 ${globalShipping.toLocaleString()}원</span>` : `<span style="color:#10b981;">무료배송</span>`;
@@ -138,8 +112,24 @@
           ${buildSelect('other', '기타옵션', otherOptions)}
         </div>
       ` : '';
+
       const shareBtn = `<button id="share-btn" style="padding:8px 12px; background:#222; color:#e5e7eb; border:1px solid #333; border-radius:8px; cursor:pointer; font-size:13px; font-family:inherit;">🔗 공유</button>`;
       const minQtyNotice = MIN_QTY > 1 ? `<div style="margin-top:12px; padding:10px 12px; background:#1a1a1a; border:1px solid #333; border-radius:8px; font-size:12px; color:#f59e0b; line-height:1.6;">⚠️ 최소 주문 수량은 <b>${MIN_QTY}개</b>입니다. 옵션 및 기타 제품을 추가해주시기 바랍니다.</div>` : '';
+
+      // ⭐ 신상품 배지
+      const newBadge = isNew ? `<span style="display:inline-block; margin-left:8px; background:#e53935; color:#fff; font-size:11px; font-weight:700; padding:3px 8px; border-radius:4px; vertical-align:middle;">NEW</span>` : '';
+
+      // ⭐ 비회원 + 신상품 → 가격 숨김 + 로그인 유도
+      const priceHtml = hidePrice
+        ? `<div style="background:#1a1a1a; border:1px solid #333; border-radius:8px; padding:14px 16px; margin:0 0 16px; display:flex; align-items:center; gap:10px;">
+             <span style="font-size:24px;">🔒</span>
+             <div>
+               <div style="color:#e5e7eb; font-weight:700; font-size:15px;">로그인 후 가격 확인 가능</div>
+               <div style="color:#9ca3af; font-size:12px; margin-top:2px;">신상품은 등록 후 7일간 회원에게만 가격이 공개됩니다.</div>
+               <a href="login.html" style="display:inline-block; margin-top:8px; padding:6px 12px; background:#e5e7eb; color:#111; text-decoration:none; border-radius:6px; font-size:13px; font-weight:600;">로그인 하기 →</a>
+             </div>
+           </div>`
+        : `<p style="color:#ef4444; font-weight:700; font-size:24px; margin:0 0 8px;">${Number(data.price).toLocaleString()}원</p>`;
 
       detailEl.innerHTML = `
         <div style="background:#151515; border:1px solid #222; border-radius:12px; padding:16px;">
@@ -151,24 +141,33 @@
               <div>
                 ${data.product_code ? `<div style="color:#666; font-size:12px; margin-bottom:4px;">제품번호: ${data.product_code}</div>` : ''}
                 <div style="display:flex; justify-content:space-between; align-items:start; gap:8px;">
-                  <h2 style="margin:0 0 12px; font-size:22px; color:#fff; flex:1;">${data.name}</h2>
+                  <h2 style="margin:0 0 12px; font-size:22px; color:#fff; flex:1;">${data.name}${newBadge}</h2>
                   ${shareBtn}
                 </div>
-                <p style="color:#ef4444; font-weight:700; font-size:24px; margin:0 0 8px;">${Number(data.price).toLocaleString()}원</p>
+                ${priceHtml}
                 <p style="margin:0 0 16px;">${shippingLabel}</p>
                 ${minQtyNotice}
-                <div style="margin-top:12px; font-size:13px; font-weight:600; color:#fff; margin-bottom:8px;">옵션 선택 (필수) <span style="color:#ef4444;">*</span></div>
-                ${row1}
-                ${row2}
-                <div id="selected-items" style="margin-top:12px;"></div>
+                ${hidePrice ? '' : `
+                  <div style="margin-top:12px; font-size:13px; font-weight:600; color:#fff; margin-bottom:8px;">옵션 선택 (필수) <span style="color:#ef4444;">*</span></div>
+                  ${row1}
+                  ${row2}
+                  <div id="selected-items" style="margin-top:12px;"></div>
+                `}
               </div>
-              <div style="margin-top:20px;">
-                <div id="total-preview" style="text-align:right; font-size:14px; font-weight:600; color:#ef4444; line-height:1.6; margin-bottom:16px;"></div>
-                <div style="display:flex; gap:8px;">
-                  <button id="cart-btn" style="flex:1; padding:14px; background:#1a1a1a; color:#e5e7eb; border:1px solid #333; border-radius:8px; cursor:pointer; font-weight:600; font-size:15px; font-family:inherit;">장바구니</button>
-                  <button id="buy-btn" style="flex:1; padding:14px; background:#e5e7eb; color:#111; border:0; border-radius:8px; cursor:pointer; font-weight:600; font-size:15px; font-family:inherit;">바로 구매</button>
+              ${hidePrice ? '' : `
+                <div style="margin-top:20px;">
+                  <div id="total-preview" style="text-align:right; font-size:14px; font-weight:600; color:#ef4444; line-height:1.6; margin-bottom:16px;"></div>
+                  <div style="display:flex; gap:8px;">
+                    <button id="cart-btn" style="flex:1; padding:14px; background:#1a1a1a; color:#e5e7eb; border:1px solid #333; border-radius:8px; cursor:pointer; font-weight:600; font-size:15px; font-family:inherit;">장바구니</button>
+                    <button id="buy-btn" style="flex:1; padding:14px; background:#e5e7eb; color:#111; border:0; border-radius:8px; cursor:pointer; font-weight:600; font-size:15px; font-family:inherit;">바로 구매</button>
+                  </div>
                 </div>
-              </div>
+              `}
+              ${hidePrice ? `
+                <div style="margin-top:20px; padding:14px; background:#1a1a1a; color:#666; border:1px dashed #333; border-radius:8px; font-weight:600; font-size:14px; text-align:center;">
+                  🔒 로그인 후 구매 가능
+                </div>
+              ` : ''}
             </div>
           </div>
         </div>
@@ -177,12 +176,15 @@
 
       const shareEl = document.getElementById('share-btn');
       if (shareEl) shareEl.onclick = () => shareProduct(data);
-      detailEl.querySelectorAll('select[data-opt-name]').forEach(sel => {
-        sel.addEventListener('change', () => handleOptionChange());
-      });
-      document.getElementById('cart-btn').addEventListener('click', () => handleOrder('cart'));
-      document.getElementById('buy-btn').addEventListener('click', () => handleOrder('single'));
-      renderSelectedItems();
+
+      if (!hidePrice) {
+        detailEl.querySelectorAll('select[data-opt-name]').forEach(sel => {
+          sel.addEventListener('change', () => handleOptionChange());
+        });
+        document.getElementById('cart-btn').addEventListener('click', () => handleOrder('cart'));
+        document.getElementById('buy-btn').addEventListener('click', () => handleOrder('single'));
+        renderSelectedItems();
+      }
     }
 
     function handleOptionChange() {
@@ -240,10 +242,7 @@
         </div>
       `;
       el.querySelectorAll('.item-del').forEach(btn => {
-        btn.addEventListener('click', () => {
-          selectedItems.splice(Number(btn.dataset.idx), 1);
-          renderSelectedItems();
-        });
+        btn.addEventListener('click', () => { selectedItems.splice(Number(btn.dataset.idx), 1); renderSelectedItems(); });
       });
       el.querySelectorAll('.qty-minus').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -252,11 +251,7 @@
         });
       });
       el.querySelectorAll('.qty-plus').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const idx = Number(btn.dataset.idx);
-          selectedItems[idx].qty++;
-          renderSelectedItems();
-        });
+        btn.addEventListener('click', () => { selectedItems[Number(btn.dataset.idx)].qty++; renderSelectedItems(); });
       });
       el.querySelectorAll('.qty-input-item').forEach(inp => {
         inp.addEventListener('change', () => {
@@ -284,7 +279,7 @@
 
     async function shareProduct(p) {
       const url = `${location.origin}${location.pathname}?id=${p.id}`;
-      const shareData = { title: p.name, text: `${p.name} - ${Number(p.price).toLocaleString()}원`, url };
+      const shareData = { title: p.name, url };
       if (navigator.share) { try { await navigator.share(shareData); } catch (e) {} }
       else {
         try { await navigator.clipboard.writeText(url); alert('✅ 상품 링크가 복사되었습니다.\n' + url); }
@@ -295,6 +290,7 @@
     function handleOrder(mode) {
       const p = currentProduct;
       if (!p) return;
+      if (shouldHidePrice(p)) { alert('로그인 후 이용 가능합니다.'); return; }
       if (selectedItems.length === 0) { alert('옵션을 선택해주세요.'); return; }
       const totalQty = selectedItems.reduce((s, it) => s + it.qty, 0);
       if (mode === 'cart') {
@@ -333,15 +329,12 @@
       showCheckoutModal(items);
     }
 
-    // ⭐⭐⭐ 모달: body에 붙이고 position:fixed 강제 + 오버레이 스크롤 ⭐⭐⭐
     function showCheckoutModal(items) {
       const subTotal = items.reduce((s, it) => s + it.product_price * it.quantity, 0);
       const total = subTotal + globalShipping;
       const m = getMember();
-
       const inputStyle = 'width:100%; padding:10px 12px; background:#0f0f0f; border:1px solid #2a2a2a; border-radius:8px; color:#e5e7eb; font-family:inherit; font-size:14px; box-sizing:border-box;';
       const labelStyle = 'font-size:13px; font-weight:600; color:#ccc; display:block; margin-bottom:4px;';
-
       const modal = document.createElement('div');
       modal.className = 'checkout-modal-backdrop';
       modal.innerHTML = `
@@ -373,9 +366,7 @@
         </div>
       `;
       document.body.appendChild(modal);
-      modal.querySelector('#close-modal').onclick = () => modal.remove();
 
-      // ⭐ 모바일 배경 스크롤 잠금
       const prevBodyOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
       const closeModal = () => {
