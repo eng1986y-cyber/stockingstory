@@ -125,6 +125,10 @@
     .row-total { color: #e53935; font-weight: 700; font-size: 13px; white-space: nowrap; }
     .row-sep { color: #d1d5db; }
 
+    /* ⭐ 삭제(숨김)된 주문 스타일 */
+    .row-item.deleted-order { background: #f9fafb; opacity: 0.8; border-style: dashed; }
+    .badge-deleted { background: #4b5563; color: #fff; }
+
     .row-item .row-check { width: 18px; height: 18px; cursor: pointer; accent-color: #111827; flex-shrink: 0; margin: 0; }
     .list-action-bar .select-all-wrap { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #374151; white-space: nowrap; cursor: pointer; user-select: none; }
     .list-action-bar .select-all-wrap input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #111827; margin: 0; }
@@ -397,7 +401,7 @@
 
         <section id="tab-orders" class="admin-section">
           <h1 class="page-title">주문 관리</h1>
-          <p class="page-subtitle">주문 내역을 확인하고, 엑셀 다운로드 / 인쇄 / 수정 / 삭제합니다</p>
+          <p class="page-subtitle">주문 내역을 확인하고, 엑셀 다운로드 / 인쇄 / 수정 / 삭제합니다 (사용자가 삭제한 주문은 '숨김' 표시됨)</p>
 
           <div class="card">
             <div class="list-action-bar">
@@ -1343,9 +1347,9 @@
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
-    // ===== 주문 (⭐ 쿠폰 사용내역 포함) =====
+    // ===== 주문 (⭐ 쿠폰 사용내역 및 숨김/복구 포함) =====
     let allOrdersRaw = [];
-    let allCouponsForOrders = [];   // ⭐ 주문에 사용된 쿠폰 매핑용
+    let allCouponsForOrders = [];
     let selectedOrderKeys = new Set();
 
     function updateOrderBulkUI() {
@@ -1366,13 +1370,11 @@
       else { checkAll.disabled = false; checkAll.checked = Array.from(checkboxes).every(cb => cb.checked); }
     }
 
-    // ⭐ 주문번호에 매핑된 쿠폰 찾기
     function findCouponByOrderNumber(orderNumber) {
       if (!orderNumber) return null;
       return allCouponsForOrders.find(c => c.used_order_number === orderNumber && c.is_used) || null;
     }
 
-    // ⭐ 쿠폰 할인금액 표시 문자열
     function getCouponDiscountLabel(coupon) {
       if (!coupon) return '';
       if (coupon.type === 'percent') return `${coupon.discount_value}% 할인`;
@@ -1384,7 +1386,6 @@
       const el = document.getElementById('order-list');
       el.innerHTML = '로딩중...';
 
-      // ⭐ 사용된 쿠폰도 함께 로드
       try {
         const { data: couponData } = await db.from('coupons').select('*').eq('is_used', true).not('used_order_number', 'is', null);
         allCouponsForOrders = couponData || [];
@@ -1432,16 +1433,21 @@
         const itemCount = items.length;
         const isChecked = selectedOrderKeys.has(key);
 
-        // ⭐ 쿠폰 사용 태그
         const usedCoupon = findCouponByOrderNumber(realOrderNum);
         const couponTag = usedCoupon
           ? `<span class="coupon-used-tag" title="쿠폰코드: ${usedCoupon.code || ''}">🎟️ ${getCouponDiscountLabel(usedCoupon)}</span>`
           : '';
 
+        // ⭐ 삭제(숨김) 여부 확인
+        const isDeleted = first.is_deleted === true;
+        const deletedBadge = isDeleted ? `<span class="badge badge-deleted" style="margin-left:4px;">숨김</span>` : '';
+        const rowClass = isDeleted ? 'row-item deleted-order' : 'row-item';
+
         return `
-          <div class="row-item" data-key="${key}">
+          <div class="${rowClass}" data-key="${key}">
             <input type="checkbox" class="row-check order-row-check" data-key="${key}" ${isChecked ? 'checked' : ''}>
             <span class="badge" style="background:${statusColor(first.status)};">${first.status || '-'}</span>
+            ${deletedBadge}
             <span class="order-num">${displayNum}</span>
             <span class="row-sep">|</span>
             <span><b class="row-strong">${first.customer_name || '-'}</b> <span class="row-muted">(${first.customer_phone || '-'})</span></span>
@@ -1452,9 +1458,10 @@
             <span class="row-muted">${dateStr} ${timeStr}</span>
             ${first.tracking_number ? `<span class="row-sep">|</span><span class="row-muted">🚚 ${first.courier || ''} ${first.tracking_number}</span>` : ''}
             <div class="row-actions">
+              ${isDeleted ? `<button class="btn btn-success btn-sm order-restore" data-key="${key}">복구</button>` : ''}
               <button class="btn btn-secondary btn-sm order-view" data-key="${key}">상세보기</button>
               <button class="btn btn-primary btn-sm order-edit" data-key="${key}">수정</button>
-              <button class="btn btn-danger btn-sm order-del" data-key="${key}">삭제</button>
+              <button class="btn btn-danger btn-sm order-del" data-key="${key}">완전삭제</button>
             </div>
           </div>
         `;
@@ -1471,6 +1478,32 @@
       updateOrderBulkUI();
       paginateRenderedList('order-list', 'order-pagination', 'orders');
 
+      // ⭐ 복구 버튼 이벤트
+      el.querySelectorAll('.order-restore').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const key = btn.dataset.key;
+          const items = groups[key];
+          if (!items || !items.length) return;
+          const first = items[0];
+          if (!confirm(`주문번호 "${first.order_number || first.id}" 을(를) 복구하시겠습니까?`)) return;
+          
+          btn.disabled = true; btn.textContent = '복구 중...';
+          let error;
+          if (first.order_number) {
+            ({ error } = await db.from('orders').update({ is_deleted: false }).eq('order_number', first.order_number));
+          } else {
+            ({ error } = await db.from('orders').update({ is_deleted: false }).eq('id', first.id));
+          }
+          if (error) {
+            alert('❌ 복구 실패: ' + error.message);
+            btn.disabled = false; btn.textContent = '복구';
+          } else {
+            alert('✅ 주문이 복구되었습니다.');
+            loadOrders(document.getElementById('order-search').value.trim() || null);
+          }
+        });
+      });
+
       el.querySelectorAll('.order-view').forEach(btn => {
         btn.addEventListener('click', () => {
           const key = btn.dataset.key;
@@ -1485,18 +1518,19 @@
           if (items && items.length) showOrderEditModal(key, items);
         });
       });
+      // ⭐ 완전삭제 (DB에서 완전히 삭제)
       el.querySelectorAll('.order-del').forEach(btn => {
         btn.addEventListener('click', async () => {
           const key = btn.dataset.key;
           const items = groups[key];
           const first = items[0];
           const label = first.order_number ? `주문번호 "${first.order_number}"` : `해당 주문(ID: ${first.id})`;
-          if (!confirm(`${label} 의 모든 항목을 삭제할까요?`)) return;
+          if (!confirm(`${label} 의 모든 항목을 DB에서 완전히 삭제할까요?\n이 작업은 되돌릴 수 없습니다.`)) return;
           let error;
           if (first.order_number) ({ error } = await db.from('orders').delete().eq('order_number', first.order_number));
           else ({ error } = await db.from('orders').delete().eq('id', first.id));
           if (error) alert('삭제 실패: ' + error.message);
-          else { selectedOrderKeys.delete(key); alert('✅ 주문이 삭제되었습니다.'); loadOrders(document.getElementById('order-search').value.trim() || null); }
+          else { selectedOrderKeys.delete(key); alert('✅ 주문이 완전히 삭제되었습니다.'); loadOrders(document.getElementById('order-search').value.trim() || null); }
         });
       });
     }
@@ -1512,9 +1546,10 @@
       updateOrderBulkUI();
     });
 
+    // ⭐ 관리자 선택 삭제도 DB에서 완전 삭제
     document.getElementById('order-bulk-del-btn').addEventListener('click', async () => {
       if (selectedOrderKeys.size === 0) return;
-      if (!confirm(`선택한 ${selectedOrderKeys.size}개의 주문을 삭제할까요?`)) return;
+      if (!confirm(`선택한 ${selectedOrderKeys.size}개의 주문을 DB에서 완전히 삭제할까요?\n이 작업은 되돌릴 수 없습니다.`)) return;
       const btn = document.getElementById('order-bulk-del-btn');
       btn.disabled = true; btn.textContent = '삭제 중...';
       let failCount = 0;
@@ -1530,7 +1565,7 @@
       btn.disabled = false;
       selectedOrderKeys.clear();
       if (failCount > 0) alert(`⚠️ ${failCount}건 삭제 실패. 나머지는 삭제되었습니다.`);
-      else alert('✅ 선택한 주문이 삭제되었습니다.');
+      else alert('✅ 선택한 주문이 완전히 삭제되었습니다.');
       loadOrders(document.getElementById('order-search').value.trim() || null);
     });
 
@@ -1587,17 +1622,19 @@
         });
         const totalAll = productTotal + shippingTotal;
 
-        // ⭐ 인쇄: 쿠폰 사용내역
         const usedCoupon = findCouponByOrderNumber(first.order_number);
         const couponLine = usedCoupon
           ? `<div class="pdc-row"><span class="pdc-label">사용 쿠폰</span><span class="pdc-val">🎟️ ${usedCoupon.name || '쿠폰'} (${getCouponDiscountLabel(usedCoupon)}) · 코드: ${usedCoupon.code || '-'}</span></div>`
           : '';
+
+        const deletedLine = first.is_deleted ? `<div class="pdc-row"><span class="pdc-label">상태</span><span class="pdc-val" style="color:#dc2626; font-weight:bold;">사용자에 의해 숨김 처리됨</span></div>` : '';
 
         return `
           <div class="print-detail-card">
             <div class="pdc-title">주문번호: ${displayNum}</div>
             <div class="pdc-row"><span class="pdc-label">주문일시</span><span class="pdc-val">${dateStr} (KST)</span></div>
             <div class="pdc-row"><span class="pdc-label">상태</span><span class="pdc-val">${first.status || '-'}</span></div>
+            ${deletedLine}
             <div class="pdc-row"><span class="pdc-label">주문자</span><span class="pdc-val">${first.customer_name || '-'} (${first.customer_phone || '-'})</span></div>
             <div class="pdc-row"><span class="pdc-label">입금자명</span><span class="pdc-val">${first.depositor_name || '-'}</span></div>
             <div class="pdc-row"><span class="pdc-label">배송지</span><span class="pdc-val">${fullAddress || '주소 정보 없음'}</span></div>
@@ -1661,7 +1698,6 @@
         `;
       }).join('');
 
-      // ⭐ 쿠폰 사용내역
       const usedCoupon = findCouponByOrderNumber(first.order_number);
       const couponBlock = usedCoupon
         ? `
@@ -1675,12 +1711,17 @@
         `
         : '';
 
+      const deletedBlock = first.is_deleted
+        ? `<div style="background:#fee2e2; border:1px dashed #ef4444; border-radius:8px; padding:12px; margin-bottom:16px; font-size:13px; color:#991b1b; font-weight:bold; text-align:center;">🚫 사용자에 의해 숨김 처리된 주문입니다.</div>`
+        : '';
+
       const modal = document.createElement('div');
       modal.className = 'modal-backdrop';
       modal.innerHTML = `
         <div class="modal-box" style="max-width: 600px;">
           <h2 style="margin-bottom:4px;">주문 상세</h2>
           <p style="font-size:12px; color:#6b7280; margin:0 0 16px;">${displayNum}</p>
+          ${deletedBlock}
           <div style="background:#f9fafb; border-radius:8px; padding:12px; font-size:13px; color:#374151; line-height:1.7; margin-bottom:16px;">
             <div style="display:flex; justify-content:space-between; margin-bottom:6px;"><span style="color:#6b7280;">주문일시 (KST)</span><span style="font-weight:600;">${dateStr}</span></div>
             <div style="display:flex; justify-content:space-between; margin-bottom:6px; align-items:center;"><span style="color:#6b7280;">상태</span><span class="badge" style="background:${statusColor(first.status)};">${first.status || '-'}</span></div>
@@ -1778,8 +1819,7 @@
       if (selectedOrderKeys.size > 0) ordersToExport = allOrdersRaw.filter(o => { const key = o.order_number || `single_${o.id}`; return selectedOrderKeys.has(key); });
       else ordersToExport = allOrdersRaw;
       if (!ordersToExport || ordersToExport.length === 0) { alert('다운로드할 주문이 없습니다.'); return; }
-      // ⭐ 사용 쿠폰 정보 컬럼 추가
-      const header = ['주문번호','주문일시(KST)','상태','주문자','연락처','입금자명','우편번호','주소','상세주소','요청사항','제품번호','상품명','가격','수량','총금액','배송비','색상','사이즈','밑단','기타옵션','택배사','운송장번호','사용쿠폰명','쿠폰할인','쿠폰코드'];
+      const header = ['주문번호','주문일시(KST)','상태','숨김여부','주문자','연락처','입금자명','우편번호','주소','상세주소','요청사항','제품번호','상품명','가격','수량','총금액','배송비','색상','사이즈','밑단','기타옵션','택배사','운송장번호','사용쿠폰명','쿠폰할인','쿠폰코드'];
       const rows = [header];
       ordersToExport.forEach(o => {
         const usedCoupon = findCouponByOrderNumber(o.order_number);
@@ -1787,6 +1827,7 @@
           o.order_number || '',
           formatKST(o.created_at, { full: true }),
           o.status || '',
+          o.is_deleted ? '숨김(사용자삭제)' : '정상',
           o.customer_name || '',
           o.customer_phone || '',
           o.depositor_name || '',
@@ -2163,7 +2204,6 @@
       return (prefix || 'ADMIN') + '-' + rand;
     }
 
-    // ⭐ 쿠폰명 저장 추가
     async function issueCouponToMember(memberId, type, value, days, name) {
       const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
       const code = genCouponCode(type === 'percent' ? 'PCT' : 'WON');

@@ -169,7 +169,7 @@
 
     let currentGroups = {};
     let selectedKeys = new Set();
-    let usedCouponsByOrder = {}; // ⭐ 주문번호별 사용 쿠폰 매핑
+    let usedCouponsByOrder = {};
 
     function statusColor(s) {
       return { '입금대기':'#f59e0b', '입금완료':'#059669', '배송중':'#1976d2', '완료':'#6b7280', '취소':'#dc2626' }[s] || '#9ca3af';
@@ -201,11 +201,13 @@
 
       const queries = [];
 
+      // ⭐ 조회 시 is_deleted가 false이거나 null인 데이터만 가져옴
       if (name && phone) {
         queries.push(
           db.from('orders').select('*')
             .eq('customer_name', name)
             .eq('customer_phone', phone)
+            .or('is_deleted.eq.false,is_deleted.is.null')
             .order('created_at', { ascending: false })
         );
       }
@@ -215,6 +217,7 @@
           db.from('orders').select('*')
             .eq('customer_name', name)
             .eq('depositor_name', name)
+            .or('is_deleted.eq.false,is_deleted.is.null')
             .order('created_at', { ascending: false })
         );
       }
@@ -223,6 +226,7 @@
         queries.push(
           db.from('orders').select('*')
             .eq('customer_name', name)
+            .or('is_deleted.eq.false,is_deleted.is.null')
             .order('created_at', { ascending: false })
         );
       }
@@ -244,7 +248,6 @@
       );
     }
 
-    // ⭐ 주문에 사용된 쿠폰 정보 로드 (본인 주문번호만)
     async function loadUsedCoupons(orderNumbers) {
       const map = {};
       if (!orderNumbers || orderNumbers.length === 0) return map;
@@ -298,7 +301,6 @@
         if (o.order_number) orderNumbers.push(o.order_number);
       });
 
-      // ⭐ 사용 쿠폰 로드
       usedCouponsByOrder = await loadUsedCoupons([...new Set(orderNumbers)]);
 
       renderHistory();
@@ -322,7 +324,6 @@
         const totalAll = productTotal + shippingTotal;
         const isChecked = selectedKeys.has(key);
 
-        // ⭐ 사용 쿠폰 표시
         const usedCoupon = first.order_number ? usedCouponsByOrder[first.order_number] : null;
         const couponBox = usedCoupon ? `
           <div class="history-coupon-box">
@@ -383,20 +384,21 @@
       updateBulkActions();
     }
 
+    // ⭐ 단일 주문 삭제 (Soft Delete)
     async function deleteOrderGroup(items) {
       if (!items || items.length === 0) return 0;
       const first = items[0];
 
       if (first.order_number) {
         const { data, error } = await db.from('orders')
-          .delete()
+          .update({ is_deleted: true })
           .eq('order_number', first.order_number)
           .select();
         if (error) throw error;
         return Array.isArray(data) ? data.length : 0;
       } else {
         const { data, error } = await db.from('orders')
-          .delete()
+          .update({ is_deleted: true })
           .eq('id', first.id)
           .select();
         if (error) throw error;
@@ -421,7 +423,7 @@
           if (!items) return;
           const first = items[0];
           const label = first.order_number ? `주문번호 "${first.order_number}"` : `해당 주문`;
-          if (!confirm(`${label} 을(를) 삭제할까요?\n삭제된 내역은 복구할 수 없습니다.`)) return;
+          if (!confirm(`${label} 을(를) 삭제할까요?\n삭제된 내역은 고객센터(관리자)를 통해 복구 요청이 가능합니다.`)) return;
 
           const originalText = btn.textContent;
           btn.disabled = true;
@@ -430,7 +432,7 @@
           try {
             const deletedCount = await deleteOrderGroup(items);
             if (deletedCount === 0) {
-              throw new Error('삭제 권한이 없거나 이미 삭제된 주문입니다. (Supabase RLS DELETE 정책을 확인하세요)');
+              throw new Error('삭제할 주문이 없거나 이미 삭제된 주문입니다.');
             }
             alert('✅ 주문이 삭제되었습니다.');
             loadOrderHistory();
@@ -451,9 +453,10 @@
       updateBulkActions();
     });
 
+    // ⭐ 선택 주문 일괄 삭제 (Soft Delete)
     deleteSelectedBtn.addEventListener('click', async () => {
       if (selectedKeys.size === 0) return;
-      if (!confirm(`선택한 ${selectedKeys.size}건의 주문을 삭제할까요?\n삭제된 내역은 복구할 수 없습니다.`)) return;
+      if (!confirm(`선택한 ${selectedKeys.size}건의 주문을 삭제할까요?\n삭제된 내역은 고객센터(관리자)를 통해 복구 요청이 가능합니다.`)) return;
 
       deleteSelectedBtn.disabled = true;
       deleteSelectedBtn.textContent = '삭제 중...';
@@ -473,7 +476,7 @@
       if (orderNumbers.length > 0) {
         try {
           const { data, error } = await db.from('orders')
-            .delete()
+            .update({ is_deleted: true })
             .in('order_number', orderNumbers)
             .select();
           if (error) throw error;
@@ -487,7 +490,7 @@
       if (singleIds.length > 0) {
         try {
           const { data, error } = await db.from('orders')
-            .delete()
+            .update({ is_deleted: true })
             .in('id', singleIds)
             .select();
           if (error) throw error;
@@ -501,9 +504,9 @@
       deleteSelectedBtn.disabled = false;
 
       if (errorMsg) {
-        alert('❌ 일부 삭제 실패:\n' + errorMsg + '\n⚠️ Supabase orders 테이블의 DELETE 권한(RLS)을 확인하세요.');
+        alert('❌ 일부 삭제 실패:\n' + errorMsg);
       } else if (successCount === 0) {
-        alert('⚠️ 삭제된 항목이 없습니다.\nSupabase orders 테이블의 DELETE 권한(RLS)을 확인하세요.');
+        alert('⚠️ 삭제된 항목이 없습니다.');
       } else {
         alert(`✅ ${successCount}건의 주문이 삭제되었습니다.`);
       }
