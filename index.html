@@ -33,6 +33,44 @@
     #promo-video-inner iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; display: block; }
     @media (max-width: 768px) { #promo-video-wrap { padding: 0 12px; margin-top: 12px; } #promo-video-inner { border-radius: 8px; } }
 
+    /* NEW ITEM 섹션 표기 */
+    #new-item-heading {
+      display: none;
+      max-width: 1400px;
+      margin: 24px auto 0;
+      padding: 0 16px;
+      box-sizing: border-box;
+      width: 100%;
+      align-items: center;
+      gap: 10px;
+    }
+    #new-item-heading.show { display: flex; }
+    #new-item-heading .ni-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #e53935;
+      letter-spacing: 1px;
+      margin: 0;
+    }
+    #new-item-heading .ni-sub {
+      font-size: 13px;
+      font-weight: 500;
+      color: #888;
+      margin: 0;
+    }
+    #new-item-heading .ni-line {
+      flex: 1;
+      height: 2px;
+      background: linear-gradient(to right, #e53935, transparent);
+      border-radius: 2px;
+    }
+    body.dark #new-item-heading .ni-sub { color: #aaa; }
+    @media (max-width: 768px) {
+      #new-item-heading { margin-top: 16px; padding: 0 12px; }
+      #new-item-heading .ni-title { font-size: 16px; }
+      #new-item-heading .ni-sub { font-size: 11px; }
+    }
+
     #product-container { max-width: 1400px; margin: 0 auto; padding: 0 16px; box-sizing: border-box; width: 100%; margin-top: 16px; }
     #product-container.no-banner { margin-top: 24px; }
     @media (max-width: 768px) { #product-container { margin-top: 12px; } }
@@ -81,6 +119,12 @@
 
   <div id="promo-video-wrap">
     <div id="promo-video-inner"></div>
+  </div>
+
+  <div id="new-item-heading">
+    <h2 class="ni-title">NEW ITEM</h2>
+    <span class="ni-sub">새로 입고된 신상품</span>
+    <span class="ni-line"></span>
   </div>
 
   <main id="product-container">
@@ -265,6 +309,13 @@
       }, { passive: true });
     })();
 
+    // ⭐ NEW ITEM 헤딩 표시/숨김
+    function toggleNewItemHeading(show) {
+      const el = document.getElementById('new-item-heading');
+      if (!el) return;
+      el.classList.toggle('show', !!show);
+    }
+
     async function loadProducts() {
       const list = document.getElementById('product-list');
       // ⭐ 일반회원용: target_grade = 'all' 인 상품만 표시
@@ -273,10 +324,16 @@
       if (!data || data.length === 0) {
         list.innerHTML = '<p>등록된 상품이 없습니다.</p>';
         document.getElementById('pagination').innerHTML = '';
+        toggleNewItemHeading(false);
         return;
       }
       allProducts = data;
       currentPage = 1;
+
+      // ⭐ 신규 상품 존재 여부 확인 후 NEW ITEM 표기
+      const hasNew = allProducts.some(p => isNewProduct(p));
+      toggleNewItemHeading(hasNew);
+
       applyGridColumns();
       renderPage();
     }
