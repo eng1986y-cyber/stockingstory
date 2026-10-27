@@ -1,13 +1,34 @@
 // ===== 공통 유틸 =====
 
-// ⭐ 페이지 판별
 const _pathName = location.pathname.split('/').pop().replace('.html','') || 'index';
 const _isIndex = (_pathName === '' || _pathName === 'index');
 const _isAdmin = (_pathName === 'admin' || _pathName === 'edit');
+const _isWholesale = (_pathName === 'wholesale');
+const _isVip = (_pathName === 'vip');
 const _isDark = !_isIndex && !_isAdmin;
 
 if (_isDark) {
   document.documentElement.style.background = '#0a0a0a';
+}
+
+// ⭐ 등급별 할인율
+const GRADE_DISCOUNT = { '일반회원': 0, '도매회원': 50, 'VIP회원': 30 };
+const GRADE_SHIPPING = {
+  '도매회원': { method: '해운', fee: '착불' },
+  'VIP회원': { method: '택배', fee: '무료' },
+};
+
+function getMemberGrade() {
+  try {
+    const m = JSON.parse(localStorage.getItem('member') || 'null');
+    return m?.grade || '일반회원';
+  } catch { return '일반회원'; }
+}
+
+function applyGradeDiscount(price) {
+  const grade = getMemberGrade();
+  const rate = GRADE_DISCOUNT[grade] || 0;
+  return Math.round(Number(price) * (100 - rate) / 100);
 }
 
 (function() {
@@ -218,6 +239,9 @@ if (_isDark) {
     #mobile-bottom-nav.nav-count-6 .bottom-nav-item { padding: 0 1px; gap: 2px; }
     #mobile-bottom-nav.nav-count-6 .bottom-nav-item .nav-icon { width: 18px; height: 18px; }
     #mobile-bottom-nav.nav-count-6 .bottom-nav-item > span { font-size: 9px; }
+    #mobile-bottom-nav.nav-count-7 .bottom-nav-item { padding: 0 1px; gap: 2px; }
+    #mobile-bottom-nav.nav-count-7 .bottom-nav-item .nav-icon { width: 16px; height: 16px; }
+    #mobile-bottom-nav.nav-count-7 .bottom-nav-item > span { font-size: 8px; }
   `;
   document.head.appendChild(style);
 })();
@@ -335,7 +359,6 @@ async function refreshFooterCache() {
   } catch (e) {}
 }
 
-// ⭐⭐⭐ 방문 기록 (visits 테이블에 insert) ⭐⭐⭐
 function getOrCreateSessionId() {
   try {
     let sid = localStorage.getItem('visitor_sid');
@@ -368,7 +391,6 @@ async function recordVisit() {
   } catch (e) {}
 }
 
-// ⭐⭐⭐ 푸터 렌더 (캐시 없으면 서버 요청해서 다시 렌더) ⭐⭐⭐
 let _footerRenderCount = 0;
 
 function renderFooter() {
@@ -394,7 +416,6 @@ function renderFooter() {
 
   if (!owner && !phone && !email && !address && !business && !text && !hasSns) {
     wrap.style.display = 'none';
-    // ⭐ 캐시가 비었으면 서버에서 다시 받아와 재렌더 (무한루프 방지: 2회까지만)
     if (_footerRenderCount < 2) {
       _footerRenderCount++;
       refreshFooterCache().then(() => {
@@ -456,7 +477,7 @@ async function verifyMemberStatus() {
   const client = getSupabaseClient();
   if (!client) return true;
   try {
-    const { data, error } = await client.from('members').select('id, status').eq('id', member.id).maybeSingle();
+    const { data, error } = await client.from('members').select('id, status, grade').eq('id', member.id).maybeSingle();
     if (error) return true;
     if (!data) {
       localStorage.removeItem('member');
@@ -478,15 +499,15 @@ async function verifyMemberStatus() {
       return false;
     }
     member.status = status;
+    member.grade = data.grade || member.grade || '일반회원';
     localStorage.setItem('member', JSON.stringify(member));
     return true;
   } catch (e) { return true; }
 }
 
-// ===== 헤더 및 하단 탭바 렌더 =====
 let _headerRendered = false;
 
-function buildBottomNav(current, isMember, svgIcons) {
+function buildBottomNav(current, isMember, svgIcons, memberGrade) {
   const commonTabs = `
     <a href="index.html" data-nav="home" class="bottom-nav-item ${current === 'home' ? 'active' : ''}">
       ${svgIcons.home}<span>홈</span>
@@ -500,6 +521,16 @@ function buildBottomNav(current, isMember, svgIcons) {
       ${svgIcons.orders}<span>주문조회</span>
     </a>
   `;
+
+  const gradeTabs = (isMember && memberGrade === '도매회원')
+    ? `<a href="wholesale.html" data-nav="wholesale" class="bottom-nav-item ${current === 'wholesale' ? 'active' : ''}">
+         ${svgIcons.wholesale}<span>도매</span>
+       </a>`
+    : (isMember && memberGrade === 'VIP회원')
+    ? `<a href="vip.html" data-nav="vip" class="bottom-nav-item ${current === 'vip' ? 'active' : ''}">
+         ${svgIcons.vip}<span>VIP</span>
+       </a>`
+    : '';
 
   const memberTabs = isMember
     ? `<a href="myorders.html" data-nav="myorders" class="bottom-nav-item ${current === 'myorders' ? 'active' : ''}">
@@ -518,7 +549,8 @@ function buildBottomNav(current, isMember, svgIcons) {
          ${svgIcons.signup}<span>회원가입</span>
        </a>`;
 
-  return { html: commonTabs + memberTabs, count: isMember ? 6 : 5 };
+  const count = 3 + (gradeTabs ? 1 : 0) + (isMember ? 3 : 2);
+  return { html: commonTabs + gradeTabs + memberTabs, count };
 }
 
 function updateBottomNavBadge() {
@@ -562,17 +594,14 @@ function renderHeader(current) {
     bottomNav = document.createElement('nav');
     bottomNav.id = 'mobile-bottom-nav';
   }
-  if (wrapper) {
-    if (bottomNav.parentNode !== wrapper) wrapper.appendChild(bottomNav);
-    else wrapper.appendChild(bottomNav);
-  } else if (!bottomNav.parentNode) {
-    document.body.appendChild(bottomNav);
-  }
+  if (wrapper) wrapper.appendChild(bottomNav);
+  else if (!bottomNav.parentNode) document.body.appendChild(bottomNav);
 
   const member = localStorage.getItem('member');
   let m = null;
   try { m = member ? JSON.parse(member) : null; } catch { m = null; }
   const isMember = !!(m && m.id);
+  const memberGrade = m?.grade || '일반회원';
 
   const svgIcons = {
     home: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
@@ -582,10 +611,12 @@ function renderHeader(current) {
     mypage: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
     logout: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`,
     login: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>`,
-    signup: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>`
+    signup: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>`,
+    wholesale: `<svg class="nav-icon" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>`,
+    vip: `<svg class="nav-icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
   };
 
-  const { html: navHtml, count } = buildBottomNav(current, isMember, svgIcons);
+  const { html: navHtml, count } = buildBottomNav(current, isMember, svgIcons, memberGrade);
   bottomNav.className = `nav-count-${count}`;
   bottomNav.innerHTML = navHtml;
   updateBottomNavBadge();
@@ -617,8 +648,15 @@ function renderHeader(current) {
     white-space: nowrap; box-sizing: border-box; flex-shrink: 0;
   `;
 
+  const gradeBtn = (memberGrade === '도매회원')
+    ? `<a href="wholesale.html" data-nav="wholesale" style="${btnStyle(current === 'wholesale')}">🏭 도매전용</a>`
+    : (memberGrade === 'VIP회원')
+    ? `<a href="vip.html" data-nav="vip" style="${btnStyle(current === 'vip')}">⭐ VIP전용</a>`
+    : '';
+
   const userBtns = isMember
-    ? `<a href="mypage.html" data-nav="mypage" style="${btnStyle(current === 'mypage')}">내정보</a>
+    ? `${gradeBtn}
+       <a href="mypage.html" data-nav="mypage" style="${btnStyle(current === 'mypage')}">내정보</a>
        <a href="myorders.html" data-nav="myorders" style="${btnStyle(current === 'myorders')}">주문내역</a>
        <a href="#" id="logout-btn" style="${btnStyle(false)}">로그아웃</a>`
     : `<a href="login.html" data-nav="login" style="${btnStyle(current === 'login')}">로그인</a>
@@ -626,7 +664,7 @@ function renderHeader(current) {
 
   const nameRow = `
     <div class="header-name-row" style="text-align:center; font-size:13px; color:${theme.nameColor}; margin-bottom:12px; min-height:18px; line-height:18px; font-weight:500;">
-      ${isMember ? `${m.name}님` : ''}
+      ${isMember ? `${m.name}님 <span style="color:${memberGrade === '도매회원' ? '#f59e0b' : memberGrade === 'VIP회원' ? '#a855f7' : '#6b7280'}; font-weight:700;">[${memberGrade}]</span>` : ''}
     </div>
   `;
 
@@ -674,10 +712,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const existingHeader = document.getElementById('app-header');
   const existingBottomNav = document.getElementById('mobile-bottom-nav');
   const bodyChildren = Array.from(document.body.children);
-  
+
   const wrapper = document.createElement('div');
   wrapper.className = 'site-wrapper';
-  
+
   const mainScroll = document.createElement('div');
   mainScroll.className = 'site-main-scroll';
 
@@ -694,7 +732,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (existingHeader) wrapper.appendChild(existingHeader);
   wrapper.appendChild(mainScroll);
   if (existingBottomNav) wrapper.appendChild(existingBottomNav);
-  
+
   document.body.insertBefore(wrapper, document.body.firstChild);
 
   const loader = document.createElement('div');
@@ -709,21 +747,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   createScrollButtons();
 
-  // ⭐⭐⭐ 푸터 렌더 (2단계: 캐시 → 서버 재조회) ⭐⭐⭐
-  // 1차: 캐시로 즉시 그리기 (이미 캐시 있으면 바로 표시)
   renderFooter();
-  // 2차: 서버에서 최신값 받아 다시 그리기 (캐시 없거나 오래된 경우 SNS 아이콘 확실히 표시)
   refreshFooterCache().then(() => {
     renderFooter();
   });
 
-  // ⭐ 방문 기록 (통계용)
   recordVisit();
 
   const isOk = await verifyMemberStatus();
   if (!isOk) return;
 
-  const map = { 'index': 'home', 'login': 'login', 'signup': 'signup', 'cart': 'cart', 'orders': 'orders', 'product': 'product', 'mypage': 'mypage', 'myorders': 'myorders' };
+  const map = { 'index': 'home', 'login': 'login', 'signup': 'signup', 'cart': 'cart', 'orders': 'orders', 'product': 'product', 'mypage': 'mypage', 'myorders': 'myorders', 'wholesale': 'wholesale', 'vip': 'vip' };
   const current = map[_pathName] || 'home';
 
   if (document.getElementById('app-header')) renderHeader(current);

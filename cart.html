@@ -14,6 +14,17 @@
     .rule-card .rule-text { color: #aaa; }
     .rule-card .rule-status { font-weight: 700; }
 
+    .grade-info-card {
+      background: linear-gradient(135deg, #1a1a1a 0%, #222 100%);
+      border: 1px solid #333; border-radius: 8px; padding: 12px 16px;
+      margin-bottom: 16px; font-size: 13px; color: #e5e7eb;
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+    }
+    .grade-info-card.wholesale { background: linear-gradient(135deg, #78350f 0%, #92400e 100%); border-color: #f59e0b; }
+    .grade-info-card.vip { background: linear-gradient(135deg, #581c87 0%, #6b21a8 100%); border-color: #a855f7; }
+    .grade-info-card .gi-label { font-weight: 700; }
+    .grade-info-card .gi-detail { font-size: 12px; opacity: 0.95; }
+
     .checkout-modal-backdrop { position: fixed !important; top: 0; left: 0; right: 0; bottom: 0; width: 100vw !important; height: 100vh !important; height: 100dvh !important; background: rgba(0,0,0,.8); z-index: 999999 !important; display: flex !important; align-items: flex-start !important; justify-content: center !important; padding: 10px !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch; box-sizing: border-box; }
     .checkout-modal-box { background: #151515; border: 1px solid #222; padding: 20px 16px; border-radius: 12px; width: 100% !important; max-width: 460px !important; margin: 20px auto !important; color: #e5e7eb; box-sizing: border-box; position: relative; }
     .checkout-modal-box .checkout-form { display: grid !important; gap: 10px !important; background: none !important; padding: 0 !important; border: 0 !important; max-width: none !important; width: 100% !important; }
@@ -23,22 +34,9 @@
       .checkout-modal-box { margin: 0 auto !important; border-radius: 8px !important; max-height: none !important; }
     }
 
-    /* ⭐ 쿠폰 선택 UI */
-    .coupon-picker {
-      background: #0f0f0f; border: 1px solid #2a2a2a;
-      border-radius: 8px; padding: 12px;
-      margin-top: 8px;
-    }
-    .coupon-picker .cp-title {
-      font-size: 13px; font-weight: 700; color: #fbbf24;
-      margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
-    }
-    .coupon-picker select {
-      width: 100%; padding: 10px 12px;
-      background: #151515; border: 1px solid #333;
-      border-radius: 6px; color: #e5e7eb;
-      font-family: inherit; font-size: 13px;
-    }
+    .coupon-picker { background: #0f0f0f; border: 1px solid #2a2a2a; border-radius: 8px; padding: 12px; margin-top: 8px; }
+    .coupon-picker .cp-title { font-size: 13px; font-weight: 700; color: #fbbf24; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .coupon-picker select { width: 100%; padding: 10px 12px; background: #151515; border: 1px solid #333; border-radius: 6px; color: #e5e7eb; font-family: inherit; font-size: 13px; }
     .coupon-picker select:disabled { opacity: 0.6; }
   </style>
 </head>
@@ -63,9 +61,35 @@
     let globalShipping = 0;
     let selectedIndexes = new Set();
 
+    const GRADE_DISCOUNT = { '일반회원': 0, '도매회원': 50, 'VIP회원': 30 };
+
     function getCart() { return JSON.parse(localStorage.getItem('cart') || '[]'); }
     function saveCart(cart) { localStorage.setItem('cart', JSON.stringify(cart)); }
     function getMember() { try { return JSON.parse(localStorage.getItem('member') || 'null'); } catch { return null; } }
+
+    // ⭐ 등급별 배송/할인 정책
+    function getGradePolicy() {
+      const m = getMember();
+      const grade = m?.grade || '일반회원';
+      const discountRate = GRADE_DISCOUNT[grade] || 0;
+      let shippingFee = 0;
+      let shippingLabel = '';
+      let shippingMethod = '';
+      if (grade === '도매회원') {
+        shippingFee = 0; // 착불 -> 결제 총액에는 미포함
+        shippingLabel = '착불';
+        shippingMethod = '해운';
+      } else if (grade === 'VIP회원') {
+        shippingFee = 0;
+        shippingLabel = '무료';
+        shippingMethod = '택배';
+      } else {
+        shippingFee = globalShipping;
+        shippingLabel = globalShipping > 0 ? globalShipping.toLocaleString() + '원' : '무료';
+        shippingMethod = '택배';
+      }
+      return { grade, discountRate, shippingFee, shippingLabel, shippingMethod };
+    }
 
     async function loadShipping() {
       const { data } = await db.from('settings').select('value').eq('key', 'shipping_fee').maybeSingle();
@@ -74,8 +98,25 @@
 
     const TOTAL_MIN = 6;
 
+    // ⭐ 장바구니 아이템 가격을 등급 할인 반영해서 재계산
+    function recalcCartPrices(cart) {
+      const policy = getGradePolicy();
+      cart.forEach(it => {
+        // original_price가 저장되어 있으면 그걸 기준으로 재계산 (등급이 바뀌어도 안전)
+        const basePrice = Number(it.original_price ?? it.product_price ?? 0);
+        it.original_price = basePrice;
+        it.product_price = Math.round(basePrice * (100 - policy.discountRate) / 100);
+        it.discount_rate = policy.discountRate;
+        it.member_grade = policy.grade;
+      });
+      saveCart(cart);
+      return cart;
+    }
+
     function render() {
-      const cart = getCart();
+      const cart = recalcCartPrices(getCart());
+      const policy = getGradePolicy();
+
       if (cart.length === 0) {
         listEl.innerHTML = '<p style="text-align:center; padding:40px; color:#666;">장바구니가 비어있습니다.</p>';
         summaryEl.style.display = 'none';
@@ -85,6 +126,8 @@
 
       listEl.innerHTML = cart.map((it, idx) => {
         const checked = selectedIndexes.has(idx);
+        const basePrice = Number(it.original_price ?? it.product_price);
+        const showDiscount = policy.discountRate > 0;
         return `
           <div style="background:#151515; border:1px solid ${checked ? '#10b981' : '#222'}; padding:14px; border-radius:12px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; transition:border-color .15s;">
             <input type="checkbox" class="cart-check" data-idx="${idx}" ${checked ? 'checked' : ''}>
@@ -97,6 +140,7 @@
               ${it.selected_hem ? `<br>밑단선택: ${it.selected_hem}` : ''}
               ${it.selected_other ? `<br>기타옵션: ${it.selected_other}` : ''}
               <br>
+              ${showDiscount ? `<span style="color:#9ca3af; text-decoration:line-through; font-size:12px;">${basePrice.toLocaleString()}원</span> ` : ''}
               ${Number(it.product_price).toLocaleString()}원 ×
               <span style="display:inline-flex; align-items:center; gap:2px; margin:0 4px;">
                 <button class="qty-minus" data-idx="${idx}" style="width:26px; height:26px; background:#1a1a1a; color:#e5e7eb; border:1px solid #333; border-radius:4px; cursor:pointer; font-weight:700; font-size:14px; font-family:inherit;">−</button>
@@ -104,6 +148,7 @@
                 <button class="qty-plus" data-idx="${idx}" style="width:26px; height:26px; background:#1a1a1a; color:#e5e7eb; border:1px solid #333; border-radius:4px; cursor:pointer; font-weight:700; font-size:14px; font-family:inherit;">+</button>
               </span>
               = <b style="color:#ef4444;">${(it.product_price * it.quantity).toLocaleString()}원</b>
+              ${showDiscount ? `<span style="background:#ef4444; color:#fff; font-size:10px; font-weight:700; padding:2px 5px; border-radius:3px; margin-left:4px;">-${policy.discountRate}%</span>` : ''}
             </div>
             <button data-idx="${idx}" class="del-btn" style="padding:8px 14px; background:#dc2626; color:#fff; border:0; border-radius:8px; cursor:pointer; font-size:13px; font-family:inherit;">삭제</button>
           </div>
@@ -114,12 +159,29 @@
       const subTotal = selectedCart.reduce((s, it) => s + it.product_price * it.quantity, 0);
       const selectedQty = selectedCart.reduce((s, it) => s + it.quantity, 0);
       const totalQty = cart.reduce((s, it) => s + it.quantity, 0);
-      const total = subTotal + (selectedCart.length > 0 ? globalShipping : 0);
+      const total = subTotal + (selectedCart.length > 0 ? policy.shippingFee : 0);
       const canOrder = selectedQty >= TOTAL_MIN;
       const allChecked = selectedIndexes.size === cart.length && cart.length > 0;
 
+      // 등급 안내 카드
+      let gradeInfoHtml = '';
+      if (policy.grade === '도매회원') {
+        gradeInfoHtml = `
+          <div class="grade-info-card wholesale">
+            <span class="gi-label">🏭 도매회원 혜택</span>
+            <span class="gi-detail">등급 할인 ${policy.discountRate}% 적용 · 배송방법: 해운 / 배송비: 착불</span>
+          </div>`;
+      } else if (policy.grade === 'VIP회원') {
+        gradeInfoHtml = `
+          <div class="grade-info-card vip">
+            <span class="gi-label">⭐ VIP회원 혜택</span>
+            <span class="gi-detail">등급 할인 ${policy.discountRate}% 적용 · 배송방법: 택배 / 배송비: 무료</span>
+          </div>`;
+      }
+
       summaryEl.style.display = 'block';
       summaryEl.innerHTML = `
+        ${gradeInfoHtml}
         <div style="background:#151515; border:1px solid #222; padding:20px; border-radius:12px; font-size:14px; line-height:1.8; color:#e5e7eb;">
           <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:12px; border-bottom:1px solid #222; margin-bottom:16px;">
             <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:14px; font-weight:600; color:#e5e7eb;">
@@ -129,14 +191,14 @@
             <span style="font-size:12px; color:#888;">전체 총 수량: ${totalQty}개</span>
           </div>
           <div class="rule-card">
-            <span class="rule-text">📦 주문 규칙: 선택 상품 총 6개 이상</span>
+            <span class="rule-text">📦 최소 주문수량은 6개입니다.<br><span style="font-size:11px;">(다른 옵션 및 디자인과 자유롭게 교차/혼합 구매가능)</span></span>
             <span class="rule-status" style="color:${canOrder ? '#10b981' : '#f59e0b'};">
               현재 ${selectedQty}개 ${canOrder ? '✅ 주문 가능' : `(${TOTAL_MIN - selectedQty}개 부족)`}
             </span>
           </div>
           <div style="text-align:right;">
             <div>선택 상품 합계: <b>${subTotal.toLocaleString()}원</b></div>
-            <div>배송비: <b>${globalShipping > 0 ? globalShipping.toLocaleString() + '원' : '무료'}</b></div>
+            <div>배송비: <b>${policy.shippingLabel}${policy.shippingMethod ? ` <span style="color:#888; font-size:11px;">(${policy.shippingMethod})</span>` : ''}</b></div>
             <hr style="border:0; border-top:1px solid #222; margin:12px 0;">
             <p style="font-size:18px; margin-bottom:16px;">총 합계: <b style="color:#ef4444; font-size:22px;">${total.toLocaleString()}원</b></p>
             <button id="checkout-btn" style="padding:14px 28px; background:${canOrder ? '#e5e7eb' : '#333'}; color:${canOrder ? '#111' : '#777'}; border:0; border-radius:8px; cursor:${canOrder ? 'pointer' : 'not-allowed'}; font-weight:600; font-size:15px; font-family:inherit;">
@@ -188,7 +250,7 @@
       });
       document.getElementById('checkout-btn').onclick = () => {
         if (selectedIndexes.size === 0) { alert('주문할 상품을 선택해주세요.'); return; }
-        if (!canOrder) { alert(`구매가능최소수량은 ${TOTAL_MIN}개입니다. 기타옵션 및 기타제품 추가해주시기 바랍니다.\n(현재: ${selectedQty}개)`); return; }
+        if (!canOrder) { alert(`최소 주문수량은 ${TOTAL_MIN}개입니다.\n(다른 옵션 및 디자인과 자유롭게 교차/혼합 구매가능)\n현재: ${selectedQty}개`); return; }
         showCheckoutModal(selectedCart);
       };
     }
@@ -210,6 +272,7 @@
     }
 
     async function showCheckoutModal(cart) {
+      const policy = getGradePolicy();
       const subTotal = cart.reduce((s, it) => s + it.product_price * it.quantity, 0);
       const m = getMember();
       const coupons = await loadUsableCoupons();
@@ -256,8 +319,8 @@
             <div id="price-summary" style="text-align:right; font-size:14px; font-weight:600; color:#ef4444; line-height:1.7; margin-top:8px;">
               <div>상품: <b id="p-subtotal">${subTotal.toLocaleString()}</b>원</div>
               <div id="p-discount-row" style="display:none;">쿠폰 할인: <b id="p-discount">0</b>원</div>
-              <div>배송비: <b>${globalShipping > 0 ? globalShipping.toLocaleString() + '원' : '무료'}</b></div>
-              <div style="font-size:17px;">총액: <b id="p-total">${(subTotal + globalShipping).toLocaleString()}</b>원</div>
+              <div>배송비: <b>${policy.shippingLabel}${policy.shippingMethod ? ` (${policy.shippingMethod})` : ''}</b></div>
+              <div style="font-size:17px;">총액: <b id="p-total">${(subTotal + policy.shippingFee).toLocaleString()}</b>원</div>
             </div>
 
             <button type="submit" style="padding:12px; background:#e5e7eb; color:#111; border:0; border-radius:8px; cursor:pointer; font-weight:600; font-family:inherit; font-size:15px;">주문 완료</button>
@@ -275,10 +338,7 @@
       };
       modal.querySelector('#close-modal').onclick = closeModal;
 
-      // ⭐ 쿠폰 선택 시 금액 갱신
       const couponSelect = modal.querySelector('#coupon-select');
-      let currentDiscount = 0;
-      let currentCouponId = null;
 
       function calcDiscount(sub, type, value) {
         if (type === 'percent') return Math.floor(sub * (Number(value) / 100));
@@ -287,19 +347,14 @@
       }
 
       function updatePriceUI() {
-        const opt = couponSelect ? couponSelect.selectedOptions[0] : null;
-        if (opt && opt.value) {
-          const type = opt.dataset.type;
-          const value = Number(opt.dataset.value);
-          currentCouponId = opt.value;
-          currentDiscount = calcDiscount(subTotal, type, value);
-        } else {
-          currentCouponId = null;
-          currentDiscount = 0;
+        let discount = 0;
+        if (couponSelect && couponSelect.value) {
+          const opt = couponSelect.selectedOptions[0];
+          discount = calcDiscount(subTotal, opt.dataset.type, Number(opt.dataset.value));
         }
-        const finalTotal = Math.max(0, subTotal - currentDiscount) + globalShipping;
-        modal.querySelector('#p-discount-row').style.display = currentDiscount > 0 ? 'block' : 'none';
-        modal.querySelector('#p-discount').textContent = currentDiscount.toLocaleString();
+        const finalTotal = Math.max(0, subTotal - discount) + policy.shippingFee;
+        modal.querySelector('#p-discount-row').style.display = discount > 0 ? 'block' : 'none';
+        modal.querySelector('#p-discount').textContent = discount.toLocaleString();
         modal.querySelector('#p-total').textContent = finalTotal.toLocaleString();
       }
 
@@ -312,7 +367,6 @@
         ev.preventDefault();
         const f = ev.target;
 
-        // 최종 할인 금액 재계산
         let couponIdToUse = null;
         let discountAmount = 0;
         if (couponSelect && couponSelect.value) {
@@ -320,22 +374,23 @@
           couponIdToUse = couponSelect.value;
           discountAmount = calcDiscount(subTotal, opt.dataset.type, Number(opt.dataset.value));
         }
-        const finalTotal = Math.max(0, subTotal - discountAmount) + globalShipping;
+        const finalTotal = Math.max(0, subTotal - discountAmount) + policy.shippingFee;
 
         const orderNumber = generateOrderNumber();
         const rows = cart.map((it, idx) => ({
           order_number: orderNumber, product_id: it.product_id, product_code: it.product_code || '', product_name: it.product_name,
           product_price: it.product_price, quantity: it.quantity,
-          total_price: idx === 0 ? Math.max(0, it.product_price * it.quantity - discountAmount) + globalShipping : it.product_price * it.quantity,
+          total_price: idx === 0 ? Math.max(0, it.product_price * it.quantity - discountAmount) + policy.shippingFee : it.product_price * it.quantity,
           customer_name: f.customer_name.value.trim(), customer_phone: f.customer_phone.value.trim(), depositor_name: f.depositor_name.value.trim(),
           memo: f.memo.value.trim(), address: f.address.value.trim(), address_detail: f.address_detail.value.trim(), postcode: f.postcode.value.trim(),
           selected_color: it.selected_color, selected_size: it.selected_size, selected_hem: it.selected_hem, selected_other: it.selected_other,
-          shipping_fee: idx === 0 ? globalShipping : 0, status: '입금대기',
+          shipping_fee: idx === 0 ? policy.shippingFee : 0,
+          grade_discount: policy.discountRate,
+          status: '입금대기',
         }));
         const { error } = await db.from('orders').insert(rows);
         if (error) { alert('❌ 주문 실패: ' + error.message); return; }
 
-        // ⭐ 쿠폰 사용 처리
         if (couponIdToUse) {
           try {
             await db.from('coupons').update({

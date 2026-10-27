@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>VIP회원 전용 - Simple life' StockingStory</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="common.js"></script>
+  <style>
+    #grade-hero { max-width: 1400px; margin: 16px auto 0; padding: 0 16px; box-sizing: border-box; width: 100%; }
+    .grade-hero-inner { background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%); border-radius: 12px; padding: 24px 28px; color: #fff; }
+    .grade-hero-inner h1 { font-size: 22px; font-weight: 800; margin: 0 0 6px; }
+    .grade-hero-inner p { font-size: 13px; margin: 0; opacity: 0.95; line-height: 1.7; }
+    .grade-hero-inner .ship-info { display: inline-block; margin-top: 10px; background: rgba(255,255,255,0.18); padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; }
+
+    #product-container { max-width: 1400px; margin: 0 auto; padding: 0 16px; box-sizing: border-box; width: 100%; margin-top: 16px; }
+    #product-list { display: grid; gap: 16px; width: 100%; box-sizing: border-box; }
+    #product-list .card { min-width: 0; display: block; box-sizing: border-box; text-decoration: none; color: inherit; position: relative; }
+    #product-list .card .thumb { width: 100%; padding-bottom: 100%; position: relative; overflow: hidden; border-radius: 10px; background-color: #f0f0f0; background-size: cover; background-position: center; }
+    #product-list .card .card-info { padding: 10px 4px; min-width: 0; }
+    #product-list .card .name { font-size: 14px; font-weight: 500; color: #222; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    body.dark #product-list .card .name { color: #e5e7eb; }
+    #product-list .card .price-wrap { margin-top: 4px; display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+    #product-list .card .original-price { font-size: 11px; color: #9ca3af; text-decoration: line-through; }
+    #product-list .card .price { color: #e53935; font-weight: 700; font-size: 15px; }
+    #product-list .card .discount-tag { position: absolute; top: 8px; left: 8px; background: #a855f7; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; z-index: 2; }
+    #pagination { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 20px; margin-bottom: 40px; flex-wrap: wrap; width: 100%; box-sizing: border-box; min-height: 50px; }
+
+    .access-denied { max-width: 420px; margin: 60px auto; text-align: center; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 40px 24px; }
+    body.dark .access-denied { background: #151515; border-color: #222; color: #e5e7eb; }
+    .access-denied h2 { font-size: 20px; margin: 0 0 8px; }
+    .access-denied p { font-size: 13px; color: #6b7280; line-height: 1.7; }
+    .access-denied a { display: inline-block; margin-top: 16px; padding: 10px 20px; background: #111827; color: #fff; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div id="denied" style="display:none;">
+    <div class="access-denied">
+      <div style="font-size:40px; margin-bottom:12px;">🔒</div>
+      <h2>VIP회원 전용 페이지</h2>
+      <p>이 페이지는 <b>VIP회원</b>만 접근할 수 있습니다.<br>일반회원 또는 비회원은 접근이 제한됩니다.</p>
+      <a href="index.html">메인으로 돌아가기</a>
+    </div>
+  </div>
+
+  <div id="page-content" style="display:none;">
+    <div id="grade-hero">
+      <div class="grade-hero-inner">
+        <h1>⭐ VIP회원 전용관</h1>
+        <p>VIP회원 전용 상품입니다. 등급 할인 <b>30%</b>가 자동 적용됩니다.</p>
+        <span class="ship-info">📦 배송방법: 택배 / 배송비: 무료</span>
+      </div>
+    </div>
+    <main id="product-container">
+      <div id="product-list">로딩중...</div>
+      <div id="pagination"></div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    window.db = supabase.createClient(
+      "https://alpdhgcipjeekzrpxlbh.supabase.co",
+      "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya"
+    );
+    const db = window.db;
+  </script>
+
+  <script>
+    function getMember() {
+      try { return JSON.parse(localStorage.getItem('member') || 'null'); } catch { return null; }
+    }
+
+    const member = getMember();
+    const grade = member?.grade || '일반회원';
+
+    if (!member || !member.id || grade !== 'VIP회원') {
+      document.getElementById('denied').style.display = 'block';
+      document.getElementById('page-content').style.display = 'none';
+    } else {
+      document.getElementById('page-content').style.display = 'block';
+    }
+
+    const isPC = () => window.innerWidth >= 769;
+    const PC_PER_PAGE = 30, PC_MAX_PAGES = 10, MOBILE_PER_PAGE = 10, MOBILE_MAX_PAGES = 5;
+    let allProducts = [], currentPage = 1;
+    const DISCOUNT_RATE = 30;
+
+    function applyGridColumns() {
+      const list = document.getElementById('product-list');
+      if (!list) return;
+      list.style.gridTemplateColumns = isPC() ? 'repeat(6, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr))';
+    }
+
+    function getPerPage() { return isPC() ? PC_PER_PAGE : MOBILE_PER_PAGE; }
+    function getMaxPages() { return isPC() ? PC_MAX_PAGES : MOBILE_MAX_PAGES; }
+
+    function bgUrl(url) {
+      if (!url) return 'none';
+      const safe = String(url).replace(/'/g, "\\'").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
+      return `url('${safe}')`;
+    }
+
+    async function loadProducts() {
+      const list = document.getElementById('product-list');
+      if (!list) return;
+      const { data, error } = await db.from('products').select('*').eq('target_grade', 'vip').order('created_at', { ascending: false });
+      if (error) { list.innerHTML = '<p>상품을 불러올 수 없습니다.</p>'; return; }
+      if (!data || data.length === 0) {
+        list.innerHTML = '<p style="color:#9ca3af;">등록된 VIP 전용 상품이 없습니다.</p>';
+        document.getElementById('pagination').innerHTML = '';
+        return;
+      }
+      allProducts = data;
+      currentPage = 1;
+      applyGridColumns();
+      renderPage();
+    }
+
+    function renderPage() {
+      const list = document.getElementById('product-list');
+      const perPage = getPerPage();
+      const start = (currentPage - 1) * perPage;
+      const items = allProducts.slice(start, start + perPage);
+
+      list.innerHTML = items.map(p => {
+        const original = Number(p.price);
+        const discounted = Math.round(original * (100 - DISCOUNT_RATE) / 100);
+        return `
+          <a class="card" href="product.html?id=${p.id}">
+            <div class="thumb" style="background-image: ${bgUrl(p.main_image)};">
+              <span class="discount-tag">-${DISCOUNT_RATE}%</span>
+            </div>
+            <div class="card-info">
+              <div class="name">${p.name}</div>
+              <div class="price-wrap">
+                <span class="original-price">${original.toLocaleString()}원</span>
+                <span class="price">${discounted.toLocaleString()}원</span>
+              </div>
+            </div>
+          </a>
+        `;
+      }).join('');
+
+      renderPagination();
+    }
+
+    function renderPagination() {
+      const el = document.getElementById('pagination');
+      const perPage = getPerPage();
+      const maxPages = getMaxPages();
+      const totalPages = Math.min(Math.ceil(allProducts.length / perPage), maxPages);
+      if (totalPages <= 1) { el.innerHTML = ''; return; }
+
+      let html = '';
+      const btnBase = 'padding:8px 14px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; font-family:inherit;';
+
+      html += `<button class="page-nav" data-page="${currentPage-1}" ${currentPage===1?'disabled':''}
+        style="${btnBase} background:${currentPage===1?'#333':'#1a1a1a'}; color:${currentPage===1?'#666':'#e5e7eb'}; border:1px solid #333;">이전</button>`;
+      for (let i = 1; i <= totalPages; i++) {
+        html += `<button class="page-num" data-page="${i}"
+          style="${btnBase} background:${i===currentPage?'#e5e7eb':'#1a1a1a'}; color:${i===currentPage?'#111':'#e5e7eb'}; border:1px solid #333;">${i}</button>`;
+      }
+      html += `<button class="page-nav" data-page="${currentPage+1}" ${currentPage===totalPages?'disabled':''}
+        style="${btnBase} background:${currentPage===totalPages?'#333':'#1a1a1a'}; color:${currentPage===totalPages?'#666':'#e5e7eb'}; border:1px solid #333;">다음</button>`;
+      el.innerHTML = html;
+
+      el.querySelectorAll('.page-num, .page-nav').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (btn.disabled) return;
+          currentPage = Number(btn.dataset.page);
+          renderPage();
+        });
+      });
+    }
+
+    if (member && grade === 'VIP회원') loadProducts();
+
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        applyGridColumns();
+        const maxP = getMaxPages();
+        const totalP = Math.min(Math.ceil(allProducts.length / getPerPage()), maxP);
+        if (currentPage > totalP) currentPage = totalP || 1;
+        if (allProducts.length) renderPage();
+      }, 200);
+    });
+  </script>
+</body>
+</html>

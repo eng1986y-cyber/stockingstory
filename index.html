@@ -40,14 +40,12 @@
     #product-list { display: grid; gap: 16px; width: 100%; box-sizing: border-box; }
     #product-list .card { min-width: 0; display: block; box-sizing: border-box; text-decoration: none; color: inherit; -webkit-transform: translate3d(0, 0, 0); transform: translate3d(0, 0, 0); -webkit-backface-visibility: hidden; backface-visibility: hidden; position: relative; }
     #product-list .card .thumb { width: 100%; padding-bottom: 100%; position: relative; overflow: hidden; border-radius: 10px; background-color: #f0f0f0; background-size: cover; background-position: center; background-repeat: no-repeat; -webkit-background-size: cover; -webkit-transform: translate3d(0, 0, 0); transform: translate3d(0, 0, 0); }
-    #product-list .card .thumb img { display: none; }
     #product-list .card .card-info { padding: 10px 4px; min-width: 0; }
     #product-list .card .name { font-size: 14px; font-weight: 500; color: #222; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     body.dark #product-list .card .name { color: #e5e7eb; }
     #product-list .card .price { color: #e53935; font-weight: 700; font-size: 15px; margin-top: 4px; }
     #product-list .card .price.locked { color: #1976d2; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
 
-    /* ⭐ NEW 배지 */
     #product-list .card .new-badge {
       position: absolute; top: 8px; left: 8px;
       background: #e53935; color: #fff;
@@ -109,7 +107,6 @@
     let allProducts = [];
     let currentPage = 1;
 
-    // ⭐ 로그인 여부
     function isLoggedIn() {
       try {
         const m = JSON.parse(localStorage.getItem('member') || 'null');
@@ -117,21 +114,17 @@
       } catch { return false; }
     }
 
-    // ⭐ 7일 이내 신상품 여부
     function isNewProduct(product) {
       if (!product || !product.created_at) return false;
       const created = new Date(product.created_at).getTime();
       if (isNaN(created)) return false;
-      const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
-      return (Date.now() - created) < sevenDaysMs;
+      return (Date.now() - created) < 7 * 24 * 60 * 60 * 1000;
     }
 
-    // ⭐ 가격 숨김 여부 (비회원 + 신상품)
     function shouldHidePrice(product) {
       return !isLoggedIn() && isNewProduct(product);
     }
 
-    /* ⭐ YouTube URL → embed URL 변환 */
     function getYouTubeEmbedUrl(url) {
       if (!url) return '';
       const s = String(url).trim();
@@ -152,20 +145,13 @@
       try {
         const { data } = await db.from('settings').select('value').eq('key', 'promo_video_url').maybeSingle();
         const url = data?.value || '';
-        if (!url) {
-          wrap.style.display = 'none';
-          inner.innerHTML = '';
-          return;
-        }
+        if (!url) { wrap.style.display = 'none'; inner.innerHTML = ''; return; }
         const embed = getYouTubeEmbedUrl(url);
         inner.innerHTML = `<iframe src="${embed}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>`;
         wrap.style.display = 'block';
-      } catch (e) {
-        wrap.style.display = 'none';
-      }
+      } catch (e) { wrap.style.display = 'none'; }
     }
 
-    /* ⭐ 배너 슬라이드 */
     const AUTO_INTERVAL = 5000;
     let bannerList = [];
     let bannerIndex = 0;
@@ -212,25 +198,16 @@
         dotsEl.innerHTML = bannerList.map((_, i) =>
           `<button type="button" class="banner-dot ${i === 0 ? 'active' : ''}" data-idx="${i}" aria-label="배너 ${i + 1}"></button>`
         ).join('');
-
         dotsEl.querySelectorAll('.banner-dot').forEach(dot => {
-          dot.addEventListener('click', () => {
-            goToBanner(Number(dot.dataset.idx));
-            restartAuto();
-          });
+          dot.addEventListener('click', () => { goToBanner(Number(dot.dataset.idx)); restartAuto(); });
         });
-
         prevBtn.onclick = () => { goToBanner(bannerIndex - 1); restartAuto(); };
         nextBtn.onclick = () => { goToBanner(bannerIndex + 1); restartAuto(); };
         startAuto();
       } else {
-        dotsEl.hidden = true;
-        prevBtn.hidden = true;
-        nextBtn.hidden = true;
-        dotsEl.innerHTML = '';
+        dotsEl.hidden = true; prevBtn.hidden = true; nextBtn.hidden = true; dotsEl.innerHTML = '';
         stopAuto();
       }
-
       bannerIndex = 0;
       goToBanner(0);
     }
@@ -288,10 +265,10 @@
       }, { passive: true });
     })();
 
-    /* ⭐ 상품 목록 */
     async function loadProducts() {
       const list = document.getElementById('product-list');
-      const { data, error } = await db.from('products').select('*').order('created_at', { ascending: false });
+      // ⭐ 일반회원용: target_grade = 'all' 인 상품만 표시
+      const { data, error } = await db.from('products').select('*').or('target_grade.eq.all,target_grade.is.null').order('created_at', { ascending: false });
       if (error) { list.innerHTML = '<p>상품을 불러올 수 없습니다.</p>'; return; }
       if (!data || data.length === 0) {
         list.innerHTML = '<p>등록된 상품이 없습니다.</p>';

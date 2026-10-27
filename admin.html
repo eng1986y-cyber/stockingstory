@@ -49,15 +49,23 @@
     .settings-col .card input, .settings-col .card textarea, .settings-col .card button { max-width: 100%; box-sizing: border-box; }
     @media (max-width: 1000px) { .settings-split { grid-template-columns: 1fr; gap: 12px; } }
 
+    /* ⭐ 상품 등록 폼 - target_grade select 포함 12컬럼 */
     #product-register-card { min-width: 0; width: 100%; }
-    #product-register-card > #product-form { display: grid !important; grid-template-columns: 0.9fr 1.2fr 0.55fr 2fr 0.9fr 0.9fr 1fr 0.9fr 0.5fr 2fr 0.5fr !important; gap: 8px; align-items: stretch; width: 100% !important; max-width: none !important; min-width: 0 !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; box-sizing: border-box; }
+    #product-register-card > #product-form {
+      display: grid !important;
+      grid-template-columns: 0.9fr 1.2fr 0.55fr 2fr 0.9fr 0.9fr 1fr 0.9fr 0.5fr 2fr 1fr 0.9fr !important;
+      gap: 8px; align-items: stretch; width: 100% !important; max-width: none !important; min-width: 0 !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; box-sizing: border-box;
+    }
     #product-register-card > #product-form input,
+    #product-register-card > #product-form select,
     #product-register-card > #product-form textarea,
     #product-register-card > #product-form button { display: block; width: 100% !important; max-width: 100% !important; min-width: 0 !important; margin: 0 !important; box-sizing: border-box; }
-    #product-register-card > #product-form input { min-height: 42px; padding: 8px 7px; font-size: 12px; }
+    #product-register-card > #product-form input,
+    #product-register-card > #product-form select { min-height: 42px; padding: 8px 7px; font-size: 12px; }
     #product-register-card > #product-form textarea { min-height: 42px; height: 42px; padding: 8px 7px; font-size: 12px; resize: vertical; }
     #product-register-card > #product-form input[name="price"] { padding-left: 4px; padding-right: 4px; }
     #product-register-card > #product-form input[name="min_qty"] { padding-left: 3px; padding-right: 3px; }
+    #product-register-card > #product-form select[name="target_grade"] { padding-left: 4px; padding-right: 4px; font-weight: 700; }
     #product-register-card > #product-form button { min-height: 42px; padding: 6px 2px; font-size: 10px; white-space: nowrap; }
 
     .form-row { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -88,7 +96,7 @@
     #admin-list-wrap { background: #f9fafb; border-radius: 8px; padding: 10px; overflow-x: auto; }
     #admin-list { display: flex; flex-direction: column; gap: 7px; min-width: 0; min-height: 338px; }
     #admin-list-wrap { min-height: 360px; box-sizing: border-box; }
-    .product-row { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px 10px; display: grid; grid-template-columns: 20px 42px minmax(180px, 1fr) 170px auto; align-items: center; gap: 10px; font-size: 13px; color: #374151; width: 100%; min-width: 720px; }
+    .product-row { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px 10px; display: grid; grid-template-columns: 20px 42px minmax(180px, 1fr) 170px auto; align-items: center; gap: 10px; font-size: 13px; color: #374151; width: 100%; min-width: 780px; }
     .product-row:hover { border-color: #d1d5db; }
     .product-check { width: 18px; height: 18px; cursor: pointer; accent-color: #111827; margin: 0; }
     .product-row img { width: 42px; height: 42px; object-fit: cover; border-radius: 6px; background: #f3f4f6; border: 1px solid #e5e7eb; }
@@ -125,7 +133,6 @@
     .row-total { color: #e53935; font-weight: 700; font-size: 13px; white-space: nowrap; }
     .row-sep { color: #d1d5db; }
 
-    /* ⭐ 삭제(숨김)된 주문 스타일 */
     .row-item.deleted-order { background: #f9fafb; opacity: 0.8; border-style: dashed; }
     .badge-deleted { background: #4b5563; color: #fff; }
 
@@ -142,16 +149,19 @@
 
     .grade-badge { padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; white-space: nowrap; }
     .grade-일반회원 { background: #6b7280; color: #fff; }
-    .grade-도매회원 { background: #2563eb; color: #fff; }
-    .grade-VIP회원 { background: #9f1239; color: #fff; }
+    .grade-도매회원 { background: #f59e0b; color: #fff; }
+    .grade-VIP회원 { background: #a855f7; color: #fff; }
 
-    /* ⭐ 쿠폰 배지 */
+    .target-badge { padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; white-space: nowrap; }
+    .target-all { background: #e5e7eb; color: #374151; }
+    .target-wholesale { background: #f59e0b; color: #fff; }
+    .target-vip { background: #a855f7; color: #fff; }
+
     .coupon-badge { padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; white-space: nowrap; }
     .coupon-active { background: #fef3c7; color: #92400e; border: 1px solid #f59e0b; }
     .coupon-used { background: #f3f4f6; color: #6b7280; }
     .coupon-expired { background: #fee2e2; color: #991b1b; }
 
-    /* ⭐ 쿠폰 사용내역 태그 */
     .coupon-used-tag {
       display: inline-flex; align-items: center; gap: 4px;
       padding: 3px 8px; border-radius: 4px;
@@ -211,10 +221,9 @@
     .modal-box .modal-actions { display: flex; gap: 8px; margin-top: 10px; }
     .modal-box .modal-actions > * { flex: 1; }
 
-    /* ⭐ 쿠폰 발급 폼 가로 폭 꽉 차게 수정 */
     #coupon-issue-form {
       display: grid !important;
-      grid-template-columns: 1.5fr 1fr 1fr 1fr 1.5fr auto !important; /* 비율 조정 */
+      grid-template-columns: 1.5fr 1fr 1fr 1fr 1.5fr auto !important;
       gap: 10px !important;
       align-items: end !important;
       width: 100% !important;
@@ -223,36 +232,13 @@
       margin: 0 !important;
     }
     #coupon-issue-form > div { min-width: 0; width: 100%; }
-    
     #coupon-issue-form select,
-    #coupon-issue-form input {
-      width: 100% !important;
-      height: 40px !important;
-      padding: 8px 12px !important;
-      font-size: 14px !important;
-      box-sizing: border-box !important;
-      background: #fff !important;
-      border: 1px solid #e5e7eb !important;
-      border-radius: 6px !important;
-      color: #111827 !important;
-    }
-    
-    #coupon-issue-form button {
-      height: 40px !important;
-      padding: 0 20px !important;
-      font-size: 14px !important;
-      white-space: nowrap !important;
-      border-radius: 6px !important;
-      box-sizing: border-box !important;
-    }
+    #coupon-issue-form input { width: 100% !important; height: 40px !important; padding: 8px 12px !important; font-size: 14px !important; box-sizing: border-box !important; background: #fff !important; border: 1px solid #e5e7eb !important; border-radius: 6px !important; color: #111827 !important; }
+    #coupon-issue-form button { height: 40px !important; padding: 0 20px !important; font-size: 14px !important; white-space: nowrap !important; border-radius: 6px !important; box-sizing: border-box !important; }
 
     @media (max-width: 1000px) {
-      #coupon-issue-form {
-        grid-template-columns: 1fr 1fr !important;
-      }
-      #coupon-issue-form button {
-        grid-column: 1 / -1 !important;
-      }
+      #coupon-issue-form { grid-template-columns: 1fr 1fr !important; }
+      #coupon-issue-form button { grid-column: 1 / -1 !important; }
     }
 
     @media (max-width: 1000px) {
@@ -270,7 +256,7 @@
       .list-search { max-width: 560px; min-width: 0; width: 100%; margin-inline: auto; }
       .bulk-actions { width: 100%; justify-content: flex-end; }
       #admin-list-wrap { padding: 6px; }
-      .product-row { min-width: 700px; }
+      .product-row { min-width: 740px; }
       .admin-layout { padding: 10px; }
       .card { padding: 14px; }
       .list-action-bar { flex-direction: column; align-items: stretch; }
@@ -303,11 +289,9 @@
     }
     .print-only { display: none; }
 
-    #order-print-detail-area,
-    #member-print-detail-area { display: none; }
+    #order-print-detail-area, #member-print-detail-area { display: none; }
     @media print {
-      #order-print-detail-area,
-      #member-print-detail-area { display: block !important; }
+      #order-print-detail-area, #member-print-detail-area { display: block !important; }
     }
     .print-detail-card { border: 1px solid #999 !important; border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; page-break-inside: avoid; font-size: 12px; line-height: 1.5; color: #111; background: #fff; }
     .print-detail-card .pdc-title { font-size: 14px; font-weight: 700; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px dashed #999; }
@@ -357,7 +341,7 @@
       <div class="admin-content">
         <section id="tab-products" class="admin-section active">
           <h1 class="page-title">상품 관리</h1>
-          <p class="page-subtitle">상품을 등록하고 목록을 관리합니다</p>
+          <p class="page-subtitle">상품을 등록하고 목록을 관리합니다 (일반 / 도매전용 / VIP전용 선택 등록)</p>
 
           <div class="product-layout">
             <div class="card" id="product-register-card">
@@ -373,6 +357,11 @@
                 <input name="other_option" placeholder="기타옵션 (쉼표)">
                 <input name="min_qty" type="number" min="1" value="1" placeholder="최소 주문수량 (기본 1)">
                 <input name="detail_images" type="text" placeholder="상세 이미지 URL">
+                <select name="target_grade" required>
+                  <option value="all">일반(전체)</option>
+                  <option value="wholesale">도매전용</option>
+                  <option value="vip">VIP전용</option>
+                </select>
                 <button type="submit" class="btn btn-primary">상품 등록</button>
               </form>
               <p id="msg" class="msg"></p>
@@ -455,7 +444,6 @@
           <div id="member-print-detail-area"></div>
         </section>
 
-        <!-- ⭐ 쿠폰 관리 -->
         <section id="tab-coupons" class="admin-section">
           <h1 class="page-title">쿠폰 관리</h1>
           <p class="page-subtitle">회원별 쿠폰을 발급하고, 발급된 쿠폰을 관리합니다</p>
@@ -654,12 +642,12 @@
               </div>
 
               <div class="card">
-                <div class="card-title">🚚 전체 배송비 설정</div>
+                <div class="card-title">🚚 전체 배송비 설정 <span class="hint">(일반회원 적용 / 도매=착불, VIP=무료)</span></div>
                 <div class="form-row">
                   <input id="global-shipping" type="number" min="0" placeholder="배송비 (0=무료)">
                   <button id="save-shipping" class="btn btn-success" style="flex:0 0 auto;">저장</button>
                 </div>
-                <p style="font-size:12px; color:#9ca3af; margin:6px 0 0;">모든 상품에 동일하게 적용됩니다</p>
+                <p style="font-size:12px; color:#9ca3af; margin:6px 0 0;">일반회원에게만 적용됩니다. (도매회원: 해운/착불, VIP회원: 택배/무료)</p>
                 <p id="shipping-msg" class="msg"></p>
               </div>
             </div>
@@ -1067,11 +1055,12 @@
         hem_option: parseList(form.hem_option.value),
         other_option: parseList(form.other_option.value),
         min_qty: Number(form.min_qty.value) || 1,
+        target_grade: form.target_grade.value || 'all',
       });
       if (error) { msg.className = 'msg error'; msg.textContent = '❌ ' + error.message; }
       else {
         msg.className = 'msg success'; msg.textContent = '✅ 등록 완료!';
-        form.reset(); form.min_qty.value = 1; loadAdminList();
+        form.reset(); form.min_qty.value = 1; form.target_grade.value = 'all'; loadAdminList();
       }
     });
 
@@ -1081,6 +1070,13 @@
     const PER_PAGE = 5;
     const MAX_PAGES = 10;
     let selectedProductIds = new Set();
+
+    function targetGradeBadge(grade) {
+      const g = grade || 'all';
+      if (g === 'wholesale') return `<span class="target-badge target-wholesale">도매</span>`;
+      if (g === 'vip') return `<span class="target-badge target-vip">VIP</span>`;
+      return `<span class="target-badge target-all">일반</span>`;
+    }
 
     async function loadAdminList() {
       const { data, error } = await db.from('products').select('*').order('created_at', { ascending: false });
@@ -1096,7 +1092,7 @@
       if (!keyword) filteredProducts = [...allProducts];
       else {
         filteredProducts = allProducts.filter((p) => {
-          const vals = [p.name, p.product_code, p.colors, p.sizes, p.hem_option, p.other_option, p.min_qty, p.price, p.id];
+          const vals = [p.name, p.product_code, p.colors, p.sizes, p.hem_option, p.other_option, p.min_qty, p.price, p.id, p.target_grade];
           return vals.some((v) => {
             const t = Array.isArray(v) ? v.join(' ') : v;
             return normalizeSearch(t).includes(keyword);
@@ -1135,6 +1131,7 @@
             <img src="${p.main_image || ''}" alt="${p.name || '상품 이미지'}" loading="lazy">
             <div class="prod-info">
               <div class="prod-name-wrap" title="${p.name || ''}">
+                ${targetGradeBadge(p.target_grade)}
                 <span class="prod-name">${p.name || '(상품명 없음)'}</span>
                 ${p.product_code ? `<span class="prod-code" title="제품번호: ${p.product_code}">${p.product_code}</span>` : ''}
               </div>
@@ -1184,6 +1181,7 @@
             colors: p.colors || [], sizes: p.sizes || [],
             hem_option: p.hem_option || [], other_option: p.other_option || [],
             min_qty: p.min_qty || 1,
+            target_grade: p.target_grade || 'all',
           });
           if (error) { alert('❌ 복사 실패: ' + error.message); btn.disabled = false; btn.textContent = '복제'; }
           else loadAdminList();
@@ -1200,6 +1198,7 @@
     }
 
     function showProductEditModal(p) {
+      const tg = p.target_grade || 'all';
       const modal = document.createElement('div');
       modal.className = 'modal-backdrop';
       modal.innerHTML = `
@@ -1215,6 +1214,11 @@
             <input name="hem_option" placeholder="밑단선택 (쉼표)" value="${(p.hem_option || []).join(',')}">
             <input name="other_option" placeholder="기타옵션 (쉼표)" value="${(p.other_option || []).join(',')}">
             <input name="min_qty" type="number" min="1" placeholder="최소 주문수량" value="${p.min_qty || 1}">
+            <select name="target_grade">
+              <option value="all" ${tg === 'all' ? 'selected' : ''}>일반(전체)</option>
+              <option value="wholesale" ${tg === 'wholesale' ? 'selected' : ''}>도매전용</option>
+              <option value="vip" ${tg === 'vip' ? 'selected' : ''}>VIP전용</option>
+            </select>
             <input name="detail_images" type="text" placeholder="상세 이미지 URL" style="grid-column: 1 / -1;" value="${(p.detail_images || []).join(', ')}">
             <div class="modal-actions" style="grid-column: 1 / -1;">
               <button type="submit" class="btn btn-primary">수정 완료</button>
@@ -1242,6 +1246,7 @@
           hem_option: parseList(f.hem_option.value),
           other_option: parseList(f.other_option.value),
           min_qty: Number(f.min_qty.value) || 1,
+          target_grade: f.target_grade.value || 'all',
         }).eq('id', p.id);
         if (error) { alert('❌ 수정 실패: ' + error.message); submitBtn.disabled = false; submitBtn.textContent = '수정 완료'; }
         else { alert('✅ 수정 완료!'); modal.remove(); loadAdminList(); }
@@ -1347,7 +1352,7 @@
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
-    // ===== 주문 (⭐ 쿠폰 사용내역 및 숨김/복구 포함) =====
+    // ===== 주문 =====
     let allOrdersRaw = [];
     let allCouponsForOrders = [];
     let selectedOrderKeys = new Set();
@@ -1438,16 +1443,19 @@
           ? `<span class="coupon-used-tag" title="쿠폰코드: ${usedCoupon.code || ''}">🎟️ ${getCouponDiscountLabel(usedCoupon)}</span>`
           : '';
 
-        // ⭐ 삭제(숨김) 여부 확인
         const isDeleted = first.is_deleted === true;
         const deletedBadge = isDeleted ? `<span class="badge badge-deleted" style="margin-left:4px;">숨김</span>` : '';
         const rowClass = isDeleted ? 'row-item deleted-order' : 'row-item';
+
+        const gradeDisc = Number(first.grade_discount || 0);
+        const gradeTag = gradeDisc > 0 ? `<span class="target-badge target-wholesale" style="margin-left:4px;">등급 -${gradeDisc}%</span>` : '';
 
         return `
           <div class="${rowClass}" data-key="${key}">
             <input type="checkbox" class="row-check order-row-check" data-key="${key}" ${isChecked ? 'checked' : ''}>
             <span class="badge" style="background:${statusColor(first.status)};">${first.status || '-'}</span>
             ${deletedBadge}
+            ${gradeTag}
             <span class="order-num">${displayNum}</span>
             <span class="row-sep">|</span>
             <span><b class="row-strong">${first.customer_name || '-'}</b> <span class="row-muted">(${first.customer_phone || '-'})</span></span>
@@ -1478,7 +1486,6 @@
       updateOrderBulkUI();
       paginateRenderedList('order-list', 'order-pagination', 'orders');
 
-      // ⭐ 복구 버튼 이벤트
       el.querySelectorAll('.order-restore').forEach(btn => {
         btn.addEventListener('click', async () => {
           const key = btn.dataset.key;
@@ -1486,21 +1493,12 @@
           if (!items || !items.length) return;
           const first = items[0];
           if (!confirm(`주문번호 "${first.order_number || first.id}" 을(를) 복구하시겠습니까?`)) return;
-          
           btn.disabled = true; btn.textContent = '복구 중...';
           let error;
-          if (first.order_number) {
-            ({ error } = await db.from('orders').update({ is_deleted: false }).eq('order_number', first.order_number));
-          } else {
-            ({ error } = await db.from('orders').update({ is_deleted: false }).eq('id', first.id));
-          }
-          if (error) {
-            alert('❌ 복구 실패: ' + error.message);
-            btn.disabled = false; btn.textContent = '복구';
-          } else {
-            alert('✅ 주문이 복구되었습니다.');
-            loadOrders(document.getElementById('order-search').value.trim() || null);
-          }
+          if (first.order_number) ({ error } = await db.from('orders').update({ is_deleted: false }).eq('order_number', first.order_number));
+          else ({ error } = await db.from('orders').update({ is_deleted: false }).eq('id', first.id));
+          if (error) { alert('❌ 복구 실패: ' + error.message); btn.disabled = false; btn.textContent = '복구'; }
+          else { alert('✅ 주문이 복구되었습니다.'); loadOrders(document.getElementById('order-search').value.trim() || null); }
         });
       });
 
@@ -1518,7 +1516,6 @@
           if (items && items.length) showOrderEditModal(key, items);
         });
       });
-      // ⭐ 완전삭제 (DB에서 완전히 삭제)
       el.querySelectorAll('.order-del').forEach(btn => {
         btn.addEventListener('click', async () => {
           const key = btn.dataset.key;
@@ -1546,7 +1543,6 @@
       updateOrderBulkUI();
     });
 
-    // ⭐ 관리자 선택 삭제도 DB에서 완전 삭제
     document.getElementById('order-bulk-del-btn').addEventListener('click', async () => {
       if (selectedOrderKeys.size === 0) return;
       if (!confirm(`선택한 ${selectedOrderKeys.size}개의 주문을 DB에서 완전히 삭제할까요?\n이 작업은 되돌릴 수 없습니다.`)) return;
@@ -1628,6 +1624,7 @@
           : '';
 
         const deletedLine = first.is_deleted ? `<div class="pdc-row"><span class="pdc-label">상태</span><span class="pdc-val" style="color:#dc2626; font-weight:bold;">사용자에 의해 숨김 처리됨</span></div>` : '';
+        const gradeLine = Number(first.grade_discount || 0) > 0 ? `<div class="pdc-row"><span class="pdc-label">등급할인</span><span class="pdc-val">${first.grade_discount}% 할인 적용</span></div>` : '';
 
         return `
           <div class="print-detail-card">
@@ -1635,6 +1632,7 @@
             <div class="pdc-row"><span class="pdc-label">주문일시</span><span class="pdc-val">${dateStr} (KST)</span></div>
             <div class="pdc-row"><span class="pdc-label">상태</span><span class="pdc-val">${first.status || '-'}</span></div>
             ${deletedLine}
+            ${gradeLine}
             <div class="pdc-row"><span class="pdc-label">주문자</span><span class="pdc-val">${first.customer_name || '-'} (${first.customer_phone || '-'})</span></div>
             <div class="pdc-row"><span class="pdc-label">입금자명</span><span class="pdc-val">${first.depositor_name || '-'}</span></div>
             <div class="pdc-row"><span class="pdc-label">배송지</span><span class="pdc-val">${fullAddress || '주소 정보 없음'}</span></div>
@@ -1715,6 +1713,13 @@
         ? `<div style="background:#fee2e2; border:1px dashed #ef4444; border-radius:8px; padding:12px; margin-bottom:16px; font-size:13px; color:#991b1b; font-weight:bold; text-align:center;">🚫 사용자에 의해 숨김 처리된 주문입니다.</div>`
         : '';
 
+      const gradeBlock = Number(first.grade_discount || 0) > 0
+        ? `<div style="background:#dbeafe; border:1px dashed #3b82f6; border-radius:8px; padding:12px; margin-bottom:16px; font-size:13px; color:#1e40af;">
+            <div style="font-weight:700; margin-bottom:4px;">🏷️ 등급 할인</div>
+            <div><b>${first.grade_discount}%</b> 등급 할인이 적용된 주문입니다.</div>
+          </div>`
+        : '';
+
       const modal = document.createElement('div');
       modal.className = 'modal-backdrop';
       modal.innerHTML = `
@@ -1722,6 +1727,7 @@
           <h2 style="margin-bottom:4px;">주문 상세</h2>
           <p style="font-size:12px; color:#6b7280; margin:0 0 16px;">${displayNum}</p>
           ${deletedBlock}
+          ${gradeBlock}
           <div style="background:#f9fafb; border-radius:8px; padding:12px; font-size:13px; color:#374151; line-height:1.7; margin-bottom:16px;">
             <div style="display:flex; justify-content:space-between; margin-bottom:6px;"><span style="color:#6b7280;">주문일시 (KST)</span><span style="font-weight:600;">${dateStr}</span></div>
             <div style="display:flex; justify-content:space-between; margin-bottom:6px; align-items:center;"><span style="color:#6b7280;">상태</span><span class="badge" style="background:${statusColor(first.status)};">${first.status || '-'}</span></div>
@@ -1819,7 +1825,7 @@
       if (selectedOrderKeys.size > 0) ordersToExport = allOrdersRaw.filter(o => { const key = o.order_number || `single_${o.id}`; return selectedOrderKeys.has(key); });
       else ordersToExport = allOrdersRaw;
       if (!ordersToExport || ordersToExport.length === 0) { alert('다운로드할 주문이 없습니다.'); return; }
-      const header = ['주문번호','주문일시(KST)','상태','숨김여부','주문자','연락처','입금자명','우편번호','주소','상세주소','요청사항','제품번호','상품명','가격','수량','총금액','배송비','색상','사이즈','밑단','기타옵션','택배사','운송장번호','사용쿠폰명','쿠폰할인','쿠폰코드'];
+      const header = ['주문번호','주문일시(KST)','상태','숨김여부','등급할인(%)','주문자','연락처','입금자명','우편번호','주소','상세주소','요청사항','제품번호','상품명','가격','수량','총금액','배송비','색상','사이즈','밑단','기타옵션','택배사','운송장번호','사용쿠폰명','쿠폰할인','쿠폰코드'];
       const rows = [header];
       ordersToExport.forEach(o => {
         const usedCoupon = findCouponByOrderNumber(o.order_number);
@@ -1828,6 +1834,7 @@
           formatKST(o.created_at, { full: true }),
           o.status || '',
           o.is_deleted ? '숨김(사용자삭제)' : '정상',
+          o.grade_discount || 0,
           o.customer_name || '',
           o.customer_phone || '',
           o.depositor_name || '',
@@ -2481,7 +2488,7 @@
     }
 
     function pathLabel(p) {
-      const map = { 'index': '홈 (index)', 'product': '상품 상세', 'cart': '장바구니', 'login': '로그인', 'signup': '회원가입', 'orders': '주문조회', 'mypage': '내정보', 'myorders': '내 주문내역' };
+      const map = { 'index': '홈 (index)', 'product': '상품 상세', 'cart': '장바구니', 'login': '로그인', 'signup': '회원가입', 'orders': '주문조회', 'mypage': '내정보', 'myorders': '내 주문내역', 'wholesale': '도매 전용', 'vip': 'VIP 전용' };
       return map[p] || p;
     }
     function escapeHtml(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c])); }
