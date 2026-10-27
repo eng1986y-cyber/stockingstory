@@ -40,18 +40,24 @@
   <script>
     const params = new URLSearchParams(location.search);
     const id = params.get('id');
+
+    // ⭐ 상품 target_grade 기준 할인/배송 정책 (회원 등급 아님)
+    const TARGET_DISCOUNT = { 'all': 0, 'wholesale': 50, 'vip': 30 };
+    const TARGET_SHIPPING = {
+      'all':       { method: '택배', feeType: 'setting' },
+      'wholesale': { method: '해운', feeType: 'collect' },
+      'vip':       { method: '택배', feeType: 'free' },
+    };
+
     let MIN_QTY = 6;
     let currentProduct = null;
     let globalShipping = 0;
     let selectedItems = [];
-    let memberGrade = '일반회원';
-    let discountRate = 0;
-    let effectiveShippingFee = 0;
-    let shippingMethodLabel = '택배';
 
+    function getMember() { try { return JSON.parse(localStorage.getItem('member') || 'null'); } catch { return null; } }
     function isLoggedIn() {
-      try { const m = JSON.parse(localStorage.getItem('member') || 'null'); return !!(m && m.id); }
-      catch { return false; }
+      const m = getMember();
+      return !!(m && m.id);
     }
     function isNewProduct(product) {
       if (!product || !product.created_at) return false;
@@ -60,34 +66,31 @@
       return (Date.now() - created) < 7 * 24 * 60 * 60 * 1000;
     }
     function shouldHidePrice(product) { return !isLoggedIn() && isNewProduct(product); }
-    function getMember() { try { return JSON.parse(localStorage.getItem('member') || 'null'); } catch { return null; } }
-
-    // ⭐ 등급별 할인/배송 정책
-    function applyGradePolicy() {
-      const m = getMember();
-      memberGrade = m?.grade || '일반회원';
-      const rateMap = { '일반회원': 0, '도매회원': 50, 'VIP회원': 30 };
-      discountRate = rateMap[memberGrade] || 0;
-
-      if (memberGrade === '도매회원') {
-        shippingMethodLabel = '해운';
-        effectiveShippingFee = 0; // 착불 -> 결제 금액에는 0
-      } else if (memberGrade === 'VIP회원') {
-        shippingMethodLabel = '택배';
-        effectiveShippingFee = 0; // 무료
-      } else {
-        shippingMethodLabel = '택배';
-        effectiveShippingFee = globalShipping; // 일반회원은 설정 배송비
-      }
-    }
 
     async function loadShippingFee() {
       const { data } = await db.from('settings').select('value').eq('key', 'shipping_fee').maybeSingle();
       globalShipping = data ? Number(data.value) || 0 : 0;
     }
 
-    function getDisplayPrice(originalPrice) {
-      return Math.round(Number(originalPrice) * (100 - discountRate) / 100);
+    // ⭐ 상품의 target_grade 기준 실효 가격/배송정보 반환
+    function getPricing(product) {
+      const tg = product.target_grade || 'all';
+      const basePrice = Number(product.price);
+      const discountRate = TARGET_DISCOUNT[tg] ?? 0;
+      const finalPrice = Math.round(basePrice * (100 - discountRate) / 100);
+      const shipPolicy = TARGET_SHIPPING[tg] || TARGET_SHIPPING.all;
+      let shippingFee = 0, shippingLabel = '', shippingMethod = shipPolicy.method;
+      if (shipPolicy.feeType === 'setting') {
+        shippingFee = globalShipping;
+        shippingLabel = globalShipping > 0 ? globalShipping.toLocaleString() + '원' : '무료';
+      } else if (shipPolicy.feeType === 'collect') {
+        shippingFee = 0;
+        shippingLabel = '착불';
+      } else {
+        shippingFee = 0;
+        shippingLabel = '무료';
+      }
+      return { targetGrade: tg, basePrice, discountRate, finalPrice, shippingFee, shippingLabel, shippingMethod };
     }
 
     async function loadProduct() {
@@ -100,8 +103,9 @@
       currentProduct = data;
       MIN_QTY = Number(data.min_qty) || 1;
 
-      // ⭐ 등급 검증: 도매/VIP 전용 상품 접근 제어
-      applyGradePolicy();
+      // ⭐ target_grade 접근 제어
+      const member = getMember();
+      const memberGrade = member?.grade || '일반회원';
       if (data.target_grade === 'wholesale' && memberGrade !== '도매회원') {
         detailEl.innerHTML = `<div style="max-width:420px; margin:40px auto; text-align:center; background:#151515; border:1px solid #222; padding:32px 20px; border-radius:12px;">
           <div style="font-size:36px; margin-bottom:12px;">🔒</div>
@@ -123,22 +127,20 @@
 
       const hidePrice = shouldHidePrice(data);
       const isNew = isNewProduct(data);
-
-      const originalPrice = Number(data.price);
-      const displayPrice = getDisplayPrice(originalPrice);
-      const hasDiscount = discountRate > 0;
+      const pricing = getPricing(data);
+      const hasDiscount = pricing.discountRate > 0;
 
       const detailImgs = (data.detail_images || []).map(url => `<img src="${url}" alt="상세" loading="lazy" style="width:100%; display:block; margin-top:8px; border-radius:8px;">`).join('');
 
-      // ⭐ 배송비 표시
+      // ⭐ 상품 target_grade 기준 배송 표시
       let shippingLabel = '';
-      if (memberGrade === '도매회원') {
+      if (pricing.targetGrade === 'wholesale') {
         shippingLabel = `<span style="color:#f59e0b; font-weight:700;">🚢 배송방법: 해운 / 배송비: 착불</span>`;
-      } else if (memberGrade === 'VIP회원') {
+      } else if (pricing.targetGrade === 'vip') {
         shippingLabel = `<span style="color:#10b981; font-weight:700;">📦 배송방법: 택배 / 배송비: 무료</span>`;
       } else {
-        shippingLabel = globalShipping > 0
-          ? `<span style="color:#888;">🚚 배송비 ${globalShipping.toLocaleString()}원</span>`
+        shippingLabel = pricing.shippingFee > 0
+          ? `<span style="color:#888;">🚚 배송비 ${pricing.shippingFee.toLocaleString()}원</span>`
           : `<span style="color:#10b981;">🚚 무료배송</span>`;
       }
 
@@ -189,8 +191,8 @@
 
       const discountInfo = hasDiscount ? `
         <div style="display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; margin-bottom:6px;">
-          <span style="color:#9ca3af; text-decoration:line-through; font-size:14px;">${originalPrice.toLocaleString()}원</span>
-          <span style="background:#ef4444; color:#fff; font-size:11px; font-weight:700; padding:2px 6px; border-radius:4px;">${memberGrade} ${discountRate}% 할인</span>
+          <span style="color:#9ca3af; text-decoration:line-through; font-size:14px;">${pricing.basePrice.toLocaleString()}원</span>
+          <span style="background:#ef4444; color:#fff; font-size:11px; font-weight:700; padding:2px 6px; border-radius:4px;">${pricing.discountRate}% 할인</span>
         </div>
       ` : '';
 
@@ -205,7 +207,7 @@
            </div>`
         : `<div style="margin:0 0 8px;">
              ${discountInfo}
-             <p style="color:#ef4444; font-weight:700; font-size:24px; margin:0;">${displayPrice.toLocaleString()}원</p>
+             <p style="color:#ef4444; font-weight:700; font-size:24px; margin:0;">${pricing.finalPrice.toLocaleString()}원</p>
            </div>`;
 
       detailEl.innerHTML = `
@@ -282,7 +284,7 @@
     }
 
     function getUnitPrice() {
-      return getDisplayPrice(currentProduct.price);
+      return getPricing(currentProduct).finalPrice;
     }
 
     function renderSelectedItems() {
@@ -351,14 +353,11 @@
       const totalQty = selectedItems.reduce((s, it) => s + it.qty, 0);
       const sub = selectedItems.reduce((s, it) => s + it.qty * getUnitPrice(), 0);
       if (totalQty === 0) { el.innerHTML = ''; return; }
-      const sum = sub + effectiveShippingFee;
-      let shipLabel = '';
-      if (memberGrade === '도매회원') shipLabel = '착불';
-      else if (memberGrade === 'VIP회원') shipLabel = '무료';
-      else shipLabel = effectiveShippingFee > 0 ? effectiveShippingFee.toLocaleString() + '원' : '무료';
+      const pricing = getPricing(currentProduct);
+      const sum = sub + pricing.shippingFee;
       el.innerHTML = `
         상품: ${sub.toLocaleString()}원<br>
-        배송비: ${shipLabel}<br>
+        배송비: ${pricing.shippingLabel}${pricing.shippingMethod ? ` (${pricing.shippingMethod})` : ''}<br>
         <span style="font-size:17px;">합계: ${sum.toLocaleString()}원</span>
       `;
     }
@@ -379,7 +378,8 @@
       if (shouldHidePrice(p)) { alert('로그인 후 이용 가능합니다.'); return; }
       if (selectedItems.length === 0) { alert('옵션을 선택해주세요.'); return; }
       const totalQty = selectedItems.reduce((s, it) => s + it.qty, 0);
-      const unitPrice = getUnitPrice();
+      const pricing = getPricing(p);
+      const unitPrice = pricing.finalPrice;
 
       if (mode === 'cart') {
         const cart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -389,10 +389,17 @@
           if (dupIdx >= 0) { cart[dupIdx].quantity += sel.qty; merged++; }
           else {
             cart.push({
-              product_id: p.id, product_code: p.product_code || '', product_name: p.name,
-              product_price: unitPrice, original_price: Number(p.price),
-              discount_rate: discountRate, member_grade: memberGrade,
-              main_image: p.main_image, quantity: sel.qty,
+              product_id: p.id,
+              product_code: p.product_code || '',
+              product_name: p.name,
+              // ⭐ original_price(정가)와 target_grade를 저장 → 장바구니에서 상품 등급 기준 재계산
+              original_price: Number(p.price),
+              product_price: unitPrice,
+              target_grade: pricing.targetGrade,
+              discount_rate: pricing.discountRate,
+              min_qty: Number(p.min_qty) || 1,
+              main_image: p.main_image,
+              quantity: sel.qty,
               selected_color: sel.color, selected_size: sel.size, selected_hem: sel.hem, selected_other: sel.other,
             });
             added++;
@@ -407,13 +414,23 @@
         renderSelectedItems();
         return;
       }
+
+      // 최소 수량 체크
       if (MIN_QTY > 1 && totalQty < MIN_QTY) {
         alert(`최소 주문수량은 ${MIN_QTY}개입니다.\n(다른 옵션 및 디자인과 자유롭게 교차/혼합 구매가능)\n현재: ${totalQty}개`);
         return;
       }
+
       const items = selectedItems.map(sel => ({
-        product_id: p.id, product_code: p.product_code || '', product_name: p.name,
-        product_price: unitPrice, quantity: sel.qty,
+        product_id: p.id,
+        product_code: p.product_code || '',
+        product_name: p.name,
+        product_price: unitPrice,
+        original_price: Number(p.price),
+        target_grade: pricing.targetGrade,
+        discount_rate: pricing.discountRate,
+        min_qty: Number(p.min_qty) || 1,
+        quantity: sel.qty,
         selected_color: sel.color, selected_size: sel.size, selected_hem: sel.hem, selected_other: sel.other,
       }));
       showCheckoutModal(items);
@@ -437,15 +454,14 @@
 
     async function showCheckoutModal(items) {
       const subTotal = items.reduce((s, it) => s + it.product_price * it.quantity, 0);
+      const pricing = getPricing(currentProduct);
+      // 이 상품 하나만 주문하므로 배송비 1회
+      const shippingFee = pricing.shippingFee;
+
       const m = getMember();
       const coupons = await loadUsableCoupons();
       const inputStyle = 'width:100%; padding:10px 12px; background:#0f0f0f; border:1px solid #2a2a2a; border-radius:8px; color:#e5e7eb; font-family:inherit; font-size:14px; box-sizing:border-box;';
       const labelStyle = 'font-size:13px; font-weight:600; color:#ccc; display:block; margin-bottom:4px;';
-
-      let shippingDisplay = '';
-      if (memberGrade === '도매회원') shippingDisplay = '착불 (해운)';
-      else if (memberGrade === 'VIP회원') shippingDisplay = '무료 (택배)';
-      else shippingDisplay = effectiveShippingFee > 0 ? effectiveShippingFee.toLocaleString() + '원' : '무료';
 
       const modal = document.createElement('div');
       modal.className = 'checkout-modal-backdrop';
@@ -486,8 +502,8 @@
             <div id="price-summary" style="text-align:right; font-size:14px; font-weight:600; color:#ef4444; line-height:1.7; margin-top:8px;">
               <div>상품: <b id="p-subtotal">${subTotal.toLocaleString()}</b>원</div>
               <div id="p-discount-row" style="display:none;">쿠폰 할인: <b id="p-discount">0</b>원</div>
-              <div>배송비: <b>${shippingDisplay}</b></div>
-              <div style="font-size:17px;">총액: <b id="p-total">${(subTotal + effectiveShippingFee).toLocaleString()}</b>원</div>
+              <div>배송비: <b>${pricing.shippingLabel}${pricing.shippingMethod ? ` (${pricing.shippingMethod})` : ''}</b></div>
+              <div style="font-size:17px;">총액: <b id="p-total">${(subTotal + shippingFee).toLocaleString()}</b>원</div>
             </div>
 
             <button type="submit" style="padding:12px; background:#e5e7eb; color:#111; border:0; border-radius:8px; cursor:pointer; font-weight:600; font-family:inherit; font-size:15px;">주문 완료</button>
@@ -519,7 +535,7 @@
           const opt = couponSelect.selectedOptions[0];
           discount = calcDiscount(subTotal, opt.dataset.type, Number(opt.dataset.value));
         }
-        const finalTotal = Math.max(0, subTotal - discount) + effectiveShippingFee;
+        const finalTotal = Math.max(0, subTotal - discount) + shippingFee;
         modal.querySelector('#p-discount-row').style.display = discount > 0 ? 'block' : 'none';
         modal.querySelector('#p-discount').textContent = discount.toLocaleString();
         modal.querySelector('#p-total').textContent = finalTotal.toLocaleString();
@@ -541,20 +557,33 @@
           couponIdToUse = couponSelect.value;
           discountAmount = calcDiscount(subTotal, opt.dataset.type, Number(opt.dataset.value));
         }
-        const finalTotal = Math.max(0, subTotal - discountAmount) + effectiveShippingFee;
+        const finalTotal = Math.max(0, subTotal - discountAmount) + shippingFee;
 
         const orderNumber = generateOrderNumber();
+        // ⭐ 이 상품 1종 주문: 첫 행에 쿠폰할인·배송비 부과
         const rows = items.map((it, idx) => ({
-          order_number: orderNumber, product_id: it.product_id, product_code: it.product_code,
-          product_name: it.product_name, product_price: it.product_price, quantity: it.quantity,
-          total_price: idx === 0 ? Math.max(0, it.product_price * it.quantity - discountAmount) + effectiveShippingFee : it.product_price * it.quantity,
-          customer_name: f.customer_name.value.trim(), customer_phone: f.customer_phone.value.trim(),
-          depositor_name: f.depositor_name.value.trim(), memo: f.memo.value.trim(),
-          address: f.address.value.trim(), address_detail: f.address_detail.value.trim(), postcode: f.postcode.value.trim(),
-          selected_color: it.selected_color, selected_size: it.selected_size,
-          selected_hem: it.selected_hem, selected_other: it.selected_other,
-          shipping_fee: idx === 0 ? effectiveShippingFee : 0,
-          grade_discount: discountRate,
+          order_number: orderNumber,
+          product_id: it.product_id,
+          product_code: it.product_code,
+          product_name: it.product_name,
+          product_price: it.product_price,
+          quantity: it.quantity,
+          total_price: idx === 0
+            ? Math.max(0, it.product_price * it.quantity - discountAmount) + shippingFee
+            : it.product_price * it.quantity,
+          customer_name: f.customer_name.value.trim(),
+          customer_phone: f.customer_phone.value.trim(),
+          depositor_name: f.depositor_name.value.trim(),
+          memo: f.memo.value.trim(),
+          address: f.address.value.trim(),
+          address_detail: f.address_detail.value.trim(),
+          postcode: f.postcode.value.trim(),
+          selected_color: it.selected_color,
+          selected_size: it.selected_size,
+          selected_hem: it.selected_hem,
+          selected_other: it.selected_other,
+          shipping_fee: idx === 0 ? shippingFee : 0,
+          grade_discount: it.discount_rate || 0,
           status: '입금대기',
         }));
         const { error } = await db.from('orders').insert(rows);
@@ -600,12 +629,9 @@
             <button id="copy-order-number" style="padding:3px 8px; background:#222; color:#e5e7eb; border:1px solid #333; border-radius:4px; cursor:pointer; font-size:11px; font-family:inherit;">복사</button>
           </div>
           <hr style="border:0; border-top:1px solid #222; margin:8px 0;">
-          <b>입금 계좌 안내</b><br>
-          은행: <b>○○은행</b><br>
-          계좌: <b>123-456-789012</b>
+          <b>입금 계좌 안내</b><br>은행: <b>○○은행</b><br>계좌: <b>123-456-789012</b>
           <button id="copy-account" style="margin-left:6px; padding:3px 8px; background:#222; color:#e5e7eb; border:1px solid #333; border-radius:4px; cursor:pointer; font-size:11px; font-family:inherit;">복사</button>
-          <br>예금주: <b>홍길동</b><br>
-          입금액: <b>${total.toLocaleString()}원</b>
+          <br>예금주: <b>홍길동</b><br>입금액: <b>${total.toLocaleString()}원</b>
         </div>
         <p style="font-size:12px; color:#666; margin-bottom:16px;">주문번호를 꼭 저장해두세요.</p>
         <button id="go-main" style="width:100%; padding:12px; background:#e5e7eb; color:#111; border:0; border-radius:8px; cursor:pointer; font-weight:600; font-family:inherit;">메인으로</button>
