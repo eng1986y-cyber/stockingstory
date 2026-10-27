@@ -62,6 +62,47 @@
     .history-price-summary .price-row.total { margin-top: 8px; padding-top: 8px; border-top: 1px dashed #ddd; font-weight: 700; font-size: 16px; color: #e53935; }
     body.dark .history-price-summary .price-row.total { border-top-color: #333; color: #ef4444; }
 
+    /* ⭐ 입금계좌 박스 */
+    .history-account-box {
+      margin-top: 12px;
+      padding: 12px 14px;
+      background: #fef9e7;
+      border: 1px dashed #f59e0b;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #78350f;
+      line-height: 1.7;
+      word-break: break-all;
+    }
+    body.dark .history-account-box {
+      background: #1a1a1a;
+      border-color: #f59e0b;
+      color: #fcd34d;
+    }
+    .history-account-box .ab-title {
+      font-weight: 700;
+      margin-bottom: 6px;
+      display: flex; align-items: center; gap: 6px;
+      color: #92400e;
+    }
+    body.dark .history-account-box .ab-title { color: #fbbf24; }
+    .history-account-box .ab-row { display: flex; gap: 6px; font-size: 13px; margin-bottom: 2px; }
+    .history-account-box .ab-row .ab-label { color: #92400e; font-weight: 600; flex: 0 0 60px; }
+    body.dark .history-account-box .ab-row .ab-label { color: #fbbf24; }
+    .history-account-box .ab-row .ab-val { flex: 1; color: #451a03; font-weight: 600; }
+    body.dark .history-account-box .ab-row .ab-val { color: #fde68a; }
+    .history-account-box .ab-total { font-size: 15px; color: #dc2626; font-weight: 700; }
+    body.dark .history-account-box .ab-total { color: #ef4444; }
+    .history-account-box .ab-copy {
+      margin-left: 6px; padding: 2px 8px;
+      background: #fff7ed; color: #92400e;
+      border: 1px solid #f59e0b; border-radius: 4px;
+      cursor: pointer; font-size: 11px; font-family: inherit;
+    }
+    body.dark .history-account-box .ab-copy {
+      background: #222; color: #fbbf24; border-color: #f59e0b;
+    }
+
     /* ⭐ 쿠폰 사용내역 박스 */
     .history-coupon-box {
       margin-top: 12px;
@@ -74,6 +115,7 @@
       line-height: 1.6;
       word-break: break-all;
     }
+    body.dark .history-coupon-box { background: #1a1a1a; border-color: #f59e0b; color: #fcd34d; }
     .history-coupon-box .cc-title {
       font-weight: 700;
       margin-bottom: 4px;
@@ -81,6 +123,18 @@
     }
     .history-coupon-box .cc-row { display: flex; gap: 8px; font-size: 12px; }
     .history-coupon-box .cc-row b { color: #78350f; }
+    body.dark .history-coupon-box .cc-row b { color: #fde68a; }
+
+    /* ⭐ 등급 할인 배지 */
+    .history-grade-badge {
+      display: inline-block;
+      padding: 3px 8px; border-radius: 4px;
+      background: #dbeafe; color: #1e40af;
+      font-size: 11px; font-weight: 700;
+      border: 1px solid #93c5fd;
+      margin-bottom: 8px;
+    }
+    body.dark .history-grade-badge { background: #1e3a8a; color: #bfdbfe; border-color: #3b82f6; }
 
     .btn-delete-single {
       margin-top: 16px; width: 100%; padding: 12px;
@@ -201,7 +255,6 @@
 
       const queries = [];
 
-      // ⭐ 조회 시 is_deleted가 false이거나 null인 데이터만 가져옴
       if (name && phone) {
         queries.push(
           db.from('orders').select('*')
@@ -324,6 +377,16 @@
         const totalAll = productTotal + shippingTotal;
         const isChecked = selectedKeys.has(key);
 
+        // ⭐ 등급 할인 배지 (상품 그룹 중 하나라도 discount 있으면)
+        let gradeDiscount = 0;
+        items.forEach(o => {
+          const d = Number(o.grade_discount || 0);
+          if (d > gradeDiscount) gradeDiscount = d;
+        });
+        const gradeBadge = gradeDiscount > 0
+          ? `<div><span class="history-grade-badge">🏷️ ${gradeDiscount}% 할인 적용됨</span></div>`
+          : '';
+
         const usedCoupon = first.order_number ? usedCouponsByOrder[first.order_number] : null;
         const couponBox = usedCoupon ? `
           <div class="history-coupon-box">
@@ -332,6 +395,27 @@
             <div class="cc-row"><span>할인:</span><b>${getCouponDiscountLabel(usedCoupon)}</b></div>
             <div class="cc-row"><span>코드:</span><b>${usedCoupon.code || '-'}</b></div>
             <div class="cc-row"><span>사용일:</span><b>${usedCoupon.used_at ? formatKST(usedCoupon.used_at, { dateOnly: true }) : '-'}</b></div>
+          </div>
+        ` : '';
+
+        // ⭐⭐⭐ 입금 계좌 안내 박스 (입금대기 상태에서 표시) ⭐⭐⭐
+        const status = first.status || '';
+        const showAccount = (status === '입금대기' || status === '입금완료');
+        const accountBox = showAccount ? `
+          <div class="history-account-box">
+            <div class="ab-title">💰 입금 계좌 안내</div>
+            <div class="ab-row"><span class="ab-label">은행</span><span class="ab-val">○○은행</span></div>
+            <div class="ab-row">
+              <span class="ab-label">계좌번호</span>
+              <span class="ab-val">123-456-789012
+                <button type="button" class="ab-copy" data-account="123-456-789012">복사</button>
+              </span>
+            </div>
+            <div class="ab-row"><span class="ab-label">예금주</span><span class="ab-val">홍길동</span></div>
+            <div class="ab-row">
+              <span class="ab-label">입금액</span>
+              <span class="ab-val ab-total">${totalAll.toLocaleString()}원</span>
+            </div>
           </div>
         ` : '';
 
@@ -344,6 +428,7 @@
                 <span class="history-status" style="background:${statusColor(first.status)};">${first.status || '-'}</span>
               </div>
               <span class="history-order-num">${displayNum}</span>
+              ${gradeBadge}
               <div>
                 ${items.map(o => {
                   const opts = [];
@@ -369,6 +454,7 @@
                 ${first.memo ? `<div style="margin-top:4px;">📝 <b>요청사항:</b> ${first.memo}</div>` : ''}
                 ${(first.courier || first.tracking_number) ? `<div style="margin-top:8px; padding-top:8px; border-top:1px dashed #ddd; color:#1976d2;">🚚 <b>배송정보:</b> ${first.courier || '택배사 미정'} | ${first.tracking_number || '운송장 없음'}</div>` : ''}
               </div>
+              ${accountBox}
               ${couponBox}
               <div class="history-price-summary">
                 <div class="price-row"><span>상품 금액</span><span>${productTotal.toLocaleString()}원</span></div>
@@ -380,11 +466,22 @@
           </div>
         `;
       }).join('');
+
+      // ⭐ 계좌번호 복사 버튼 이벤트
+      historyListEl.querySelectorAll('.ab-copy').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const acc = btn.dataset.account || '';
+          navigator.clipboard.writeText(acc)
+            .then(() => alert('계좌번호가 복사되었습니다.\n' + acc))
+            .catch(() => prompt('아래 계좌번호를 복사하세요:', acc));
+        });
+      });
+
       bindEvents();
       updateBulkActions();
     }
 
-    // ⭐ 단일 주문 삭제 (Soft Delete)
     async function deleteOrderGroup(items) {
       if (!items || items.length === 0) return 0;
       const first = items[0];
@@ -453,7 +550,6 @@
       updateBulkActions();
     });
 
-    // ⭐ 선택 주문 일괄 삭제 (Soft Delete)
     deleteSelectedBtn.addEventListener('click', async () => {
       if (selectedKeys.size === 0) return;
       if (!confirm(`선택한 ${selectedKeys.size}건의 주문을 삭제할까요?\n삭제된 내역은 고객센터(관리자)를 통해 복구 요청이 가능합니다.`)) return;
