@@ -101,7 +101,11 @@
       ` : '';
 
       // ⭐ 등급 할인 표시
-      const gradeDiscount = Number(first.grade_discount || 0);
+      let gradeDiscount = 0;
+      data.forEach(o => {
+        const d = Number(o.grade_discount || 0);
+        if (d > gradeDiscount) gradeDiscount = d;
+      });
       const gradeDiscountHtml = gradeDiscount > 0 ? `
         <div style="margin-top:12px; padding:12px; background:#1e3a8a; border:1px solid #3b82f6; border-radius:8px; font-size:13px;">
           <div style="font-weight:700; color:#bfdbfe; margin-bottom:4px;">🏷️ 등급 할인</div>
@@ -109,8 +113,10 @@
         </div>
       ` : '';
 
-      // ⭐ 입금 계좌 표시 (핵심 요청)
-      const accountHtml = `
+      // ⭐⭐⭐ 입금 계좌 안내 (입금대기 / 입금완료 시) ⭐⭐⭐
+      const status = first.status || '';
+      const showAccount = (status === '입금대기' || status === '입금완료');
+      const accountHtml = showAccount ? `
         <div style="margin-top:12px; padding:12px; background:#0f0f0f; border:1px solid #fbbf24; border-radius:8px; font-size:13px;">
           <div style="font-weight:700; color:#fbbf24; margin-bottom:6px;">💰 입금 계좌 안내</div>
           <div style="color:#ccc; line-height:1.8;">
@@ -122,7 +128,7 @@
             입금액: <b style="color:#ef4444; font-size:16px;">${totalAll.toLocaleString()}원</b>
           </div>
         </div>
-      `;
+      ` : '';
 
       resultEl.innerHTML = `
         <div style="background:#151515; border:1px solid #222; padding:16px; border-radius:12px; margin-bottom:12px; border-left:4px solid ${statusColor(first.status)};">
