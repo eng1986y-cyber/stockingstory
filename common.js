@@ -823,15 +823,15 @@ window.ChannelIO('boot', {
 (function() {
   const style = document.createElement('style');
   style.textContent = `
-    /* PC 화면 (스크롤 버튼이 우측 하단에 위치할 때) */
+    /* PC 화면 (넓은 화면) - 스크롤 버튼이 우측 중앙/하단에 위치 */
     @media (min-width: 1451px) {
       #ch-plugin-launcher {
-        bottom: 130px !important; /* 스크롤 버튼(44px + 20px 여백) 위로 */
+        bottom: 130px !important; /* 스크롤 버튼(44px) + 여백(20px) + 간격(66px) */
         right: 20px !important;
       }
     }
 
-    /* 중간 사이즈 PC (스크롤 버튼이 우측 하단으로 이동하는 구간) */
+    /* 중간 사이즈 PC - 스크롤 버튼이 우측 하단으로 이동하는 구간 */
     @media (min-width: 769px) and (max-width: 1450px) {
       #ch-plugin-launcher {
         bottom: 130px !important;
@@ -839,10 +839,10 @@ window.ChannelIO('boot', {
       }
     }
 
-    /* 모바일 화면 */
+    /* 모바일 화면 - 하단 탭바(65px) + 스크롤 버튼(40px) + 여백(35px) */
     @media (max-width: 768px) {
       #ch-plugin-launcher {
-        bottom: 140px !important; /* 하단 탭바(65px) + 스크롤 버튼(40px) + 여백 */
+        bottom: 140px !important;
         right: 12px !important;
       }
     }
