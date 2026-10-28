@@ -819,31 +819,45 @@ window.ChannelIO('boot', {
   // "profile": { "name": "사용자 이름", "email": "이메일" } // 사용자 정보 (선택)
 });
 
-// ===== 채널톡 버튼 위치 강제 조정 (PC & 모바일 스크롤 버튼 위로 일직선 정렬) =====
+// ===== 채널톡 버튼 위치 강제 조정 (PC & 모바일 스크롤 버튼 바로 위로) =====
 (function() {
+  // 기존에 주입된 스타일이 있다면 제거 (중복 방지)
+  const oldStyle = document.getElementById('channel-talk-position-style');
+  if (oldStyle) oldStyle.remove();
+
   const style = document.createElement('style');
+  style.id = 'channel-talk-position-style';
   style.textContent = `
-    /* PC 화면 */
+    /* 채널톡 기본 버튼 위치 무효화 및 커스텀 배치 */
+    #ch-plugin-launcher {
+      position: fixed !important;
+      right: 16px !important;
+      bottom: 145px !important; /* 스크롤 버튼(약 100px) + 여백(45px) */
+      z-index: 899 !important; /* 스크롤 버튼(z-index: 900)보다 아래에 위치 */
+      transition: bottom 0.2s ease, right 0.2s ease !important;
+    }
+
+    /* PC 화면 (넓은 화면) */
     @media (min-width: 1451px) {
       #ch-plugin-launcher {
-        bottom: 130px !important; /* 스크롤 버튼(44px + 20px 여백) 위로 */
-        right: 20px !important;   /* 스크롤 버튼과 같은 우측 정렬 */
+        right: calc(50% - 700px - 16px) !important; /* 스크롤 버튼과 동일한 우측 정렬 */
+        bottom: 145px !important;
       }
     }
 
     /* 중간 사이즈 PC */
     @media (min-width: 769px) and (max-width: 1450px) {
       #ch-plugin-launcher {
-        bottom: 130px !important;
-        right: 20px !important;
+        right: 16px !important;
+        bottom: 145px !important;
       }
     }
 
     /* 모바일 화면 */
     @media (max-width: 768px) {
       #ch-plugin-launcher {
-        bottom: 140px !important; /* 하단 탭바(65px) + 스크롤 버튼(40px) + 여백 */
         right: 12px !important;
+        bottom: 145px !important; /* 하단 탭바(65px) + 스크롤 버튼(40px) + 여백 */
       }
     }
   `;
