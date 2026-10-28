@@ -246,10 +246,14 @@ function applyGradeDiscount(price) {
   document.head.appendChild(style);
 })();
 
+// ===== 사이트 전체 우클릭 방지 (관리자 페이지 제외) =====
 document.addEventListener('contextmenu', (e) => {
-  if (e.target.tagName === 'IMG') e.preventDefault();
+  if (_isAdmin) return; // 관리자 페이지는 예외
+  e.preventDefault(); // 모든 우클릭 방지
 });
+
 document.addEventListener('dragstart', (e) => {
+  if (_isAdmin) return;
   if (e.target.tagName === 'IMG') e.preventDefault();
 });
 
@@ -766,4 +770,51 @@ document.addEventListener('DOMContentLoaded', async () => {
     loader.classList.add('hide');
     setTimeout(() => loader.remove(), 300);
   }, 300);
+});
+
+// ===== 채널톡(Channel Talk) 연동 =====
+(function() {
+  var w = window;
+  if (w.ChannelIO) {
+    return (window.console.error || window.console.log)('ChannelIO already loaded');
+  }
+
+  var ch = function() {
+    ch.c(arguments);
+  };
+  ch.q = [];
+  ch.c = function(args) {
+    ch.q.push(args);
+  };
+  w.ChannelIO = ch;
+
+  function l() {
+    if (w.ChannelIOInitialized) {
+      return;
+    }
+    w.ChannelIOInitialized = true;
+    var s = document.createElement('script');
+    s.type = 'text/javascript';
+    s.async = true;
+    s.src = 'https://cdn.channel.io/plugin/ch-plugin-web.js';
+    s.charset = 'UTF-8';
+    var x = document.getElementsByTagName('script')[0];
+    x.parentNode.insertBefore(s, x);
+  }
+
+  if (document.readyState === 'complete') {
+    l();
+  } else if (window.attachEvent) {
+    window.attachEvent('onload', l);
+  } else {
+    window.addEventListener('DOMContentLoaded', l, false);
+    window.addEventListener('load', l, false);
+  }
+})();
+
+// 채널톡 초기화 (플러그인 키를 입력하세요)
+window.ChannelIO('boot', {
+  "pluginKey": "c5ed9957-c9e6-42af-887e-1b2ab2b6d1dd", // ⭐ 여기에 실제 채널톡 플러그인 키를 입력하세요.
+  // "memberId": "사용자 ID", // 로그인한 사용자 ID (선택)
+  // "profile": { "name": "사용자 이름", "email": "이메일" } // 사용자 정보 (선택)
 });
