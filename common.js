@@ -819,21 +819,31 @@ window.ChannelIO('boot', {
   // "profile": { "name": "사용자 이름", "email": "이메일" } // 사용자 정보 (선택)
 });
 
-// ===== 모바일 채널톡 버튼 위치 조정 (하단 탭바 가림 방지) =====
+// ===== 채널톡 버튼 위치 강제 조정 (PC & 모바일 스크롤 버튼 위로) =====
 (function() {
   const style = document.createElement('style');
   style.textContent = `
-    /* 모바일 화면(768px 이하)에서만 적용 */
-    @media (max-width: 768px) {
-      /* 채널톡 버튼 컨테이너 위치 조정 */
+    /* PC 화면 (스크롤 버튼이 우측 하단에 위치할 때) */
+    @media (min-width: 1451px) {
       #ch-plugin-launcher {
-        bottom: 85px !important; /* 기존 65px + 여유 20px */
-        right: 16px !important;
+        bottom: 130px !important; /* 스크롤 버튼(44px + 20px 여백) 위로 */
+        right: 20px !important;
       }
-      
-      /* 채널톡이 열렸을 때의 창 위치 조정 (선택) */
-      #ch-plugin {
-        bottom: 85px !important;
+    }
+
+    /* 중간 사이즈 PC (스크롤 버튼이 우측 하단으로 이동하는 구간) */
+    @media (min-width: 769px) and (max-width: 1450px) {
+      #ch-plugin-launcher {
+        bottom: 130px !important;
+        right: 20px !important;
+      }
+    }
+
+    /* 모바일 화면 */
+    @media (max-width: 768px) {
+      #ch-plugin-launcher {
+        bottom: 140px !important; /* 하단 탭바(65px) + 스크롤 버튼(40px) + 여백 */
+        right: 12px !important;
       }
     }
   `;
