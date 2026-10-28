@@ -49,7 +49,6 @@
     .settings-col .card input, .settings-col .card textarea, .settings-col .card button { max-width: 100%; box-sizing: border-box; }
     @media (max-width: 1000px) { .settings-split { grid-template-columns: 1fr; gap: 12px; } }
 
-    /* ⭐ 상품 등록 폼 - target_grade select 포함 12컬럼 */
     #product-register-card { min-width: 0; width: 100%; }
     #product-register-card > #product-form {
       display: grid !important;
@@ -560,7 +559,7 @@
 
         <section id="tab-settings" class="admin-section">
           <h1 class="page-title">사이트 설정</h1>
-          <p class="page-subtitle">로고, 배너, 푸터, SNS, 배송비, 홍보영상을 관리합니다</p>
+          <p class="page-subtitle">로고, 배너, 푸터, SNS, 배송비, 홍보영상, 회원가입 쿠폰을 관리합니다</p>
 
           <div class="settings-split">
             <div class="settings-col">
@@ -650,6 +649,40 @@
                 <p style="font-size:12px; color:#9ca3af; margin:6px 0 0;">일반회원에게만 적용됩니다. (도매회원: 해운/착불, VIP회원: 택배/무료)</p>
                 <p id="shipping-msg" class="msg"></p>
               </div>
+
+              <div class="card">
+                <div class="card-title">🎁 회원가입 쿠폰 설정 <span class="hint">(신규 가입 시 자동 발급)</span></div>
+                <div style="display: grid; gap: 12px;">
+                  <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:#374151; cursor:pointer;">
+                    <input type="checkbox" id="signup-coupon-enabled" style="width:18px; height:18px; accent-color:#111827; cursor:pointer;">
+                    회원가입 시 쿠폰 자동 발급
+                  </label>
+                  <div>
+                    <label style="font-size:12px; font-weight:600; color:#6b7280; display:block; margin-bottom:4px;">쿠폰명</label>
+                    <input id="signup-coupon-name" placeholder="예: 가입 감사 10% 할인 쿠폰" value="가입 감사 10% 할인 쿠폰">
+                  </div>
+                  <div class="form-row">
+                    <div style="flex:1; min-width:120px;">
+                      <label style="font-size:12px; font-weight:600; color:#6b7280; display:block; margin-bottom:4px;">할인 유형</label>
+                      <select id="signup-coupon-type">
+                        <option value="percent">% 할인</option>
+                        <option value="fixed">원 할인</option>
+                      </select>
+                    </div>
+                    <div style="flex:1; min-width:120px;">
+                      <label style="font-size:12px; font-weight:600; color:#6b7280; display:block; margin-bottom:4px;">할인값</label>
+                      <input id="signup-coupon-value" type="number" min="1" value="10" placeholder="할인값">
+                    </div>
+                  </div>
+                  <div>
+                    <label style="font-size:12px; font-weight:600; color:#6b7280; display:block; margin-bottom:4px;">유효기간 (일)</label>
+                    <input id="signup-coupon-days" type="number" min="1" value="30" placeholder="유효기간(일)">
+                  </div>
+                  <button id="save-signup-coupon" class="btn btn-success">저장</button>
+                </div>
+                <p style="font-size:12px; color:#9ca3af; margin:6px 0 0;">체크 해제 시 회원가입 시 쿠폰이 발급되지 않습니다.</p>
+                <p id="signup-coupon-msg" class="msg"></p>
+              </div>
             </div>
           </div>
         </section>
@@ -728,6 +761,7 @@
       adminScreen.style.display = 'block';
       loadLogo(); loadFooter(); loadBanner(); loadShippingSetting(); loadSnsLinks();
       loadPromoVideo();
+      loadSignupCouponSetting();
       loadAdminList(); loadOrders(); loadMembers();
       loadCouponsAndMembers();
     }
@@ -1032,6 +1066,45 @@
       const { error } = await db.from('settings').upsert({ key: 'shipping_fee', value: String(val) });
       if (error) { sm.className = 'msg error'; sm.textContent = '❌ ' + error.message; }
       else { sm.className = 'msg success'; sm.textContent = '✅ 저장 완료!'; setTimeout(() => sm.textContent = '', 2000); }
+    });
+
+    // ===== 회원가입 쿠폰 설정 =====
+    async function loadSignupCouponSetting() {
+      const keys = ['signup_coupon_enabled', 'signup_coupon_name', 'signup_coupon_type', 'signup_coupon_value', 'signup_coupon_days'];
+      const { data } = await db.from('settings').select('key, value').in('key', keys);
+      const map = {};
+      (data || []).forEach(row => { map[row.key] = row.value; });
+
+      document.getElementById('signup-coupon-enabled').checked = (map.signup_coupon_enabled === 'true');
+      document.getElementById('signup-coupon-name').value = map.signup_coupon_name || '가입 감사 10% 할인 쿠폰';
+      document.getElementById('signup-coupon-type').value = map.signup_coupon_type || 'percent';
+      document.getElementById('signup-coupon-value').value = map.signup_coupon_value || '10';
+      document.getElementById('signup-coupon-days').value = map.signup_coupon_days || '30';
+    }
+
+    document.getElementById('save-signup-coupon').addEventListener('click', async () => {
+      const msgEl = document.getElementById('signup-coupon-msg');
+      msgEl.className = 'msg'; msgEl.textContent = '저장 중...';
+
+      const enabled = document.getElementById('signup-coupon-enabled').checked;
+      const name = document.getElementById('signup-coupon-name').value.trim();
+      const type = document.getElementById('signup-coupon-type').value;
+      const value = Number(document.getElementById('signup-coupon-value').value) || 0;
+      const days = Number(document.getElementById('signup-coupon-days').value) || 30;
+
+      if (enabled && value <= 0) { msgEl.className = 'msg error'; msgEl.textContent = '❌ 할인값은 1 이상이어야 합니다.'; return; }
+      if (enabled && days <= 0) { msgEl.className = 'msg error'; msgEl.textContent = '❌ 유효기간은 1일 이상이어야 합니다.'; return; }
+
+      const updates = [
+        { key: 'signup_coupon_enabled', value: enabled ? 'true' : 'false' },
+        { key: 'signup_coupon_name', value: name || '가입 감사 10% 할인 쿠폰' },
+        { key: 'signup_coupon_type', value: type },
+        { key: 'signup_coupon_value', value: String(value) },
+        { key: 'signup_coupon_days', value: String(days) },
+      ];
+      const { error } = await db.from('settings').upsert(updates);
+      if (error) { msgEl.className = 'msg error'; msgEl.textContent = '❌ ' + error.message; }
+      else { msgEl.className = 'msg success'; msgEl.textContent = '✅ 저장 완료!'; setTimeout(() => msgEl.textContent = '', 2000); }
     });
 
     // ===== 상품 등록 =====

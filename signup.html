@@ -36,9 +36,9 @@
   <main>
     <div class="auth-wrap">
       <h2 class="auth-title">회원가입</h2>
-      <div class="coupon-notice">
+      <div class="coupon-notice" id="coupon-notice" style="display:none;">
         🎉 <b>신규 회원 감사 쿠폰</b><br>
-        10% 할인 쿠폰 (유효기간 30일)이 자동 발급됩니다!
+        <span id="coupon-notice-text">10% 할인 쿠폰 (유효기간 30일)이 자동 발급됩니다!</span>
       </div>
       <form id="signup-form" class="auth-form">
         <label>아이디</label>
@@ -71,6 +71,45 @@
     const form = document.getElementById('signup-form');
     const msg = document.getElementById('msg');
 
+    // ⭐ 관리자 설정에서 회원가입 쿠폰 정보 로드
+    let signupCouponConfig = { enabled: false, name: '가입 감사 10% 할인 쿠폰', type: 'percent', value: 10, days: 30 };
+
+    async function loadSignupCouponConfig() {
+      try {
+        const keys = ['signup_coupon_enabled', 'signup_coupon_name', 'signup_coupon_type', 'signup_coupon_value', 'signup_coupon_days'];
+        const { data } = await db.from('settings').select('key, value').in('key', keys);
+        const map = {};
+        (data || []).forEach(row => { map[row.key] = row.value; });
+
+        // 설정이 아예 없으면 기본값으로 비활성화 (관리자가 명시적으로 켜야 함)
+        signupCouponConfig = {
+          enabled: map.signup_coupon_enabled === 'true',
+          name: map.signup_coupon_name || '가입 감사 10% 할인 쿠폰',
+          type: map.signup_coupon_type || 'percent',
+          value: Number(map.signup_coupon_value) || 10,
+          days: Number(map.signup_coupon_days) || 30,
+        };
+
+        const noticeEl = document.getElementById('coupon-notice');
+        const noticeTextEl = document.getElementById('coupon-notice-text');
+        if (signupCouponConfig.enabled && noticeEl && noticeTextEl) {
+          const discountLabel = signupCouponConfig.type === 'percent'
+            ? `${signupCouponConfig.value}% 할인`
+            : `${signupCouponConfig.value.toLocaleString()}원 할인`;
+          noticeTextEl.textContent = `${discountLabel} 쿠폰 (유효기간 ${signupCouponConfig.days}일)이 자동 발급됩니다!`;
+          noticeEl.style.display = 'block';
+        } else if (noticeEl) {
+          noticeEl.style.display = 'none';
+        }
+      } catch (e) {
+        console.warn('회원가입 쿠폰 설정 로드 실패:', e);
+        signupCouponConfig.enabled = false;
+        const noticeEl = document.getElementById('coupon-notice');
+        if (noticeEl) noticeEl.style.display = 'none';
+      }
+    }
+    loadSignupCouponConfig();
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       msg.textContent = '가입 중...';
@@ -99,25 +138,31 @@
         return;
       }
 
-      // ⭐ 신규 회원에게 10% 할인 쿠폰 자동 발급 (쿠폰명: 가입감사 10% 쿠폰)
-      try {
-        const now = new Date();
-        const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-        const code = 'WELCOME10-' + Math.random().toString(36).slice(2, 8).toUpperCase();
+      // ⭐ 관리자 설정에 따라 회원가입 쿠폰 발급
+      let couponIssued = false;
+      if (signupCouponConfig.enabled) {
+        try {
+          const now = new Date();
+          const expiresAt = new Date(now.getTime() + signupCouponConfig.days * 24 * 60 * 60 * 1000);
+          const prefix = signupCouponConfig.type === 'percent' ? 'WELCOME' : 'WON';
+          const code = prefix + '-' + Math.random().toString(36).slice(2, 8).toUpperCase();
 
-        await db.from('coupons').insert({
-          member_id: data.id,
-          code: code,
-          name: '가입 감사 10% 할인 쿠폰',
-          type: 'percent',
-          discount_value: 10,
-          min_order_amount: 0,
-          max_discount_amount: null,
-          is_used: false,
-          expires_at: expiresAt.toISOString(),
-        });
-      } catch (couponErr) {
-        console.warn('쿠폰 발급 실패 (가입은 완료):', couponErr);
+          const { error: couponErr } = await db.from('coupons').insert({
+            member_id: data.id,
+            code: code,
+            name: signupCouponConfig.name,
+            type: signupCouponConfig.type,
+            discount_value: signupCouponConfig.value,
+            min_order_amount: 0,
+            max_discount_amount: null,
+            is_used: false,
+            expires_at: expiresAt.toISOString(),
+          });
+          if (!couponErr) couponIssued = true;
+          else console.warn('쿠폰 발급 실패 (가입은 완료):', couponErr);
+        } catch (couponErr) {
+          console.warn('쿠폰 발급 실패 (가입은 완료):', couponErr);
+        }
       }
 
       localStorage.setItem('member', JSON.stringify({
@@ -129,7 +174,11 @@
       }));
 
       msg.style.color = '#10b981';
-      msg.textContent = '✅ 가입 완료! 10% 할인쿠폰이 발급되었습니다.';
+      if (couponIssued) {
+        msg.textContent = '✅ 가입 완료! 쿠폰이 발급되었습니다.';
+      } else {
+        msg.textContent = '✅ 가입 완료!';
+      }
       setTimeout(() => location.href = 'index.html', 1500);
     });
   </script>
