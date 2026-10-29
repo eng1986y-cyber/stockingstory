@@ -127,6 +127,9 @@ function applyGradeDiscount(price) {
 
     /* ============================================================
        ⭐ 스크롤 버튼 - 화면 우측 세로 중앙 고정
+       - position: fixed + right 기준이므로 화면 폭이 넓어져도
+         항상 화면 우측에 고정됨
+       - 모든 화면 크기(PC/태블릿/모바일)에서 top: 50% 유지
        ============================================================ */
     #scroll-btns {
       position: fixed;
@@ -182,13 +185,12 @@ function applyGradeDiscount(price) {
       }
     }
 
-    /* 모바일: 하단 네비바 위로 살짝 올림 */
+    /* ⭐ 모바일에서도 세로 중앙 유지, 버튼 크기/여백만 조정 */
     @media (max-width: 768px) {
       #scroll-btns {
         right: 12px;
-        top: auto;
-        bottom: calc(65px + env(safe-area-inset-bottom) + 16px);
-        transform: none;
+        top: 50%;
+        transform: translateY(-50%);
         gap: 8px;
       }
 
@@ -196,6 +198,19 @@ function applyGradeDiscount(price) {
         width: 40px;
         height: 40px;
         font-size: 16px;
+      }
+    }
+
+    /* 아주 좁은 화면에서 right 여백 축소 */
+    @media (max-width: 400px) {
+      #scroll-btns {
+        right: 8px;
+        gap: 6px;
+      }
+      #scroll-btns button {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
       }
     }
 
@@ -529,7 +544,7 @@ function createScrollButtons() {
   // ===== 가시성 판단 로직 =====
   // - 이전 상태와 동일하면 DOM 조작 안 함 (깜빡임 방지)
   // - debounce 로 연속 호출 방지
-  // - 임계값 10px (기존 50px → 미세한 스크롤에도 안정 표시)
+  // - 임계값 10px
   let _scrollVisTimer = null;
   let _lastVisible = null;
 
@@ -572,7 +587,7 @@ function createScrollButtons() {
     });
   }
 
-  // DOM 변화 감지 (childList만, characterData/attributes 무시)
+  // DOM 변화 감지 (childList만)
   if (typeof MutationObserver !== 'undefined') {
     const mo = new MutationObserver(() => {
       updateVisibility();
@@ -1353,8 +1368,12 @@ window.ChannelIO('boot', {
   // "profile": { "name": "사용자 이름", "email": "이메일" }
 });
 
-// ===== 채널톡 버튼 위치 조정 =====
-
+// ============================================================
+// ⭐⭐⭐ 채널톡 버튼 위치 조정 ⭐⭐⭐
+// - PC: 화면 우측 하단 (기존 유지)
+// - 모바일: 화면 우측 세로 중앙 (top: 50%)
+//   → 채널톡 위젯이 내부 transform 을 쓰므로 !important 로 덮어씀
+// ============================================================
 (function() {
   const oldStyle = document.getElementById('channel-talk-position-style');
 
@@ -1366,36 +1385,62 @@ window.ChannelIO('boot', {
   style.id = 'channel-talk-position-style';
 
   style.textContent = `
-    /* PC 기본 위치 */
-    #ch-plugin-launcher {
+    /* ===== PC/태블릿: 우측 하단 고정 ===== */
+    #ch-plugin-launcher,
+    #ch-plugin-entry {
       position: fixed !important;
       right: 16px !important;
       bottom: 145px !important;
+      top: auto !important;
       z-index: 899 !important;
-      transition: bottom 0.2s ease, right 0.2s ease !important;
+      transform: none !important;
+      transition: bottom 0.2s ease, right 0.2s ease, top 0.2s ease !important;
     }
 
-    /* 넓은 PC 화면 */
+    /* 넓은 PC 화면: 화면 우측 하단에 그대로 */
     @media (min-width: 1451px) {
-      #ch-plugin-launcher {
-        right: calc(50% - 700px - 16px) !important;
+      #ch-plugin-launcher,
+      #ch-plugin-entry {
+        right: 24px !important;
         bottom: 145px !important;
+        top: auto !important;
+        transform: none !important;
       }
     }
 
     /* 일반 PC 및 태블릿 */
     @media (min-width: 769px) and (max-width: 1450px) {
-      #ch-plugin-launcher {
+      #ch-plugin-launcher,
+      #ch-plugin-entry {
         right: 16px !important;
         bottom: 145px !important;
+        top: auto !important;
+        transform: none !important;
       }
     }
 
-    /* 모바일 화면 */
+    /* ============================================================
+       ⭐ 모바일: 화면 우측 세로 중앙 고정
+       - top: 50% + translateY(-50%) 로 수직 중앙
+       - 채널톡이 자체 transform 을 걸 수 있으므로 !important 필수
+       ============================================================ */
     @media (max-width: 768px) {
-      #ch-plugin-launcher {
+      #ch-plugin-launcher,
+      #ch-plugin-entry {
+        position: fixed !important;
         right: 12px !important;
-        bottom: 190px !important;
+        top: 50% !important;
+        bottom: auto !important;
+        transform: translateY(-50%) !important;
+        z-index: 899 !important;
+      }
+    }
+
+    /* 아주 좁은 화면: 우측 여백 축소 */
+    @media (max-width: 400px) {
+      #ch-plugin-launcher,
+      #ch-plugin-entry {
+        right: 8px !important;
       }
     }
   `;
