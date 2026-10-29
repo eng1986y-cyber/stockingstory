@@ -128,7 +128,7 @@ function applyGradeDiscount(price) {
     /* ============================================================
        ⭐ 스크롤 버튼
        - PC/태블릿: 화면 우측 세로 중앙 고정
-       - 모바일: 화면 우측 하단 (네비바 바로 위, 회원가입 버튼과 겹치지 않게)
+       - 모바일: 숨김 처리 (display: none)
        ============================================================ */
     #scroll-btns {
       position: fixed;
@@ -184,39 +184,10 @@ function applyGradeDiscount(price) {
       }
     }
 
-    /* ============================================================
-       ⭐ 모바일: 네비바 바로 위에 딱 붙게 (더 아래로 내림)
-       - 기존: 65px(네비바) + safe-area + 16px
-       - 변경: 65px(네비바) + safe-area + 6px  ← 더 아래로
-       - 페이지 하단 여백도 함께 늘려 회원가입 버튼과 겹치지 않게 함
-       ============================================================ */
+    /* ⭐ 모바일: 스크롤 버튼 숨김 */
     @media (max-width: 768px) {
       #scroll-btns {
-        right: 12px;
-        top: auto;
-        bottom: calc(65px + env(safe-area-inset-bottom) + 6px);
-        transform: none;
-        gap: 8px;
-      }
-
-      #scroll-btns button {
-        width: 40px;
-        height: 40px;
-        font-size: 16px;
-      }
-    }
-
-    /* 아주 좁은 화면 */
-    @media (max-width: 400px) {
-      #scroll-btns {
-        right: 8px;
-        gap: 6px;
-        bottom: calc(65px + env(safe-area-inset-bottom) + 4px);
-      }
-      #scroll-btns button {
-        width: 36px;
-        height: 36px;
-        font-size: 14px;
+        display: none !important;
       }
     }
 
@@ -357,7 +328,7 @@ function applyGradeDiscount(price) {
         font-size: 11px;
       }
 
-      /* ⭐ 페이지 하단 여백 확대 → 회원가입 버튼 등이 스크롤 버튼과 겹치지 않게 */
+      /* ⭐ 페이지 하단 여백 확대 (채널톡 아이콘과 겹치지 않게) */
       .site-main-scroll {
         padding-bottom: calc(65px + env(safe-area-inset-bottom) + 80px);
       }
@@ -1368,7 +1339,7 @@ window.ChannelIO('boot', {
 // ============================================================
 // ⭐⭐⭐ 채널톡 버튼 위치 조정 ⭐⭐⭐
 // - PC/태블릿: 우측 하단 고정
-// - 모바일: 화면 우측 세로 중앙 고정
+// - 모바일: 화면 우측 하단 고정 (기존 스크롤 버튼 자리)
 // ============================================================
 (function() {
   const oldStyle = document.getElementById('channel-talk-position-style');
@@ -1385,23 +1356,12 @@ window.ChannelIO('boot', {
     #ch-plugin-launcher,
     #ch-plugin-entry {
       position: fixed !important;
-      right: 16px !important;
+      right: 24px !important;
       bottom: 145px !important;
       top: auto !important;
       z-index: 899 !important;
       transform: none !important;
       transition: bottom 0.2s ease, right 0.2s ease, top 0.2s ease !important;
-    }
-
-    /* 넓은 PC 화면 */
-    @media (min-width: 1451px) {
-      #ch-plugin-launcher,
-      #ch-plugin-entry {
-        right: 24px !important;
-        bottom: 145px !important;
-        top: auto !important;
-        transform: none !important;
-      }
     }
 
     /* 일반 PC 및 태블릿 */
@@ -1415,15 +1375,15 @@ window.ChannelIO('boot', {
       }
     }
 
-    /* ===== 모바일: 화면 우측 세로 중앙 고정 ===== */
+    /* ===== 모바일: 화면 우측 하단 고정 (스크롤 버튼이 있던 자리) ===== */
     @media (max-width: 768px) {
       #ch-plugin-launcher,
       #ch-plugin-entry {
         position: fixed !important;
-        right: 12px !important;
-        top: 50% !important;
-        bottom: auto !important;
-        transform: translateY(-50%) !important;
+        right: 16px !important;
+        bottom: 85px !important; /* 하단 탭바(65px) + 여백(20px) */
+        top: auto !important;
+        transform: none !important;
         z-index: 899 !important;
       }
     }
@@ -1432,7 +1392,7 @@ window.ChannelIO('boot', {
     @media (max-width: 400px) {
       #ch-plugin-launcher,
       #ch-plugin-entry {
-        right: 8px !important;
+        right: 12px !important;
       }
     }
   `;
