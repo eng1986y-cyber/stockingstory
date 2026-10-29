@@ -126,21 +126,20 @@ function applyGradeDiscount(price) {
     a img { pointer-events: auto !important; }
 
     /* ============================================================
-       ⭐ 스크롤 버튼 - 화면 우측 세로 중앙 고정
-       - position: fixed + right 기준 → 화면 폭이 아무리 넓어져도
-         항상 화면 우측에 고정 (콘텐츠 영역과 무관)
-       - 모든 화면 크기(PC/태블릿/모바일)에서 top: 50% 유지
+       ⭐ 스크롤 버튼
+       - PC/태블릿: 화면 우측 세로 중앙 고정
+       - 모바일: 화면 우측 하단 (하단 네비바 위) ← 원위치
        ============================================================ */
     #scroll-btns {
       position: fixed;
       right: 24px;
       top: 50%;
       transform: translateY(-50%);
-      display: none;                /* 초기 숨김 → JS가 판단 후 flex */
+      display: none;
       flex-direction: column;
       gap: 10px;
       z-index: 900;
-      pointer-events: none;         /* 컨테이너는 이벤트 통과 */
+      pointer-events: none;
     }
 
     #scroll-btns button {
@@ -185,12 +184,13 @@ function applyGradeDiscount(price) {
       }
     }
 
-    /* ⭐ 모바일: 세로 중앙 유지, 여백/크기만 조정 */
+    /* ⭐ 모바일: 원위치(우측 하단, 네비바 위)로 복원 */
     @media (max-width: 768px) {
       #scroll-btns {
         right: 12px;
-        top: 50%;
-        transform: translateY(-50%);
+        top: auto;
+        bottom: calc(65px + env(safe-area-inset-bottom) + 16px);
+        transform: none;
         gap: 8px;
       }
 
@@ -1360,8 +1360,8 @@ window.ChannelIO('boot', {
 
 // ============================================================
 // ⭐⭐⭐ 채널톡 버튼 위치 조정 ⭐⭐⭐
-// - PC/태블릿: 우측 하단 고정 (기존 유지)
-// - 모바일: 화면 우측 세로 중앙 고정 (top: 50% + translateY(-50%))
+// - PC/태블릿: 우측 하단 고정
+// - 모바일: 화면 우측 세로 중앙 고정
 // ============================================================
 (function() {
   const oldStyle = document.getElementById('channel-talk-position-style');
@@ -1408,9 +1408,7 @@ window.ChannelIO('boot', {
       }
     }
 
-    /* ============================================================
-       ⭐ 모바일: 화면 우측 세로 중앙 고정
-       ============================================================ */
+    /* ===== 모바일: 화면 우측 세로 중앙 고정 ===== */
     @media (max-width: 768px) {
       #ch-plugin-launcher,
       #ch-plugin-entry {
