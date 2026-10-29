@@ -174,7 +174,6 @@ function applyGradeDiscount(price) {
 
     body.dark #scroll-btns button:hover { background: #222; }
 
-    /* 화면이 아주 낮을 때 */
     @media (max-height: 420px) {
       #scroll-btns { gap: 6px; }
       #scroll-btns button {
@@ -184,7 +183,6 @@ function applyGradeDiscount(price) {
       }
     }
 
-    /* ⭐ 모바일: 스크롤 버튼 숨김 */
     @media (max-width: 768px) {
       #scroll-btns {
         display: none !important;
@@ -257,7 +255,9 @@ function applyGradeDiscount(price) {
       margin-top: 14px;
     }
 
-    #app-footer .footer-sns-btn {
+    /* ⭐ 푸터 SNS 버튼 + 채널톡 버튼 공통 스타일 */
+    #app-footer .footer-sns-btn,
+    #app-footer .footer-channel-btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -270,28 +270,60 @@ function applyGradeDiscount(price) {
       text-decoration: none;
       transition: all 0.15s ease;
       pointer-events: auto !important;
+      cursor: pointer;
+      padding: 0;
+      font: inherit;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    #app-footer .footer-sns-btn svg {
+    #app-footer .footer-sns-btn svg,
+    #app-footer .footer-channel-btn svg {
       pointer-events: none !important;
     }
 
-    #app-footer .footer-sns-btn:hover {
+    #app-footer .footer-sns-btn:hover,
+    #app-footer .footer-channel-btn:hover {
       background: #111827;
       color: #fff;
       border-color: #111827;
     }
 
-    body.dark #app-footer .footer-sns-btn {
+    /* 채널톡 버튼만 색상 강조 (선택) */
+    #app-footer .footer-channel-btn {
+      background: #331fdb;
+      color: #fff;
+      border-color: #331fdb;
+    }
+
+    #app-footer .footer-channel-btn:hover {
+      background: #2a18b8;
+      border-color: #2a18b8;
+      color: #fff;
+    }
+
+    body.dark #app-footer .footer-sns-btn,
+    body.dark #app-footer .footer-channel-btn {
       background: #1a1a1a;
       border-color: #333;
       color: #e5e7eb;
+    }
+
+    body.dark #app-footer .footer-channel-btn {
+      background: #331fdb;
+      border-color: #331fdb;
+      color: #fff;
     }
 
     body.dark #app-footer .footer-sns-btn:hover {
       background: #e5e7eb;
       color: #111;
       border-color: #e5e7eb;
+    }
+
+    body.dark #app-footer .footer-channel-btn:hover {
+      background: #2a18b8;
+      border-color: #2a18b8;
+      color: #fff;
     }
 
     @media (max-width: 768px) {
@@ -307,16 +339,19 @@ function applyGradeDiscount(price) {
         gap: 14px;
         margin-top: 16px;
         margin-bottom: 4px;
+        flex-wrap: wrap;
       }
 
-      #app-footer .footer-sns-btn {
+      #app-footer .footer-sns-btn,
+      #app-footer .footer-channel-btn {
         display: inline-flex !important;
         visibility: visible !important;
         width: 44px;
         height: 44px;
       }
 
-      #app-footer .footer-sns-btn svg {
+      #app-footer .footer-sns-btn svg,
+      #app-footer .footer-channel-btn svg {
         display: block !important;
         width: 22px;
         height: 22px;
@@ -328,9 +363,8 @@ function applyGradeDiscount(price) {
         font-size: 11px;
       }
 
-      /* ⭐ 페이지 하단 여백 확대 (채널톡 아이콘과 겹치지 않게) */
       .site-main-scroll {
-        padding-bottom: calc(65px + env(safe-area-inset-bottom) + 80px);
+        padding-bottom: calc(65px + env(safe-area-inset-bottom) + 40px);
       }
     }
 
@@ -411,32 +445,21 @@ function applyGradeDiscount(price) {
       #mobile-bottom-nav { display: flex; }
     }
 
-    #mobile-bottom-nav.nav-count-6 .bottom-nav-item {
-      padding: 0 1px;
-      gap: 2px;
-    }
+    #mobile-bottom-nav.nav-count-6 .bottom-nav-item { padding: 0 1px; gap: 2px; }
+    #mobile-bottom-nav.nav-count-6 .bottom-nav-item .nav-icon { width: 18px; height: 18px; }
+    #mobile-bottom-nav.nav-count-6 .bottom-nav-item > span { font-size: 9px; }
 
-    #mobile-bottom-nav.nav-count-6 .bottom-nav-item .nav-icon {
-      width: 18px;
-      height: 18px;
-    }
+    #mobile-bottom-nav.nav-count-7 .bottom-nav-item { padding: 0 1px; gap: 2px; }
+    #mobile-bottom-nav.nav-count-7 .bottom-nav-item .nav-icon { width: 16px; height: 16px; }
+    #mobile-bottom-nav.nav-count-7 .bottom-nav-item > span { font-size: 8px; }
 
-    #mobile-bottom-nav.nav-count-6 .bottom-nav-item > span {
-      font-size: 9px;
-    }
-
-    #mobile-bottom-nav.nav-count-7 .bottom-nav-item {
-      padding: 0 1px;
-      gap: 2px;
-    }
-
-    #mobile-bottom-nav.nav-count-7 .bottom-nav-item .nav-icon {
-      width: 16px;
-      height: 16px;
-    }
-
-    #mobile-bottom-nav.nav-count-7 .bottom-nav-item > span {
-      font-size: 8px;
+    /* ============================================================
+       ⭐ 채널톡 플로팅 런처 숨김 (푸터 버튼으로 대체)
+       - 대화창/엔트리 등 나머지는 그대로
+       ============================================================ */
+    #ch-plugin-launcher,
+    #ch-plugin-entry {
+      display: none !important;
     }
   `;
 
@@ -484,12 +507,11 @@ function applyPhoneAttrs() {
 // ============================================================
 // ⭐⭐⭐ 스크롤 버튼 생성 & 가시성 판단 ⭐⭐⭐
 // - PC/태블릿: 우측 세로 중앙 고정
-// - 모바일: 생성 자체를 스킵 (채널톡 아이콘 자리 확보)
+// - 모바일: 생성 자체를 스킵
 // ============================================================
 function createScrollButtons() {
   if (_isAdmin) return;
 
-  // ⭐ 모바일(768px 이하)에서는 스크롤 버튼 생성 안 함
   if (window.matchMedia('(max-width: 768px)').matches) return;
 
   if (document.getElementById('scroll-btns')) return;
@@ -525,7 +547,6 @@ function createScrollButtons() {
     }
   });
 
-  // ===== 가시성 판단 (깜빡임 방지) =====
   let _scrollVisTimer = null;
   let _lastVisible = null;
 
@@ -584,29 +605,21 @@ function createScrollButtons() {
 function getCachedLogo() {
   try {
     return JSON.parse(localStorage.getItem('logo_cache') || 'null') || {};
-  } catch {
-    return {};
-  }
+  } catch { return {}; }
 }
 
 function setCachedLogo(obj) {
-  try {
-    localStorage.setItem('logo_cache', JSON.stringify(obj));
-  } catch {}
+  try { localStorage.setItem('logo_cache', JSON.stringify(obj)); } catch {}
 }
 
 function getCachedFooter() {
   try {
     return JSON.parse(localStorage.getItem('footer_cache') || 'null') || {};
-  } catch {
-    return {};
-  }
+  } catch { return {}; }
 }
 
 function setCachedFooter(obj) {
-  try {
-    localStorage.setItem('footer_cache', JSON.stringify(obj));
-  } catch {}
+  try { localStorage.setItem('footer_cache', JSON.stringify(obj)); } catch {}
 }
 
 function getSupabaseClient() {
@@ -651,10 +664,7 @@ async function refreshLogoCache() {
         site_name: data.site_name || ''
       });
     } else {
-      setCachedLogo({
-        image_url: '',
-        site_name: ''
-      });
+      setCachedLogo({ image_url: '', site_name: '' });
     }
   } catch (e) {}
 }
@@ -722,12 +732,8 @@ async function recordVisit() {
     await client.from('visits').insert({
       path: _pathName || 'index',
       session_id: getOrCreateSessionId(),
-      user_agent: navigator.userAgent
-        ? navigator.userAgent.slice(0, 500)
-        : null,
-      referrer: document.referrer
-        ? document.referrer.slice(0, 500)
-        : null
+      user_agent: navigator.userAgent ? navigator.userAgent.slice(0, 500) : null,
+      referrer: document.referrer ? document.referrer.slice(0, 500) : null
     });
   } catch (e) {}
 }
@@ -761,21 +767,21 @@ function renderFooter() {
 
   const hasSns = instagram || blog || band;
 
+  // ⭐ 채널톡 버튼은 항상 표시되도록 처리
+  //   (SNS 정보가 하나도 없어도 푸터가 숨겨지지 않게)
   if (
     !owner && !phone && !email && !address &&
     !business && !text && !hasSns
   ) {
-    wrap.style.display = 'none';
-
+    // 캐시 갱신 1~2회 시도 후에도 없으면 숨김
     if (_footerRenderCount < 2) {
       _footerRenderCount++;
-
-      refreshFooterCache().then(() => {
-        renderFooter();
-      });
+      refreshFooterCache().then(() => renderFooter());
+      return;
     }
-
-    return;
+    // 채널톡 버튼만 보여주기 위해 푸터 유지 (원하면 이 return을 살려서 완전 숨김)
+    // wrap.style.display = 'none';
+    // return;
   }
 
   _footerRenderCount = 0;
@@ -783,17 +789,9 @@ function renderFooter() {
 
   const items = [];
 
-  if (phone) {
-    items.push(`<span class="footer-item">📞 ${phone}</span>`);
-  }
-
-  if (email) {
-    items.push(`<span class="footer-item">✉️ ${email}</span>`);
-  }
-
-  if (business) {
-    items.push(`<span class="footer-item">사업자번호: ${business}</span>`);
-  }
+  if (phone) items.push(`<span class="footer-item">📞 ${phone}</span>`);
+  if (email) items.push(`<span class="footer-item">✉️ ${email}</span>`);
+  if (business) items.push(`<span class="footer-item">사업자번호: ${business}</span>`);
 
   const snsLinks = [];
 
@@ -842,29 +840,51 @@ function renderFooter() {
     </a>
   `);
 
+  // ⭐ 채널톡 아이콘을 SNS 행에 추가
+  //   (말풍선 아이콘 / 클릭 시 채널톡 대화창 오픈)
+  snsLinks.push(`
+    <button type="button"
+            class="footer-channel-btn"
+            id="footer-channel-btn"
+            aria-label="채널톡 상담"
+            title="채널톡 상담">
+      <svg viewBox="0 0 24 24" width="20" height="20"
+           fill="none" stroke="currentColor" stroke-width="1.8"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+      </svg>
+    </button>
+  `);
+
   wrap.innerHTML = `
     <div class="footer-inner">
       ${owner ? `<div class="footer-title">${owner}</div>` : ''}
       ${address ? `<div class="footer-item" style="margin-bottom:6px;">${address}</div>` : ''}
       ${items.length ? `<div class="footer-row">${items.join('')}</div>` : ''}
-      ${snsLinks.length ? `<div class="footer-sns-row">${snsLinks.join('')}</div>` : ''}
+      <div class="footer-sns-row">${snsLinks.join('')}</div>
       ${text ? `<div class="footer-text">${text}</div>` : ''}
     </div>
   `;
+
+  // ⭐ 채널톡 버튼 이벤트 바인딩
+  const chBtn = document.getElementById('footer-channel-btn');
+  if (chBtn) {
+    chBtn.addEventListener('click', () => {
+      try {
+        if (window.ChannelIO) {
+          window.ChannelIO('show');
+        }
+      } catch (e) {}
+    });
+  }
 }
 
 async function verifyMemberStatus() {
   const memberStr = localStorage.getItem('member');
-
   if (!memberStr) return true;
 
   let member;
-
-  try {
-    member = JSON.parse(memberStr);
-  } catch {
-    return true;
-  }
+  try { member = JSON.parse(memberStr); } catch { return true; }
 
   if (!member || !member.id) return true;
 
@@ -907,7 +927,6 @@ async function verifyMemberStatus() {
     member.grade = data.grade || member.grade || '일반회원';
 
     localStorage.setItem('member', JSON.stringify(member));
-
     return true;
   } catch (e) {
     return true;
@@ -975,10 +994,7 @@ function buildBottomNav(current, isMember, svgIcons, memberGrade) {
 
   const count = 3 + (gradeTabs ? 1 : 0) + (isMember ? 3 : 2);
 
-  return {
-    html: commonTabs + gradeTabs + memberTabs,
-    count
-  };
+  return { html: commonTabs + gradeTabs + memberTabs, count };
 }
 
 function updateBottomNavBadge() {
@@ -997,7 +1013,6 @@ function bindBottomLogout() {
   if (blb) {
     blb.onclick = (e) => {
       e.preventDefault();
-
       if (confirm('로그아웃 하시겠습니까?')) {
         localStorage.removeItem('member');
         location.href = 'index.html';
@@ -1050,35 +1065,21 @@ function renderHeader(current) {
   const member = localStorage.getItem('member');
 
   let m = null;
-
-  try {
-    m = member ? JSON.parse(member) : null;
-  } catch {
-    m = null;
-  }
+  try { m = member ? JSON.parse(member) : null; } catch { m = null; }
 
   const isMember = !!(m && m.id);
   const memberGrade = m?.grade || '일반회원';
 
   const svgIcons = {
     home: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
-
     cart: `<svg class="nav-icon" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>`,
-
     orders: `<svg class="nav-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,
-
     myorders: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
-
     mypage: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
-
     logout: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`,
-
     login: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>`,
-
     signup: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>`,
-
     wholesale: `<svg class="nav-icon" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>`,
-
     vip: `<svg class="nav-icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`
   };
 
@@ -1094,18 +1095,13 @@ function renderHeader(current) {
   if (_headerRendered && wrap.querySelector('header')) {
     wrap.querySelectorAll('[data-nav]').forEach(el => {
       const isActive = el.dataset.nav === current;
-
       el.style.background = isActive ? theme.btnBgActive : theme.btnBg;
       el.style.color = isActive ? theme.btnTextActive : theme.btnText;
       el.style.borderColor = isActive ? theme.btnBorderActive : theme.btnBorder;
     });
 
     const cc = document.getElementById('cart-count');
-
-    if (cc) {
-      cc.textContent = JSON.parse(localStorage.getItem('cart') || '[]').length;
-    }
-
+    if (cc) cc.textContent = JSON.parse(localStorage.getItem('cart') || '[]').length;
     return;
   }
 
@@ -1176,13 +1172,9 @@ function renderHeader(current) {
   _headerRendered = true;
 
   const cc = document.getElementById('cart-count');
-
-  if (cc) {
-    cc.textContent = JSON.parse(localStorage.getItem('cart') || '[]').length;
-  }
+  if (cc) cc.textContent = JSON.parse(localStorage.getItem('cart') || '[]').length;
 
   const lb = document.getElementById('logout-btn');
-
   if (lb) {
     lb.onclick = (e) => {
       e.preventDefault();
@@ -1223,20 +1215,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   if (existingHeader) wrapper.appendChild(existingHeader);
-
   wrapper.appendChild(mainScroll);
-
   if (existingBottomNav) wrapper.appendChild(existingBottomNav);
 
   document.body.insertBefore(wrapper, document.body.firstChild);
 
   const loader = document.createElement('div');
   loader.className = 'page-loader';
-
   if (!_isDark) loader.style.background = '#f8f8f8';
-
   loader.innerHTML = '<div class="spinner"></div>';
-
   document.body.appendChild(loader);
 
   if (_isDark) document.body.classList.add('dark');
@@ -1249,37 +1236,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   createScrollButtons();
-
   renderFooter();
-
-  refreshFooterCache().then(() => {
-    renderFooter();
-  });
-
+  refreshFooterCache().then(() => renderFooter());
   recordVisit();
 
   const isOk = await verifyMemberStatus();
-
   if (!isOk) return;
 
   const map = {
-    'index': 'home',
-    'login': 'login',
-    'signup': 'signup',
-    'cart': 'cart',
-    'orders': 'orders',
-    'product': 'product',
-    'mypage': 'mypage',
-    'myorders': 'myorders',
-    'wholesale': 'wholesale',
-    'vip': 'vip'
+    'index': 'home', 'login': 'login', 'signup': 'signup',
+    'cart': 'cart', 'orders': 'orders', 'product': 'product',
+    'mypage': 'mypage', 'myorders': 'myorders',
+    'wholesale': 'wholesale', 'vip': 'vip'
   };
 
   const current = map[_pathName] || 'home';
 
-  if (document.getElementById('app-header')) {
-    renderHeader(current);
-  }
+  if (document.getElementById('app-header')) renderHeader(current);
 
   setTimeout(() => {
     loader.classList.add('hide');
@@ -1296,23 +1269,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     return (window.console.error || window.console.log)('ChannelIO already loaded');
   }
 
-  var ch = function() {
-    ch.c(arguments);
-  };
-
+  var ch = function() { ch.c(arguments); };
   ch.q = [];
-
-  ch.c = function(args) {
-    ch.q.push(args);
-  };
-
+  ch.c = function(args) { ch.q.push(args); };
   w.ChannelIO = ch;
 
   function l() {
-    if (w.ChannelIOInitialized) {
-      return;
-    }
-
+    if (w.ChannelIOInitialized) return;
     w.ChannelIOInitialized = true;
 
     var s = document.createElement('script');
@@ -1341,67 +1304,3 @@ window.ChannelIO('boot', {
   // "memberId": "사용자 ID",
   // "profile": { "name": "사용자 이름", "email": "이메일" }
 });
-
-// ============================================================
-// ⭐⭐⭐ 채널톡 버튼 위치 조정 ⭐⭐⭐
-// - PC/태블릿: 우측 하단 고정
-// - 모바일: 하단 탭바 위 우측 고정 (스크롤 버튼 대신)
-// ============================================================
-(function() {
-  const oldStyle = document.getElementById('channel-talk-position-style');
-
-  if (oldStyle) {
-    oldStyle.remove();
-  }
-
-  const style = document.createElement('style');
-  style.id = 'channel-talk-position-style';
-
-  style.textContent = `
-    /* ===== PC/태블릿: 우측 하단 고정 ===== */
-    #ch-plugin-launcher,
-    #ch-plugin-entry {
-      position: fixed !important;
-      right: 24px !important;
-      bottom: 145px !important;
-      top: auto !important;
-      z-index: 899 !important;
-      transform: none !important;
-      transition: bottom 0.2s ease, right 0.2s ease, top 0.2s ease !important;
-    }
-
-    /* 일반 PC 및 태블릿 */
-    @media (min-width: 769px) and (max-width: 1450px) {
-      #ch-plugin-launcher,
-      #ch-plugin-entry {
-        right: 16px !important;
-        bottom: 145px !important;
-        top: auto !important;
-        transform: none !important;
-      }
-    }
-
-    /* ===== 모바일: 하단 탭바 위 우측 고정 (스크롤 버튼 자리) ===== */
-    @media (max-width: 768px) {
-      #ch-plugin-launcher,
-      #ch-plugin-entry {
-        position: fixed !important;
-        right: 16px !important;
-        bottom: calc(65px + env(safe-area-inset-bottom) + 20px) !important;
-        top: auto !important;
-        transform: none !important;
-        z-index: 899 !important;
-      }
-    }
-
-    /* 아주 좁은 화면 */
-    @media (max-width: 400px) {
-      #ch-plugin-launcher,
-      #ch-plugin-entry {
-        right: 12px !important;
-      }
-    }
-  `;
-
-  document.head.appendChild(style);
-})();
