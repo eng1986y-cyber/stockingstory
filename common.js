@@ -128,7 +128,7 @@ function applyGradeDiscount(price) {
     /* ============================================================
        ⭐ 스크롤 버튼
        - PC/태블릿: 화면 우측 세로 중앙 고정
-       - 모바일: 화면 우측 하단 (하단 네비바 위) ← 원위치
+       - 모바일: 화면 우측 하단 (네비바 바로 위, 회원가입 버튼과 겹치지 않게)
        ============================================================ */
     #scroll-btns {
       position: fixed;
@@ -184,12 +184,17 @@ function applyGradeDiscount(price) {
       }
     }
 
-    /* ⭐ 모바일: 원위치(우측 하단, 네비바 위)로 복원 */
+    /* ============================================================
+       ⭐ 모바일: 네비바 바로 위에 딱 붙게 (더 아래로 내림)
+       - 기존: 65px(네비바) + safe-area + 16px
+       - 변경: 65px(네비바) + safe-area + 6px  ← 더 아래로
+       - 페이지 하단 여백도 함께 늘려 회원가입 버튼과 겹치지 않게 함
+       ============================================================ */
     @media (max-width: 768px) {
       #scroll-btns {
         right: 12px;
         top: auto;
-        bottom: calc(65px + env(safe-area-inset-bottom) + 16px);
+        bottom: calc(65px + env(safe-area-inset-bottom) + 6px);
         transform: none;
         gap: 8px;
       }
@@ -206,6 +211,7 @@ function applyGradeDiscount(price) {
       #scroll-btns {
         right: 8px;
         gap: 6px;
+        bottom: calc(65px + env(safe-area-inset-bottom) + 4px);
       }
       #scroll-btns button {
         width: 36px;
@@ -351,8 +357,9 @@ function applyGradeDiscount(price) {
         font-size: 11px;
       }
 
+      /* ⭐ 페이지 하단 여백 확대 → 회원가입 버튼 등이 스크롤 버튼과 겹치지 않게 */
       .site-main-scroll {
-        padding-bottom: calc(65px + env(safe-area-inset-bottom));
+        padding-bottom: calc(65px + env(safe-area-inset-bottom) + 80px);
       }
     }
 
