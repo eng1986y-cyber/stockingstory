@@ -128,7 +128,7 @@ function applyGradeDiscount(price) {
     /* ============================================================
        ⭐ 스크롤 버튼
        - PC/태블릿: 화면 우측 세로 중앙 고정
-       - 모바일: 숨김 처리 (display: none)
+       - 모바일: JS에서 생성 자체를 스킵 + CSS로도 display:none
        ============================================================ */
     #scroll-btns {
       position: fixed;
@@ -483,9 +483,15 @@ function applyPhoneAttrs() {
 
 // ============================================================
 // ⭐⭐⭐ 스크롤 버튼 생성 & 가시성 판단 ⭐⭐⭐
+// - PC/태블릿: 우측 세로 중앙 고정
+// - 모바일: 생성 자체를 스킵 (채널톡 아이콘 자리 확보)
 // ============================================================
 function createScrollButtons() {
   if (_isAdmin) return;
+
+  // ⭐ 모바일(768px 이하)에서는 스크롤 버튼 생성 안 함
+  if (window.matchMedia('(max-width: 768px)').matches) return;
+
   if (document.getElementById('scroll-btns')) return;
 
   const wrap = document.createElement('div');
@@ -1339,7 +1345,7 @@ window.ChannelIO('boot', {
 // ============================================================
 // ⭐⭐⭐ 채널톡 버튼 위치 조정 ⭐⭐⭐
 // - PC/태블릿: 우측 하단 고정
-// - 모바일: 화면 우측 하단 고정 (기존 스크롤 버튼 자리)
+// - 모바일: 하단 탭바 위 우측 고정 (스크롤 버튼 대신)
 // ============================================================
 (function() {
   const oldStyle = document.getElementById('channel-talk-position-style');
@@ -1375,13 +1381,13 @@ window.ChannelIO('boot', {
       }
     }
 
-    /* ===== 모바일: 화면 우측 하단 고정 (스크롤 버튼이 있던 자리) ===== */
+    /* ===== 모바일: 하단 탭바 위 우측 고정 (스크롤 버튼 자리) ===== */
     @media (max-width: 768px) {
       #ch-plugin-launcher,
       #ch-plugin-entry {
         position: fixed !important;
         right: 16px !important;
-        bottom: 85px !important; /* 하단 탭바(65px) + 여백(20px) */
+        bottom: calc(65px + env(safe-area-inset-bottom) + 20px) !important;
         top: auto !important;
         transform: none !important;
         z-index: 899 !important;
