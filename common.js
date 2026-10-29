@@ -255,7 +255,7 @@ function applyGradeDiscount(price) {
       margin-top: 14px;
     }
 
-    /* ⭐ 푸터 SNS 버튼 + 채널톡 버튼 공통 스타일 */
+    /* ⭐ 푸터 SNS 버튼 + 채널톡 버튼 공통 스타일 (동일하게) */
     #app-footer .footer-sns-btn,
     #app-footer .footer-channel-btn {
       display: inline-flex;
@@ -288,19 +288,6 @@ function applyGradeDiscount(price) {
       border-color: #111827;
     }
 
-    /* 채널톡 버튼만 색상 강조 (선택) */
-    #app-footer .footer-channel-btn {
-      background: #331fdb;
-      color: #fff;
-      border-color: #331fdb;
-    }
-
-    #app-footer .footer-channel-btn:hover {
-      background: #2a18b8;
-      border-color: #2a18b8;
-      color: #fff;
-    }
-
     body.dark #app-footer .footer-sns-btn,
     body.dark #app-footer .footer-channel-btn {
       background: #1a1a1a;
@@ -308,22 +295,16 @@ function applyGradeDiscount(price) {
       color: #e5e7eb;
     }
 
-    body.dark #app-footer .footer-channel-btn {
-      background: #331fdb;
-      border-color: #331fdb;
-      color: #fff;
-    }
-
-    body.dark #app-footer .footer-sns-btn:hover {
+    body.dark #app-footer .footer-sns-btn:hover,
+    body.dark #app-footer .footer-channel-btn:hover {
       background: #e5e7eb;
       color: #111;
       border-color: #e5e7eb;
     }
 
-    body.dark #app-footer .footer-channel-btn:hover {
-      background: #2a18b8;
-      border-color: #2a18b8;
-      color: #fff;
+    /* ⭐ 채널톡 버튼: PC에서는 숨김 (플로팅 런처 사용) */
+    #app-footer .footer-channel-btn {
+      display: none !important;
     }
 
     @media (max-width: 768px) {
@@ -454,12 +435,35 @@ function applyGradeDiscount(price) {
     #mobile-bottom-nav.nav-count-7 .bottom-nav-item > span { font-size: 8px; }
 
     /* ============================================================
-       ⭐ 채널톡 플로팅 런처 숨김 (푸터 버튼으로 대체)
-       - 대화창/엔트리 등 나머지는 그대로
+       ⭐ 채널톡 플로팅 런처 (우측 하단)
+       - PC/태블릿: 원래 위치대로 표시
+       - 모바일: 숨김 (푸터의 채널톡 버튼으로 대체)
        ============================================================ */
-    #ch-plugin-launcher,
-    #ch-plugin-entry {
-      display: none !important;
+    @media (min-width: 769px) {
+      #ch-plugin-launcher,
+      #ch-plugin-entry {
+        position: fixed !important;
+        right: 24px !important;
+        bottom: 145px !important;
+        top: auto !important;
+        z-index: 899 !important;
+        transform: none !important;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1450px) {
+      #ch-plugin-launcher,
+      #ch-plugin-entry {
+        right: 16px !important;
+        bottom: 145px !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      #ch-plugin-launcher,
+      #ch-plugin-entry {
+        display: none !important;
+      }
     }
   `;
 
@@ -767,21 +771,15 @@ function renderFooter() {
 
   const hasSns = instagram || blog || band;
 
-  // ⭐ 채널톡 버튼은 항상 표시되도록 처리
-  //   (SNS 정보가 하나도 없어도 푸터가 숨겨지지 않게)
   if (
     !owner && !phone && !email && !address &&
     !business && !text && !hasSns
   ) {
-    // 캐시 갱신 1~2회 시도 후에도 없으면 숨김
     if (_footerRenderCount < 2) {
       _footerRenderCount++;
       refreshFooterCache().then(() => renderFooter());
       return;
     }
-    // 채널톡 버튼만 보여주기 위해 푸터 유지 (원하면 이 return을 살려서 완전 숨김)
-    // wrap.style.display = 'none';
-    // return;
   }
 
   _footerRenderCount = 0;
@@ -840,8 +838,7 @@ function renderFooter() {
     </a>
   `);
 
-  // ⭐ 채널톡 아이콘을 SNS 행에 추가
-  //   (말풍선 아이콘 / 클릭 시 채널톡 대화창 오픈)
+  // ⭐ 채널톡 아이콘 (모바일에서만 표시, CSS로 제어)
   snsLinks.push(`
     <button type="button"
             class="footer-channel-btn"
@@ -866,7 +863,7 @@ function renderFooter() {
     </div>
   `;
 
-  // ⭐ 채널톡 버튼 이벤트 바인딩
+  // ⭐ 채널톡 버튼 이벤트 (모바일에서만 실질적으로 보임)
   const chBtn = document.getElementById('footer-channel-btn');
   if (chBtn) {
     chBtn.addEventListener('click', () => {
