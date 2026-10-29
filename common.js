@@ -125,22 +125,27 @@ function applyGradeDiscount(price) {
 
     a img { pointer-events: auto !important; }
 
+    /* ============================================================
+       ⭐ 스크롤 버튼 - 화면 우측 세로 중앙 고정
+       ============================================================ */
     #scroll-btns {
       position: fixed;
-      left: 50%;
-      transform: translateX(calc(700px + 16px));
-      bottom: 20px;
-      display: flex;
+      right: 24px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: none;                /* 초기 숨김 → JS가 판단 후 flex */
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
       z-index: 900;
+      pointer-events: none;         /* 컨테이너는 이벤트 통과 */
     }
 
     #scroll-btns button {
-      width: 44px; height: 44px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       border: 1px solid #ddd;
-      background: #fff;
+      background: rgba(255,255,255,0.96);
       color: #222;
       font-size: 18px;
       font-weight: 700;
@@ -151,27 +156,40 @@ function applyGradeDiscount(price) {
       justify-content: center;
       padding: 0;
       line-height: 1;
+      pointer-events: auto;         /* 버튼은 클릭 가능 */
+      transition: background 0.15s ease;
+      -webkit-tap-highlight-color: transparent;
     }
+
+    #scroll-btns button:hover { background: #f3f4f6; }
 
     body.dark #scroll-btns button {
       border-color: #333;
-      background: #1a1a1a;
+      background: rgba(26,26,26,0.96);
       color: #e5e7eb;
       box-shadow: 0 2px 8px rgba(0,0,0,.5);
     }
 
-    @media (max-width: 1450px) {
-      #scroll-btns {
-        left: auto;
-        right: 16px;
-        transform: none;
+    body.dark #scroll-btns button:hover { background: #222; }
+
+    /* 화면이 아주 낮을 때 */
+    @media (max-height: 420px) {
+      #scroll-btns { gap: 6px; }
+      #scroll-btns button {
+        width: 38px;
+        height: 38px;
+        font-size: 15px;
       }
     }
 
+    /* 모바일: 하단 네비바 위로 살짝 올림 */
     @media (max-width: 768px) {
       #scroll-btns {
         right: 12px;
-        bottom: 85px;
+        top: auto;
+        bottom: calc(65px + env(safe-area-inset-bottom) + 16px);
+        transform: none;
+        gap: 8px;
       }
 
       #scroll-btns button {
@@ -470,6 +488,9 @@ function applyPhoneAttrs() {
   });
 }
 
+// ============================================================
+// ⭐⭐⭐ 스크롤 버튼 생성 & 가시성 판단 (개선판) ⭐⭐⭐
+// ============================================================
 function createScrollButtons() {
   if (_isAdmin) return;
   if (document.getElementById('scroll-btns')) return;
@@ -478,22 +499,20 @@ function createScrollButtons() {
   wrap.id = 'scroll-btns';
 
   wrap.innerHTML = `
-    <button id="btn-scroll-top" title="맨 위로">▲</button>
-    <button id="btn-scroll-bottom" title="맨 아래로">▼</button>
+    <button id="btn-scroll-top" title="맨 위로" aria-label="맨 위로">▲</button>
+    <button id="btn-scroll-bottom" title="맨 아래로" aria-label="맨 아래로">▼</button>
   `;
 
   document.body.appendChild(wrap);
 
   document.getElementById('btn-scroll-top').addEventListener('click', () => {
     const mainScroll = document.querySelector('.site-main-scroll');
-
     if (mainScroll) mainScroll.scrollTo({ top: 0, behavior: 'smooth' });
     else window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
   document.getElementById('btn-scroll-bottom').addEventListener('click', () => {
     const mainScroll = document.querySelector('.site-main-scroll');
-
     if (mainScroll) {
       mainScroll.scrollTo({
         top: mainScroll.scrollHeight,
@@ -507,30 +526,70 @@ function createScrollButtons() {
     }
   });
 
-  const updateVisibility = () => {
+  // ===== 가시성 판단 로직 =====
+  // - 이전 상태와 동일하면 DOM 조작 안 함 (깜빡임 방지)
+  // - debounce 로 연속 호출 방지
+  // - 임계값 10px (기존 50px → 미세한 스크롤에도 안정 표시)
+  let _scrollVisTimer = null;
+  let _lastVisible = null;
+
+  const applyVisibility = () => {
     const mainScroll = document.querySelector('.site-main-scroll');
 
+    let shouldShow;
     if (mainScroll) {
-      wrap.style.display =
-        (mainScroll.scrollHeight > mainScroll.clientHeight + 50)
-          ? 'flex'
-          : 'none';
+      shouldShow = (mainScroll.scrollHeight - mainScroll.clientHeight) > 10;
     } else {
-      wrap.style.display =
-        (document.documentElement.scrollHeight > window.innerHeight + 50)
-          ? 'flex'
-          : 'none';
+      shouldShow = (document.documentElement.scrollHeight - window.innerHeight) > 10;
     }
+
+    // 상태 변화가 없으면 DOM 건드리지 않음
+    if (_lastVisible === shouldShow) return;
+    _lastVisible = shouldShow;
+
+    wrap.style.display = shouldShow ? 'flex' : 'none';
   };
 
-  updateVisibility();
+  const updateVisibility = () => {
+    if (_scrollVisTimer) clearTimeout(_scrollVisTimer);
+    _scrollVisTimer = setTimeout(applyVisibility, 120);
+  };
+
+  // 초기 1회 판단
+  applyVisibility();
+
+  // window resize
   window.addEventListener('resize', updateVisibility);
 
-  new MutationObserver(updateVisibility).observe(document.body, {
-    childList: true,
-    subtree: true,
-    characterData: true
-  });
+  // .site-main-scroll 내부 컨텐츠 높이 변화 감지 (ResizeObserver)
+  const mainScrollEl = document.querySelector('.site-main-scroll');
+  if (mainScrollEl && typeof ResizeObserver !== 'undefined') {
+    const ro = new ResizeObserver(() => updateVisibility());
+    ro.observe(mainScrollEl);
+
+    Array.from(mainScrollEl.children).forEach(child => {
+      try { ro.observe(child); } catch (e) {}
+    });
+  }
+
+  // DOM 변화 감지 (childList만, characterData/attributes 무시)
+  if (typeof MutationObserver !== 'undefined') {
+    const mo = new MutationObserver(() => {
+      updateVisibility();
+    });
+    mo.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+  }
+
+  // 이미지 로딩 완료 시점 재판단
+  window.addEventListener('load', updateVisibility);
+
+  // 동적 컨텐츠 대응: 일정 시간 후 안정화 체크
+  setTimeout(updateVisibility, 500);
+  setTimeout(updateVisibility, 1500);
+  setTimeout(updateVisibility, 3000);
 }
 
 function getCachedLogo() {
@@ -1294,7 +1353,7 @@ window.ChannelIO('boot', {
   // "profile": { "name": "사용자 이름", "email": "이메일" }
 });
 
-// ===== 채널톡 버튼 위치 조정 (참고 이미지 기준) =====
+// ===== 채널톡 버튼 위치 조정 =====
 
 (function() {
   const oldStyle = document.getElementById('channel-talk-position-style');
