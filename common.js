@@ -127,8 +127,8 @@ function applyGradeDiscount(price) {
 
     /* ============================================================
        ⭐ 스크롤 버튼 - 화면 우측 세로 중앙 고정
-       - position: fixed + right 기준이므로 화면 폭이 넓어져도
-         항상 화면 우측에 고정됨
+       - position: fixed + right 기준 → 화면 폭이 아무리 넓어져도
+         항상 화면 우측에 고정 (콘텐츠 영역과 무관)
        - 모든 화면 크기(PC/태블릿/모바일)에서 top: 50% 유지
        ============================================================ */
     #scroll-btns {
@@ -159,7 +159,7 @@ function applyGradeDiscount(price) {
       justify-content: center;
       padding: 0;
       line-height: 1;
-      pointer-events: auto;         /* 버튼은 클릭 가능 */
+      pointer-events: auto;
       transition: background 0.15s ease;
       -webkit-tap-highlight-color: transparent;
     }
@@ -185,7 +185,7 @@ function applyGradeDiscount(price) {
       }
     }
 
-    /* ⭐ 모바일에서도 세로 중앙 유지, 버튼 크기/여백만 조정 */
+    /* ⭐ 모바일: 세로 중앙 유지, 여백/크기만 조정 */
     @media (max-width: 768px) {
       #scroll-btns {
         right: 12px;
@@ -201,7 +201,7 @@ function applyGradeDiscount(price) {
       }
     }
 
-    /* 아주 좁은 화면에서 right 여백 축소 */
+    /* 아주 좁은 화면 */
     @media (max-width: 400px) {
       #scroll-btns {
         right: 8px;
@@ -504,7 +504,7 @@ function applyPhoneAttrs() {
 }
 
 // ============================================================
-// ⭐⭐⭐ 스크롤 버튼 생성 & 가시성 판단 (개선판) ⭐⭐⭐
+// ⭐⭐⭐ 스크롤 버튼 생성 & 가시성 판단 ⭐⭐⭐
 // ============================================================
 function createScrollButtons() {
   if (_isAdmin) return;
@@ -541,10 +541,7 @@ function createScrollButtons() {
     }
   });
 
-  // ===== 가시성 판단 로직 =====
-  // - 이전 상태와 동일하면 DOM 조작 안 함 (깜빡임 방지)
-  // - debounce 로 연속 호출 방지
-  // - 임계값 10px
+  // ===== 가시성 판단 (깜빡임 방지) =====
   let _scrollVisTimer = null;
   let _lastVisible = null;
 
@@ -558,7 +555,6 @@ function createScrollButtons() {
       shouldShow = (document.documentElement.scrollHeight - window.innerHeight) > 10;
     }
 
-    // 상태 변화가 없으면 DOM 건드리지 않음
     if (_lastVisible === shouldShow) return;
     _lastVisible = shouldShow;
 
@@ -570,13 +566,10 @@ function createScrollButtons() {
     _scrollVisTimer = setTimeout(applyVisibility, 120);
   };
 
-  // 초기 1회 판단
   applyVisibility();
 
-  // window resize
   window.addEventListener('resize', updateVisibility);
 
-  // .site-main-scroll 내부 컨텐츠 높이 변화 감지 (ResizeObserver)
   const mainScrollEl = document.querySelector('.site-main-scroll');
   if (mainScrollEl && typeof ResizeObserver !== 'undefined') {
     const ro = new ResizeObserver(() => updateVisibility());
@@ -587,7 +580,6 @@ function createScrollButtons() {
     });
   }
 
-  // DOM 변화 감지 (childList만)
   if (typeof MutationObserver !== 'undefined') {
     const mo = new MutationObserver(() => {
       updateVisibility();
@@ -598,10 +590,8 @@ function createScrollButtons() {
     });
   }
 
-  // 이미지 로딩 완료 시점 재판단
   window.addEventListener('load', updateVisibility);
 
-  // 동적 컨텐츠 대응: 일정 시간 후 안정화 체크
   setTimeout(updateVisibility, 500);
   setTimeout(updateVisibility, 1500);
   setTimeout(updateVisibility, 3000);
@@ -1370,9 +1360,8 @@ window.ChannelIO('boot', {
 
 // ============================================================
 // ⭐⭐⭐ 채널톡 버튼 위치 조정 ⭐⭐⭐
-// - PC: 화면 우측 하단 (기존 유지)
-// - 모바일: 화면 우측 세로 중앙 (top: 50%)
-//   → 채널톡 위젯이 내부 transform 을 쓰므로 !important 로 덮어씀
+// - PC/태블릿: 우측 하단 고정 (기존 유지)
+// - 모바일: 화면 우측 세로 중앙 고정 (top: 50% + translateY(-50%))
 // ============================================================
 (function() {
   const oldStyle = document.getElementById('channel-talk-position-style');
@@ -1397,7 +1386,7 @@ window.ChannelIO('boot', {
       transition: bottom 0.2s ease, right 0.2s ease, top 0.2s ease !important;
     }
 
-    /* 넓은 PC 화면: 화면 우측 하단에 그대로 */
+    /* 넓은 PC 화면 */
     @media (min-width: 1451px) {
       #ch-plugin-launcher,
       #ch-plugin-entry {
@@ -1421,8 +1410,6 @@ window.ChannelIO('boot', {
 
     /* ============================================================
        ⭐ 모바일: 화면 우측 세로 중앙 고정
-       - top: 50% + translateY(-50%) 로 수직 중앙
-       - 채널톡이 자체 transform 을 걸 수 있으므로 !important 필수
        ============================================================ */
     @media (max-width: 768px) {
       #ch-plugin-launcher,
@@ -1436,7 +1423,7 @@ window.ChannelIO('boot', {
       }
     }
 
-    /* 아주 좁은 화면: 우측 여백 축소 */
+    /* 아주 좁은 화면 */
     @media (max-width: 400px) {
       #ch-plugin-launcher,
       #ch-plugin-entry {
