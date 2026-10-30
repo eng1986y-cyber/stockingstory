@@ -112,6 +112,9 @@
     #admin-pagination { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 14px; flex-wrap: wrap; width: 100%; }
     #admin-pagination button { min-width: 34px; min-height: 32px; }
     #admin-pagination button:disabled { opacity: .35; cursor: not-allowed; }
+    .upload-label { display:block; font-size:12px; font-weight:700; color:#374151; margin:2px 0 -5px; }
+    .upload-help { font-size:11px; color:#9ca3af; margin:-5px 0 0; line-height:1.5; }
+    input[type="file"] { padding:8px !important; background:#f9fafb !important; }
     .preview-box { margin-top: 12px; padding: 12px; background: #f9fafb; border-radius: 8px; border: 1px dashed #e5e7eb; }
     .preview-box .preview-label { font-size: 12px; color: #6b7280; margin-bottom: 6px; }
 
@@ -567,7 +570,10 @@
                 <div class="card-title">🏷️ 로고 / 사이트명</div>
                 <div style="display: grid; gap: 10px;">
                   <input id="logo-site-name" placeholder="사이트명">
-                  <input id="logo-image-url" placeholder="로고 이미지 URL">
+                  <input id="logo-image-url" placeholder="로고 이미지 URL (직접 업로드하면 자동 입력됩니다)">
+                  <label class="upload-label" for="logo-image-file">또는 로고 이미지 직접 업로드</label>
+                  <input id="logo-image-file" type="file" accept="image/*">
+                  <p class="upload-help">이미지 파일을 선택하면 Supabase 저장소에 업로드한 뒤 URL이 자동 입력됩니다.</p>
                   <div class="form-row">
                     <button id="logo-save-btn" class="btn btn-primary">등록/수정</button>
                     <button id="logo-delete-btn" class="btn btn-danger">삭제</button>
@@ -600,7 +606,10 @@
               <div class="card">
                 <div class="card-title">🖼️ 배너 이미지 <span class="hint">(여러 개 등록 가능)</span></div>
                 <div style="display: grid; gap: 10px;">
-                  <input id="banner-image-url" placeholder="배너 이미지 URL">
+                  <input id="banner-image-url" placeholder="배너 이미지 URL (직접 업로드하면 자동 입력됩니다)">
+                  <label class="upload-label" for="banner-image-file">또는 배너 이미지 직접 업로드</label>
+                  <input id="banner-image-file" type="file" accept="image/*">
+                  <p class="upload-help">이미지 파일을 선택하면 Supabase 저장소에 업로드한 뒤 URL이 자동 입력됩니다.</p>
                   <input id="banner-link-url" placeholder="클릭 시 이동할 링크 URL (선택)">
                   <div class="form-row">
                     <button id="banner-save-btn" class="btn btn-primary">➕ 새 배너 추가</button>
@@ -788,6 +797,47 @@
       showLogin();
     });
 
+    // ===== 이미지 업로드 공통 설정 =====
+    // Supabase Storage에 공개(public) 버킷 "site-assets"를 만들어 두어야 합니다.
+    const SITE_ASSET_BUCKET = 'site-assets';
+
+    async function uploadSiteImage(file, folder) {
+      if (!file) throw new Error('업로드할 이미지 파일을 선택하세요.');
+      if (!file.type || !file.type.startsWith('image/')) {
+        throw new Error('이미지 파일만 업로드할 수 있습니다.');
+      }
+      const maxSize = 10 * 1024 * 1024;
+      if (file.size > maxSize) throw new Error('이미지 파일은 10MB 이하만 업로드할 수 있습니다.');
+
+      const rawExt = (file.name.split('.').pop() || 'jpg').toLowerCase();
+      const ext = /^[a-z0-9]{1,8}$/.test(rawExt) ? rawExt : 'jpg';
+      const safeName = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${ext}`;
+      const path = `${folder}/${safeName}`;
+
+      const { error } = await db.storage.from(SITE_ASSET_BUCKET).upload(path, file, {
+        cacheControl: '3600',
+        upsert: false,
+        contentType: file.type
+      });
+      if (error) {
+        if (/bucket not found/i.test(error.message || '')) {
+          throw new Error('Supabase Storage에 "site-assets" 공개 버킷을 먼저 만들어 주세요.');
+        }
+        throw error;
+      }
+
+      const { data } = db.storage.from(SITE_ASSET_BUCKET).getPublicUrl(path);
+      if (!data || !data.publicUrl) throw new Error('업로드는 되었지만 공개 이미지 URL을 가져오지 못했습니다.');
+      return data.publicUrl;
+    }
+
+    function setUploadMessage(elementId, message, isError = false) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      el.className = isError ? 'msg error' : 'msg success';
+      el.textContent = message;
+    }
+
     // ===== 로고 =====
     let currentLogoId = null;
     async function loadLogo() {
@@ -808,6 +858,25 @@
       if (data.image_url) { img.src = data.image_url; preview.style.display = 'block'; }
       else preview.style.display = 'none';
     }
+    document.getElementById('logo-image-file').addEventListener('change', async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const msg = document.getElementById('logo-msg');
+      try {
+        msg.className = 'msg'; msg.textContent = '이미지 업로드 중...';
+        const url = await uploadSiteImage(file, 'logos');
+        document.getElementById('logo-image-url').value = url;
+        const img = document.getElementById('logo-preview-img');
+        img.src = url;
+        document.getElementById('logo-preview').style.display = 'block';
+        msg.className = 'msg success'; msg.textContent = '✅ 이미지 업로드 완료! 아래 등록/수정 버튼을 눌러 저장하세요.';
+      } catch (err) {
+        msg.className = 'msg error'; msg.textContent = '❌ 업로드 실패: ' + (err.message || err);
+      } finally {
+        e.target.value = '';
+      }
+    });
+
     document.getElementById('logo-save-btn').addEventListener('click', async () => {
       const msg = document.getElementById('logo-msg');
       const siteName = document.getElementById('logo-site-name').value.trim();
@@ -999,6 +1068,8 @@
           <form id="banner-edit-form" class="modal-form">
             <label>배너 이미지 URL *</label>
             <input name="image_url" value="${banner.image_url || ''}" required>
+            <label>또는 이미지 파일 직접 업로드</label>
+            <input name="image_file" type="file" accept="image/*">
             <label>클릭 시 이동할 링크 URL (선택)</label>
             <input name="link_url" value="${banner.link_url || ''}">
             <div style="margin-top:8px;">
@@ -1015,6 +1086,25 @@
       document.body.appendChild(modal);
       const form = modal.querySelector('#banner-edit-form');
       const previewImg = modal.querySelector('#banner-edit-preview');
+      form.querySelector('input[name="image_file"]').addEventListener('change', async (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = '업로드 중...';
+        try {
+          const url = await uploadSiteImage(file, 'banners');
+          form.querySelector('input[name="image_url"]').value = url;
+          previewImg.src = url;
+          previewImg.style.display = 'block';
+        } catch (err) {
+          alert('❌ 이미지 업로드 실패: ' + (err.message || err));
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = '저장';
+          e.target.value = '';
+        }
+      });
       form.querySelector('input[name="image_url"]').addEventListener('input', (e) => {
         const v = e.target.value.trim();
         if (v) { previewImg.src = v; previewImg.style.display = 'block'; }
@@ -1038,6 +1128,22 @@
         }
       });
     }
+    document.getElementById('banner-image-file').addEventListener('change', async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const msg = document.getElementById('banner-msg');
+      try {
+        msg.className = 'msg'; msg.textContent = '이미지 업로드 중...';
+        const url = await uploadSiteImage(file, 'banners');
+        document.getElementById('banner-image-url').value = url;
+        msg.className = 'msg success'; msg.textContent = '✅ 이미지 업로드 완료! 링크를 입력한 뒤 새 배너 추가를 누르세요.';
+      } catch (err) {
+        msg.className = 'msg error'; msg.textContent = '❌ 업로드 실패: ' + (err.message || err);
+      } finally {
+        e.target.value = '';
+      }
+    });
+
     document.getElementById('banner-save-btn').addEventListener('click', async () => {
       const msg = document.getElementById('banner-msg');
       const imageUrl = document.getElementById('banner-image-url').value.trim();
