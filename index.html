@@ -70,6 +70,75 @@
       #new-item-heading .ni-sub { font-size: 11px; }
     }
 
+    /* ⭐ 상품 검색 영역 */
+    #product-search-wrap {
+      max-width: 1400px;
+      margin: 16px auto 0;
+      padding: 0 16px;
+      box-sizing: border-box;
+      width: 100%;
+      display: flex;
+      gap: 8px;
+    }
+    #product-search-input {
+      flex: 1;
+      min-width: 0;
+      padding: 12px 14px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      background: #fff;
+      color: #222;
+      box-sizing: border-box;
+    }
+    #product-search-input:focus { outline: none; border-color: #222; }
+    body.dark #product-search-input {
+      background: #0f0f0f;
+      border-color: #2a2a2a;
+      color: #e5e7eb;
+    }
+    body.dark #product-search-input::placeholder { color: #555; }
+    body.dark #product-search-input:focus { border-color: #555; box-shadow: 0 0 0 3px rgba(255,255,255,.05); }
+    #product-search-btn {
+      padding: 12px 20px;
+      background: #222;
+      color: #fff;
+      border: 0;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+    #product-search-btn:hover { background: #000; }
+    body.dark #product-search-btn { background: #e5e7eb; color: #111; }
+    body.dark #product-search-btn:hover { background: #fff; }
+    #product-search-reset {
+      padding: 12px 14px;
+      background: #fff;
+      color: #374151;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+    body.dark #product-search-reset {
+      background: #1a1a1a;
+      color: #e5e7eb;
+      border-color: #333;
+    }
+    @media (max-width: 768px) {
+      #product-search-wrap { padding: 0 12px; margin-top: 12px; }
+      #product-search-input { padding: 10px 12px; font-size: 13px; }
+      #product-search-btn { padding: 10px 14px; font-size: 13px; }
+      #product-search-reset { padding: 10px 12px; font-size: 13px; }
+    }
+
     #product-container { max-width: 1400px; margin: 0 auto; padding: 0 16px; box-sizing: border-box; width: 100%; margin-top: 16px; }
     #product-container.no-banner { margin-top: 24px; }
     @media (max-width: 768px) { #product-container { margin-top: 12px; } }
@@ -126,6 +195,13 @@
     <span class="ni-line"></span>
   </div>
 
+  <!-- ⭐ 상품 검색 -->
+  <div id="product-search-wrap">
+    <input id="product-search-input" type="text" placeholder="상품명 또는 제품번호로 검색" autocomplete="off">
+    <button id="product-search-btn" type="button">검색</button>
+    <button id="product-search-reset" type="button">전체</button>
+  </div>
+
   <main id="product-container">
     <div id="product-list">로딩중...</div>
     <div id="pagination"></div>
@@ -148,7 +224,9 @@
     const MOBILE_MAX_PAGES = 5;
 
     let allProducts = [];
+    let filteredProducts = [];
     let currentPage = 1;
+    let currentSearch = '';
 
     function isLoggedIn() {
       try {
@@ -310,7 +388,6 @@
 
     async function loadProducts() {
       const list = document.getElementById('product-list');
-      // ⭐ 일반회원용: target_grade = 'all' 인 상품만 표시
       const { data, error } = await db.from('products').select('*').or('target_grade.eq.all,target_grade.is.null').order('created_at', { ascending: false });
       if (error) { list.innerHTML = '<p>상품을 불러올 수 없습니다.</p>'; return; }
       if (!data || data.length === 0) {
@@ -319,6 +396,24 @@
         return;
       }
       allProducts = data;
+      applySearch(currentSearch);
+    }
+
+    function normalizeSearch(v) {
+      return String(v ?? '').normalize('NFKC').toLocaleLowerCase().trim();
+    }
+
+    function applySearch(text) {
+      currentSearch = text || '';
+      const keyword = normalizeSearch(currentSearch);
+      if (!keyword) {
+        filteredProducts = [...allProducts];
+      } else {
+        filteredProducts = allProducts.filter(p => {
+          const vals = [p.name, p.product_code];
+          return vals.some(v => normalizeSearch(v).includes(keyword));
+        });
+      }
       currentPage = 1;
       applyGridColumns();
       renderPage();
@@ -342,7 +437,13 @@
       const list = document.getElementById('product-list');
       const perPage = getPerPage();
       const start = (currentPage - 1) * perPage;
-      const items = allProducts.slice(start, start + perPage);
+      const items = filteredProducts.slice(start, start + perPage);
+
+      if (filteredProducts.length === 0) {
+        list.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:40px; color:#9ca3af;">검색 결과가 없습니다.</p>';
+        document.getElementById('pagination').innerHTML = '';
+        return;
+      }
 
       list.innerHTML = items.map(p => {
         const hidePrice = shouldHidePrice(p);
@@ -371,7 +472,7 @@
       const el = document.getElementById('pagination');
       const perPage = getPerPage();
       const maxPages = getMaxPages();
-      const totalPages = Math.min(Math.ceil(allProducts.length / perPage), maxPages);
+      const totalPages = Math.min(Math.ceil(filteredProducts.length / perPage), maxPages);
 
       if (totalPages <= 1) { el.innerHTML = ''; return; }
 
@@ -400,13 +501,24 @@
       });
     }
 
+    // ⭐ 검색 이벤트
+    const searchInput = document.getElementById('product-search-input');
+    const searchBtn = document.getElementById('product-search-btn');
+    const searchReset = document.getElementById('product-search-reset');
+
+    searchBtn.addEventListener('click', () => applySearch(searchInput.value));
+    searchReset.addEventListener('click', () => { searchInput.value = ''; applySearch(''); });
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); applySearch(searchInput.value); }
+    });
+
     let resizeTimer;
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
         applyGridColumns();
         const maxP = getMaxPages();
-        const totalP = Math.min(Math.ceil(allProducts.length / getPerPage()), maxP);
+        const totalP = Math.min(Math.ceil(filteredProducts.length / getPerPage()), maxP);
         if (currentPage > totalP) currentPage = totalP || 1;
         renderPage();
       }, 200);
