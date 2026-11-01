@@ -345,6 +345,45 @@
           <h1 class="page-title">상품 관리</h1>
           <p class="page-subtitle">상품을 등록하고 목록을 관리합니다 (일반 / 도매전용 / VIP전용 선택 등록)</p>
 
+          <div class="card" id="global-detail-images-card">
+            <div class="card-title">🖼️ 전체 상품 상세 공통 이미지</div>
+            <p class="upload-help" style="margin:0 0 12px;">여기에 등록한 이미지는 모든 상품 상세페이지에 자동으로 적용됩니다. 위쪽 이미지는 상세이미지 바로 위, 아래쪽 이미지는 상세이미지 맨 아래에 표시됩니다.</p>
+            <div class="settings-split" style="margin-bottom:0;">
+              <div class="settings-col">
+                <div>
+                  <label class="upload-label" for="detail-notice-file">📢 상세이미지 위 공지 이미지</label>
+                  <input id="detail-notice-file" type="file" accept="image/*">
+                  <input id="detail-notice-url" placeholder="공지 이미지 URL (직접 URL 입력도 가능)" style="margin-top:8px;">
+                  <div id="detail-notice-preview" class="preview-box" style="display:none;">
+                    <div class="preview-label">미리보기</div>
+                    <img id="detail-notice-preview-img" style="display:block;width:100%;height:auto;">
+                  </div>
+                  <div class="form-row" style="margin-top:10px;">
+                    <button type="button" id="detail-notice-save" class="btn btn-primary">공지 이미지 저장</button>
+                    <button type="button" id="detail-notice-delete" class="btn btn-danger">삭제</button>
+                  </div>
+                  <p id="detail-notice-msg" class="msg"></p>
+                </div>
+              </div>
+              <div class="settings-col">
+                <div>
+                  <label class="upload-label" for="detail-footer-file">📦 상세이미지 아래 사용설명 / 배송안내 이미지</label>
+                  <input id="detail-footer-file" type="file" accept="image/*">
+                  <input id="detail-footer-url" placeholder="사용설명 / 배송안내 이미지 URL (직접 URL 입력도 가능)" style="margin-top:8px;">
+                  <div id="detail-footer-preview" class="preview-box" style="display:none;">
+                    <div class="preview-label">미리보기</div>
+                    <img id="detail-footer-preview-img" style="display:block;width:100%;height:auto;">
+                  </div>
+                  <div class="form-row" style="margin-top:10px;">
+                    <button type="button" id="detail-footer-save" class="btn btn-primary">하단 이미지 저장</button>
+                    <button type="button" id="detail-footer-delete" class="btn btn-danger">삭제</button>
+                  </div>
+                  <p id="detail-footer-msg" class="msg"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="product-layout">
             <div class="card" id="product-register-card">
               <div class="card-title">📝 새 상품 등록</div>
@@ -771,7 +810,7 @@
       loadLogo(); loadFooter(); loadBanner(); loadShippingSetting(); loadSnsLinks();
       loadPromoVideo();
       loadSignupCouponSetting();
-      loadAdminList(); loadOrders(); loadMembers();
+      loadAdminList(); loadGlobalDetailImages(); loadOrders(); loadMembers();
       loadCouponsAndMembers();
     }
 
@@ -830,6 +869,104 @@
       if (!data || !data.publicUrl) throw new Error('업로드는 되었지만 공개 이미지 URL을 가져오지 못했습니다.');
       return data.publicUrl;
     }
+
+    // ===== 모든 상품 상세페이지 공통 이미지 관리 =====
+    const GLOBAL_DETAIL_IMAGE_KEYS = {
+      notice: 'global_product_detail_notice_image',
+      footer: 'global_product_detail_footer_image'
+    };
+
+    function setGlobalDetailImagePreview(type, url) {
+      const prefix = type === 'notice' ? 'detail-notice' : 'detail-footer';
+      const box = document.getElementById(prefix + '-preview');
+      const img = document.getElementById(prefix + '-preview-img');
+      if (url) {
+        img.src = url;
+        box.style.display = 'block';
+      } else {
+        img.removeAttribute('src');
+        box.style.display = 'none';
+      }
+    }
+
+    async function loadGlobalDetailImages() {
+      const keys = Object.values(GLOBAL_DETAIL_IMAGE_KEYS);
+      const { data, error } = await db.from('settings').select('key,value').in('key', keys);
+      if (error) {
+        console.error('공통 상세 이미지 설정 로드 실패:', error.message);
+        return;
+      }
+      const map = {};
+      (data || []).forEach(row => { map[row.key] = row.value || ''; });
+      const notice = map[GLOBAL_DETAIL_IMAGE_KEYS.notice] || '';
+      const footer = map[GLOBAL_DETAIL_IMAGE_KEYS.footer] || '';
+      document.getElementById('detail-notice-url').value = notice;
+      document.getElementById('detail-footer-url').value = footer;
+      setGlobalDetailImagePreview('notice', notice);
+      setGlobalDetailImagePreview('footer', footer);
+    }
+
+    ['notice', 'footer'].forEach(type => {
+      const prefix = type === 'notice' ? 'detail-notice' : 'detail-footer';
+      document.getElementById(prefix + '-file').addEventListener('change', async e => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const msgEl = document.getElementById(prefix + '-msg');
+        msgEl.className = 'msg';
+        msgEl.textContent = '이미지 업로드 중...';
+        try {
+          const url = await uploadSiteImage(file, 'product-detail-global');
+          document.getElementById(prefix + '-url').value = url;
+          setGlobalDetailImagePreview(type, url);
+          msgEl.className = 'msg success';
+          msgEl.textContent = '✅ 업로드 완료! 저장 버튼을 눌러 전체 상품에 적용하세요.';
+        } catch (err) {
+          msgEl.className = 'msg error';
+          msgEl.textContent = '❌ 업로드 실패: ' + (err.message || err);
+        } finally {
+          e.target.value = '';
+        }
+      });
+
+      document.getElementById(prefix + '-url').addEventListener('input', e => {
+        setGlobalDetailImagePreview(type, e.target.value.trim());
+      });
+
+      document.getElementById(prefix + '-save').addEventListener('click', async () => {
+        const msgEl = document.getElementById(prefix + '-msg');
+        const url = document.getElementById(prefix + '-url').value.trim();
+        msgEl.className = 'msg';
+        msgEl.textContent = '저장 중...';
+        const { error } = await db.from('settings').upsert({
+          key: GLOBAL_DETAIL_IMAGE_KEYS[type],
+          value: url
+        });
+        if (error) {
+          msgEl.className = 'msg error';
+          msgEl.textContent = '❌ 저장 실패: ' + error.message;
+        } else {
+          msgEl.className = 'msg success';
+          msgEl.textContent = url ? '✅ 저장 완료! 모든 상품 상세페이지에 적용됩니다.' : '✅ 빈 이미지 설정이 저장되었습니다.';
+        }
+      });
+
+      document.getElementById(prefix + '-delete').addEventListener('click', async () => {
+        if (!confirm('이 공통 이미지를 삭제할까요? 모든 상품 상세페이지에서 표시되지 않습니다.')) return;
+        const msgEl = document.getElementById(prefix + '-msg');
+        msgEl.className = 'msg';
+        msgEl.textContent = '삭제 중...';
+        const { error } = await db.from('settings').delete().eq('key', GLOBAL_DETAIL_IMAGE_KEYS[type]);
+        if (error) {
+          msgEl.className = 'msg error';
+          msgEl.textContent = '❌ 삭제 실패: ' + error.message;
+        } else {
+          document.getElementById(prefix + '-url').value = '';
+          setGlobalDetailImagePreview(type, '');
+          msgEl.className = 'msg success';
+          msgEl.textContent = '✅ 삭제 완료! 모든 상품 상세페이지에서 제거되었습니다.';
+        }
+      });
+    });
 
     function setUploadMessage(elementId, message, isError = false) {
       const el = document.getElementById(elementId);

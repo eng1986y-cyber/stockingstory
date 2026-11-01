@@ -130,6 +130,16 @@
       const pricing = getPricing(data);
       const hasDiscount = pricing.discountRate > 0;
 
+      // 관리자에서 등록한 전체 상품 공통 상세 이미지
+      const { data: sharedImageRows } = await db
+        .from('settings')
+        .select('key,value')
+        .in('key', ['global_product_detail_notice_image', 'global_product_detail_footer_image']);
+      const sharedImageMap = {};
+      (sharedImageRows || []).forEach(row => { sharedImageMap[row.key] = row.value || ''; });
+      const sharedNoticeImage = sharedImageMap.global_product_detail_notice_image || '';
+      const sharedFooterImage = sharedImageMap.global_product_detail_footer_image || '';
+
       const detailImgs = (data.detail_images || []).map(url => `<img src="${url}" alt="상세" loading="lazy" style="width:100%; display:block; margin-top:8px; border-radius:8px;">`).join('');
 
       // ⭐ 상품 target_grade 기준 배송 표시
@@ -250,7 +260,9 @@
             </div>
           </div>
         </div>
-        ${detailImgs ? `<div style="margin-top:16px;">${detailImgs}</div>` : ''}
+        ${sharedNoticeImage ? `<div class="global-product-detail-notice" style="margin-top:16px;"><img src="${sharedNoticeImage}" alt="상품 공지" loading="lazy" style="display:block;width:100%;height:auto;border-radius:8px;"></div>` : ''}
+        ${detailImgs ? `<div style="margin-top:8px;">${detailImgs}</div>` : ''}
+        ${sharedFooterImage ? `<div class="global-product-detail-footer" style="margin-top:16px;"><img src="${sharedFooterImage}" alt="상품 사용설명 및 배송안내" loading="lazy" style="display:block;width:100%;height:auto;border-radius:8px;"></div>` : ''}
       `;
 
       const shareEl = document.getElementById('share-btn');
