@@ -1127,9 +1127,9 @@ function renderHeader(current) {
   `;
 
   const gradeBtn = (memberGrade === '도매회원')
-    ? `<a href="wholesale.html" data-nav="wholesale" style="${btnStyle(current === 'wholesale')}">🏭 도매전용</a>`
+    ? `<a href="wholesale.html" data-nav="wholesale" style="${btnStyle(current === 'wholesale')}">도매전용관</a>`
     : (memberGrade === 'VIP회원')
-    ? `<a href="vip.html" data-nav="vip" style="${btnStyle(current === 'vip')}">⭐ VIP전용</a>`
+    ? `<a href="vip.html" data-nav="vip" style="${btnStyle(current === 'vip')}">⭐ VIP전용관</a>`
     : '';
 
   const userBtns = isMember
