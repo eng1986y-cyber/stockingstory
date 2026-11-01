@@ -117,6 +117,34 @@
     input[type="file"] { padding:8px !important; background:#f9fafb !important; }
     .preview-box { margin-top: 12px; padding: 12px; background: #f9fafb; border-radius: 8px; border: 1px dashed #e5e7eb; }
     .preview-box .preview-label { font-size: 12px; color: #6b7280; margin-bottom: 6px; }
+    /* 전체 상품 상세 공통 이미지 업로드 영역 간격 및 미리보기 크기 */
+    #global-detail-images-card .upload-label {
+      display: block;
+      position: static;
+      margin: 0 0 10px !important;
+      padding: 0;
+      line-height: 1.5;
+      font-size: 13px;
+      white-space: normal;
+    }
+    #global-detail-images-card input[type="file"] {
+      display: block;
+      width: 100%;
+      margin: 0 !important;
+      box-sizing: border-box;
+    }
+    #global-detail-images-card .preview-box {
+      padding: 8px;
+    }
+    #global-detail-images-card .preview-box img {
+      display: block;
+      width: auto !important;
+      max-width: 200px !important;
+      max-height: 130px !important;
+      height: auto !important;
+      object-fit: contain;
+      object-position: left center;
+    }
 
     .login-wrap { max-width: 380px; margin: 80px auto; background: #fff; padding: 32px; border-radius: 12px; border: 1px solid #e5e7eb; }
     .login-wrap h2 { font-size: 22px; font-weight: 700; color: #111827; margin: 0 0 6px; }
