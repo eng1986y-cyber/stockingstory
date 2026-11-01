@@ -33,7 +33,6 @@
     #promo-video-inner iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; display: block; }
     @media (max-width: 768px) { #promo-video-wrap { padding: 0 12px; margin-top: 12px; } #promo-video-inner { border-radius: 8px; } }
 
-    /* NEW ITEM 섹션 표기 (항상 표시) */
     #new-item-heading {
       display: flex;
       max-width: 1400px;
@@ -403,6 +402,7 @@
       return String(v ?? '').normalize('NFKC').toLocaleLowerCase().trim();
     }
 
+    // ⭐ 상품명 + 제품번호 모두 부분 일치 검색
     function applySearch(text) {
       currentSearch = text || '';
       const keyword = normalizeSearch(currentSearch);
@@ -410,8 +410,9 @@
         filteredProducts = [...allProducts];
       } else {
         filteredProducts = allProducts.filter(p => {
-          const vals = [p.name, p.product_code];
-          return vals.some(v => normalizeSearch(v).includes(keyword));
+          const nameMatch = normalizeSearch(p.name).includes(keyword);
+          const codeMatch = normalizeSearch(p.product_code).includes(keyword);
+          return nameMatch || codeMatch;
         });
       }
       currentPage = 1;
