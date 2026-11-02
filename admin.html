@@ -117,7 +117,6 @@
     input[type="file"] { padding:8px !important; background:#f9fafb !important; }
     .preview-box { margin-top: 12px; padding: 12px; background: #f9fafb; border-radius: 8px; border: 1px dashed #e5e7eb; }
     .preview-box .preview-label { font-size: 12px; color: #6b7280; margin-bottom: 6px; }
-    /* 전체 상품 상세 공통 이미지 업로드 영역 간격 및 미리보기 크기 */
     #global-detail-images-card .upload-label {
       display: block;
       position: static;
@@ -629,7 +628,7 @@
 
         <section id="tab-settings" class="admin-section">
           <h1 class="page-title">사이트 설정</h1>
-          <p class="page-subtitle">로고, 배너, 푸터, SNS, 배송비, 홍보영상, 회원가입 쿠폰을 관리합니다</p>
+          <p class="page-subtitle">로고, 배너, 푸터, SNS, 배송비, 홍보영상, 회원가입 쿠폰, 입금계좌를 관리합니다</p>
 
           <div class="settings-split">
             <div class="settings-col">
@@ -703,6 +702,18 @@
                   <button id="save-footer" class="btn btn-success">저장</button>
                 </div>
                 <p id="footer-msg" class="msg"></p>
+              </div>
+
+              <div class="card">
+                <div class="card-title">💰 입금 계좌 정보 <span class="hint">(모든 주문 페이지에 자동 표시)</span></div>
+                <div style="display: grid; gap: 10px;">
+                  <input id="account-bank" placeholder="은행명 (예: 국민은행)">
+                  <input id="account-number" placeholder="계좌번호 (예: 123-456-789012)">
+                  <input id="account-holder" placeholder="예금주">
+                  <button id="save-account" class="btn btn-success">저장</button>
+                </div>
+                <p style="font-size:12px; color:#9ca3af; margin:6px 0 0;">입력한 정보는 장바구니, 상품 상세, 주문조회, 내 주문내역 페이지의 입금 안내 박스에 자동 표시됩니다.</p>
+                <p id="account-msg" class="msg"></p>
               </div>
 
               <div class="card">
@@ -838,6 +849,7 @@
       loadLogo(); loadFooter(); loadBanner(); loadShippingSetting(); loadSnsLinks();
       loadPromoVideo();
       loadSignupCouponSetting();
+      loadAccountSetting();
       loadAdminList(); loadGlobalDetailImages(); loadOrders(); loadMembers();
       loadCouponsAndMembers();
     }
@@ -864,8 +876,6 @@
       showLogin();
     });
 
-    // ===== 이미지 업로드 공통 설정 =====
-    // Supabase Storage에 공개(public) 버킷 "site-assets"를 만들어 두어야 합니다.
     const SITE_ASSET_BUCKET = 'site-assets';
 
     async function uploadSiteImage(file, folder) {
@@ -898,7 +908,6 @@
       return data.publicUrl;
     }
 
-    // ===== 모든 상품 상세페이지 공통 이미지 관리 =====
     const GLOBAL_DETAIL_IMAGE_KEYS = {
       notice: 'global_product_detail_notice_image',
       footer: 'global_product_detail_footer_image'
@@ -996,14 +1005,6 @@
       });
     });
 
-    function setUploadMessage(elementId, message, isError = false) {
-      const el = document.getElementById(elementId);
-      if (!el) return;
-      el.className = isError ? 'msg error' : 'msg success';
-      el.textContent = message;
-    }
-
-    // ===== 로고 =====
     let currentLogoId = null;
     async function loadLogo() {
       const { data, error } = await db.from('logos').select('*').order('id', { ascending: false }).limit(1).maybeSingle();
@@ -1075,7 +1076,6 @@
       }
     });
 
-    // ===== 푸터 =====
     async function loadFooter() {
       const keys = ['footer_owner','footer_phone','footer_email','footer_address','footer_business','footer_text'];
       const { data } = await db.from('settings').select('key, value').in('key', keys);
@@ -1104,7 +1104,30 @@
       else { msg.className = 'msg success'; msg.textContent = '✅ 저장 완료!'; localStorage.removeItem('footer_cache'); setTimeout(() => msg.textContent = '', 2000); }
     });
 
-    // ===== SNS =====
+    // ===== 입금 계좌 =====
+    async function loadAccountSetting() {
+      const keys = ['account_bank', 'account_number', 'account_holder'];
+      const { data } = await db.from('settings').select('key, value').in('key', keys);
+      const map = {};
+      (data || []).forEach(row => { map[row.key] = row.value || ''; });
+      document.getElementById('account-bank').value = map.account_bank || '';
+      document.getElementById('account-number').value = map.account_number || '';
+      document.getElementById('account-holder').value = map.account_holder || '';
+    }
+
+    document.getElementById('save-account').addEventListener('click', async () => {
+      const msg = document.getElementById('account-msg');
+      msg.className = 'msg'; msg.textContent = '저장 중...';
+      const updates = [
+        { key: 'account_bank', value: document.getElementById('account-bank').value.trim() },
+        { key: 'account_number', value: document.getElementById('account-number').value.trim() },
+        { key: 'account_holder', value: document.getElementById('account-holder').value.trim() },
+      ];
+      const { error } = await db.from('settings').upsert(updates);
+      if (error) { msg.className = 'msg error'; msg.textContent = '❌ ' + error.message; }
+      else { msg.className = 'msg success'; msg.textContent = '✅ 저장 완료!'; localStorage.removeItem('footer_cache'); setTimeout(() => msg.textContent = '', 2000); }
+    });
+
     async function loadSnsLinks() {
       const keys = ['footer_instagram','footer_blog','footer_band'];
       const { data } = await db.from('settings').select('key, value').in('key', keys);
@@ -1128,7 +1151,6 @@
       else { msg.className = 'msg success'; msg.textContent = '✅ 저장 완료!'; localStorage.removeItem('footer_cache'); setTimeout(() => msg.textContent = '', 2000); }
     });
 
-    // ===== 홍보 영상 =====
     let currentPromoVideoUrl = '';
     function getYouTubeEmbedUrl(url) {
       if (!url) return '';
@@ -1181,7 +1203,6 @@
       }
     });
 
-    // ===== 배너 =====
     async function loadBanner() {
       const listEl = document.getElementById('banner-list');
       const countEl = document.getElementById('banner-count');
@@ -1325,7 +1346,6 @@
       }
     });
 
-    // ===== 배송비 =====
     async function loadShippingSetting() {
       const { data } = await db.from('settings').select('value').eq('key', 'shipping_fee').maybeSingle();
       document.getElementById('global-shipping').value = data ? (data.value || 0) : 0;
@@ -1339,7 +1359,6 @@
       else { sm.className = 'msg success'; sm.textContent = '✅ 저장 완료!'; setTimeout(() => sm.textContent = '', 2000); }
     });
 
-    // ===== 회원가입 쿠폰 설정 =====
     async function loadSignupCouponSetting() {
       const keys = ['signup_coupon_enabled', 'signup_coupon_name', 'signup_coupon_type', 'signup_coupon_value', 'signup_coupon_days'];
       const { data } = await db.from('settings').select('key, value').in('key', keys);
@@ -1378,7 +1397,6 @@
       else { msgEl.className = 'msg success'; msgEl.textContent = '✅ 저장 완료!'; setTimeout(() => msgEl.textContent = '', 2000); }
     });
 
-    // ===== 상품 등록 =====
     const form = document.getElementById('product-form');
     const msg = document.getElementById('msg');
     const listEl = document.getElementById('admin-list');
@@ -1696,7 +1714,6 @@
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
-    // ===== 주문 =====
     let allOrdersRaw = [];
     let allCouponsForOrders = [];
     let selectedOrderKeys = new Set();
@@ -2207,7 +2224,6 @@
       downloadCSV('주문목록' + suffix, rows);
     });
 
-    // ===== 회원 =====
     let allMembers = [];
     let selectedMemberIds = new Set();
 
@@ -2525,7 +2541,6 @@
       });
     }
 
-    // ===== 쿠폰 관리 =====
     let allCoupons = [];
     let couponMemberMap = {};
 
@@ -2732,7 +2747,6 @@
       downloadCSV('쿠폰목록', rows);
     });
 
-    // ===== 통계 =====
     let statsRange = 7;
     document.querySelectorAll('.chart-controls .range-btn').forEach(btn => {
       btn.addEventListener('click', () => {
