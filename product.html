@@ -157,13 +157,13 @@
 
       let shippingLabel = '';
       if (pricing.targetGrade === 'wholesale') {
-        shippingLabel = `<span style="color:#f59e0b; font-weight:700;">🚢 배송방법: 해운 / 배송비: 착불</span>`;
+        shippingLabel = `<span style="color:#f59e0b; font-weight:700;">배송방법: 해운 / 배송비: 착불</span>`;
       } else if (pricing.targetGrade === 'vip') {
-        shippingLabel = `<span style="color:#10b981; font-weight:700;">📦 배송방법: 택배 / 배송비: 무료</span>`;
+        shippingLabel = `<span style="color:#10b981; font-weight:700;">배송방법: 택배 / 배송비: 무료</span>`;
       } else {
         shippingLabel = pricing.shippingFee > 0
-          ? `<span style="color:#888;">🚚 배송비 ${pricing.shippingFee.toLocaleString()}원</span>`
-          : `<span style="color:#10b981;">🚚 무료배송</span>`;
+          ? `<span style="color:#888;">배송비 ${pricing.shippingFee.toLocaleString()}원</span>`
+          : `<span style="color:#10b981;">무료배송</span>`;
       }
 
       const colors = data.colors || [], sizes = data.sizes || [], hemOptions = data.hem_option || [], otherOptions = data.other_option || [];
