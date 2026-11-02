@@ -60,14 +60,13 @@
     const summaryEl = document.getElementById('cart-summary');
     let globalShipping = 0;
     let selectedIndexes = new Set();
+    let cachedAccount = { bank: '', number: '', holder: '' };
 
-    // ⭐ 상품 target_grade 별 할인율 (상품 등급 기준)
     const TARGET_DISCOUNT = { 'all': 0, 'wholesale': 50, 'vip': 30 };
-    // ⭐ 상품 target_grade 별 배송 정책
     const TARGET_SHIPPING = {
-      'all':       { method: '택배', feeType: 'setting' },  // settings.shipping_fee 사용
-      'wholesale': { method: '해운', feeType: 'collect' },  // 착불 (결제액 미포함)
-      'vip':       { method: '택배', feeType: 'free' },     // 무료
+      'all':       { method: '택배', feeType: 'setting' },
+      'wholesale': { method: '해운', feeType: 'collect' },
+      'vip':       { method: '택배', feeType: 'free' },
     };
 
     function getCart() { return JSON.parse(localStorage.getItem('cart') || '[]'); }
@@ -79,7 +78,21 @@
       globalShipping = data ? Number(data.value) || 0 : 0;
     }
 
-    // ⭐ 상품 1건의 실효 단가/배송 정보 계산 (상품 target_grade 기준)
+    async function loadAccountInfo() {
+      try {
+        const { data } = await db.from('settings').select('key, value').in('key', ['account_bank', 'account_number', 'account_holder']);
+        const map = {};
+        (data || []).forEach(row => { map[row.key] = row.value || ''; });
+        cachedAccount = {
+          bank: map.account_bank || '',
+          number: map.account_number || '',
+          holder: map.account_holder || ''
+        };
+      } catch (e) {
+        cachedAccount = { bank: '', number: '', holder: '' };
+      }
+    }
+
     function getItemPricing(item) {
       const targetGrade = item.target_grade || 'all';
       const basePrice = Number(item.original_price ?? item.base_price ?? item.product_price ?? 0);
@@ -87,16 +100,16 @@
       const finalPrice = Math.round(basePrice * (100 - discountRate) / 100);
 
       const shipPolicy = TARGET_SHIPPING[targetGrade] || TARGET_SHIPPING.all;
-      let shippingFeePerGroup = 0;      // 이 상품 그룹에 부과될 배송비
+      let shippingFeePerGroup = 0;
       let shippingLabel = '';
       let shippingMethod = shipPolicy.method;
       if (shipPolicy.feeType === 'setting') {
         shippingFeePerGroup = globalShipping;
         shippingLabel = globalShipping > 0 ? globalShipping.toLocaleString() + '원' : '무료';
       } else if (shipPolicy.feeType === 'collect') {
-        shippingFeePerGroup = 0; // 착불 - 결제액에 미포함
+        shippingFeePerGroup = 0;
         shippingLabel = '착불';
-      } else { // free
+      } else {
         shippingFeePerGroup = 0;
         shippingLabel = '무료';
       }
@@ -104,10 +117,8 @@
       return { targetGrade, basePrice, discountRate, finalPrice, shippingFeePerGroup, shippingLabel, shippingMethod };
     }
 
-    // ⭐ 장바구니의 각 상품을 target_grade 기준으로 가격 재계산하여 저장
     function recalcCartPrices(cart) {
       cart.forEach(it => {
-        // original_price(정가)를 우선 사용, 없으면 현재 product_price를 정가로 취급
         if (it.original_price == null) {
           it.original_price = Number(it.product_price ?? 0);
         }
@@ -169,17 +180,14 @@
         `;
       }).join('');
 
-      // ===== 선택된 상품 합계 계산 =====
       const selectedCart = cart.filter((_, idx) => selectedIndexes.has(idx));
       const subTotal = selectedCart.reduce((s, it) => s + it.product_price * it.quantity, 0);
       const selectedQty = selectedCart.reduce((s, it) => s + it.quantity, 0);
       const totalQty = cart.reduce((s, it) => s + it.quantity, 0);
 
-      // ⭐ 배송비: target_grade 그룹별로 1회씩 부과 (혼합 주문 대응)
-      // 같은 배송 그룹(예: 'all')의 상품이 여러 개 있어도 배송비는 1번만 부과
       const shippingGroups = new Set();
       let shippingFee = 0;
-      const shippingDetail = []; // { method, label, fee }
+      const shippingDetail = [];
       selectedCart.forEach(it => {
         const pricing = getItemPricing(it);
         if (shippingGroups.has(pricing.targetGrade)) return;
@@ -195,8 +203,6 @@
 
       const total = subTotal + shippingFee;
 
-      // ⭐ 최소 주문 수량: 상품 target_grade 그룹별로 각각 검사
-      // 도매 상품은 도매 최소수량, 일반 상품은 일반 최소수량. 각 그룹별로 min_qty 확인.
       const qtyByGroup = {};
       selectedCart.forEach(it => {
         const tg = it.target_grade || 'all';
@@ -205,7 +211,6 @@
         const mq = Number(it.min_qty || 1);
         if (mq > qtyByGroup[tg].minQty) qtyByGroup[tg].minQty = mq;
       });
-      // 그룹별 부족 여부
       const shortGroups = [];
       Object.entries(qtyByGroup).forEach(([tg, g]) => {
         if (g.minQty > 1 && g.qty < g.minQty) {
@@ -215,7 +220,6 @@
       const canOrder = selectedCart.length > 0 && shortGroups.length === 0;
       const allChecked = selectedIndexes.size === cart.length && cart.length > 0;
 
-      // 등급/배송 안내 카드
       let gradeInfoHtml = '';
       if (memberGrade === '도매회원') {
         gradeInfoHtml = `
@@ -231,7 +235,6 @@
           </div>`;
       }
 
-      // 배송 상세 라인
       const shippingLinesHtml = shippingDetail.map(sd => {
         let label = sd.label;
         if (sd.targetGrade === 'wholesale') label = '착불 (해운)';
@@ -240,7 +243,6 @@
         return `<div style="font-size:12px; color:#9ca3af;">· ${label}</div>`;
       }).join('');
 
-      // 부족 그룹 안내
       let shortMsgHtml = '';
       if (shortGroups.length > 0) {
         shortMsgHtml = shortGroups.map(g => {
@@ -353,7 +355,6 @@
     async function showCheckoutModal(cart) {
       const subTotal = cart.reduce((s, it) => s + it.product_price * it.quantity, 0);
 
-      // ⭐ target_grade 그룹별 배송비 1회씩 부과
       const shippingGroups = new Set();
       let totalShippingFee = 0;
       cart.forEach(it => {
@@ -363,20 +364,12 @@
         totalShippingFee += pricing.shippingFeePerGroup;
       });
 
-      // ⭐ 그룹별 상품별 배송비 할당: 각 그룹의 첫 번째 상품 행에 그룹 배송비 부과
-      const shippingAssignedTo = {}; // target_grade -> 첫 idx
-      cart.forEach((it, idx) => {
-        const tg = it.target_grade || 'all';
-        if (!(tg in shippingAssignedTo)) shippingAssignedTo[tg] = idx;
-      });
-
       const m = getMember();
       const coupons = await loadUsableCoupons();
 
       const inputStyle = 'width:100%; padding:10px 12px; background:#0f0f0f; border:1px solid #2a2a2a; border-radius:8px; color:#e5e7eb; font-family:inherit; font-size:14px; box-sizing:border-box;';
       const labelStyle = 'font-size:13px; font-weight:600; color:#ccc; display:block; margin-bottom:4px;';
 
-      // 배송 상세 라벨
       const shipGroupsSet = new Set();
       const shippingLabelLines = [];
       cart.forEach(it => {
@@ -489,9 +482,7 @@
 
         const orderNumber = generateOrderNumber();
 
-        // ⭐ 상품별로 target_grade 그룹 배송비를 할당
-        // 그룹별로 첫 번째 상품 행에 그룹 배송비 부과, 나머지는 0
-        const groupShipFeeAssigned = {}; // target_grade -> { assigned: bool }
+        const groupShipFeeAssigned = {};
         const rows = cart.map((it, idx) => {
           const tg = it.target_grade || 'all';
           const pricing = getItemPricing(it);
@@ -502,7 +493,6 @@
             groupShipFeeAssigned[tg] = true;
           }
 
-          // 쿠폰 할인은 첫 번째 상품 행의 total_price에 반영
           const lineTotal = it.product_price * it.quantity;
           const rowTotal = idx === 0
             ? Math.max(0, lineTotal - discountAmount) + rowShipFee
@@ -570,6 +560,17 @@
 
     function showOrderComplete(modal, orderNumber, total, closeModal) {
       const box = modal.querySelector('.checkout-modal-box');
+      const acc = cachedAccount;
+      const hasAccount = acc.bank || acc.number || acc.holder;
+      const accountHtml = hasAccount ? `
+        <b>입금 계좌 안내</b><br>
+        ${acc.bank ? `은행: <b>${acc.bank}</b><br>` : ''}
+        ${acc.number ? `계좌: <b>${acc.number}</b>
+          <button id="copy-account" style="margin-left:6px; padding:3px 8px; background:#222; color:#e5e7eb; border:1px solid #333; border-radius:4px; cursor:pointer; font-size:11px; font-family:inherit;">복사</button><br>` : ''}
+        ${acc.holder ? `예금주: <b>${acc.holder}</b><br>` : ''}
+        입금액: <b>${total.toLocaleString()}원</b>
+      ` : `<b>입금 계좌 안내</b><br><span style="color:#888;">관리자가 계좌 정보를 등록하지 않았습니다.</span><br>입금액: <b>${total.toLocaleString()}원</b>`;
+
       box.innerHTML = `
         <h2 style="margin-bottom:16px; color:#10b981;">✅ 주문 접수 완료</h2>
         <div style="background:#0f0f0f; padding:16px; border-radius:8px; margin-bottom:16px; line-height:1.8; font-size:14px; border:1px solid #222;">
@@ -579,19 +580,20 @@
             <button id="copy-order-number" style="padding:3px 8px; background:#222; color:#e5e7eb; border:1px solid #333; border-radius:4px; cursor:pointer; font-size:11px; font-family:inherit;">복사</button>
           </div>
           <hr style="border:0; border-top:1px solid #222; margin:8px 0;">
-          <b>입금 계좌 안내</b><br>은행: <b>○○은행</b><br>계좌: <b>123-456-789012</b>
-          <button id="copy-account" style="margin-left:6px; padding:3px 8px; background:#222; color:#e5e7eb; border:1px solid #333; border-radius:4px; cursor:pointer; font-size:11px; font-family:inherit;">복사</button>
-          <br>예금주: <b>홍길동</b><br>입금액: <b>${total.toLocaleString()}원</b>
+          ${accountHtml}
         </div>
         <p style="font-size:12px; color:#666; margin-bottom:16px;">주문번호를 꼭 저장해두세요.</p>
         <button id="go-main" style="width:100%; padding:12px; background:#e5e7eb; color:#111; border:0; border-radius:8px; cursor:pointer; font-weight:600; font-family:inherit;">메인으로</button>
       `;
       box.querySelector('#copy-order-number').onclick = () => { navigator.clipboard.writeText(orderNumber).then(() => alert('주문번호가 복사되었습니다.')); };
-      box.querySelector('#copy-account').onclick = () => { navigator.clipboard.writeText('123-456-789012').then(() => alert('계좌번호가 복사되었습니다.')); };
+      const copyAccBtn = box.querySelector('#copy-account');
+      if (copyAccBtn) {
+        copyAccBtn.onclick = () => { navigator.clipboard.writeText(acc.number).then(() => alert('계좌번호가 복사되었습니다.')); };
+      }
       box.querySelector('#go-main').onclick = () => { closeModal(); location.href = 'index.html'; };
     }
 
-    (async () => { await loadShipping(); render(); })();
+    (async () => { await loadShipping(); await loadAccountInfo(); render(); })();
   </script>
 </body>
 </html>

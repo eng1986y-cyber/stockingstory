@@ -690,7 +690,10 @@ async function refreshFooterCache() {
         'footer_text',
         'footer_instagram',
         'footer_blog',
-        'footer_band'
+        'footer_band',
+        'account_bank',
+        'account_number',
+        'account_holder'
       ]);
 
     const obj = {};
@@ -701,6 +704,36 @@ async function refreshFooterCache() {
 
     setCachedFooter(obj);
   } catch (e) {}
+}
+
+// ⭐ 입금 계좌 캐시 헬퍼
+function getCachedAccount() {
+  const f = getCachedFooter();
+  return {
+    bank: f.account_bank || '',
+    number: f.account_number || '',
+    holder: f.account_holder || ''
+  };
+}
+
+async function fetchAccountFromDB() {
+  const client = getSupabaseClient();
+  if (!client) return { bank: '', number: '', holder: '' };
+  try {
+    const { data } = await client
+      .from('settings')
+      .select('key, value')
+      .in('key', ['account_bank', 'account_number', 'account_holder']);
+    const map = {};
+    (data || []).forEach(row => { map[row.key] = row.value || ''; });
+    return {
+      bank: map.account_bank || '',
+      number: map.account_number || '',
+      holder: map.account_holder || ''
+    };
+  } catch (e) {
+    return { bank: '', number: '', holder: '' };
+  }
 }
 
 function getOrCreateSessionId() {
@@ -838,7 +871,6 @@ function renderFooter() {
     </a>
   `);
 
-  // ⭐ 채널톡 아이콘 (모바일에서만 표시, CSS로 제어)
   snsLinks.push(`
     <button type="button"
             class="footer-channel-btn"
@@ -863,7 +895,6 @@ function renderFooter() {
     </div>
   `;
 
-  // ⭐ 채널톡 버튼 이벤트 (모바일에서만 실질적으로 보임)
   const chBtn = document.getElementById('footer-channel-btn');
   if (chBtn) {
     chBtn.addEventListener('click', () => {
@@ -1295,9 +1326,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 })();
 
-// 채널톡 초기화
 window.ChannelIO('boot', {
   "pluginKey": "c5ed9957-c9e6-42af-887e-1b2ab2b6d1dd",
-  // "memberId": "사용자 ID",
-  // "profile": { "name": "사용자 이름", "email": "이메일" }
 });

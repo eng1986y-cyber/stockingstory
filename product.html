@@ -41,7 +41,6 @@
     const params = new URLSearchParams(location.search);
     const id = params.get('id');
 
-    // ⭐ 상품 target_grade 기준 할인/배송 정책 (회원 등급 아님)
     const TARGET_DISCOUNT = { 'all': 0, 'wholesale': 50, 'vip': 30 };
     const TARGET_SHIPPING = {
       'all':       { method: '택배', feeType: 'setting' },
@@ -53,6 +52,7 @@
     let currentProduct = null;
     let globalShipping = 0;
     let selectedItems = [];
+    let cachedAccount = { bank: '', number: '', holder: '' };
 
     function getMember() { try { return JSON.parse(localStorage.getItem('member') || 'null'); } catch { return null; } }
     function isLoggedIn() {
@@ -72,7 +72,21 @@
       globalShipping = data ? Number(data.value) || 0 : 0;
     }
 
-    // ⭐ 상품의 target_grade 기준 실효 가격/배송정보 반환
+    async function loadAccountInfo() {
+      try {
+        const { data } = await db.from('settings').select('key, value').in('key', ['account_bank', 'account_number', 'account_holder']);
+        const map = {};
+        (data || []).forEach(row => { map[row.key] = row.value || ''; });
+        cachedAccount = {
+          bank: map.account_bank || '',
+          number: map.account_number || '',
+          holder: map.account_holder || ''
+        };
+      } catch (e) {
+        cachedAccount = { bank: '', number: '', holder: '' };
+      }
+    }
+
     function getPricing(product) {
       const tg = product.target_grade || 'all';
       const basePrice = Number(product.price);
@@ -97,13 +111,13 @@
       const detailEl = document.getElementById('product-detail');
       if (!id) { detailEl.innerHTML = '<p>상품 ID가 없습니다.</p>'; return; }
       await loadShippingFee();
+      await loadAccountInfo();
       const { data, error } = await db.from('products').select('*').eq('id', id).single();
       if (error || !data) { detailEl.innerHTML = '<p>상품이 없습니다.</p>'; return; }
 
       currentProduct = data;
       MIN_QTY = Number(data.min_qty) || 1;
 
-      // ⭐ target_grade 접근 제어
       const member = getMember();
       const memberGrade = member?.grade || '일반회원';
       if (data.target_grade === 'wholesale' && memberGrade !== '도매회원') {
@@ -130,7 +144,6 @@
       const pricing = getPricing(data);
       const hasDiscount = pricing.discountRate > 0;
 
-      // 관리자에서 등록한 전체 상품 공통 상세 이미지
       const { data: sharedImageRows } = await db
         .from('settings')
         .select('key,value')
@@ -142,7 +155,6 @@
 
       const detailImgs = (data.detail_images || []).map(url => `<img src="${url}" alt="상세" loading="lazy" style="width:100%; display:block; margin-top:8px; border-radius:8px;">`).join('');
 
-      // ⭐ 상품 target_grade 기준 배송 표시
       let shippingLabel = '';
       if (pricing.targetGrade === 'wholesale') {
         shippingLabel = `<span style="color:#f59e0b; font-weight:700;">🚢 배송방법: 해운 / 배송비: 착불</span>`;
@@ -184,7 +196,6 @@
 
       const shareBtn = `<button id="share-btn" style="padding:8px 12px; background:#222; color:#e5e7eb; border:1px solid #333; border-radius:8px; cursor:pointer; font-size:13px; font-family:inherit;">🔗 공유</button>`;
 
-      // ⭐ 최소주문 안내 문구 변경
       const minQtyNotice = MIN_QTY > 1 ? `
         <div style="margin-top:12px; padding:10px 12px; background:#1a1a1a; border:1px solid #333; border-radius:8px; font-size:12px; color:#f59e0b; line-height:1.6;">
           ⚠️ 최소 주문수량은 <b>${MIN_QTY}개</b>입니다.<br>
@@ -404,7 +415,6 @@
               product_id: p.id,
               product_code: p.product_code || '',
               product_name: p.name,
-              // ⭐ original_price(정가)와 target_grade를 저장 → 장바구니에서 상품 등급 기준 재계산
               original_price: Number(p.price),
               product_price: unitPrice,
               target_grade: pricing.targetGrade,
@@ -427,7 +437,6 @@
         return;
       }
 
-      // 최소 수량 체크
       if (MIN_QTY > 1 && totalQty < MIN_QTY) {
         alert(`최소 주문수량은 ${MIN_QTY}개입니다.\n(다른 옵션 및 디자인과 자유롭게 교차/혼합 구매가능)\n현재: ${totalQty}개`);
         return;
@@ -467,7 +476,6 @@
     async function showCheckoutModal(items) {
       const subTotal = items.reduce((s, it) => s + it.product_price * it.quantity, 0);
       const pricing = getPricing(currentProduct);
-      // 이 상품 하나만 주문하므로 배송비 1회
       const shippingFee = pricing.shippingFee;
 
       const m = getMember();
@@ -572,7 +580,6 @@
         const finalTotal = Math.max(0, subTotal - discountAmount) + shippingFee;
 
         const orderNumber = generateOrderNumber();
-        // ⭐ 이 상품 1종 주문: 첫 행에 쿠폰할인·배송비 부과
         const rows = items.map((it, idx) => ({
           order_number: orderNumber,
           product_id: it.product_id,
@@ -632,6 +639,17 @@
 
     function showOrderComplete(modal, orderNumber, total, closeModal) {
       const box = modal.querySelector('.checkout-modal-box');
+      const acc = cachedAccount;
+      const hasAccount = acc.bank || acc.number || acc.holder;
+      const accountHtml = hasAccount ? `
+        <b>입금 계좌 안내</b><br>
+        ${acc.bank ? `은행: <b>${acc.bank}</b><br>` : ''}
+        ${acc.number ? `계좌: <b>${acc.number}</b>
+          <button id="copy-account" style="margin-left:6px; padding:3px 8px; background:#222; color:#e5e7eb; border:1px solid #333; border-radius:4px; cursor:pointer; font-size:11px; font-family:inherit;">복사</button><br>` : ''}
+        ${acc.holder ? `예금주: <b>${acc.holder}</b><br>` : ''}
+        입금액: <b>${total.toLocaleString()}원</b>
+      ` : `<b>입금 계좌 안내</b><br><span style="color:#888;">관리자가 계좌 정보를 등록하지 않았습니다.</span><br>입금액: <b>${total.toLocaleString()}원</b>`;
+
       box.innerHTML = `
         <h2 style="margin-bottom:16px; color:#10b981;">✅ 주문 접수 완료</h2>
         <div style="background:#0f0f0f; padding:16px; border-radius:8px; margin-bottom:16px; line-height:1.8; font-size:14px; border:1px solid #222;">
@@ -641,15 +659,16 @@
             <button id="copy-order-number" style="padding:3px 8px; background:#222; color:#e5e7eb; border:1px solid #333; border-radius:4px; cursor:pointer; font-size:11px; font-family:inherit;">복사</button>
           </div>
           <hr style="border:0; border-top:1px solid #222; margin:8px 0;">
-          <b>입금 계좌 안내</b><br>은행: <b>○○은행</b><br>계좌: <b>123-456-789012</b>
-          <button id="copy-account" style="margin-left:6px; padding:3px 8px; background:#222; color:#e5e7eb; border:1px solid #333; border-radius:4px; cursor:pointer; font-size:11px; font-family:inherit;">복사</button>
-          <br>예금주: <b>홍길동</b><br>입금액: <b>${total.toLocaleString()}원</b>
+          ${accountHtml}
         </div>
         <p style="font-size:12px; color:#666; margin-bottom:16px;">주문번호를 꼭 저장해두세요.</p>
         <button id="go-main" style="width:100%; padding:12px; background:#e5e7eb; color:#111; border:0; border-radius:8px; cursor:pointer; font-weight:600; font-family:inherit;">메인으로</button>
       `;
       box.querySelector('#copy-order-number').onclick = () => { navigator.clipboard.writeText(orderNumber).then(() => alert('주문번호가 복사되었습니다.')); };
-      box.querySelector('#copy-account').onclick = () => { navigator.clipboard.writeText('123-456-789012').then(() => alert('계좌번호가 복사되었습니다.')); };
+      const copyAccBtn = box.querySelector('#copy-account');
+      if (copyAccBtn) {
+        copyAccBtn.onclick = () => { navigator.clipboard.writeText(acc.number).then(() => alert('계좌번호가 복사되었습니다.')); };
+      }
       box.querySelector('#go-main').onclick = () => { closeModal(); location.href = 'index.html'; };
     }
 

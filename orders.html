@@ -90,6 +90,20 @@
       }
       const first = data[0];
       const totalAll = data.reduce((s, o) => s + Number(o.total_price || 0), 0);
+
+      // ⭐ 계좌 정보 조회
+      let acc = { bank: '', number: '', holder: '' };
+      try {
+        const { data: accData } = await db.from('settings').select('key, value').in('key', ['account_bank', 'account_number', 'account_holder']);
+        const map = {};
+        (accData || []).forEach(row => { map[row.key] = row.value || ''; });
+        acc = {
+          bank: map.account_bank || '',
+          number: map.account_number || '',
+          holder: map.account_holder || ''
+        };
+      } catch (e) { console.warn('계좌 정보 로드 실패:', e); }
+
       const trackingHtml = (first.courier || first.tracking_number) ? `
         <div style="margin-top:12px; padding:12px; background:#0f0f0f; border:1px solid #2a2a2a; border-radius:8px; font-size:13px;">
           <div style="font-weight:700; color:#60a5fa; margin-bottom:6px;">🚚 배송 정보</div>
@@ -100,7 +114,6 @@
         </div>
       ` : '';
 
-      // ⭐ 등급 할인 표시
       let gradeDiscount = 0;
       data.forEach(o => {
         const d = Number(o.grade_discount || 0);
@@ -113,18 +126,20 @@
         </div>
       ` : '';
 
-      // ⭐⭐⭐ 입금 계좌 안내 (입금대기 / 입금완료 시) ⭐⭐⭐
       const status = first.status || '';
       const showAccount = (status === '입금대기' || status === '입금완료');
+      const hasAccount = acc.bank || acc.number || acc.holder;
       const accountHtml = showAccount ? `
         <div style="margin-top:12px; padding:12px; background:#0f0f0f; border:1px solid #fbbf24; border-radius:8px; font-size:13px;">
           <div style="font-weight:700; color:#fbbf24; margin-bottom:6px;">💰 입금 계좌 안내</div>
           <div style="color:#ccc; line-height:1.8;">
-            은행: <b style="color:#fff;">○○은행</b><br>
-            계좌: <b style="color:#fff; letter-spacing:0.5px;">123-456-789012</b>
-            <button id="copy-account-orders" style="margin-left:6px; padding:2px 8px; background:#222; color:#e5e7eb; border:1px solid #444; border-radius:4px; cursor:pointer; font-size:11px; font-family:inherit;">복사</button>
-            <br>
-            예금주: <b style="color:#fff;">홍길동</b><br>
+            ${hasAccount ? `
+              ${acc.bank ? `은행: <b style="color:#fff;">${acc.bank}</b><br>` : ''}
+              ${acc.number ? `계좌: <b style="color:#fff; letter-spacing:0.5px;">${acc.number}</b>
+                <button id="copy-account-orders" style="margin-left:6px; padding:2px 8px; background:#222; color:#e5e7eb; border:1px solid #444; border-radius:4px; cursor:pointer; font-size:11px; font-family:inherit;">복사</button>
+                <br>` : ''}
+              ${acc.holder ? `예금주: <b style="color:#fff;">${acc.holder}</b><br>` : ''}
+            ` : `<span style="color:#888;">관리자가 계좌 정보를 등록하지 않았습니다.</span><br>`}
             입금액: <b style="color:#ef4444; font-size:16px;">${totalAll.toLocaleString()}원</b>
           </div>
         </div>
@@ -169,7 +184,7 @@
       const copyAccBtn = document.getElementById('copy-account-orders');
       if (copyAccBtn) {
         copyAccBtn.onclick = () => {
-          navigator.clipboard.writeText('123-456-789012').then(() => alert('계좌번호가 복사되었습니다.'));
+          navigator.clipboard.writeText(acc.number).then(() => alert('계좌번호가 복사되었습니다.'));
         };
       }
     }
