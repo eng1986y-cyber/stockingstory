@@ -79,81 +79,86 @@ function applyGradeDiscount(price) {
     body.dark .site-main-scroll::-webkit-scrollbar-thumb { background: #333; }
     body.dark .site-main-scroll::-webkit-scrollbar-thumb:hover { background: #555; }
 
+    /* ⭐ 수정된 헤더 네비게이션 (검색창 포함) */
     .header-nav-wrap {
-      display: flex; gap: 8px; flex-wrap: wrap;
-      align-items: center; justify-content: flex-end;
-    }
-
-    /* ⭐ 헤더 내 검색 영역 (로고 바로 아래, 좌측 정렬) - 네이버 스타일 */
-    .header-search-wrap {
-      max-width: 1400px;
-      margin: 0 auto 10px auto;
-      padding: 0;
-      display: flex;
-      justify-content: flex-start;
-    }
-
-    .header-search-box {
-      display: flex;
-      align-items: center;
+      display: flex; 
+      gap: 8px; 
+      flex-wrap: wrap;
+      align-items: center; 
+      justify-content: flex-end;
       width: 100%;
-      max-width: 460px;
-      height: 40px;
-      border: 2px solid #e53935;
-      border-radius: 8px;
-      background: #fff;
-      overflow: hidden;
-      box-sizing: border-box;
-      transition: box-shadow .15s ease, border-color .15s ease;
     }
 
-    .header-search-box:focus-within {
-      box-shadow: 0 0 0 3px rgba(229,57,53,0.15);
+    /* ⭐ 검색 폼 스타일 (버튼들과 높이/위치 일치화) */
+    .header-search-form {
+      display: flex !important;
+      align-items: center !important;
+      height: 36px !important; /* 버튼 높이와 동일 */
+      width: 280px !important; /* 적당한 너비 */
+      background: #fff !important;
+      border: 2px solid #e53935 !important; /* 메인 레드 */
+      border-radius: 6px !important; /* 버튼과 동일한 둥글기 */
+      overflow: hidden !important;
+      margin-left: 10px !important; /* 오른쪽으로 10px 이동 */
+      box-sizing: border-box !important;
+      flex-shrink: 0 !important;
+      pointer-events: auto !important;
+      z-index: 1000 !important;
     }
 
-    body.dark .header-search-box {
-      background: #1a1a1a;
-      border-color: #e53935;
+    body.dark .header-search-form {
+      background: #1a1a1a !important;
     }
 
-    .header-search-box input {
-      flex: 1 1 0;
-      min-width: 0;
-      height: 100%;
-      border: 0;
-      outline: none;
-      padding: 0 12px;
-      font-size: 14px;
-      font-family: inherit;
-      background: transparent;
-      color: #222;
-      box-sizing: border-box;
+    .header-search-form input {
+      flex: 1 1 0 !important;
+      min-width: 0 !important;
+      height: 100% !important;
+      border: none !important;
+      outline: none !important;
+      padding: 0 10px !important;
+      font-size: 13px !important;
+      font-family: inherit !important;
+      color: #222 !important;
+      background: transparent !important;
+      pointer-events: auto !important;
     }
 
-    body.dark .header-search-box input { color: #e5e7eb; }
-    .header-search-box input::placeholder { color: #9ca3af; }
-    body.dark .header-search-box input::placeholder { color: #666; }
-
-    .header-search-box button {
-      flex: 0 0 auto;
-      width: 48px;
-      height: 100%;
-      border: 0;
-      background: #e53935;
-      color: #fff;
-      font-size: 18px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
+    body.dark .header-search-form input {
+      color: #e5e7eb !important;
     }
 
-    .header-search-box button:hover { background: #c62828; }
+    .header-search-form input::placeholder {
+      color: #aaa !important;
+    }
+
+    .header-search-form button {
+      flex: 0 0 36px !important;
+      width: 36px !important;
+      height: 100% !important;
+      border: none !important;
+      background: #e53935 !important;
+      color: #fff !important;
+      cursor: pointer !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 0 !important;
+      pointer-events: auto !important;
+    }
+
+    .header-search-form button:hover {
+      background: #c62828 !important;
+    }
+
+    .header-search-form button svg {
+      pointer-events: none !important;
+    }
 
     @media (max-width: 768px) {
-      .header-nav-wrap { display: none !important; }
+      .header-nav-wrap { 
+        display: none !important; 
+      }
       #app-header header { padding: 10px 16px 8px 16px !important; }
 
       .header-name-row {
@@ -163,9 +168,6 @@ function applyGradeDiscount(price) {
       }
 
       .site-main-scroll { overflow-y: auto; }
-
-      .header-search-box { max-width: 100%; height: 38px; }
-      .header-search-box button { width: 44px; font-size: 16px; }
     }
 
     .page-loader {
@@ -1004,9 +1006,6 @@ function bindBottomLogout() {
 
 // ============================================================
 // ⭐⭐⭐ 헤더 렌더 (검색창 포함) ⭐⭐⭐
-// - index 페이지에서만 검색창 노출
-// - form submit 시 window.__onHeaderSearchSubmit(keyword) 호출
-//   (index.html에서 이 함수를 정의하면 자동 연결됨)
 // ============================================================
 function renderHeader(current) {
   const wrap = document.getElementById('app-header');
@@ -1074,7 +1073,6 @@ function renderHeader(current) {
     const cc = document.getElementById('cart-count');
     if (cc) cc.textContent = JSON.parse(localStorage.getItem('cart') || '[]').length;
 
-    // ⭐ 이미 그려졌어도 검색창 이벤트 바인딩이 필요할 수 있음
     bindHeaderSearchForm();
     return;
   }
@@ -1128,19 +1126,17 @@ function renderHeader(current) {
     ? `<a href="index.html" style="display:inline-block;"><img src="${logoImageUrl}" alt="${siteName}" style="height:40px; max-width:240px; object-fit:contain; display:block; margin:0 auto;"></a>`
     : `<a href="index.html" style="font-size:22px; font-weight:700; color:${theme.logoColor}; text-decoration:none; display:inline-block;">${siteName}</a>`;
 
-  // ⭐ index 페이지에서만 검색창 노출 (로고 바로 아래 좌측)
+  // ⭐ index 페이지에서만 검색창 노출 (버튼들과 같은 줄에 배치)
   const searchHtml = _isIndex ? `
-    <div class="header-search-wrap">
-      <form class="header-search-box" id="header-search-form" role="search" autocomplete="off">
-        <input type="text" id="header-search-input" placeholder="상품명 또는 제품번호 검색" aria-label="상품 검색">
-        <button type="submit" id="header-search-btn" aria-label="검색">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
-            <circle cx="11" cy="11" r="7"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-        </button>
-      </form>
-    </div>
+    <form class="header-search-form" id="header-search-form" role="search" autocomplete="off">
+      <input type="text" id="header-search-input" placeholder="상품명/제품번호 검색" aria-label="상품 검색">
+      <button type="submit" id="header-search-btn" aria-label="검색">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
+          <circle cx="11" cy="11" r="7"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </button>
+    </form>
   ` : '';
 
   wrap.innerHTML = `
@@ -1148,9 +1144,9 @@ function renderHeader(current) {
       <div style="max-width:1400px; margin:0 auto;">
         <div style="margin-bottom:8px; text-align:center;">${logoHtml}</div>
         ${nameRow}
-        ${searchHtml}
 
         <div class="header-nav-wrap">
+          ${searchHtml}
           <a href="cart.html" data-nav="cart" style="${btnStyle(current === 'cart')}">장바구니 <span id="cart-count" style="margin-left:4px;">0</span></a>
           <a href="orders.html" data-nav="orders" style="${btnStyle(current === 'orders')}">주문조회</a>
           ${userBtns}
@@ -1175,15 +1171,11 @@ function renderHeader(current) {
 
   refreshLogoCache();
 
-  // ⭐ 검색 폼 이벤트 바인딩 (매 렌더 후 호출)
   bindHeaderSearchForm();
 }
 
 // ============================================================
 // ⭐ 검색 폼 이벤트 바인딩
-// - form submit 시 window.__onHeaderSearchSubmit(keyword)를 호출
-// - index.html이 이 함수를 정의해두면 자동 동작
-// - 이미 바인딩된 경우 중복 방지
 // ============================================================
 function bindHeaderSearchForm() {
   const form = document.getElementById('header-search-form');
