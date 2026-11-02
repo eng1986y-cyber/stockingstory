@@ -84,6 +84,74 @@ function applyGradeDiscount(price) {
       align-items: center; justify-content: flex-end;
     }
 
+    /* ⭐ 헤더 내 검색 영역 (로고 바로 아래, 좌측 정렬) - 네이버 스타일 */
+    .header-search-wrap {
+      max-width: 1400px;
+      margin: 0 auto 10px auto;
+      padding: 0;
+      display: flex;
+      justify-content: flex-start;
+    }
+
+    .header-search-box {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      max-width: 460px;
+      height: 40px;
+      border: 2px solid #e53935;
+      border-radius: 8px;
+      background: #fff;
+      overflow: hidden;
+      box-sizing: border-box;
+      transition: box-shadow .15s ease, border-color .15s ease;
+    }
+
+    .header-search-box:focus-within {
+      box-shadow: 0 0 0 3px rgba(229,57,53,0.15);
+    }
+
+    body.dark .header-search-box {
+      background: #1a1a1a;
+      border-color: #e53935;
+    }
+
+    .header-search-box input {
+      flex: 1 1 0;
+      min-width: 0;
+      height: 100%;
+      border: 0;
+      outline: none;
+      padding: 0 12px;
+      font-size: 14px;
+      font-family: inherit;
+      background: transparent;
+      color: #222;
+      box-sizing: border-box;
+    }
+
+    body.dark .header-search-box input { color: #e5e7eb; }
+    .header-search-box input::placeholder { color: #9ca3af; }
+    body.dark .header-search-box input::placeholder { color: #666; }
+
+    .header-search-box button {
+      flex: 0 0 auto;
+      width: 48px;
+      height: 100%;
+      border: 0;
+      background: #e53935;
+      color: #fff;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .header-search-box button:hover { background: #c62828; }
+
     @media (max-width: 768px) {
       .header-nav-wrap { display: none !important; }
       #app-header header { padding: 10px 16px 8px 16px !important; }
@@ -95,6 +163,9 @@ function applyGradeDiscount(price) {
       }
 
       .site-main-scroll { overflow-y: auto; }
+
+      .header-search-box { max-width: 100%; height: 38px; }
+      .header-search-box button { width: 44px; font-size: 16px; }
     }
 
     .page-loader {
@@ -127,8 +198,6 @@ function applyGradeDiscount(price) {
 
     /* ============================================================
        ⭐ 스크롤 버튼
-       - PC/태블릿: 화면 우측 세로 중앙 고정
-       - 모바일: JS에서 생성 자체를 스킵 + CSS로도 display:none
        ============================================================ */
     #scroll-btns {
       position: fixed;
@@ -176,17 +245,11 @@ function applyGradeDiscount(price) {
 
     @media (max-height: 420px) {
       #scroll-btns { gap: 6px; }
-      #scroll-btns button {
-        width: 38px;
-        height: 38px;
-        font-size: 15px;
-      }
+      #scroll-btns button { width: 38px; height: 38px; font-size: 15px; }
     }
 
     @media (max-width: 768px) {
-      #scroll-btns {
-        display: none !important;
-      }
+      #scroll-btns { display: none !important; }
     }
 
     #app-footer {
@@ -255,7 +318,6 @@ function applyGradeDiscount(price) {
       margin-top: 14px;
     }
 
-    /* ⭐ 푸터 SNS 버튼 + 채널톡 버튼 공통 스타일 (동일하게) */
     #app-footer .footer-sns-btn,
     #app-footer .footer-channel-btn {
       display: inline-flex;
@@ -302,10 +364,7 @@ function applyGradeDiscount(price) {
       border-color: #e5e7eb;
     }
 
-    /* ⭐ 채널톡 버튼: PC에서는 숨김 (플로팅 런처 사용) */
-    #app-footer .footer-channel-btn {
-      display: none !important;
-    }
+    #app-footer .footer-channel-btn { display: none !important; }
 
     @media (max-width: 768px) {
       #app-footer {
@@ -435,9 +494,7 @@ function applyGradeDiscount(price) {
     #mobile-bottom-nav.nav-count-7 .bottom-nav-item > span { font-size: 8px; }
 
     /* ============================================================
-       ⭐ 채널톡 플로팅 런처 (우측 하단)
-       - PC/태블릿: 원래 위치대로 표시
-       - 모바일: 숨김 (푸터의 채널톡 버튼으로 대체)
+       ⭐ 채널톡 플로팅 런처
        ============================================================ */
     @media (min-width: 769px) {
       #ch-plugin-launcher,
@@ -510,14 +567,10 @@ function applyPhoneAttrs() {
 
 // ============================================================
 // ⭐⭐⭐ 스크롤 버튼 생성 & 가시성 판단 ⭐⭐⭐
-// - PC/태블릿: 우측 세로 중앙 고정
-// - 모바일: 생성 자체를 스킵
 // ============================================================
 function createScrollButtons() {
   if (_isAdmin) return;
-
   if (window.matchMedia('(max-width: 768px)').matches) return;
-
   if (document.getElementById('scroll-btns')) return;
 
   const wrap = document.createElement('div');
@@ -539,15 +592,9 @@ function createScrollButtons() {
   document.getElementById('btn-scroll-bottom').addEventListener('click', () => {
     const mainScroll = document.querySelector('.site-main-scroll');
     if (mainScroll) {
-      mainScroll.scrollTo({
-        top: mainScroll.scrollHeight,
-        behavior: 'smooth'
-      });
+      mainScroll.scrollTo({ top: mainScroll.scrollHeight, behavior: 'smooth' });
     } else {
-      window.scrollTo({
-        top: document.documentElement.scrollHeight,
-        behavior: 'smooth'
-      });
+      window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
     }
   });
 
@@ -556,17 +603,12 @@ function createScrollButtons() {
 
   const applyVisibility = () => {
     const mainScroll = document.querySelector('.site-main-scroll');
-
     let shouldShow;
-    if (mainScroll) {
-      shouldShow = (mainScroll.scrollHeight - mainScroll.clientHeight) > 10;
-    } else {
-      shouldShow = (document.documentElement.scrollHeight - window.innerHeight) > 10;
-    }
+    if (mainScroll) shouldShow = (mainScroll.scrollHeight - mainScroll.clientHeight) > 10;
+    else shouldShow = (document.documentElement.scrollHeight - window.innerHeight) > 10;
 
     if (_lastVisible === shouldShow) return;
     _lastVisible = shouldShow;
-
     wrap.style.display = shouldShow ? 'flex' : 'none';
   };
 
@@ -576,40 +618,31 @@ function createScrollButtons() {
   };
 
   applyVisibility();
-
   window.addEventListener('resize', updateVisibility);
 
   const mainScrollEl = document.querySelector('.site-main-scroll');
   if (mainScrollEl && typeof ResizeObserver !== 'undefined') {
     const ro = new ResizeObserver(() => updateVisibility());
     ro.observe(mainScrollEl);
-
     Array.from(mainScrollEl.children).forEach(child => {
       try { ro.observe(child); } catch (e) {}
     });
   }
 
   if (typeof MutationObserver !== 'undefined') {
-    const mo = new MutationObserver(() => {
-      updateVisibility();
-    });
-    mo.observe(document.body, {
-      childList: true,
-      subtree: true
-    });
+    const mo = new MutationObserver(() => updateVisibility());
+    mo.observe(document.body, { childList: true, subtree: true });
   }
 
   window.addEventListener('load', updateVisibility);
-
   setTimeout(updateVisibility, 500);
   setTimeout(updateVisibility, 1500);
   setTimeout(updateVisibility, 3000);
 }
 
 function getCachedLogo() {
-  try {
-    return JSON.parse(localStorage.getItem('logo_cache') || 'null') || {};
-  } catch { return {}; }
+  try { return JSON.parse(localStorage.getItem('logo_cache') || 'null') || {}; }
+  catch { return {}; }
 }
 
 function setCachedLogo(obj) {
@@ -617,9 +650,8 @@ function setCachedLogo(obj) {
 }
 
 function getCachedFooter() {
-  try {
-    return JSON.parse(localStorage.getItem('footer_cache') || 'null') || {};
-  } catch { return {}; }
+  try { return JSON.parse(localStorage.getItem('footer_cache') || 'null') || {}; }
+  catch { return {}; }
 }
 
 function setCachedFooter(obj) {
@@ -636,14 +668,9 @@ function getSupabaseClient() {
       "https://alpdhgcipjeekzrpxlbh.supabase.co",
       "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya",
       {
-        auth: {
-          persistSession: false,
-          autoRefreshToken: false,
-          detectSessionInUrl: false
-        }
+        auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
       }
     );
-
     window.db = client;
   }
 
@@ -663,10 +690,7 @@ async function refreshLogoCache() {
       .maybeSingle();
 
     if (data) {
-      setCachedLogo({
-        image_url: data.image_url || '',
-        site_name: data.site_name || ''
-      });
+      setCachedLogo({ image_url: data.image_url || '', site_name: data.site_name || '' });
     } else {
       setCachedLogo({ image_url: '', site_name: '' });
     }
@@ -682,31 +706,17 @@ async function refreshFooterCache() {
       .from('settings')
       .select('key, value')
       .in('key', [
-        'footer_owner',
-        'footer_phone',
-        'footer_email',
-        'footer_address',
-        'footer_business',
-        'footer_text',
-        'footer_instagram',
-        'footer_blog',
-        'footer_band',
-        'account_bank',
-        'account_number',
-        'account_holder'
+        'footer_owner', 'footer_phone', 'footer_email', 'footer_address',
+        'footer_business', 'footer_text', 'footer_instagram', 'footer_blog',
+        'footer_band', 'account_bank', 'account_number', 'account_holder'
       ]);
 
     const obj = {};
-
-    (data || []).forEach(row => {
-      obj[row.key] = row.value || '';
-    });
-
+    (data || []).forEach(row => { obj[row.key] = row.value || ''; });
     setCachedFooter(obj);
   } catch (e) {}
 }
 
-// ⭐ 입금 계좌 캐시 헬퍼
 function getCachedAccount() {
   const f = getCachedFooter();
   return {
@@ -739,14 +749,10 @@ async function fetchAccountFromDB() {
 function getOrCreateSessionId() {
   try {
     let sid = localStorage.getItem('visitor_sid');
-
     if (!sid) {
-      sid = 'sid_' + Date.now().toString(36) + '_' +
-        Math.random().toString(36).slice(2, 10);
-
+      sid = 'sid_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
       localStorage.setItem('visitor_sid', sid);
     }
-
     return sid;
   } catch (e) {
     return 'sid_anon_' + Math.random().toString(36).slice(2, 10);
@@ -761,7 +767,6 @@ async function recordVisit() {
     const key = 'last_visit_' + _pathName;
     const now = Date.now();
     const last = Number(localStorage.getItem(key) || 0);
-
     if (now - last < 5 * 60 * 1000) return;
 
     localStorage.setItem(key, String(now));
@@ -783,15 +788,12 @@ function renderFooter() {
   if (!wrap) {
     wrap = document.createElement('div');
     wrap.id = 'app-footer';
-
     const mainScroll = document.querySelector('.site-main-scroll');
-
     if (mainScroll) mainScroll.appendChild(wrap);
     else document.body.appendChild(wrap);
   }
 
   const f = getCachedFooter();
-
   const owner = f.footer_owner || '';
   const phone = f.footer_phone || '';
   const email = f.footer_email || '';
@@ -804,10 +806,7 @@ function renderFooter() {
 
   const hasSns = instagram || blog || band;
 
-  if (
-    !owner && !phone && !email && !address &&
-    !business && !text && !hasSns
-  ) {
+  if (!owner && !phone && !email && !address && !business && !text && !hasSns) {
     if (_footerRenderCount < 2) {
       _footerRenderCount++;
       refreshFooterCache().then(() => renderFooter());
@@ -819,7 +818,6 @@ function renderFooter() {
   wrap.style.display = 'block';
 
   const items = [];
-
   if (phone) items.push(`<span class="footer-item">📞 ${phone}</span>`);
   if (email) items.push(`<span class="footer-item">✉️ ${email}</span>`);
   if (business) items.push(`<span class="footer-item">사업자번호: ${business}</span>`);
@@ -827,13 +825,8 @@ function renderFooter() {
   const snsLinks = [];
 
   if (instagram) snsLinks.push(`
-    <a href="${instagram}" target="_blank"
-       rel="noopener noreferrer"
-       class="footer-sns-btn"
-       aria-label="Instagram">
-      <svg viewBox="0 0 24 24" width="20" height="20"
-           fill="none" stroke="currentColor" stroke-width="1.8"
-           stroke-linecap="round" stroke-linejoin="round">
+    <a href="${instagram}" target="_blank" rel="noopener noreferrer" class="footer-sns-btn" aria-label="Instagram">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
         <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
         <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
@@ -842,13 +835,8 @@ function renderFooter() {
   `);
 
   if (blog) snsLinks.push(`
-    <a href="${blog}" target="_blank"
-       rel="noopener noreferrer"
-       class="footer-sns-btn"
-       aria-label="Naver Blog">
-      <svg viewBox="0 0 24 24" width="20" height="20"
-           fill="none" stroke="currentColor" stroke-width="1.8"
-           stroke-linecap="round" stroke-linejoin="round">
+    <a href="${blog}" target="_blank" rel="noopener noreferrer" class="footer-sns-btn" aria-label="Naver Blog">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="10"></circle>
         <path d="M8 16V8l8 8V8"></path>
       </svg>
@@ -856,13 +844,8 @@ function renderFooter() {
   `);
 
   if (band) snsLinks.push(`
-    <a href="${band}" target="_blank"
-       rel="noopener noreferrer"
-       class="footer-sns-btn"
-       aria-label="Naver Band">
-      <svg viewBox="0 0 24 24" width="20" height="20"
-           fill="none" stroke="currentColor" stroke-width="1.8"
-           stroke-linecap="round" stroke-linejoin="round">
+    <a href="${band}" target="_blank" rel="noopener noreferrer" class="footer-sns-btn" aria-label="Naver Band">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
         <circle cx="9" cy="7" r="4"></circle>
         <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
@@ -872,14 +855,8 @@ function renderFooter() {
   `);
 
   snsLinks.push(`
-    <button type="button"
-            class="footer-channel-btn"
-            id="footer-channel-btn"
-            aria-label="채널톡 상담"
-            title="채널톡 상담">
-      <svg viewBox="0 0 24 24" width="20" height="20"
-           fill="none" stroke="currentColor" stroke-width="1.8"
-           stroke-linecap="round" stroke-linejoin="round">
+    <button type="button" class="footer-channel-btn" id="footer-channel-btn" aria-label="채널톡 상담" title="채널톡 상담">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
       </svg>
     </button>
@@ -898,11 +875,7 @@ function renderFooter() {
   const chBtn = document.getElementById('footer-channel-btn');
   if (chBtn) {
     chBtn.addEventListener('click', () => {
-      try {
-        if (window.ChannelIO) {
-          window.ChannelIO('show');
-        }
-      } catch (e) {}
+      try { if (window.ChannelIO) window.ChannelIO('show'); } catch (e) {}
     });
   }
 }
@@ -913,7 +886,6 @@ async function verifyMemberStatus() {
 
   let member;
   try { member = JSON.parse(memberStr); } catch { return true; }
-
   if (!member || !member.id) return true;
 
   const client = getSupabaseClient();
@@ -953,7 +925,6 @@ async function verifyMemberStatus() {
 
     member.status = status;
     member.grade = data.grade || member.grade || '일반회원';
-
     localStorage.setItem('member', JSON.stringify(member));
     return true;
   } catch (e) {
@@ -965,70 +936,53 @@ let _headerRendered = false;
 
 function buildBottomNav(current, isMember, svgIcons, memberGrade) {
   const commonTabs = `
-    <a href="index.html" data-nav="home"
-       class="bottom-nav-item ${current === 'home' ? 'active' : ''}">
+    <a href="index.html" data-nav="home" class="bottom-nav-item ${current === 'home' ? 'active' : ''}">
       ${svgIcons.home}<span>홈</span>
     </a>
-
-    <a href="cart.html" data-nav="cart"
-       class="bottom-nav-item ${current === 'cart' ? 'active' : ''}">
+    <a href="cart.html" data-nav="cart" class="bottom-nav-item ${current === 'cart' ? 'active' : ''}">
       ${svgIcons.cart}
       <span id="bottom-cart-badge" class="cart-badge" style="display:none;">0</span>
       <span>장바구니</span>
     </a>
-
-    <a href="orders.html" data-nav="orders"
-       class="bottom-nav-item ${current === 'orders' ? 'active' : ''}">
+    <a href="orders.html" data-nav="orders" class="bottom-nav-item ${current === 'orders' ? 'active' : ''}">
       ${svgIcons.orders}<span>주문조회</span>
     </a>
   `;
 
   const gradeTabs = (isMember && memberGrade === '도매회원')
-    ? `<a href="wholesale.html" data-nav="wholesale"
-         class="bottom-nav-item ${current === 'wholesale' ? 'active' : ''}">
+    ? `<a href="wholesale.html" data-nav="wholesale" class="bottom-nav-item ${current === 'wholesale' ? 'active' : ''}">
          ${svgIcons.wholesale}<span>도매</span>
        </a>`
     : (isMember && memberGrade === 'VIP회원')
-    ? `<a href="vip.html" data-nav="vip"
-         class="bottom-nav-item ${current === 'vip' ? 'active' : ''}">
+    ? `<a href="vip.html" data-nav="vip" class="bottom-nav-item ${current === 'vip' ? 'active' : ''}">
          ${svgIcons.vip}<span>VIP</span>
        </a>`
     : '';
 
   const memberTabs = isMember
-    ? `<a href="myorders.html" data-nav="myorders"
-         class="bottom-nav-item ${current === 'myorders' ? 'active' : ''}">
+    ? `<a href="myorders.html" data-nav="myorders" class="bottom-nav-item ${current === 'myorders' ? 'active' : ''}">
          ${svgIcons.myorders}<span>주문내역</span>
        </a>
-
-       <a href="mypage.html" data-nav="mypage"
-          class="bottom-nav-item ${current === 'mypage' ? 'active' : ''}">
+       <a href="mypage.html" data-nav="mypage" class="bottom-nav-item ${current === 'mypage' ? 'active' : ''}">
          ${svgIcons.mypage}<span>내정보</span>
        </a>
-
-       <a href="#" data-nav="logout" id="bottom-logout-btn"
-          class="bottom-nav-item">
+       <a href="#" data-nav="logout" id="bottom-logout-btn" class="bottom-nav-item">
          ${svgIcons.logout}<span>로그아웃</span>
        </a>`
-    : `<a href="login.html" data-nav="login"
-         class="bottom-nav-item ${current === 'login' ? 'active' : ''}">
+    : `<a href="login.html" data-nav="login" class="bottom-nav-item ${current === 'login' ? 'active' : ''}">
          ${svgIcons.login}<span>로그인</span>
        </a>
-
-       <a href="signup.html" data-nav="signup"
-          class="bottom-nav-item ${current === 'signup' ? 'active' : ''}">
+       <a href="signup.html" data-nav="signup" class="bottom-nav-item ${current === 'signup' ? 'active' : ''}">
          ${svgIcons.signup}<span>회원가입</span>
        </a>`;
 
   const count = 3 + (gradeTabs ? 1 : 0) + (isMember ? 3 : 2);
-
   return { html: commonTabs + gradeTabs + memberTabs, count };
 }
 
 function updateBottomNavBadge() {
   const cart = JSON.parse(localStorage.getItem('cart') || '[]');
   const badge = document.getElementById('bottom-cart-badge');
-
   if (badge) {
     badge.textContent = cart.length;
     badge.style.display = cart.length > 0 ? 'block' : 'none';
@@ -1037,7 +991,6 @@ function updateBottomNavBadge() {
 
 function bindBottomLogout() {
   const blb = document.getElementById('bottom-logout-btn');
-
   if (blb) {
     blb.onclick = (e) => {
       e.preventDefault();
@@ -1056,26 +1009,14 @@ function renderHeader(current) {
   const isDark = _isDark;
 
   const theme = isDark ? {
-    headerBg: '#0f0f0f',
-    borderColor: '#222',
-    logoColor: '#fff',
-    btnBg: '#1a1a1a',
-    btnBgActive: '#e5e7eb',
-    btnText: '#e5e7eb',
-    btnTextActive: '#111',
-    btnBorder: '#333',
-    btnBorderActive: '#e5e7eb',
+    headerBg: '#0f0f0f', borderColor: '#222', logoColor: '#fff',
+    btnBg: '#1a1a1a', btnBgActive: '#e5e7eb', btnText: '#e5e7eb',
+    btnTextActive: '#111', btnBorder: '#333', btnBorderActive: '#e5e7eb',
     nameColor: '#888'
   } : {
-    headerBg: '#fff',
-    borderColor: '#eee',
-    logoColor: '#222',
-    btnBg: '#fff',
-    btnBgActive: '#222',
-    btnText: '#222',
-    btnTextActive: '#fff',
-    btnBorder: '#ddd',
-    btnBorderActive: '#222',
+    headerBg: '#fff', borderColor: '#eee', logoColor: '#222',
+    btnBg: '#fff', btnBgActive: '#222', btnText: '#222',
+    btnTextActive: '#fff', btnBorder: '#ddd', btnBorderActive: '#222',
     nameColor: '#555'
   };
 
@@ -1091,7 +1032,6 @@ function renderHeader(current) {
   else if (!bottomNav.parentNode) document.body.appendChild(bottomNav);
 
   const member = localStorage.getItem('member');
-
   let m = null;
   try { m = member ? JSON.parse(member) : null; } catch { m = null; }
 
@@ -1111,12 +1051,9 @@ function renderHeader(current) {
     vip: `<svg class="nav-icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`
   };
 
-  const { html: navHtml, count } =
-    buildBottomNav(current, isMember, svgIcons, memberGrade);
-
+  const { html: navHtml, count } = buildBottomNav(current, isMember, svgIcons, memberGrade);
   bottomNav.className = `nav-count-${count}`;
   bottomNav.innerHTML = navHtml;
-
   updateBottomNavBadge();
   bindBottomLogout();
 
@@ -1182,11 +1119,27 @@ function renderHeader(current) {
     ? `<a href="index.html" style="display:inline-block;"><img src="${logoImageUrl}" alt="${siteName}" style="height:40px; max-width:240px; object-fit:contain; display:block; margin:0 auto;"></a>`
     : `<a href="index.html" style="font-size:22px; font-weight:700; color:${theme.logoColor}; text-decoration:none; display:inline-block;">${siteName}</a>`;
 
+  // ⭐ index 페이지에서만 검색창 노출 (로고 바로 아래 좌측)
+  const searchHtml = _isIndex ? `
+    <div class="header-search-wrap">
+      <form class="header-search-box" id="header-search-form" role="search" autocomplete="off">
+        <input type="text" id="header-search-input" placeholder="상품명 또는 제품번호 검색" aria-label="상품 검색">
+        <button type="submit" id="header-search-btn" aria-label="검색">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
+            <circle cx="11" cy="11" r="7"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </button>
+      </form>
+    </div>
+  ` : '';
+
   wrap.innerHTML = `
     <header style="background:${theme.headerBg}; border-bottom:1px solid ${theme.borderColor}; padding:12px 16px 10px 16px;">
       <div style="max-width:1400px; margin:0 auto;">
         <div style="margin-bottom:8px; text-align:center;">${logoHtml}</div>
         ${nameRow}
+        ${searchHtml}
 
         <div class="header-nav-wrap">
           <a href="cart.html" data-nav="cart" style="${btnStyle(current === 'cart')}">장바구니 <span id="cart-count" style="margin-left:4px;">0</span></a>
@@ -1292,11 +1245,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 (function() {
   var w = window;
-
   if (w.ChannelIO) {
     return (window.console.error || window.console.log)('ChannelIO already loaded');
   }
-
   var ch = function() { ch.c(arguments); };
   ch.q = [];
   ch.c = function(args) { ch.q.push(args); };
@@ -1316,11 +1267,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     x.parentNode.insertBefore(s, x);
   }
 
-  if (document.readyState === 'complete') {
-    l();
-  } else if (window.attachEvent) {
-    window.attachEvent('onload', l);
-  } else {
+  if (document.readyState === 'complete') l();
+  else if (window.attachEvent) window.attachEvent('onload', l);
+  else {
     window.addEventListener('DOMContentLoaded', l, false);
     window.addEventListener('load', l, false);
   }
