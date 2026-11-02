@@ -108,7 +108,7 @@
     #search-modal {
       position: fixed;
       inset: 0;
-      z-index: 999999;
+      z-index: 9999999;
       display: none;
     }
 
@@ -328,7 +328,7 @@
     <div id="pagination"></div>
   </main>
 
-  <!-- ⭐ 검색 결과 팝업 -->
+  <!-- ⭐ 검색 결과 팝업 (common.js가 wrapper 밖으로 이동시킴) -->
   <div id="search-modal" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="sm-backdrop" id="search-modal-backdrop"></div>
     <div class="sm-panel">
@@ -631,7 +631,7 @@
     });
 
     // ============================================================
-    // ⭐ 헤더 검색 + 검색 결과 팝업
+    // ⭐ 검색 결과 팝업 로직
     // ============================================================
     function normalizeSearch(v) {
       return String(v ?? '').normalize('NFKC').toLocaleLowerCase().trim();
@@ -646,13 +646,11 @@
     function openSearchModal() {
       searchModal.classList.add('open');
       searchModal.setAttribute('aria-hidden', 'false');
-      document.body.style.overflow = 'hidden';
     }
 
     function closeSearchModal() {
       searchModal.classList.remove('open');
       searchModal.setAttribute('aria-hidden', 'true');
-      document.body.style.overflow = '';
     }
 
     searchModalClose.addEventListener('click', closeSearchModal);
@@ -695,9 +693,6 @@
         const priceHtml = hidePrice
           ? `<div class="sm-price locked">🔒 로그인 후</div>`
           : `<div class="sm-price">${Number(p.price).toLocaleString()}원</div>`;
-        const metaParts = [];
-        if (p.product_code) metaParts.push(`제품번호: ${p.product_code}`);
-        if (p.name) metaParts.push(`상품명: ${p.name}`);
         return `
           <a class="sm-item" href="product.html?id=${p.id}">
             <div class="sm-thumb" style="background-image: ${bgUrl(p.main_image)};"></div>
@@ -711,52 +706,17 @@
       }).join('');
     }
 
-    function handleHeaderSearch(keyword) {
+    // ⭐ common.js의 검색 폼이 submit 될 때 호출되는 훅
+    window.__onHeaderSearchSubmit = function(keyword) {
       renderSearchResults(keyword);
       openSearchModal();
-    }
+    };
 
-    // 헤더 렌더링 후 검색 폼 바인딩 (common.js에서 그려준 DOM)
-    function bindHeaderSearch() {
-      const form = document.getElementById('header-search-form');
-      if (!form) return;
-      const input = document.getElementById('header-search-input');
-      if (!input) return;
-
-      form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const kw = input.value.trim();
-        if (!kw) { input.focus(); return; }
-        handleHeaderSearch(kw);
-      });
-    }
-
-    // common.js의 renderHeader가 DOM을 다시 그릴 수 있으므로 MutationObserver로 감지
-    const headerObserver = new MutationObserver(() => {
-      if (document.getElementById('header-search-form')) {
-        bindHeaderSearch();
-      }
-    });
-
+    // 초기 로드
     (async () => {
       await loadBanner();
       await loadPromoVideo();
       await loadProducts();
-
-      // 헤더 DOM이 그려질 때까지 대기 후 바인딩
-      const tryBind = (retry = 0) => {
-        if (document.getElementById('header-search-form')) {
-          bindHeaderSearch();
-        } else if (retry < 20) {
-          setTimeout(() => tryBind(retry + 1), 100);
-        }
-      };
-      tryBind();
-
-      headerObserver.observe(document.getElementById('app-header') || document.body, {
-        childList: true,
-        subtree: true
-      });
     })();
   </script>
 </body>

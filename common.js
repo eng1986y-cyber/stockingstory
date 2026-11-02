@@ -1002,6 +1002,12 @@ function bindBottomLogout() {
   }
 }
 
+// ============================================================
+// ⭐⭐⭐ 헤더 렌더 (검색창 포함) ⭐⭐⭐
+// - index 페이지에서만 검색창 노출
+// - form submit 시 window.__onHeaderSearchSubmit(keyword) 호출
+//   (index.html에서 이 함수를 정의하면 자동 연결됨)
+// ============================================================
 function renderHeader(current) {
   const wrap = document.getElementById('app-header');
   if (!wrap) return;
@@ -1067,6 +1073,9 @@ function renderHeader(current) {
 
     const cc = document.getElementById('cart-count');
     if (cc) cc.textContent = JSON.parse(localStorage.getItem('cart') || '[]').length;
+
+    // ⭐ 이미 그려졌어도 검색창 이벤트 바인딩이 필요할 수 있음
+    bindHeaderSearchForm();
     return;
   }
 
@@ -1165,6 +1174,33 @@ function renderHeader(current) {
   }
 
   refreshLogoCache();
+
+  // ⭐ 검색 폼 이벤트 바인딩 (매 렌더 후 호출)
+  bindHeaderSearchForm();
+}
+
+// ============================================================
+// ⭐ 검색 폼 이벤트 바인딩
+// - form submit 시 window.__onHeaderSearchSubmit(keyword)를 호출
+// - index.html이 이 함수를 정의해두면 자동 동작
+// - 이미 바인딩된 경우 중복 방지
+// ============================================================
+function bindHeaderSearchForm() {
+  const form = document.getElementById('header-search-form');
+  if (!form) return;
+  if (form.dataset.bound === '1') return;
+  form.dataset.bound = '1';
+
+  const input = document.getElementById('header-search-input');
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const kw = (input?.value || '').trim();
+    if (!kw) { input?.focus(); return; }
+    if (typeof window.__onHeaderSearchSubmit === 'function') {
+      window.__onHeaderSearchSubmit(kw);
+    }
+  });
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -1191,6 +1227,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (child.id === 'app-footer') return;
     if (child.classList.contains('page-loader')) return;
     if (child.id === 'scroll-btns') return;
+    if (child.id === 'search-modal') return; // ⭐ 검색 팝업은 wrapper 밖으로
 
     mainScroll.appendChild(child);
   });
