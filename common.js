@@ -97,6 +97,7 @@ function applyGradeDiscount(price) {
     .header-product-search {
       display: flex;
       align-items: center;
+      gap: 6px;
       width: min(360px, 42%);
       min-width: 220px;
       height: 36px;
@@ -104,58 +105,45 @@ function applyGradeDiscount(price) {
       flex: 0 1 360px;
       margin-right: auto;
       z-index: 100001;
-      
-      /* ⭐ 인풋 대신 폼(컨테이너)에 테두리 적용 */
-      border: 1px solid var(--header-search-border, #ddd);
-      border-radius: 6px;
-      background: #fff;
-      transition: border-color .16s ease, box-shadow .16s ease;
-      overflow: hidden;
     }
-    .header-product-search:focus-within {
-      border-color: var(--header-search-focus-border, #999);
-      box-shadow: 0 0 0 2px rgba(80, 80, 80, .12);
-    }
-
     .header-product-search input {
-      flex: 1;
+      width: 100%;
       min-width: 0;
-      height: 100%;
+      height: 36px;
       box-sizing: border-box;
       padding: 0 12px;
-      border: 0; /* ⭐ 테두리 제거 */
-      background: transparent;
+      border: none;
+      border-radius: 6px;
+      background: #fff;
       color: #222;
       font: inherit;
       font-size: 13px;
       outline: none;
+      transition: box-shadow .16s ease;
+    }
+    .header-product-search input:focus {
+      box-shadow: 0 0 0 2px rgba(80, 80, 80, .12);
     }
     .header-product-search input::placeholder { color: #9ca3af; }
-
-    /* ⭐ 검색 버튼 */
     .header-product-search button {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 40px;
-      min-width: 40px;
-      height: 100%;
+      width: 36px;
+      min-width: 36px;
+      height: 36px;
       padding: 0;
       box-sizing: border-box;
-      border: 0; /* ⭐ 버튼 기본 테두리 제거 */
-      border-radius: 0;
+      border: 1px solid transparent;
+      border-radius: 6px;
       background: transparent;
       color: #111;
       cursor: pointer;
       flex-shrink: 0;
-      transition: background .16s ease, color .16s ease, transform .16s ease;
+      transition: background .16s ease, border-color .16s ease, transform .16s ease;
     }
     .header-product-search button:hover {
       background: transparent;
-      color: #000;
-      /* 버튼 자체 테두리 대신 부모 폼의 테두리 색을 변경하도록 유도 */
-    }
-    .header-product-search:has(button:hover) {
       border-color: #9ca3af;
     }
     .header-product-search button:active { transform: scale(.94); }
@@ -169,26 +157,22 @@ function applyGradeDiscount(price) {
       stroke-linecap: round;
       stroke-linejoin: round;
     }
-
-    /* ⭐ 다크모드 */
-    body.dark .header-product-search {
-      background: #171717;
-      border-color: var(--header-search-border, #333);
-    }
-    body.dark .header-product-search:focus-within {
-      border-color: var(--header-search-focus-border, #666);
-      box-shadow: 0 0 0 2px rgba(255,255,255,.10);
-    }
     body.dark .header-product-search input {
+      background: #171717;
       color: #eee;
+    }
+    body.dark .header-product-search input:focus {
+      box-shadow: 0 0 0 2px rgba(255,255,255,.10);
     }
     body.dark .header-product-search button {
       color: #fff;
+      background: transparent;
+      border-color: transparent;
     }
-    body.dark .header-product-search:has(button:hover) {
+    body.dark .header-product-search button:hover {
+      background: transparent;
       border-color: #6b7280;
     }
-
     .header-search-popup {
       display: none;
       position: absolute;
@@ -269,8 +253,8 @@ function applyGradeDiscount(price) {
         max-width: none;
         height: 36px;
       }
-      .header-product-search input { height: 100%; }
-      .header-product-search button { width: 40px; min-width: 40px; height: 100%; }
+      .header-product-search input { height: 36px; }
+      .header-product-search button { width: 36px; min-width: 36px; height: 36px; }
       .header-search-popup {
         width: 100%;
         max-height: 55vh;
@@ -1530,8 +1514,7 @@ function renderHeader(current) {
         ${nameRow}
 
         <div class="header-toolbar">
-          <form class="header-product-search" id="header-product-search" role="search"
-                style="--header-search-border:${theme.btnBorder}; --header-search-focus-border:${isDark ? '#666' : '#999'};">
+          <form class="header-product-search" id="header-product-search" role="search">
             <input id="header-product-search-input" type="search"
                    placeholder="상품명 또는 제품번호 검색"
                    autocomplete="off" aria-label="상품 검색">
