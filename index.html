@@ -101,204 +101,6 @@
       .banner-dots { bottom: 12px; gap: 6px; }
       .banner-dot { width: 8px; height: 8px; }
     }
-
-    /* ============================================================
-       ⭐ 검색 결과 팝업(모달)
-       ============================================================ */
-    #search-modal {
-      position: fixed;
-      inset: 0;
-      z-index: 9999999;
-      display: none;
-    }
-
-    #search-modal.open { display: block; }
-
-    #search-modal .sm-backdrop {
-      position: absolute;
-      inset: 0;
-      background: rgba(0,0,0,0.45);
-      animation: smFade .15s ease;
-    }
-
-    @keyframes smFade { from { opacity: 0; } to { opacity: 1; } }
-
-    #search-modal .sm-panel {
-      position: absolute;
-      left: 50%;
-      top: 90px;
-      transform: translateX(-50%);
-      width: calc(100% - 32px);
-      max-width: 680px;
-      max-height: calc(100vh - 140px);
-      background: #fff;
-      border-radius: 14px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      animation: smPop .18s ease;
-    }
-
-    @keyframes smPop {
-      from { opacity: 0; transform: translate(-50%, -8px); }
-      to { opacity: 1; transform: translate(-50%, 0); }
-    }
-
-    body.dark #search-modal .sm-panel {
-      background: #141414;
-      border: 1px solid #2a2a2a;
-    }
-
-    .sm-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      padding: 14px 16px;
-      border-bottom: 1px solid #eee;
-      flex-shrink: 0;
-    }
-
-    body.dark .sm-header { border-bottom-color: #222; }
-
-    .sm-title {
-      font-size: 15px;
-      font-weight: 700;
-      color: #222;
-      margin: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .sm-title .sm-keyword { color: #e53935; }
-
-    body.dark .sm-title { color: #e5e7eb; }
-
-    .sm-count {
-      font-size: 12px;
-      color: #888;
-      font-weight: 500;
-      margin-left: 6px;
-    }
-
-    .sm-close {
-      flex: 0 0 auto;
-      width: 32px;
-      height: 32px;
-      border: 0;
-      border-radius: 50%;
-      background: #f5f5f5;
-      color: #555;
-      font-size: 18px;
-      line-height: 1;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .sm-close:hover { background: #e5e5e5; }
-    body.dark .sm-close { background: #222; color: #ccc; }
-    body.dark .sm-close:hover { background: #333; }
-
-    .sm-body {
-      flex: 1 1 auto;
-      overflow-y: auto;
-      padding: 8px 8px 12px;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior: contain;
-    }
-
-    .sm-list {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .sm-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px;
-      border-radius: 10px;
-      text-decoration: none;
-      color: inherit;
-      transition: background .12s ease;
-    }
-
-    .sm-item:hover { background: #f7f7f7; }
-    body.dark .sm-item:hover { background: #1e1e1e; }
-
-    .sm-thumb {
-      flex: 0 0 56px;
-      width: 56px;
-      height: 56px;
-      border-radius: 8px;
-      background: #f0f0f0 center/cover no-repeat;
-      border: 1px solid #eee;
-    }
-
-    body.dark .sm-thumb { border-color: #2a2a2a; }
-
-    .sm-info { min-width: 0; flex: 1 1 auto; }
-
-    .sm-name {
-      font-size: 14px;
-      font-weight: 600;
-      color: #222;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    body.dark .sm-name { color: #e5e7eb; }
-
-    .sm-meta {
-      font-size: 12px;
-      color: #888;
-      margin-top: 3px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .sm-price {
-      font-size: 14px;
-      font-weight: 700;
-      color: #e53935;
-      flex: 0 0 auto;
-      white-space: nowrap;
-    }
-
-    .sm-price.locked {
-      color: #1976d2;
-      font-size: 11px;
-      font-weight: 600;
-    }
-
-    .sm-empty {
-      padding: 48px 16px;
-      text-align: center;
-      color: #9ca3af;
-      font-size: 14px;
-      line-height: 1.6;
-    }
-
-    .sm-empty strong { color: #e53935; }
-
-    @media (max-width: 768px) {
-      #search-modal .sm-panel {
-        top: 60px;
-        width: calc(100% - 20px);
-        max-height: calc(100vh - 120px);
-      }
-      .sm-thumb { flex-basis: 48px; width: 48px; height: 48px; }
-      .sm-name { font-size: 13px; }
-      .sm-price { font-size: 13px; }
-    }
   </style>
 </head>
 <body>
@@ -328,20 +130,6 @@
     <div id="pagination"></div>
   </main>
 
-  <!-- ⭐ 검색 결과 팝업 (common.js가 wrapper 밖으로 이동시킴) -->
-  <div id="search-modal" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="sm-backdrop" id="search-modal-backdrop"></div>
-    <div class="sm-panel">
-      <div class="sm-header">
-        <h3 class="sm-title" id="search-modal-title">검색 결과</h3>
-        <button type="button" class="sm-close" id="search-modal-close" aria-label="닫기">✕</button>
-      </div>
-      <div class="sm-body">
-        <div class="sm-list" id="search-modal-list"></div>
-      </div>
-    </div>
-  </div>
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     window.db = supabase.createClient(
@@ -361,6 +149,7 @@
     let allProducts = [];
     let filteredProducts = [];
     let currentPage = 1;
+    let currentSearch = '';
 
     function isLoggedIn() {
       try {
@@ -530,7 +319,26 @@
         return;
       }
       allProducts = data;
-      filteredProducts = [...allProducts];
+      applySearch(currentSearch);
+    }
+
+    function normalizeSearch(v) {
+      return String(v ?? '').normalize('NFKC').toLocaleLowerCase().trim();
+    }
+
+    // ⭐ 상품명 + 제품번호 모두 부분 일치 검색
+    function applySearch(text) {
+      currentSearch = text || '';
+      const keyword = normalizeSearch(currentSearch);
+      if (!keyword) {
+        filteredProducts = [...allProducts];
+      } else {
+        filteredProducts = allProducts.filter(p => {
+          const nameMatch = normalizeSearch(p.name).includes(keyword);
+          const codeMatch = normalizeSearch(p.product_code).includes(keyword);
+          return nameMatch || codeMatch;
+        });
+      }
       currentPage = 1;
       applyGridColumns();
       renderPage();
@@ -557,7 +365,7 @@
       const items = filteredProducts.slice(start, start + perPage);
 
       if (filteredProducts.length === 0) {
-        list.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:40px; color:#9ca3af;">등록된 상품이 없습니다.</p>';
+        list.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:40px; color:#9ca3af;">검색 결과가 없습니다.</p>';
         document.getElementById('pagination').innerHTML = '';
         return;
       }
@@ -617,8 +425,7 @@
         });
       });
     }
-
-    let resizeTimer;
+let resizeTimer;
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
@@ -630,89 +437,6 @@
       }, 200);
     });
 
-    // ============================================================
-    // ⭐ 검색 결과 팝업 로직
-    // ============================================================
-    function normalizeSearch(v) {
-      return String(v ?? '').normalize('NFKC').toLocaleLowerCase().trim();
-    }
-
-    const searchModal = document.getElementById('search-modal');
-    const searchModalList = document.getElementById('search-modal-list');
-    const searchModalTitle = document.getElementById('search-modal-title');
-    const searchModalClose = document.getElementById('search-modal-close');
-    const searchModalBackdrop = document.getElementById('search-modal-backdrop');
-
-    function openSearchModal() {
-      searchModal.classList.add('open');
-      searchModal.setAttribute('aria-hidden', 'false');
-    }
-
-    function closeSearchModal() {
-      searchModal.classList.remove('open');
-      searchModal.setAttribute('aria-hidden', 'true');
-    }
-
-    searchModalClose.addEventListener('click', closeSearchModal);
-    searchModalBackdrop.addEventListener('click', closeSearchModal);
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && searchModal.classList.contains('open')) closeSearchModal();
-    });
-
-    function renderSearchResults(keyword) {
-      const kw = normalizeSearch(keyword);
-
-      if (!kw) {
-        searchModalTitle.innerHTML = '검색어를 입력해주세요';
-        searchModalList.innerHTML = '';
-        return;
-      }
-
-      const matched = allProducts.filter(p => {
-        const nameMatch = normalizeSearch(p.name).includes(kw);
-        const codeMatch = normalizeSearch(p.product_code).includes(kw);
-        return nameMatch || codeMatch;
-      });
-
-      searchModalTitle.innerHTML =
-        `검색 결과 <span class="sm-keyword">"${keyword}"</span>` +
-        `<span class="sm-count">${matched.length}건</span>`;
-
-      if (matched.length === 0) {
-        searchModalList.innerHTML = `
-          <div class="sm-empty">
-            <strong>"${keyword}"</strong> 에 대한 검색 결과가 없습니다.<br>
-            다른 상품명 또는 제품번호로 검색해보세요.
-          </div>
-        `;
-        return;
-      }
-
-      searchModalList.innerHTML = matched.map(p => {
-        const hidePrice = shouldHidePrice(p);
-        const priceHtml = hidePrice
-          ? `<div class="sm-price locked">🔒 로그인 후</div>`
-          : `<div class="sm-price">${Number(p.price).toLocaleString()}원</div>`;
-        return `
-          <a class="sm-item" href="product.html?id=${p.id}">
-            <div class="sm-thumb" style="background-image: ${bgUrl(p.main_image)};"></div>
-            <div class="sm-info">
-              <div class="sm-name">${p.name}</div>
-              ${p.product_code ? `<div class="sm-meta">제품번호: ${p.product_code}</div>` : ''}
-            </div>
-            ${priceHtml}
-          </a>
-        `;
-      }).join('');
-    }
-
-    // ⭐ common.js의 검색 폼이 submit 될 때 호출되는 훅
-    window.__onHeaderSearchSubmit = function(keyword) {
-      renderSearchResults(keyword);
-      openSearchModal();
-    };
-
-    // 초기 로드
     (async () => {
       await loadBanner();
       await loadPromoVideo();
