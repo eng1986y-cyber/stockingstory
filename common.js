@@ -81,33 +81,36 @@ function applyGradeDiscount(price) {
 
     /* ⭐ 수정된 헤더 네비게이션 (검색창 포함) */
     .header-nav-wrap {
-      display: flex; 
-      gap: 8px; 
-      flex-wrap: wrap;
-      align-items: center; 
-      justify-content: flex-end;
+      display: flex;
+      gap: 8px;
+      flex-wrap: nowrap;
+      align-items: center;
+      justify-content: flex-start; /* 검색창을 메뉴 줄의 가장 왼쪽에 고정 */
       width: 100%;
+      box-sizing: border-box;
     }
 
-    /* ⭐ 검색 폼 스타일 (버튼들과 높이/위치 일치화) */
+    /* ⭐ 상품 검색창: 장바구니/주문조회 버튼과 같은 높이, 사이트 기본 색상 */
     .header-search-form {
       display: flex !important;
       align-items: center !important;
-      height: 36px !important; /* 버튼 높이와 동일 */
-      width: 280px !important; /* 적당한 너비 */
+      height: 36px !important;
+      width: 280px !important;
+      max-width: 100%;
       background: #fff !important;
-      border: 2px solid #e53935 !important; /* 메인 레드 */
-      border-radius: 6px !important; /* 버튼과 동일한 둥글기 */
+      border: 1px solid #ddd !important;
+      border-radius: 6px !important;
       overflow: hidden !important;
-      margin-left: 10px !important; /* 오른쪽으로 10px 이동 */
+      margin: 0 4px 0 0 !important;
       box-sizing: border-box !important;
-      flex-shrink: 0 !important;
+      flex: 0 0 280px !important;
       pointer-events: auto !important;
       z-index: 1000 !important;
     }
 
     body.dark .header-search-form {
       background: #1a1a1a !important;
+      border-color: #333 !important;
     }
 
     .header-search-form input {
@@ -122,22 +125,19 @@ function applyGradeDiscount(price) {
       color: #222 !important;
       background: transparent !important;
       pointer-events: auto !important;
+      box-sizing: border-box !important;
     }
 
-    body.dark .header-search-form input {
-      color: #e5e7eb !important;
-    }
-
-    .header-search-form input::placeholder {
-      color: #aaa !important;
-    }
+    body.dark .header-search-form input { color: #e5e7eb !important; }
+    .header-search-form input::placeholder { color: #999 !important; }
 
     .header-search-form button {
       flex: 0 0 36px !important;
       width: 36px !important;
       height: 100% !important;
       border: none !important;
-      background: #e53935 !important;
+      border-left: 1px solid #ddd !important;
+      background: #222 !important;
       color: #fff !important;
       cursor: pointer !important;
       display: flex !important;
@@ -147,9 +147,13 @@ function applyGradeDiscount(price) {
       pointer-events: auto !important;
     }
 
-    .header-search-form button:hover {
-      background: #c62828 !important;
+    body.dark .header-search-form button {
+      background: #e5e7eb !important;
+      color: #111 !important;
+      border-left-color: #333 !important;
     }
+
+    .header-search-form button:hover { opacity: .88; }
 
     .header-search-form button svg {
       pointer-events: none !important;
@@ -1126,7 +1130,7 @@ function renderHeader(current) {
     ? `<a href="index.html" style="display:inline-block;"><img src="${logoImageUrl}" alt="${siteName}" style="height:40px; max-width:240px; object-fit:contain; display:block; margin:0 auto;"></a>`
     : `<a href="index.html" style="font-size:22px; font-weight:700; color:${theme.logoColor}; text-decoration:none; display:inline-block;">${siteName}</a>`;
 
-  // ⭐ index 페이지에서만 검색창 노출 (버튼들과 같은 줄에 배치)
+  // ⭐ index 페이지에서만 상품 검색창 노출 (로고 바로 아래 메뉴 줄의 맨 왼쪽)
   const searchHtml = _isIndex ? `
     <form class="header-search-form" id="header-search-form" role="search" autocomplete="off">
       <input type="text" id="header-search-input" placeholder="상품명/제품번호 검색" aria-label="상품 검색">
