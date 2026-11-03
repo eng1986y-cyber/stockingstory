@@ -95,7 +95,7 @@ function applyGradeDiscount(price) {
       position: relative;
     }
     
-    /* ⭐ 검색 폼: 바깥쪽 테두리 역할 */
+    /* ⭐ 검색 폼: 테두리 없이 밑줄만 */
     .header-product-search {
       display: flex;
       align-items: center;
@@ -107,12 +107,11 @@ function applyGradeDiscount(price) {
       flex: 0 1 360px;
       margin-right: auto;
       z-index: 100001;
-      border: 1px solid #444;
-      border-radius: 6px;
-      background: #fff;
+      border: none;
+      border-bottom: 2px solid #444; /* 진한 밑줄 */
+      border-radius: 0;
+      background: transparent;
       box-sizing: border-box;
-      padding: 0 2px 0 0;
-      transition: border-color .16s ease;
     }
 
     .header-product-search input {
@@ -120,7 +119,7 @@ function applyGradeDiscount(price) {
       min-width: 0;
       height: 100%;
       box-sizing: border-box;
-      padding: 0 12px;
+      padding: 0 4px;
       border: none;
       background: transparent;
       color: #222;
@@ -168,7 +167,6 @@ function applyGradeDiscount(price) {
       flex-shrink: 0;
       outline: none;
       transition: background .16s ease, transform .16s ease;
-      margin-right: 2px;
     }
     
     .header-product-search button:hover {
@@ -195,8 +193,7 @@ function applyGradeDiscount(price) {
     }
     
     body.dark .header-product-search {
-      background: #171717;
-      border-color: #777;
+      border-bottom-color: #777; /* 다크모드 진한 밑줄 */
     }
     
     body.dark .header-product-search input {
