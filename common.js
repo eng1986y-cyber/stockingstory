@@ -97,7 +97,6 @@ function applyGradeDiscount(price) {
     .header-product-search {
       display: flex;
       align-items: center;
-      gap: 6px;
       width: min(360px, 42%);
       min-width: 220px;
       height: 36px;
@@ -105,46 +104,58 @@ function applyGradeDiscount(price) {
       flex: 0 1 360px;
       margin-right: auto;
       z-index: 100001;
-    }
-    .header-product-search input {
-      width: 100%;
-      min-width: 0;
-      height: 36px;
-      box-sizing: border-box;
-      padding: 0 12px;
+      
+      /* ⭐ 인풋 대신 폼(컨테이너)에 테두리 적용 */
       border: 1px solid var(--header-search-border, #ddd);
       border-radius: 6px;
       background: #fff;
+      transition: border-color .16s ease, box-shadow .16s ease;
+      overflow: hidden;
+    }
+    .header-product-search:focus-within {
+      border-color: var(--header-search-focus-border, #999);
+      box-shadow: 0 0 0 2px rgba(80, 80, 80, .12);
+    }
+
+    .header-product-search input {
+      flex: 1;
+      min-width: 0;
+      height: 100%;
+      box-sizing: border-box;
+      padding: 0 12px;
+      border: 0; /* ⭐ 테두리 제거 */
+      background: transparent;
       color: #222;
       font: inherit;
       font-size: 13px;
       outline: none;
-      transition: border-color .16s ease, box-shadow .16s ease;
-    }
-    .header-product-search input:focus {
-      border-color: var(--header-search-focus-border, #999);
-      box-shadow: 0 0 0 2px rgba(80, 80, 80, .12);
     }
     .header-product-search input::placeholder { color: #9ca3af; }
+
+    /* ⭐ 검색 버튼 */
     .header-product-search button {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 36px;
-      min-width: 36px;
-      height: 36px;
+      width: 40px;
+      min-width: 40px;
+      height: 100%;
       padding: 0;
       box-sizing: border-box;
-      border: 1px solid transparent;
-      border-radius: 6px;
+      border: 0; /* ⭐ 버튼 기본 테두리 제거 */
+      border-radius: 0;
       background: transparent;
       color: #111;
       cursor: pointer;
       flex-shrink: 0;
-      transition: background .16s ease, border-color .16s ease, transform .16s ease;
+      transition: background .16s ease, color .16s ease, transform .16s ease;
     }
     .header-product-search button:hover {
       background: transparent;
+      color: #000;
+      /* 버튼 자체 테두리 대신 부모 폼의 테두리 색을 변경하도록 유도 */
+    }
+    .header-product-search:has(button:hover) {
       border-color: #9ca3af;
     }
     .header-product-search button:active { transform: scale(.94); }
@@ -158,24 +169,26 @@ function applyGradeDiscount(price) {
       stroke-linecap: round;
       stroke-linejoin: round;
     }
-    body.dark .header-product-search input {
+
+    /* ⭐ 다크모드 */
+    body.dark .header-product-search {
       background: #171717;
       border-color: var(--header-search-border, #333);
-      color: #eee;
     }
-    body.dark .header-product-search input:focus {
+    body.dark .header-product-search:focus-within {
       border-color: var(--header-search-focus-border, #666);
       box-shadow: 0 0 0 2px rgba(255,255,255,.10);
     }
+    body.dark .header-product-search input {
+      color: #eee;
+    }
     body.dark .header-product-search button {
       color: #fff;
-      background: transparent;
-      border-color: transparent;
     }
-    body.dark .header-product-search button:hover {
-      background: transparent;
+    body.dark .header-product-search:has(button:hover) {
       border-color: #6b7280;
     }
+
     .header-search-popup {
       display: none;
       position: absolute;
@@ -256,8 +269,8 @@ function applyGradeDiscount(price) {
         max-width: none;
         height: 36px;
       }
-      .header-product-search input { height: 36px; }
-      .header-product-search button { width: 36px; min-width: 36px; height: 36px; }
+      .header-product-search input { height: 100%; }
+      .header-product-search button { width: 40px; min-width: 40px; height: 100%; }
       .header-search-popup {
         width: 100%;
         max-height: 55vh;
