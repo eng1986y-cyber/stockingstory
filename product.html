@@ -24,42 +24,57 @@
     .coupon-picker .cp-title { font-size: 13px; font-weight: 700; color: #fbbf24; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
     .coupon-picker select { width: 100%; padding: 10px 12px; background: #151515; border: 1px solid #333; border-radius: 6px; color: #e5e7eb; font-family: inherit; font-size: 13px; }
 
-    /* ⬇️⬇️ 달력 스타일 ⬇️⬇️ */
-    .cal-box {
-      background: #0f0f0f; border: 1px solid #2a2a2a;
-      border-radius: 8px; padding: 12px; margin: 12px 0;
+    /* ⬇️⬇️ 배송기간 참고용 달력 스타일 ⬇️⬇️ */
+    .ship-cal-box {
+      background: #151515;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 16px;
+      margin-top: 16px;
     }
-    .cal-box .cal-title {
-      font-size: 13px; font-weight: 700; color: #fbbf24; margin-bottom: 8px;
+    .ship-cal-box .scal-title {
+      font-size: 14px; font-weight: 700; color: #e5e7eb;
+      margin-bottom: 4px; display: flex; align-items: center; gap: 6px;
     }
-    .cal-box .cal-head {
+    .ship-cal-box .scal-desc {
+      font-size: 12px; color: #9ca3af; line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    .ship-cal-box .scal-head {
       display: flex; justify-content: space-between; align-items: center;
-      color: #e5e7eb; font-size: 13px; font-weight: 600; margin-bottom: 8px;
+      color: #e5e7eb; font-size: 14px; font-weight: 600; margin-bottom: 10px;
     }
-    .cal-box .cal-head button {
+    .ship-cal-box .scal-head button {
       background: #222; color: #e5e7eb; border: 1px solid #333;
-      border-radius: 4px; padding: 4px 10px; cursor: pointer; font-family: inherit;
+      border-radius: 6px; padding: 5px 12px; cursor: pointer;
+      font-family: inherit; font-size: 14px; line-height: 1;
     }
-    .cal-box .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
-    .cal-box .cal-dow { text-align: center; font-size: 11px; color: #888; padding: 4px 0; }
-    .cal-box .cal-day {
-      text-align: center; padding: 8px 0; border-radius: 6px;
-      font-size: 13px; cursor: pointer; color: #e5e7eb; background: #1a1a1a;
+    .ship-cal-box .scal-head button:hover { background: #2a2a2a; }
+    .ship-cal-box .scal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .ship-cal-box .scal-dow { text-align: center; font-size: 11px; color: #888; padding: 4px 0; font-weight: 600; }
+    .ship-cal-box .scal-day {
+      text-align: center; padding: 9px 0; border-radius: 6px;
+      font-size: 13px; color: #e5e7eb; background: #1a1a1a;
+      transition: background 0.12s;
     }
-    .cal-box .cal-day.empty { background: transparent; cursor: default; }
-    .cal-box .cal-day.past { color: #444; background: #151515; cursor: not-allowed; }
-    .cal-box .cal-day.today { border: 1px solid #fbbf24; color: #fbbf24; }
-    .cal-box .cal-day.sel { background: #10b981; color: #fff; font-weight: 700; }
-    .cal-box .cal-day:not(.past):not(.empty):hover { background: #2a2a2a; }
-    .cal-box .cal-result {
-      margin-top: 10px; padding: 8px 10px; border-radius: 6px;
-      font-size: 13px; font-weight: 600; text-align: center;
-      background: #1a1a1a; color: #f59e0b; border: 1px solid #333;
+    .ship-cal-box .scal-day.empty { background: transparent; }
+    .ship-cal-box .scal-day.past { color: #444; background: #111; }
+    .ship-cal-box .scal-day.today { border: 1px solid #fbbf24; color: #fbbf24; }
+    .ship-cal-box .scal-day.sunday { color: #f87171; }
+    .ship-cal-box .scal-day.saturday { color: #60a5fa; }
+    .ship-cal-box .scal-legend {
+      display: flex; flex-wrap: wrap; gap: 12px;
+      margin-top: 12px; padding-top: 12px;
+      border-top: 1px dashed #333;
+      font-size: 11px; color: #9ca3af;
     }
-    .cal-box .cal-result.ok {
-      background: #052e16; color: #86efac; border-color: #10b981;
+    .ship-cal-box .scal-legend span { display: flex; align-items: center; gap: 5px; }
+    .ship-cal-box .scal-legend .lg-box {
+      display: inline-block; width: 12px; height: 12px; border-radius: 3px;
     }
-    /* ⬆️⬆️ 달력 스타일 끝 ⬆️⬆️ */
+    .ship-cal-box .scal-legend .lg-sun { background: #f87171; }
+    .ship-cal-box .scal-legend .lg-sat { background: #60a5fa; }
+    /* ⬆️⬆️ 배송기간 참고용 달력 스타일 끝 ⬆️⬆️ */
   </style>
 </head>
 <body>
@@ -91,11 +106,10 @@
     let selectedItems = [];
     let cachedAccount = { bank: '', number: '', holder: '' };
 
-    // ⬇️⬇️ 달력 상태 변수 ⬇️⬇️
-    let selectedDate = null;
-    let calY = new Date().getFullYear();
-    let calM = new Date().getMonth();
-    // ⬆️⬆️ 달력 상태 변수 끝 ⬆️⬆️
+    // ⬇️⬇️ 배송 참고 달력 상태 ⬇️⬇️
+    let scalY = new Date().getFullYear();
+    let scalM = new Date().getMonth();
+    // ⬆️⬆️ 배송 참고 달력 상태 끝 ⬆️⬆️
 
     function getMember() { try { return JSON.parse(localStorage.getItem('member') || 'null'); } catch { return null; } }
     function isLoggedIn() {
@@ -294,14 +308,6 @@
                   <div style="margin-top:12px; font-size:13px; font-weight:600; color:#fff; margin-bottom:8px;">옵션 선택 (필수) <span style="color:#ef4444;">*</span></div>
                   ${row1}
                   ${row2}
-
-                  <!-- ⬇️⬇️ 달력 UI ⬇️⬇️ -->
-                  <div class="cal-box" id="cal-box">
-                    <div class="cal-title">📅 배송 희망일 선택 (선택사항)</div>
-                    <div id="cal-root"></div>
-                  </div>
-                  <!-- ⬆️⬆️ 달력 UI 끝 ⬆️⬆️ -->
-
                   <div id="selected-items" style="margin-top:12px;"></div>
                 `}
               </div>
@@ -322,7 +328,26 @@
             </div>
           </div>
         </div>
+
+        <!-- ⬇️⬇️ 공지 이미지 (원래 위치) ⬇️⬇️ -->
         ${sharedNoticeImage ? `<div class="global-product-detail-notice" style="margin-top:16px;"><img src="${sharedNoticeImage}" alt="상품 공지" loading="lazy" style="display:block;width:100%;height:auto;border-radius:8px;"></div>` : ''}
+        <!-- ⬆️⬆️ 공지 이미지 끝 ⬆️⬆️ -->
+
+        <!-- ⬇️⬇️ 배송기간 참고용 달력 (공지 이미지 바로 아래) ⬇️⬇️ -->
+        <div class="ship-cal-box" id="ship-cal-box">
+          <div class="scal-title">🚚 배송기간 참고 달력</div>
+          <div class="scal-desc">
+            주문 폭주 및 공휴일, 주말로 인해 실제 배송까지 <b style="color:#fbbf24;">약 7~15일</b> 정도 소요될 수 있습니다.<br>
+            아래 달력은 <b>참고용</b>이며, 주문 시 별도로 날짜를 선택하지 않으셔도 됩니다.
+          </div>
+          <div id="scal-root"></div>
+          <div class="scal-legend">
+            <span><span class="lg-box lg-sun"></span> 일요일 (배송 지연 가능)</span>
+            <span><span class="lg-box lg-sat"></span> 토요일 (배송 지연 가능)</span>
+          </div>
+        </div>
+        <!-- ⬆️⬆️ 배송기간 참고용 달력 끝 ⬆️⬆️ -->
+
         ${detailImgs ? `<div style="margin-top:8px;">${detailImgs}</div>` : ''}
         ${sharedFooterImage ? `<div class="global-product-detail-footer" style="margin-top:16px;"><img src="${sharedFooterImage}" alt="상품 사용설명 및 배송안내" loading="lazy" style="display:block;width:100%;height:auto;border-radius:8px;"></div>` : ''}
       `;
@@ -337,78 +362,67 @@
         document.getElementById('cart-btn').addEventListener('click', () => handleOrder('cart'));
         document.getElementById('buy-btn').addEventListener('click', () => handleOrder('single'));
         renderSelectedItems();
-
-        // ⬇️⬇️ 달력 최초 렌더 ⬇️⬇️
-        selectedDate = null;
-        const now = new Date();
-        calY = now.getFullYear();
-        calM = now.getMonth();
-        renderCalendar();
-        // ⬆️⬆️ 달력 최초 렌더 끝 ⬆️⬆️
       }
+
+      // ⬇️⬇️ 배송 참고 달력 렌더 (로그인 여부 상관없이 항상 표시) ⬇️⬇️
+      const now = new Date();
+      scalY = now.getFullYear();
+      scalM = now.getMonth();
+      renderShipCalendar();
+      // ⬆️⬆️ 배송 참고 달력 렌더 끝 ⬆️⬆️
     }
 
-    // ⬇️⬇️ 달력 렌더 함수 ⬇️⬇️
-    function renderCalendar() {
-      const root = document.getElementById('cal-root');
+    // ⬇️⬇️ 배송 참고용 달력 렌더 함수 ⬇️⬇️
+    function renderShipCalendar() {
+      const root = document.getElementById('scal-root');
       if (!root) return;
 
       const today = new Date(); today.setHours(0, 0, 0, 0);
-      const y = calY, m = calM;
+      const y = scalY, m = scalM;
       const firstDow = new Date(y, m, 1).getDay();
       const lastDate = new Date(y, m + 1, 0).getDate();
 
       let html = `
-        <div class="cal-head">
+        <div class="scal-head">
           <button type="button" data-dir="-1">‹</button>
           <span>${y}년 ${m + 1}월</span>
           <button type="button" data-dir="1">›</button>
         </div>
-        <div class="cal-grid">
-          ${['일', '월', '화', '수', '목', '금', '토'].map(d => `<div class="cal-dow">${d}</div>`).join('')}
+        <div class="scal-grid">
+          ${['일', '월', '화', '수', '목', '금', '토'].map((d, i) => {
+            const cls = i === 0 ? 'sunday' : i === 6 ? 'saturday' : '';
+            return `<div class="scal-dow" style="${i === 0 ? 'color:#f87171;' : i === 6 ? 'color:#60a5fa;' : ''}">${d}</div>`;
+          }).join('')}
       `;
-      for (let i = 0; i < firstDow; i++) html += `<div class="cal-day empty"></div>`;
+      for (let i = 0; i < firstDow; i++) html += `<div class="scal-day empty"></div>`;
       for (let d = 1; d <= lastDate; d++) {
         const dt = new Date(y, m, d);
+        const dow = dt.getDay();
         const isPast = dt < today;
         const isToday = dt.getTime() === today.getTime();
-        const ds = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-        const isSel = selectedDate === ds;
-        const cls = ['cal-day'];
+        const cls = ['scal-day'];
         if (isPast) cls.push('past');
         if (isToday) cls.push('today');
-        if (isSel) cls.push('sel');
-        html += `<div class="${cls.join(' ')}" data-date="${isPast ? '' : ds}">${d}</div>`;
+        if (dow === 0) cls.push('sunday');
+        if (dow === 6) cls.push('saturday');
+        html += `<div class="${cls.join(' ')}">${d}</div>`;
       }
       html += `</div>`;
 
-      html += selectedDate
-        ? `<div class="cal-result ok">✅ 선택한 날짜: ${selectedDate}</div>`
-        : `<div class="cal-result">날짜를 선택해주세요 (선택사항)</div>`;
-
       root.innerHTML = html;
 
-      root.querySelectorAll('.cal-head button').forEach(btn => {
+      root.querySelectorAll('.scal-head button').forEach(btn => {
         btn.addEventListener('click', () => {
           const dir = Number(btn.dataset.dir);
-          let nm = calM + dir, ny = calY;
+          let nm = scalM + dir, ny = scalY;
           if (nm < 0) { nm = 11; ny--; }
           if (nm > 11) { nm = 0; ny++; }
-          const now = new Date();
-          if (ny < now.getFullYear() || (ny === now.getFullYear() && nm < now.getMonth())) return;
-          calY = ny; calM = nm;
-          renderCalendar();
-        });
-      });
-
-      root.querySelectorAll('.cal-day:not(.empty):not(.past)').forEach(el => {
-        el.addEventListener('click', () => {
-          selectedDate = el.dataset.date || null;
-          renderCalendar();
+          scalY = ny; scalM = nm;
+          renderShipCalendar();
         });
       });
     }
-    // ⬆️⬆️ 달력 렌더 함수 끝 ⬆️⬆️
+    // ⬆️⬆️ 배송 참고용 달력 렌더 함수 끝 ⬆️⬆️
 
     function handleOptionChange() {
       const detailEl = document.getElementById('product-detail');
@@ -544,7 +558,6 @@
               main_image: p.main_image,
               quantity: sel.qty,
               selected_color: sel.color, selected_size: sel.size, selected_hem: sel.hem, selected_other: sel.other,
-              selected_date: selectedDate || null,     // ⬅️ 장바구니에도 날짜 저장
             });
             added++;
           }
@@ -576,9 +589,7 @@
         quantity: sel.qty,
         selected_color: sel.color, selected_size: sel.size, selected_hem: sel.hem, selected_other: sel.other,
       }));
-
-      // ⬇️ 바로구매 시 선택한 날짜를 메모에 자동 첨부
-      showCheckoutModal(items, selectedDate);
+      showCheckoutModal(items);
     }
 
     async function loadUsableCoupons() {
@@ -597,7 +608,7 @@
       } catch { return []; }
     }
 
-    async function showCheckoutModal(items, selectedDateArg) {
+    async function showCheckoutModal(items) {
       const subTotal = items.reduce((s, it) => s + it.product_price * it.quantity, 0);
       const pricing = getPricing(currentProduct);
       const shippingFee = pricing.shippingFee;
@@ -627,12 +638,6 @@
             <input name="depositor_name" required style="${inputStyle}">
             <label style="${labelStyle}">요청사항</label>
             <textarea name="memo" style="${inputStyle} min-height:60px;"></textarea>
-
-            ${selectedDateArg ? `
-              <div style="padding:10px 12px; background:#052e16; border:1px solid #10b981; border-radius:8px; font-size:13px; color:#86efac; font-weight:600;">
-                📅 배송 희망일: ${selectedDateArg}
-              </div>
-            ` : ''}
 
             ${coupons.length > 0 ? `
               <div class="coupon-picker">
@@ -710,11 +715,6 @@
         const finalTotal = Math.max(0, subTotal - discountAmount) + shippingFee;
 
         const orderNumber = generateOrderNumber();
-
-        // ⬇️ 날짜를 메모에 자동 첨부
-        const baseMemo = f.memo.value.trim();
-        const memoWithDate = (baseMemo + (selectedDateArg ? ` [희망일:${selectedDateArg}]` : '')).trim();
-
         const rows = items.map((it, idx) => ({
           order_number: orderNumber,
           product_id: it.product_id,
@@ -728,7 +728,7 @@
           customer_name: f.customer_name.value.trim(),
           customer_phone: f.customer_phone.value.trim(),
           depositor_name: f.depositor_name.value.trim(),
-          memo: memoWithDate,                                 // ⬅️ 날짜 포함된 메모 저장
+          memo: f.memo.value.trim(),
           address: f.address.value.trim(),
           address_detail: f.address_detail.value.trim(),
           postcode: f.postcode.value.trim(),
@@ -757,7 +757,6 @@
 
         showOrderComplete(modal, orderNumber, finalTotal, closeModal);
         selectedItems = [];
-        selectedDate = null;         // ⬅️ 주문 후 날짜 초기화
         renderSelectedItems();
       });
     }
