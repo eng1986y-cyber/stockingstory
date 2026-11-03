@@ -112,17 +112,32 @@ function applyGradeDiscount(price) {
       height: 36px;
       box-sizing: border-box;
       padding: 0 12px;
-      border: none;
+      border: 1px solid #222;
       border-radius: 6px;
       background: #fff;
       color: #222;
       font: inherit;
       font-size: 13px;
       outline: none;
-      transition: box-shadow .16s ease;
+      -webkit-appearance: none;
+      appearance: none;
+      box-shadow: none;
+      transition: border-color .16s ease;
     }
-    .header-product-search input:focus {
-      box-shadow: 0 0 0 2px rgba(80, 80, 80, .12);
+    .header-product-search input:focus,
+    .header-product-search input:focus-visible,
+    .header-product-search input:active {
+      border-color: #222;
+      outline: none;
+      box-shadow: none;
+    }
+    .header-product-search input::-webkit-search-decoration,
+    .header-product-search input::-webkit-search-cancel-button,
+    .header-product-search input::-webkit-search-results-button,
+    .header-product-search input::-webkit-search-results-decoration {
+      -webkit-appearance: none;
+      appearance: none;
+      display: none;
     }
     .header-product-search input::placeholder { color: #9ca3af; }
     .header-product-search button {
@@ -140,11 +155,17 @@ function applyGradeDiscount(price) {
       color: #111;
       cursor: pointer;
       flex-shrink: 0;
+      outline: none;
       transition: background .16s ease, border-color .16s ease, transform .16s ease;
     }
     .header-product-search button:hover {
       background: transparent;
       border-color: #9ca3af;
+    }
+    .header-product-search button:focus,
+    .header-product-search button:focus-visible {
+      outline: none;
+      box-shadow: none;
     }
     .header-product-search button:active { transform: scale(.94); }
     .header-product-search button svg {
@@ -159,10 +180,15 @@ function applyGradeDiscount(price) {
     }
     body.dark .header-product-search input {
       background: #171717;
+      border-color: #eee;
       color: #eee;
     }
-    body.dark .header-product-search input:focus {
-      box-shadow: 0 0 0 2px rgba(255,255,255,.10);
+    body.dark .header-product-search input:focus,
+    body.dark .header-product-search input:focus-visible,
+    body.dark .header-product-search input:active {
+      border-color: #eee;
+      outline: none;
+      box-shadow: none;
     }
     body.dark .header-product-search button {
       color: #fff;
