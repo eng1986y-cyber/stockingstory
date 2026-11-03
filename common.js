@@ -112,50 +112,60 @@ function applyGradeDiscount(price) {
       height: 36px;
       box-sizing: border-box;
       padding: 0 12px;
-      border: 1px solid #cfe8f5;
+      border: 1px solid var(--header-search-border, #ddd);
       border-radius: 6px;
       background: #fff;
       color: #222;
       font: inherit;
       font-size: 13px;
       outline: none;
+      transition: border-color .16s ease, box-shadow .16s ease;
     }
     .header-product-search input:focus {
-      border-color: #87CEEB;
-      box-shadow: 0 0 0 2px rgba(135,206,235,.18);
+      border-color: var(--header-search-focus-border, #999);
+      box-shadow: 0 0 0 2px rgba(80, 80, 80, .12);
     }
     .header-product-search input::placeholder { color: #9ca3af; }
     .header-product-search button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      min-width: 36px;
       height: 36px;
-      min-width: 62px;
-      padding: 0 13px;
+      padding: 0;
       box-sizing: border-box;
-      border: 1px solid #6bb8d8;
+      border: 0;
       border-radius: 6px;
-      background: #87CEEB;
-      color: #173b4b;
-      font: inherit;
-      font-size: 13px;
-      font-weight: 700;
+      background: transparent;
+      color: #111;
       cursor: pointer;
-      white-space: nowrap;
       flex-shrink: 0;
+      transition: background .16s ease, transform .16s ease;
     }
-    .header-product-search button:hover { background: #72c1e4; }
+    .header-product-search button:hover { background: rgba(0, 0, 0, .06); }
+    .header-product-search button:active { transform: scale(.94); }
+    .header-product-search button svg {
+      display: block;
+      width: 21px;
+      height: 21px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
     body.dark .header-product-search input {
       background: #171717;
-      border-color: #333;
+      border-color: var(--header-search-border, #333);
       color: #eee;
     }
     body.dark .header-product-search input:focus {
-      border-color: #87CEEB;
-      box-shadow: 0 0 0 2px rgba(135,206,235,.12);
+      border-color: var(--header-search-focus-border, #666);
+      box-shadow: 0 0 0 2px rgba(255,255,255,.10);
     }
-    body.dark .header-product-search button {
-      background: #87CEEB;
-      border-color: #6bb8d8;
-      color: #173b4b;
-    }
+    body.dark .header-product-search button { color: #fff; }
+    body.dark .header-product-search button:hover { background: rgba(255,255,255,.10); }
     .header-search-popup {
       display: none;
       position: absolute;
@@ -237,7 +247,7 @@ function applyGradeDiscount(price) {
         height: 36px;
       }
       .header-product-search input { height: 36px; }
-      .header-product-search button { height: 36px; min-width: 58px; }
+      .header-product-search button { width: 36px; min-width: 36px; height: 36px; }
       .header-search-popup {
         width: 100%;
         max-height: 55vh;
@@ -1497,11 +1507,14 @@ function renderHeader(current) {
         ${nameRow}
 
         <div class="header-toolbar">
-          <form class="header-product-search" id="header-product-search" role="search">
+          <form class="header-product-search" id="header-product-search" role="search"
+                style="--header-search-border:${theme.btnBorder}; --header-search-focus-border:${isDark ? '#666' : '#999'};">
             <input id="header-product-search-input" type="search"
                    placeholder="상품명 또는 제품번호 검색"
                    autocomplete="off" aria-label="상품 검색">
-            <button type="submit">검색</button>
+            <button type="submit" aria-label="상품 검색 실행" title="검색">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg>
+            </button>
             <div class="header-search-popup" id="header-search-popup"
                  role="listbox" aria-label="상품 검색 결과"></div>
           </form>
