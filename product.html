@@ -24,57 +24,137 @@
     .coupon-picker .cp-title { font-size: 13px; font-weight: 700; color: #fbbf24; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
     .coupon-picker select { width: 100%; padding: 10px 12px; background: #151515; border: 1px solid #333; border-radius: 6px; color: #e5e7eb; font-family: inherit; font-size: 13px; }
 
-    /* ⬇️⬇️ 배송기간 참고용 달력 스타일 ⬇️⬇️ */
+    /* ⬇️⬇️ 배송기간 참고용 달력 스타일 (높이 최대화) ⬇️⬇️ */
     .ship-cal-box {
       background: #151515;
       border: 1px solid #333;
       border-radius: 10px;
-      padding: 16px;
+      padding: 20px;
       margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      box-sizing: border-box;
     }
     .ship-cal-box .scal-title {
-      font-size: 14px; font-weight: 700; color: #e5e7eb;
-      margin-bottom: 4px; display: flex; align-items: center; gap: 6px;
+      font-size: 16px; font-weight: 700; color: #e5e7eb;
+      margin-bottom: 6px; display: flex; align-items: center; gap: 8px;
     }
     .ship-cal-box .scal-desc {
-      font-size: 12px; color: #9ca3af; line-height: 1.6;
-      margin-bottom: 12px;
+      font-size: 13px; color: #9ca3af; line-height: 1.7;
+      margin-bottom: 16px;
     }
     .ship-cal-box .scal-head {
       display: flex; justify-content: space-between; align-items: center;
-      color: #e5e7eb; font-size: 14px; font-weight: 600; margin-bottom: 10px;
+      color: #e5e7eb; font-size: 18px; font-weight: 700;
+      margin-bottom: 16px;
     }
     .ship-cal-box .scal-head button {
       background: #222; color: #e5e7eb; border: 1px solid #333;
-      border-radius: 6px; padding: 5px 12px; cursor: pointer;
-      font-family: inherit; font-size: 14px; line-height: 1;
+      border-radius: 8px; padding: 10px 20px; cursor: pointer;
+      font-family: inherit; font-size: 18px; line-height: 1; font-weight: 700;
     }
     .ship-cal-box .scal-head button:hover { background: #2a2a2a; }
-    .ship-cal-box .scal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-    .ship-cal-box .scal-dow { text-align: center; font-size: 11px; color: #888; padding: 4px 0; font-weight: 600; }
+
+    /* 달력 그리드 - 남는 공간을 모두 채우도록 */
+    .ship-cal-box .scal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      grid-auto-rows: minmax(70px, 1fr);   /* ★ 셀 최소 70px, 남는 공간은 균등 분배 */
+      gap: 6px;
+      width: 100%;
+      flex: 1;
+    }
+    .ship-cal-box .scal-dow {
+      text-align: center;
+      font-size: 14px;
+      color: #888;
+      padding: 10px 0;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
     .ship-cal-box .scal-day {
-      text-align: center; padding: 9px 0; border-radius: 6px;
-      font-size: 13px; color: #e5e7eb; background: #1a1a1a;
+      text-align: center;
+      padding: 0;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #e5e7eb;
+      background: #1a1a1a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: background 0.12s;
+      min-height: 70px;
     }
     .ship-cal-box .scal-day.empty { background: transparent; }
     .ship-cal-box .scal-day.past { color: #444; background: #111; }
-    .ship-cal-box .scal-day.today { border: 1px solid #fbbf24; color: #fbbf24; }
+    .ship-cal-box .scal-day.today {
+      border: 2px solid #fbbf24; color: #fbbf24;
+      background: #1f1a0a;
+    }
     .ship-cal-box .scal-day.sunday { color: #f87171; }
     .ship-cal-box .scal-day.saturday { color: #60a5fa; }
+    .ship-cal-box .scal-day.past.sunday,
+    .ship-cal-box .scal-day.past.saturday { color: #444; }
+
     .ship-cal-box .scal-legend {
-      display: flex; flex-wrap: wrap; gap: 12px;
-      margin-top: 12px; padding-top: 12px;
+      display: flex; flex-wrap: wrap; gap: 16px;
+      margin-top: 16px; padding-top: 14px;
       border-top: 1px dashed #333;
-      font-size: 11px; color: #9ca3af;
+      font-size: 12px; color: #9ca3af;
     }
-    .ship-cal-box .scal-legend span { display: flex; align-items: center; gap: 5px; }
+    .ship-cal-box .scal-legend span { display: flex; align-items: center; gap: 6px; }
     .ship-cal-box .scal-legend .lg-box {
-      display: inline-block; width: 12px; height: 12px; border-radius: 3px;
+      display: inline-block; width: 14px; height: 14px; border-radius: 3px;
     }
     .ship-cal-box .scal-legend .lg-sun { background: #f87171; }
     .ship-cal-box .scal-legend .lg-sat { background: #60a5fa; }
+
+    /* 📱 모바일에서는 살짝 작게 */
+    @media (max-width: 768px) {
+      .ship-cal-box { padding: 14px; }
+      .ship-cal-box .scal-title { font-size: 15px; }
+      .ship-cal-box .scal-desc { font-size: 12px; margin-bottom: 12px; }
+      .ship-cal-box .scal-head { font-size: 15px; margin-bottom: 12px; }
+      .ship-cal-box .scal-head button { padding: 8px 14px; font-size: 16px; }
+      .ship-cal-box .scal-grid {
+        grid-auto-rows: minmax(48px, 1fr);
+        gap: 4px;
+      }
+      .ship-cal-box .scal-dow { font-size: 12px; padding: 6px 0; }
+      .ship-cal-box .scal-day { font-size: 15px; min-height: 48px; }
+    }
     /* ⬆️⬆️ 배송기간 참고용 달력 스타일 끝 ⬆️⬆️ */
+
+    /* ⬇️⬇️ 상품정보 + 달력 2단 레이아웃 ⬇️⬇️ */
+    .product-main-row {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      align-items: stretch;
+    }
+    .product-info-col {
+      flex: 1 1 480px;
+      min-width: 0;
+    }
+    .product-cal-col {
+      flex: 1 1 420px;
+      min-width: 0;
+      display: flex;
+    }
+    .product-cal-col > .ship-cal-box {
+      margin-top: 0;
+      width: 100%;
+    }
+    @media (max-width: 900px) {
+      .product-main-row { flex-direction: column; gap: 16px; }
+      .product-info-col, .product-cal-col { flex: 1 1 auto; }
+      .product-cal-col > .ship-cal-box { margin-top: 0; }
+    }
+    /* ⬆️⬆️ 상품정보 + 달력 2단 레이아웃 끝 ⬆️⬆️ */
   </style>
 </head>
 <body>
@@ -289,64 +369,74 @@
            </div>`;
 
       detailEl.innerHTML = `
-        <div style="background:#151515; border:1px solid #222; border-radius:12px; padding:16px;">
-          <div style="display:flex; gap:24px; flex-wrap:wrap; align-items:stretch;">
-            <div style="flex:1 1 320px; min-width:0;">
-              <img src="${data.main_image}" alt="${data.name}" style="width:100%; border-radius:8px; display:block;">
-            </div>
-            <div style="flex:1 1 320px; min-width:0; display:flex; flex-direction:column; justify-content:space-between;">
-              <div>
-                ${data.product_code ? `<div style="color:#666; font-size:12px; margin-bottom:4px;">제품번호: ${data.product_code}</div>` : ''}
-                <div style="display:flex; justify-content:space-between; align-items:start; gap:8px;">
-                  <h2 style="margin:0 0 12px; font-size:22px; color:#fff; flex:1;">${data.name}${gradeBadge}${newBadge}</h2>
-                  ${shareBtn}
+        <!-- ⬇️⬇️ 상품정보 + 달력 2단 레이아웃 ⬇️⬇️ -->
+        <div class="product-main-row">
+
+          <!-- 왼쪽: 상품 카드 -->
+          <div class="product-info-col">
+            <div style="background:#151515; border:1px solid #222; border-radius:12px; padding:16px; height:100%; box-sizing:border-box;">
+              <div style="display:flex; gap:24px; flex-wrap:wrap; align-items:stretch;">
+                <div style="flex:1 1 320px; min-width:0;">
+                  <img src="${data.main_image}" alt="${data.name}" style="width:100%; border-radius:8px; display:block;">
                 </div>
-                ${priceHtml}
-                <p style="margin:0 0 16px;">${shippingLabel}</p>
-                ${minQtyNotice}
-                ${hidePrice ? '' : `
-                  <div style="margin-top:12px; font-size:13px; font-weight:600; color:#fff; margin-bottom:8px;">옵션 선택 (필수) <span style="color:#ef4444;">*</span></div>
-                  ${row1}
-                  ${row2}
-                  <div id="selected-items" style="margin-top:12px;"></div>
-                `}
-              </div>
-              ${hidePrice ? '' : `
-                <div style="margin-top:20px;">
-                  <div id="total-preview" style="text-align:right; font-size:14px; font-weight:600; color:#ef4444; line-height:1.6; margin-bottom:16px;"></div>
-                  <div style="display:flex; gap:8px;">
-                    <button id="cart-btn" style="flex:1; padding:14px; background:#1a1a1a; color:#e5e7eb; border:1px solid #333; border-radius:8px; cursor:pointer; font-weight:600; font-size:15px; font-family:inherit;">장바구니</button>
-                    <button id="buy-btn" style="flex:1; padding:14px; background:#e5e7eb; color:#111; border:0; border-radius:8px; cursor:pointer; font-weight:600; font-size:15px; font-family:inherit;">바로 구매</button>
+                <div style="flex:1 1 320px; min-width:0; display:flex; flex-direction:column; justify-content:space-between;">
+                  <div>
+                    ${data.product_code ? `<div style="color:#666; font-size:12px; margin-bottom:4px;">제품번호: ${data.product_code}</div>` : ''}
+                    <div style="display:flex; justify-content:space-between; align-items:start; gap:8px;">
+                      <h2 style="margin:0 0 12px; font-size:22px; color:#fff; flex:1;">${data.name}${gradeBadge}${newBadge}</h2>
+                      ${shareBtn}
+                    </div>
+                    ${priceHtml}
+                    <p style="margin:0 0 16px;">${shippingLabel}</p>
+                    ${minQtyNotice}
+                    ${hidePrice ? '' : `
+                      <div style="margin-top:12px; font-size:13px; font-weight:600; color:#fff; margin-bottom:8px;">옵션 선택 (필수) <span style="color:#ef4444;">*</span></div>
+                      ${row1}
+                      ${row2}
+                      <div id="selected-items" style="margin-top:12px;"></div>
+                    `}
                   </div>
+                  ${hidePrice ? '' : `
+                    <div style="margin-top:20px;">
+                      <div id="total-preview" style="text-align:right; font-size:14px; font-weight:600; color:#ef4444; line-height:1.6; margin-bottom:16px;"></div>
+                      <div style="display:flex; gap:8px;">
+                        <button id="cart-btn" style="flex:1; padding:14px; background:#1a1a1a; color:#e5e7eb; border:1px solid #333; border-radius:8px; cursor:pointer; font-weight:600; font-size:15px; font-family:inherit;">장바구니</button>
+                        <button id="buy-btn" style="flex:1; padding:14px; background:#e5e7eb; color:#111; border:0; border-radius:8px; cursor:pointer; font-weight:600; font-size:15px; font-family:inherit;">바로 구매</button>
+                      </div>
+                    </div>
+                  `}
+                  ${hidePrice ? `
+                    <div style="margin-top:20px; padding:14px; background:#1a1a1a; color:#666; border:1px dashed #333; border-radius:8px; font-weight:600; font-size:14px; text-align:center;">
+                      🔒 로그인 후 구매 가능
+                    </div>
+                  ` : ''}
                 </div>
-              `}
-              ${hidePrice ? `
-                <div style="margin-top:20px; padding:14px; background:#1a1a1a; color:#666; border:1px dashed #333; border-radius:8px; font-weight:600; font-size:14px; text-align:center;">
-                  🔒 로그인 후 구매 가능
-                </div>
-              ` : ''}
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- ⬇️⬇️ 공지 이미지 (원래 위치) ⬇️⬇️ -->
+          <!-- 오른쪽: 배송 참고용 달력 (PC에서는 옆, 모바일에서는 아래) -->
+          <div class="product-cal-col">
+            <div class="ship-cal-box" id="ship-cal-box">
+              <div class="scal-title">🚚 배송기간 참고 달력</div>
+              <div class="scal-desc">
+                주문 폭주 및 공휴일, 주말로 인해 실제 배송까지 <b style="color:#fbbf24;">약 7~15일</b> 정도 소요될 수 있습니다.<br>
+                아래 달력은 <b>참고용</b>이며, 주문 시 별도로 날짜를 선택하지 않으셔도 됩니다.
+              </div>
+              <div id="scal-root" style="flex:1; display:flex; flex-direction:column;"></div>
+              <div class="scal-legend">
+                <span><span class="lg-box lg-sun"></span> 일요일 (배송 지연 가능)</span>
+                <span><span class="lg-box lg-sat"></span> 토요일 (배송 지연 가능)</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <!-- ⬆️⬆️ 상품정보 + 달력 2단 레이아웃 끝 ⬆️⬆️ -->
+
+        <!-- ⬇️⬇️ 공지 이미지 ⬇️⬇️ -->
         ${sharedNoticeImage ? `<div class="global-product-detail-notice" style="margin-top:16px;"><img src="${sharedNoticeImage}" alt="상품 공지" loading="lazy" style="display:block;width:100%;height:auto;border-radius:8px;"></div>` : ''}
         <!-- ⬆️⬆️ 공지 이미지 끝 ⬆️⬆️ -->
-
-        <!-- ⬇️⬇️ 배송기간 참고용 달력 (공지 이미지 바로 아래) ⬇️⬇️ -->
-        <div class="ship-cal-box" id="ship-cal-box">
-          <div class="scal-title">🚚 배송기간 참고 달력</div>
-          <div class="scal-desc">
-            주문 폭주 및 공휴일, 주말로 인해 실제 배송까지 <b style="color:#fbbf24;">약 7~15일</b> 정도 소요될 수 있습니다.<br>
-            아래 달력은 <b>참고용</b>이며, 주문 시 별도로 날짜를 선택하지 않으셔도 됩니다.
-          </div>
-          <div id="scal-root"></div>
-          <div class="scal-legend">
-            <span><span class="lg-box lg-sun"></span> 일요일 (배송 지연 가능)</span>
-            <span><span class="lg-box lg-sat"></span> 토요일 (배송 지연 가능)</span>
-          </div>
-        </div>
-        <!-- ⬆️⬆️ 배송기간 참고용 달력 끝 ⬆️⬆️ -->
 
         ${detailImgs ? `<div style="margin-top:8px;">${detailImgs}</div>` : ''}
         ${sharedFooterImage ? `<div class="global-product-detail-footer" style="margin-top:16px;"><img src="${sharedFooterImage}" alt="상품 사용설명 및 배송안내" loading="lazy" style="display:block;width:100%;height:auto;border-radius:8px;"></div>` : ''}
@@ -364,7 +454,7 @@
         renderSelectedItems();
       }
 
-      // ⬇️⬇️ 배송 참고 달력 렌더 (로그인 여부 상관없이 항상 표시) ⬇️⬇️
+      // ⬇️⬇️ 배송 참고 달력 렌더 ⬇️⬇️
       const now = new Date();
       scalY = now.getFullYear();
       scalM = now.getMonth();
@@ -390,7 +480,6 @@
         </div>
         <div class="scal-grid">
           ${['일', '월', '화', '수', '목', '금', '토'].map((d, i) => {
-            const cls = i === 0 ? 'sunday' : i === 6 ? 'saturday' : '';
             return `<div class="scal-dow" style="${i === 0 ? 'color:#f87171;' : i === 6 ? 'color:#60a5fa;' : ''}">${d}</div>`;
           }).join('')}
       `;
