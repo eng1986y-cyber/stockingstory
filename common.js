@@ -94,8 +94,6 @@ function applyGradeDiscount(price) {
       min-width: 0;
       position: relative;
     }
-    
-    /* ⭐ 검색 폼: 테두리 없이 밑줄만 */
     .header-product-search {
       display: flex;
       align-items: center;
@@ -107,107 +105,74 @@ function applyGradeDiscount(price) {
       flex: 0 1 360px;
       margin-right: auto;
       z-index: 100001;
-      border: none;
-      border-bottom: 2px solid #444; /* 진한 밑줄 */
-      border-radius: 0;
-      background: transparent;
-      box-sizing: border-box;
     }
-
     .header-product-search input {
       width: 100%;
       min-width: 0;
-      height: 100%;
+      height: 36px;
       box-sizing: border-box;
-      padding: 0 4px;
+      padding: 0 12px;
       border: none;
-      background: transparent;
+      border-radius: 6px;
+      background: #fff;
       color: #222;
       font: inherit;
       font-size: 13px;
       outline: none;
-      -webkit-appearance: none;
-      appearance: none;
-      box-shadow: none;
-      transition: none;
+      transition: box-shadow .16s ease;
     }
-    
-    .header-product-search input:focus,
-    .header-product-search input:focus-visible,
-    .header-product-search input:active {
-      outline: none;
-      box-shadow: none;
+    .header-product-search input:focus {
+      box-shadow: 0 0 0 2px rgba(80, 80, 80, .12);
     }
-    
-    .header-product-search input::-webkit-search-decoration,
-    .header-product-search input::-webkit-search-cancel-button,
-    .header-product-search input::-webkit-search-results-button,
-    .header-product-search input::-webkit-search-results-decoration {
-      -webkit-appearance: none;
-      appearance: none;
-      display: none;
-    }
-    
     .header-product-search input::placeholder { color: #9ca3af; }
-    
     .header-product-search button {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 32px;
-      min-width: 32px;
-      height: 32px;
+      width: 36px;
+      min-width: 36px;
+      height: 36px;
       padding: 0;
       box-sizing: border-box;
-      border: none;
-      border-radius: 4px;
+      border: 1px solid transparent;
+      border-radius: 6px;
       background: transparent;
       color: #111;
       cursor: pointer;
       flex-shrink: 0;
-      outline: none;
-      transition: background .16s ease, transform .16s ease;
+      transition: background .16s ease, border-color .16s ease, transform .16s ease;
     }
-    
     .header-product-search button:hover {
-      background: rgba(0,0,0,0.05);
+      background: transparent;
+      border-color: #9ca3af;
     }
-    
-    .header-product-search button:focus,
-    .header-product-search button:focus-visible {
-      outline: none;
-      box-shadow: none;
-    }
-    
     .header-product-search button:active { transform: scale(.94); }
-    
     .header-product-search button svg {
       display: block;
-      width: 20px;
-      height: 20px;
+      width: 21px;
+      height: 21px;
       fill: none;
       stroke: currentColor;
       stroke-width: 2;
       stroke-linecap: round;
       stroke-linejoin: round;
     }
-    
-    body.dark .header-product-search {
-      border-bottom-color: #777; /* 다크모드 진한 밑줄 */
-    }
-    
     body.dark .header-product-search input {
+      background: #171717;
       color: #eee;
     }
-    
+    body.dark .header-product-search input:focus {
+      box-shadow: 0 0 0 2px rgba(255,255,255,.10);
+    }
     body.dark .header-product-search button {
       color: #fff;
+      background: transparent;
+      border-color: transparent;
     }
-    
     body.dark .header-product-search button:hover {
-      background: rgba(255,255,255,0.1);
+      background: transparent;
+      border-color: #6b7280;
     }
-    
     .header-search-popup {
       display: none;
       position: absolute;
@@ -288,6 +253,8 @@ function applyGradeDiscount(price) {
         max-width: none;
         height: 36px;
       }
+      .header-product-search input { height: 36px; }
+      .header-product-search button { width: 36px; min-width: 36px; height: 36px; }
       .header-search-popup {
         width: 100%;
         max-height: 55vh;
