@@ -23,6 +23,43 @@
     .coupon-picker { background: #0f0f0f; border: 1px solid #2a2a2a; border-radius: 8px; padding: 12px; margin-top: 8px; }
     .coupon-picker .cp-title { font-size: 13px; font-weight: 700; color: #fbbf24; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
     .coupon-picker select { width: 100%; padding: 10px 12px; background: #151515; border: 1px solid #333; border-radius: 6px; color: #e5e7eb; font-family: inherit; font-size: 13px; }
+
+    /* ⬇️⬇️ 달력 스타일 ⬇️⬇️ */
+    .cal-box {
+      background: #0f0f0f; border: 1px solid #2a2a2a;
+      border-radius: 8px; padding: 12px; margin: 12px 0;
+    }
+    .cal-box .cal-title {
+      font-size: 13px; font-weight: 700; color: #fbbf24; margin-bottom: 8px;
+    }
+    .cal-box .cal-head {
+      display: flex; justify-content: space-between; align-items: center;
+      color: #e5e7eb; font-size: 13px; font-weight: 600; margin-bottom: 8px;
+    }
+    .cal-box .cal-head button {
+      background: #222; color: #e5e7eb; border: 1px solid #333;
+      border-radius: 4px; padding: 4px 10px; cursor: pointer; font-family: inherit;
+    }
+    .cal-box .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+    .cal-box .cal-dow { text-align: center; font-size: 11px; color: #888; padding: 4px 0; }
+    .cal-box .cal-day {
+      text-align: center; padding: 8px 0; border-radius: 6px;
+      font-size: 13px; cursor: pointer; color: #e5e7eb; background: #1a1a1a;
+    }
+    .cal-box .cal-day.empty { background: transparent; cursor: default; }
+    .cal-box .cal-day.past { color: #444; background: #151515; cursor: not-allowed; }
+    .cal-box .cal-day.today { border: 1px solid #fbbf24; color: #fbbf24; }
+    .cal-box .cal-day.sel { background: #10b981; color: #fff; font-weight: 700; }
+    .cal-box .cal-day:not(.past):not(.empty):hover { background: #2a2a2a; }
+    .cal-box .cal-result {
+      margin-top: 10px; padding: 8px 10px; border-radius: 6px;
+      font-size: 13px; font-weight: 600; text-align: center;
+      background: #1a1a1a; color: #f59e0b; border: 1px solid #333;
+    }
+    .cal-box .cal-result.ok {
+      background: #052e16; color: #86efac; border-color: #10b981;
+    }
+    /* ⬆️⬆️ 달력 스타일 끝 ⬆️⬆️ */
   </style>
 </head>
 <body>
@@ -53,6 +90,12 @@
     let globalShipping = 0;
     let selectedItems = [];
     let cachedAccount = { bank: '', number: '', holder: '' };
+
+    // ⬇️⬇️ 달력 상태 변수 ⬇️⬇️
+    let selectedDate = null;
+    let calY = new Date().getFullYear();
+    let calM = new Date().getMonth();
+    // ⬆️⬆️ 달력 상태 변수 끝 ⬆️⬆️
 
     function getMember() { try { return JSON.parse(localStorage.getItem('member') || 'null'); } catch { return null; } }
     function isLoggedIn() {
@@ -251,6 +294,14 @@
                   <div style="margin-top:12px; font-size:13px; font-weight:600; color:#fff; margin-bottom:8px;">옵션 선택 (필수) <span style="color:#ef4444;">*</span></div>
                   ${row1}
                   ${row2}
+
+                  <!-- ⬇️⬇️ 달력 UI ⬇️⬇️ -->
+                  <div class="cal-box" id="cal-box">
+                    <div class="cal-title">📅 배송 희망일 선택 (선택사항)</div>
+                    <div id="cal-root"></div>
+                  </div>
+                  <!-- ⬆️⬆️ 달력 UI 끝 ⬆️⬆️ -->
+
                   <div id="selected-items" style="margin-top:12px;"></div>
                 `}
               </div>
@@ -286,8 +337,78 @@
         document.getElementById('cart-btn').addEventListener('click', () => handleOrder('cart'));
         document.getElementById('buy-btn').addEventListener('click', () => handleOrder('single'));
         renderSelectedItems();
+
+        // ⬇️⬇️ 달력 최초 렌더 ⬇️⬇️
+        selectedDate = null;
+        const now = new Date();
+        calY = now.getFullYear();
+        calM = now.getMonth();
+        renderCalendar();
+        // ⬆️⬆️ 달력 최초 렌더 끝 ⬆️⬆️
       }
     }
+
+    // ⬇️⬇️ 달력 렌더 함수 ⬇️⬇️
+    function renderCalendar() {
+      const root = document.getElementById('cal-root');
+      if (!root) return;
+
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const y = calY, m = calM;
+      const firstDow = new Date(y, m, 1).getDay();
+      const lastDate = new Date(y, m + 1, 0).getDate();
+
+      let html = `
+        <div class="cal-head">
+          <button type="button" data-dir="-1">‹</button>
+          <span>${y}년 ${m + 1}월</span>
+          <button type="button" data-dir="1">›</button>
+        </div>
+        <div class="cal-grid">
+          ${['일', '월', '화', '수', '목', '금', '토'].map(d => `<div class="cal-dow">${d}</div>`).join('')}
+      `;
+      for (let i = 0; i < firstDow; i++) html += `<div class="cal-day empty"></div>`;
+      for (let d = 1; d <= lastDate; d++) {
+        const dt = new Date(y, m, d);
+        const isPast = dt < today;
+        const isToday = dt.getTime() === today.getTime();
+        const ds = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const isSel = selectedDate === ds;
+        const cls = ['cal-day'];
+        if (isPast) cls.push('past');
+        if (isToday) cls.push('today');
+        if (isSel) cls.push('sel');
+        html += `<div class="${cls.join(' ')}" data-date="${isPast ? '' : ds}">${d}</div>`;
+      }
+      html += `</div>`;
+
+      html += selectedDate
+        ? `<div class="cal-result ok">✅ 선택한 날짜: ${selectedDate}</div>`
+        : `<div class="cal-result">날짜를 선택해주세요 (선택사항)</div>`;
+
+      root.innerHTML = html;
+
+      root.querySelectorAll('.cal-head button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const dir = Number(btn.dataset.dir);
+          let nm = calM + dir, ny = calY;
+          if (nm < 0) { nm = 11; ny--; }
+          if (nm > 11) { nm = 0; ny++; }
+          const now = new Date();
+          if (ny < now.getFullYear() || (ny === now.getFullYear() && nm < now.getMonth())) return;
+          calY = ny; calM = nm;
+          renderCalendar();
+        });
+      });
+
+      root.querySelectorAll('.cal-day:not(.empty):not(.past)').forEach(el => {
+        el.addEventListener('click', () => {
+          selectedDate = el.dataset.date || null;
+          renderCalendar();
+        });
+      });
+    }
+    // ⬆️⬆️ 달력 렌더 함수 끝 ⬆️⬆️
 
     function handleOptionChange() {
       const detailEl = document.getElementById('product-detail');
@@ -423,6 +544,7 @@
               main_image: p.main_image,
               quantity: sel.qty,
               selected_color: sel.color, selected_size: sel.size, selected_hem: sel.hem, selected_other: sel.other,
+              selected_date: selectedDate || null,     // ⬅️ 장바구니에도 날짜 저장
             });
             added++;
           }
@@ -454,7 +576,9 @@
         quantity: sel.qty,
         selected_color: sel.color, selected_size: sel.size, selected_hem: sel.hem, selected_other: sel.other,
       }));
-      showCheckoutModal(items);
+
+      // ⬇️ 바로구매 시 선택한 날짜를 메모에 자동 첨부
+      showCheckoutModal(items, selectedDate);
     }
 
     async function loadUsableCoupons() {
@@ -473,7 +597,7 @@
       } catch { return []; }
     }
 
-    async function showCheckoutModal(items) {
+    async function showCheckoutModal(items, selectedDateArg) {
       const subTotal = items.reduce((s, it) => s + it.product_price * it.quantity, 0);
       const pricing = getPricing(currentProduct);
       const shippingFee = pricing.shippingFee;
@@ -503,6 +627,12 @@
             <input name="depositor_name" required style="${inputStyle}">
             <label style="${labelStyle}">요청사항</label>
             <textarea name="memo" style="${inputStyle} min-height:60px;"></textarea>
+
+            ${selectedDateArg ? `
+              <div style="padding:10px 12px; background:#052e16; border:1px solid #10b981; border-radius:8px; font-size:13px; color:#86efac; font-weight:600;">
+                📅 배송 희망일: ${selectedDateArg}
+              </div>
+            ` : ''}
 
             ${coupons.length > 0 ? `
               <div class="coupon-picker">
@@ -580,6 +710,11 @@
         const finalTotal = Math.max(0, subTotal - discountAmount) + shippingFee;
 
         const orderNumber = generateOrderNumber();
+
+        // ⬇️ 날짜를 메모에 자동 첨부
+        const baseMemo = f.memo.value.trim();
+        const memoWithDate = (baseMemo + (selectedDateArg ? ` [희망일:${selectedDateArg}]` : '')).trim();
+
         const rows = items.map((it, idx) => ({
           order_number: orderNumber,
           product_id: it.product_id,
@@ -593,7 +728,7 @@
           customer_name: f.customer_name.value.trim(),
           customer_phone: f.customer_phone.value.trim(),
           depositor_name: f.depositor_name.value.trim(),
-          memo: f.memo.value.trim(),
+          memo: memoWithDate,                                 // ⬅️ 날짜 포함된 메모 저장
           address: f.address.value.trim(),
           address_detail: f.address_detail.value.trim(),
           postcode: f.postcode.value.trim(),
@@ -622,6 +757,7 @@
 
         showOrderComplete(modal, orderNumber, finalTotal, closeModal);
         selectedItems = [];
+        selectedDate = null;         // ⬅️ 주문 후 날짜 초기화
         renderSelectedItems();
       });
     }
