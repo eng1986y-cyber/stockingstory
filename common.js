@@ -135,15 +135,18 @@ function applyGradeDiscount(price) {
       height: 36px;
       padding: 0;
       box-sizing: border-box;
-      border: 0;
+      border: 1px solid transparent;
       border-radius: 6px;
       background: transparent;
       color: #111;
       cursor: pointer;
       flex-shrink: 0;
-      transition: background .16s ease, transform .16s ease;
+      transition: background .16s ease, border-color .16s ease, transform .16s ease;
     }
-    .header-product-search button:hover { background: rgba(0, 0, 0, .06); }
+    .header-product-search button:hover {
+      background: transparent;
+      border-color: #9ca3af;
+    }
     .header-product-search button:active { transform: scale(.94); }
     .header-product-search button svg {
       display: block;
@@ -164,8 +167,15 @@ function applyGradeDiscount(price) {
       border-color: var(--header-search-focus-border, #666);
       box-shadow: 0 0 0 2px rgba(255,255,255,.10);
     }
-    body.dark .header-product-search button { color: #fff; }
-    body.dark .header-product-search button:hover { background: rgba(255,255,255,.10); }
+    body.dark .header-product-search button {
+      color: #fff;
+      background: transparent;
+      border-color: transparent;
+    }
+    body.dark .header-product-search button:hover {
+      background: transparent;
+      border-color: #6b7280;
+    }
     .header-search-popup {
       display: none;
       position: absolute;
