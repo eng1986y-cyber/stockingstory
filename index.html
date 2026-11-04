@@ -28,6 +28,16 @@
     .banner-dot.active { background: #fff; }
     .banner-dots[hidden] { display: none; }
 
+    #hero-bg-wrap {
+      display: none;
+      width: 100%;
+      height: 700px;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-color: #f0f0f0;
+    }
+
     #promo-video-wrap { display: none; max-width: 1400px; margin: 16px auto 0; padding: 0 16px; box-sizing: border-box; width: 100%; }
     #promo-video-inner { position: relative; width: 100%; padding-bottom: 56.25%; background: #000; border-radius: 10px; overflow: hidden; }
     #promo-video-inner iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; display: block; }
@@ -95,6 +105,7 @@
 
     @media (max-width: 768px) {
       .banner-slide img { height: 260px; }
+      #hero-bg-wrap { height: 260px; }
       .banner-arrow { width: 38px; height: 38px; font-size: 18px; }
       .banner-arrow.prev { left: 10px; }
       .banner-arrow.next { right: 10px; }
@@ -114,6 +125,8 @@
       <div class="banner-dots" id="banner-dots" hidden></div>
     </div>
   </div>
+
+  <div id="hero-bg-wrap"></div>
 
   <div id="promo-video-wrap">
     <div id="promo-video-inner"></div>
@@ -208,22 +221,23 @@
       const prevBtn = document.getElementById('banner-prev');
       const nextBtn = document.getElementById('banner-next');
       const container = document.getElementById('product-container');
+      const heroWrap = document.getElementById('hero-bg-wrap');
 
       const { data, error } = await db.from('banners').select('*').order('id', { ascending: false });
 
-      if (error || !data || data.length === 0) {
-        wrap.style.display = 'none';
-        bannerList = [];
-        if (container) container.classList.add('no-banner');
-        return;
-      }
+      bannerList = (data && !error) ? data.filter(b => b.image_url) : [];
 
-      bannerList = data.filter(b => b.image_url);
+      // 배너가 없으면 배경이미지 노출
       if (bannerList.length === 0) {
         wrap.style.display = 'none';
         if (container) container.classList.add('no-banner');
+        stopAuto();
+        await loadHeroBgImage(heroWrap);
         return;
       }
+
+      // 배너가 있으면 배경이미지 숨김
+      if (heroWrap) heroWrap.style.display = 'none';
 
       wrap.style.display = 'block';
       if (container) container.classList.remove('no-banner');
@@ -254,6 +268,24 @@
       }
       bannerIndex = 0;
       goToBanner(0);
+    }
+
+    // ===== 배경 이미지 로드 (배너 없을 때) =====
+    async function loadHeroBgImage(heroWrap) {
+      if (!heroWrap) return;
+      try {
+        const { data } = await db.from('settings').select('value').eq('key', 'hero_bg_image').maybeSingle();
+        const url = data?.value || '';
+        if (url) {
+          heroWrap.style.backgroundImage = `url('${url.replace(/'/g, "\\'")}')`;
+          heroWrap.style.display = 'block';
+        } else {
+          heroWrap.style.backgroundImage = 'none';
+          heroWrap.style.display = 'none';
+        }
+      } catch (e) {
+        heroWrap.style.display = 'none';
+      }
     }
 
     function goToBanner(idx) {
