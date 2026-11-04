@@ -1140,6 +1140,8 @@ async function verifyMemberStatus() {
 
 let _headerRendered = false;
 
+// ⭐ 도매전용관 버튼은 모든 회원에게 항상 노출 (접근 제한은 wholesale.html에서 처리)
+// ⭐ VIP전용관 버튼은 VIP회원에게만 노출
 function buildBottomNav(current, isMember, svgIcons, memberGrade) {
   const commonTabs = `
     <a href="index.html" data-nav="home"
@@ -1160,17 +1162,26 @@ function buildBottomNav(current, isMember, svgIcons, memberGrade) {
     </a>
   `;
 
-  const gradeTabs = (isMember && memberGrade === '도매회원')
-    ? `<a href="wholesale.html" data-nav="wholesale"
+  // ⭐ 도매전용관: 모든 로그인 회원에게 항상 노출
+  // ⭐ VIP전용관: VIP회원에게만 노출 (도매탭 자리에 VIP가 대신 표시됨)
+  const wholesaleTab = `<a href="wholesale.html" data-nav="wholesale"
          class="bottom-nav-item ${current === 'wholesale' ? 'active' : ''}">
          ${svgIcons.wholesale}<span>도매</span>
-       </a>`
-    : (isMember && memberGrade === 'VIP회원')
-    ? `<a href="vip.html" data-nav="vip"
+       </a>`;
+
+  const vipTab = `<a href="vip.html" data-nav="vip"
          class="bottom-nav-item ${current === 'vip' ? 'active' : ''}">
          ${svgIcons.vip}<span>VIP</span>
-       </a>`
-    : '';
+       </a>`;
+
+  let gradeTabs = '';
+  if (isMember && memberGrade === 'VIP회원') {
+    // VIP회원은 VIP 탭 + 도매 탭 둘 다
+    gradeTabs = wholesaleTab + vipTab;
+  } else if (isMember) {
+    // 일반회원/도매회원은 도매 탭만 (일반회원은 접근 시 제한 안내)
+    gradeTabs = wholesaleTab;
+  }
 
   const memberTabs = isMember
     ? `<a href="myorders.html" data-nav="myorders"
@@ -1197,7 +1208,8 @@ function buildBottomNav(current, isMember, svgIcons, memberGrade) {
          ${svgIcons.signup}<span>회원가입</span>
        </a>`;
 
-  const count = 3 + (gradeTabs ? 1 : 0) + (isMember ? 3 : 2);
+  const gradeCount = (gradeTabs.match(/<a /g) || []).length;
+  const count = 3 + gradeCount + (isMember ? 3 : 2);
 
   return { html: commonTabs + gradeTabs + memberTabs, count };
 }
@@ -1482,11 +1494,17 @@ function renderHeader(current) {
     flex-shrink: 0;
   `;
 
-  const gradeBtn = (memberGrade === '도매회원')
+  // ⭐ 도매전용관: 로그인한 모든 회원에게 항상 노출 (일반회원은 접근 시 제한 안내)
+  // ⭐ VIP전용관: VIP회원에게만 노출
+  const wholesaleBtn = isMember
     ? `<a href="wholesale.html" data-nav="wholesale" style="${btnStyle(current === 'wholesale')}">도매전용관</a>`
-    : (memberGrade === 'VIP회원')
+    : '';
+
+  const vipBtn = (isMember && memberGrade === 'VIP회원')
     ? `<a href="vip.html" data-nav="vip" style="${btnStyle(current === 'vip')}">⭐ VIP전용관</a>`
     : '';
+
+  const gradeBtn = wholesaleBtn + vipBtn;
 
   const userBtns = isMember
     ? `${gradeBtn}
