@@ -49,6 +49,7 @@
     .settings-col .card input, .settings-col .card textarea, .settings-col .card button { max-width: 100%; box-sizing: border-box; }
     @media (max-width: 1000px) { .settings-split { grid-template-columns: 1fr; gap: 12px; } }
 
+    /* ===== 상품 등록 폼 (사이즈 상세 추가로 레이아웃 재구성) ===== */
     #product-register-card { min-width: 0; width: 100%; }
     #product-register-card > #product-form {
       display: grid !important;
@@ -66,6 +67,68 @@
     #product-register-card > #product-form input[name="min_qty"] { padding-left: 3px; padding-right: 3px; }
     #product-register-card > #product-form select[name="target_grade"] { padding-left: 4px; padding-right: 4px; font-weight: 700; }
     #product-register-card > #product-form button { min-height: 42px; padding: 6px 2px; font-size: 10px; white-space: nowrap; }
+
+    /* 사이즈 상세 입력 영역 (별도 섹션) */
+    #size-detail-section {
+      grid-column: 1 / -1;
+      border: 1px dashed #d1d5db;
+      border-radius: 10px;
+      padding: 12px;
+      background: #f9fafb;
+      margin-top: 4px;
+    }
+    #size-detail-section .sd-head {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 10px; flex-wrap: wrap; gap: 8px;
+    }
+    #size-detail-section .sd-title {
+      font-size: 13px; font-weight: 700; color: #111827;
+      display: flex; align-items: center; gap: 6px;
+    }
+    #size-detail-section .sd-hint {
+      font-size: 11px; color: #9ca3af; font-weight: 400;
+    }
+    #size-detail-section .sd-add-btn {
+      padding: 6px 12px; font-size: 12px; font-weight: 600;
+      background: #111827; color: #fff; border: 0; border-radius: 6px;
+      cursor: pointer; font-family: inherit; white-space: nowrap;
+    }
+    #size-detail-section .sd-add-btn:hover { background: #374151; }
+
+    #size-detail-rows { display: flex; flex-direction: column; gap: 6px; }
+    .sd-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 40px;
+      gap: 6px;
+      align-items: center;
+    }
+    .sd-row input {
+      width: 100% !important; min-height: 36px !important;
+      padding: 6px 8px !important; font-size: 12px !important;
+      background: #fff !important; border: 1px solid #e5e7eb !important;
+      border-radius: 6px !important; color: #111827 !important;
+    }
+    .sd-row input::placeholder { color: #9ca3af; }
+    .sd-row .sd-del-btn {
+      width: 36px !important; height: 36px !important; min-height: 36px !important;
+      padding: 0 !important; background: #dc2626 !important; color: #fff !important;
+      border: 0 !important; border-radius: 6px !important;
+      cursor: pointer; font-size: 16px; font-weight: 700; line-height: 1;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .sd-row .sd-del-btn:hover { background: #b91c1c !important; }
+    .sd-empty {
+      padding: 14px; text-align: center; color: #9ca3af; font-size: 12px;
+      background: #fff; border: 1px dashed #e5e7eb; border-radius: 6px;
+    }
+
+    @media (max-width: 1000px) {
+      #product-register-card > #product-form { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+      #product-register-card > #product-form input[name="detail_images"],
+      #product-register-card > #product-form button { grid-column: 1 / -1; }
+      .sd-row { grid-template-columns: 1fr 1fr 1fr 36px; gap: 4px; }
+      .sd-row input { font-size: 11px !important; padding: 6px 4px !important; }
+    }
 
     .form-row { display: flex; gap: 8px; flex-wrap: wrap; }
     .form-row > * { flex: 1; min-width: 150px; }
@@ -250,6 +313,41 @@
     .modal-box .modal-actions { display: flex; gap: 8px; margin-top: 10px; }
     .modal-box .modal-actions > * { flex: 1; }
 
+    /* 상품 수정 모달의 사이즈 상세 영역 */
+    .edit-size-section {
+      grid-column: 1 / -1;
+      border: 1px dashed #d1d5db;
+      border-radius: 10px;
+      padding: 12px;
+      background: #f9fafb;
+    }
+    .edit-size-section .es-head {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 10px;
+    }
+    .edit-size-section .es-title { font-size: 13px; font-weight: 700; color: #111827; }
+    .edit-size-section .es-add-btn {
+      padding: 6px 12px; font-size: 12px; font-weight: 600;
+      background: #111827; color: #fff; border: 0; border-radius: 6px;
+      cursor: pointer; font-family: inherit;
+    }
+    .edit-size-rows { display: flex; flex-direction: column; gap: 6px; }
+    .es-row {
+      display: grid; grid-template-columns: 1fr 1fr 1fr 36px; gap: 6px;
+      align-items: center;
+    }
+    .es-row input {
+      padding: 7px 8px !important; font-size: 12px !important;
+      border: 1px solid #e5e7eb !important; border-radius: 6px !important;
+      background: #fff !important; color: #111827 !important;
+    }
+    .es-row .es-del-btn {
+      width: 36px; height: 34px; padding: 0;
+      background: #dc2626; color: #fff; border: 0; border-radius: 6px;
+      cursor: pointer; font-size: 15px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+
     #coupon-issue-form {
       display: grid !important;
       grid-template-columns: 1.5fr 1fr 1fr 1fr 1.5fr auto !important;
@@ -278,9 +376,6 @@
       .admin-layout { padding: 16px; gap: 14px; height: calc(100vh - 65px - 120px); margin-top: calc(65px + 120px); }
       .row-item { padding: 10px 12px; }
       .row-item .row-main { font-size: 12px; }
-      #product-register-card > #product-form { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
-      #product-register-card > #product-form input[name="detail_images"],
-      #product-register-card > #product-form button { grid-column: 1 / -1; }
       .list-controls { display: flex; flex-direction: column; align-items: center; }
       .list-search { max-width: 560px; min-width: 0; width: 100%; margin-inline: auto; }
       .bulk-actions { width: 100%; justify-content: flex-end; }
@@ -431,6 +526,18 @@
                   <option value="vip">VIP전용</option>
                 </select>
                 <button type="submit" class="btn btn-primary">상품 등록</button>
+
+                <!-- ⭐ 사이즈 상세 입력 영역 -->
+                <div id="size-detail-section">
+                  <div class="sd-head">
+                    <div class="sd-title">
+                      📏 사이즈 상세 정보
+                      <span class="sd-hint">(상품 상세페이지 달력 아래에 표시됩니다)</span>
+                    </div>
+                    <button type="button" id="sd-add-btn" class="sd-add-btn">+ 행 추가</button>
+                  </div>
+                  <div id="size-detail-rows"></div>
+                </div>
               </form>
               <p id="msg" class="msg"></p>
             </div>
@@ -1005,6 +1112,76 @@
       });
     });
 
+    // ===== ⭐ 사이즈 상세 입력 로직 =====
+    // 데이터 구조: [{ size: 'FREE', weight: '40~60kg', height: '155~165cm' }, ...]
+    function createSizeDetailRow(data = {}) {
+      const row = document.createElement('div');
+      row.className = 'sd-row';
+      row.innerHTML = `
+        <input type="text" class="sd-size" placeholder="사이즈 (예: M)" value="${(data.size || '').replace(/"/g, '&quot;')}">
+        <input type="text" class="sd-weight" placeholder="권장몸무게 (예: 45~55kg)" value="${(data.weight || '').replace(/"/g, '&quot;')}">
+        <input type="text" class="sd-height" placeholder="신장 (예: 160~170cm)" value="${(data.height || '').replace(/"/g, '&quot;')}">
+        <button type="button" class="sd-del-btn" title="행 삭제">✕</button>
+      `;
+      row.querySelector('.sd-del-btn').addEventListener('click', () => {
+        row.remove();
+        updateSizeDetailEmptyState();
+      });
+      return row;
+    }
+
+    function updateSizeDetailEmptyState() {
+      const container = document.getElementById('size-detail-rows');
+      if (!container) return;
+      const hasRows = container.querySelector('.sd-row');
+      const emptyEl = container.querySelector('.sd-empty');
+      if (!hasRows && !emptyEl) {
+        const empty = document.createElement('div');
+        empty.className = 'sd-empty';
+        empty.textContent = '등록된 사이즈 상세가 없습니다. "+ 행 추가"를 눌러 추가하세요.';
+        container.appendChild(empty);
+      } else if (hasRows && emptyEl) {
+        emptyEl.remove();
+      }
+    }
+
+    document.getElementById('sd-add-btn').addEventListener('click', () => {
+      const container = document.getElementById('size-detail-rows');
+      const emptyEl = container.querySelector('.sd-empty');
+      if (emptyEl) emptyEl.remove();
+      container.appendChild(createSizeDetailRow());
+    });
+
+    function getSizeDetailFromForm() {
+      const container = document.getElementById('size-detail-rows');
+      if (!container) return [];
+      const rows = container.querySelectorAll('.sd-row');
+      const result = [];
+      rows.forEach(row => {
+        const size = row.querySelector('.sd-size').value.trim();
+        const weight = row.querySelector('.sd-weight').value.trim();
+        const height = row.querySelector('.sd-height').value.trim();
+        if (!size && !weight && !height) return; // 완전히 빈 행은 제외
+        result.push({ size, weight, height });
+      });
+      return result;
+    }
+
+    function renderSizeDetailRows(rows) {
+      const container = document.getElementById('size-detail-rows');
+      if (!container) return;
+      container.innerHTML = '';
+      if (!rows || rows.length === 0) {
+        updateSizeDetailEmptyState();
+        return;
+      }
+      rows.forEach(r => container.appendChild(createSizeDetailRow(r)));
+    }
+
+    // 초기 상태
+    updateSizeDetailEmptyState();
+    // ===== 사이즈 상세 입력 로직 끝 =====
+
     let currentLogoId = null;
     async function loadLogo() {
       const { data, error } = await db.from('logos').select('*').order('id', { ascending: false }).limit(1).maybeSingle();
@@ -1405,6 +1582,7 @@
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const detail_images = form.detail_images.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+      const size_detail = getSizeDetailFromForm();
       msg.className = 'msg'; msg.textContent = '등록 중...';
       const { error } = await db.from('products').insert({
         product_code: form.product_code.value.trim() || null,
@@ -1418,11 +1596,14 @@
         other_option: parseList(form.other_option.value),
         min_qty: Number(form.min_qty.value) || 1,
         target_grade: form.target_grade.value || 'all',
+        size_detail: size_detail,  // ⭐ 사이즈 상세 추가
       });
       if (error) { msg.className = 'msg error'; msg.textContent = '❌ ' + error.message; }
       else {
         msg.className = 'msg success'; msg.textContent = '✅ 등록 완료!';
-        form.reset(); form.min_qty.value = 1; form.target_grade.value = 'all'; loadAdminList();
+        form.reset(); form.min_qty.value = 1; form.target_grade.value = 'all';
+        renderSizeDetailRows([]);  // 사이즈 상세 초기화
+        loadAdminList();
       }
     });
 
@@ -1485,6 +1666,7 @@
         if (p.other_option && p.other_option.length) opts.push(`기타: ${p.other_option.join(',')}`);
         opts.push(`최소: ${p.min_qty || 1}개`);
         if (p.detail_images && p.detail_images.length) opts.push(`상세이미지: ${p.detail_images.length}장`);
+        if (p.size_detail && p.size_detail.length) opts.push(`사이즈상세: ${p.size_detail.length}행`);
         const detailStr = opts.join('  ·  ');
         const isChecked = selectedProductIds.has(String(p.id));
         return `
@@ -1544,6 +1726,7 @@
             hem_option: p.hem_option || [], other_option: p.other_option || [],
             min_qty: p.min_qty || 1,
             target_grade: p.target_grade || 'all',
+            size_detail: p.size_detail || [],  // ⭐ 사이즈 상세 복사
           });
           if (error) { alert('❌ 복사 실패: ' + error.message); btn.disabled = false; btn.textContent = '복제'; }
           else loadAdminList();
@@ -1564,7 +1747,7 @@
       const modal = document.createElement('div');
       modal.className = 'modal-backdrop';
       modal.innerHTML = `
-        <div class="modal-box" style="max-width: 600px;">
+        <div class="modal-box" style="max-width: 640px;">
           <h2>상품 수정</h2>
           <form id="product-edit-form" class="modal-form" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
             <input name="product_code" placeholder="제품번호" value="${p.product_code || ''}">
@@ -1582,6 +1765,16 @@
               <option value="vip" ${tg === 'vip' ? 'selected' : ''}>VIP전용</option>
             </select>
             <input name="detail_images" type="text" placeholder="상세 이미지 URL" style="grid-column: 1 / -1;" value="${(p.detail_images || []).join(', ')}">
+
+            <!-- ⭐ 수정 모달의 사이즈 상세 -->
+            <div class="edit-size-section" style="grid-column: 1 / -1;">
+              <div class="es-head">
+                <div class="es-title">📏 사이즈 상세 정보</div>
+                <button type="button" class="es-add-btn" id="es-add-btn">+ 행 추가</button>
+              </div>
+              <div class="edit-size-rows" id="edit-size-rows"></div>
+            </div>
+
             <div class="modal-actions" style="grid-column: 1 / -1;">
               <button type="submit" class="btn btn-primary">수정 완료</button>
               <button type="button" id="cancel-edit" class="btn btn-secondary">취소</button>
@@ -1590,11 +1783,45 @@
         </div>
       `;
       document.body.appendChild(modal);
+
+      // ⭐ 수정 모달 내부 사이즈 상세 행 관리
+      function createEditSizeRow(data = {}) {
+        const row = document.createElement('div');
+        row.className = 'es-row';
+        row.innerHTML = `
+          <input type="text" class="es-size" placeholder="사이즈" value="${(data.size || '').replace(/"/g, '&quot;')}">
+          <input type="text" class="es-weight" placeholder="권장몸무게" value="${(data.weight || '').replace(/"/g, '&quot;')}">
+          <input type="text" class="es-height" placeholder="신장" value="${(data.height || '').replace(/"/g, '&quot;')}">
+          <button type="button" class="es-del-btn" title="행 삭제">✕</button>
+        `;
+        row.querySelector('.es-del-btn').addEventListener('click', () => row.remove());
+        return row;
+      }
+
+      const editRowsEl = modal.querySelector('#edit-size-rows');
+      (p.size_detail || []).forEach(r => editRowsEl.appendChild(createEditSizeRow(r)));
+
+      modal.querySelector('#es-add-btn').addEventListener('click', () => {
+        editRowsEl.appendChild(createEditSizeRow());
+      });
+
       modal.querySelector('#cancel-edit').onclick = () => modal.remove();
       modal.querySelector('#product-edit-form').addEventListener('submit', async (ev) => {
         ev.preventDefault();
         const f = ev.target;
         const detail_images = f.detail_images.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+
+        // ⭐ 수정 모달의 사이즈 상세 수집
+        const sizeRows = modal.querySelectorAll('#edit-size-rows .es-row');
+        const size_detail = [];
+        sizeRows.forEach(row => {
+          const size = row.querySelector('.es-size').value.trim();
+          const weight = row.querySelector('.es-weight').value.trim();
+          const height = row.querySelector('.es-height').value.trim();
+          if (!size && !weight && !height) return;
+          size_detail.push({ size, weight, height });
+        });
+
         const submitBtn = f.querySelector('button[type="submit"]');
         submitBtn.disabled = true; submitBtn.textContent = '저장 중...';
         const { error } = await db.from('products').update({
@@ -1609,6 +1836,7 @@
           other_option: parseList(f.other_option.value),
           min_qty: Number(f.min_qty.value) || 1,
           target_grade: f.target_grade.value || 'all',
+          size_detail: size_detail,  // ⭐ 사이즈 상세 저장
         }).eq('id', p.id);
         if (error) { alert('❌ 수정 실패: ' + error.message); submitBtn.disabled = false; submitBtn.textContent = '수정 완료'; }
         else { alert('✅ 수정 완료!'); modal.remove(); loadAdminList(); }
