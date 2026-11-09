@@ -913,6 +913,136 @@ async function fetchAccountFromDB() {
   }
 }
 
+// ============================================================
+// ⭐ 장바구니 서버 동기화 (로그인 회원 전용)
+// ============================================================
+function getLoggedMember() {
+  try { return JSON.parse(localStorage.getItem('member') || 'null'); } catch { return null; }
+}
+
+function isLoggedInMember() {
+  const m = getLoggedMember();
+  return !!(m && m.id);
+}
+
+// 서버 carts 행 → 로컬 cart item 형태로 매핑
+function mapServerCartRow(row) {
+  return {
+    product_id: row.product_id,
+    product_code: row.product_code || '',
+    product_name: row.product_name || '',
+    original_price: Number(row.original_price ?? 0),
+    product_price: Number(row.product_price ?? 0),
+    target_grade: row.target_grade || 'all',
+    discount_rate: Number(row.discount_rate ?? 0),
+    min_qty: Number(row.min_qty ?? 1),
+    main_image: row.main_image || '',
+    quantity: Number(row.quantity ?? 1),
+    selected_color: row.selected_color || null,
+    selected_size: row.selected_size || null,
+    selected_hem: row.selected_hem || null,
+    selected_other: row.selected_other || null,
+    _server_id: row.id,
+  };
+}
+
+// 서버에서 내 장바구니를 불러와 localStorage 'cart' 덮어쓰기
+async function syncCartFromServer() {
+  const m = getLoggedMember();
+  if (!m || !m.id) return;
+  const client = getSupabaseClient();
+  if (!client) return;
+  try {
+    const { data, error } = await client
+      .from('carts')
+      .select('*')
+      .eq('member_id', m.id)
+      .order('id', { ascending: true });
+    if (error) {
+      console.warn('장바구니 서버 로드 실패:', error.message);
+      return;
+    }
+    const mapped = (data || []).map(mapServerCartRow);
+    localStorage.setItem('cart', JSON.stringify(mapped));
+
+    // 배지/헤더 갱신
+    if (typeof updateBottomNavBadge === 'function') updateBottomNavBadge();
+    if (typeof renderHeader === 'function' && document.getElementById('app-header')) {
+      const mapPath = { 'index':'home','login':'login','signup':'signup','cart':'cart','orders':'orders','product':'product','mypage':'mypage','myorders':'myorders','wholesale':'wholesale','vip':'vip' };
+      const current = mapPath[_pathName] || 'home';
+      // renderHeader는 _headerRendered 상태면 배지/메뉴만 갱신
+      renderHeader(current);
+    }
+  } catch (e) {
+    console.warn('장바구니 서버 로드 오류:', e);
+  }
+}
+
+// 로컬 장바구니 전체를 서버에 반영 (전체 삭제 후 재삽입)
+// 비로그인 상태면 그냥 무시
+async function pushCartToServer(cartArray) {
+  const m = getLoggedMember();
+  if (!m || !m.id) return;
+  const client = getSupabaseClient();
+  if (!client) return;
+  try {
+    // 기존 서버 행 전체 삭제
+    const { error: delErr } = await client.from('carts').delete().eq('member_id', m.id);
+    if (delErr) { console.warn('장바구니 서버 초기화 실패:', delErr.message); return; }
+
+    const rows = (cartArray || []).map(it => ({
+      member_id: m.id,
+      product_id: it.product_id,
+      product_code: it.product_code || '',
+      product_name: it.product_name || '',
+      original_price: Number(it.original_price ?? it.product_price ?? 0),
+      product_price: Number(it.product_price ?? 0),
+      target_grade: it.target_grade || 'all',
+      discount_rate: Number(it.discount_rate ?? 0),
+      min_qty: Number(it.min_qty ?? 1),
+      main_image: it.main_image || '',
+      quantity: Number(it.quantity ?? 1),
+      selected_color: it.selected_color || null,
+      selected_size: it.selected_size || null,
+      selected_hem: it.selected_hem || null,
+      selected_other: it.selected_other || null,
+      updated_at: new Date().toISOString(),
+    }));
+    if (rows.length === 0) return;
+
+    const { data, error } = await client.from('carts').insert(rows).select('id');
+    if (error) { console.warn('장바구니 서버 저장 실패:', error.message); return; }
+
+    // 서버 id를 로컬에 반영
+    if (Array.isArray(data)) {
+      data.forEach((r, i) => {
+        if (cartArray[i]) cartArray[i]._server_id = r.id;
+      });
+      localStorage.setItem('cart', JSON.stringify(cartArray));
+    }
+  } catch (e) {
+    console.warn('장바구니 서버 저장 오류:', e);
+  }
+}
+
+// 로그인 상태 변화 감지 후 서버 장바구니 자동 로드
+(function setupCartServerWatcher() {
+  if (typeof window === 'undefined') return;
+  if (window.__cartServerWatcherInstalled) return;
+  window.__cartServerWatcherInstalled = true;
+
+  const onLogin = async () => {
+    if (!isLoggedInMember()) return;
+    await syncCartFromServer();
+  };
+
+  setTimeout(onLogin, 300);
+
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'member') onLogin();
+  });
+})();
+
 function getOrCreateSessionId() {
   try {
     let sid = localStorage.getItem('visitor_sid');
@@ -1162,8 +1292,6 @@ function buildBottomNav(current, isMember, svgIcons, memberGrade) {
     </a>
   `;
 
-  // ⭐ 도매전용관: 모든 로그인 회원에게 항상 노출
-  // ⭐ VIP전용관: VIP회원에게만 노출 (도매탭 자리에 VIP가 대신 표시됨)
   const wholesaleTab = `<a href="wholesale.html" data-nav="wholesale"
          class="bottom-nav-item ${current === 'wholesale' ? 'active' : ''}">
          ${svgIcons.wholesale}<span>도매</span>
@@ -1176,10 +1304,8 @@ function buildBottomNav(current, isMember, svgIcons, memberGrade) {
 
   let gradeTabs = '';
   if (isMember && memberGrade === 'VIP회원') {
-    // VIP회원은 VIP 탭 + 도매 탭 둘 다
     gradeTabs = wholesaleTab + vipTab;
   } else if (isMember) {
-    // 일반회원/도매회원은 도매 탭만 (일반회원은 접근 시 제한 안내)
     gradeTabs = wholesaleTab;
   }
 
@@ -1265,7 +1391,6 @@ async function getHeaderSearchProducts() {
   try {
     let client = getSupabaseClient();
 
-    // 공통 스크립트가 Supabase 라이브러리보다 먼저 로드된 페이지도 지원
     if (!client && typeof window.supabase === 'undefined') {
       await new Promise((resolve, reject) => {
         const existing = document.querySelector('script[data-header-search-supabase]');
@@ -1494,8 +1619,6 @@ function renderHeader(current) {
     flex-shrink: 0;
   `;
 
-  // ⭐ 도매전용관: 로그인한 모든 회원에게 항상 노출 (일반회원은 접근 시 제한 안내)
-  // ⭐ VIP전용관: VIP회원에게만 노출
   const wholesaleBtn = isMember
     ? `<a href="wholesale.html" data-nav="wholesale" style="${btnStyle(current === 'wholesale')}">도매전용관</a>`
     : '';
@@ -1627,6 +1750,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const isOk = await verifyMemberStatus();
   if (!isOk) return;
+
+  // ⭐ 로그인 상태라면 서버 장바구니를 먼저 동기화 (다른 기기 → 이 기기)
+  if (isLoggedInMember()) {
+    try { await syncCartFromServer(); } catch (e) {}
+  }
 
   const map = {
     'index': 'home', 'login': 'login', 'signup': 'signup',

@@ -297,29 +297,45 @@
       listEl.querySelectorAll('.qty-minus').forEach(btn => {
         btn.addEventListener('click', () => {
           const cart = getCart(); const idx = Number(btn.dataset.idx);
-          if (cart[idx].quantity > 1) { cart[idx].quantity--; saveCart(cart); render(); if (document.getElementById('app-header')) renderHeader('cart'); }
+          if (cart[idx].quantity > 1) {
+            cart[idx].quantity--;
+            saveCart(cart);
+            if (isLoggedInMember()) pushCartToServer(cart);
+            render();
+            if (document.getElementById('app-header')) renderHeader('cart');
+          }
         });
       });
       listEl.querySelectorAll('.qty-plus').forEach(btn => {
         btn.addEventListener('click', () => {
           const cart = getCart(); const idx = Number(btn.dataset.idx);
-          cart[idx].quantity++; saveCart(cart); render(); if (document.getElementById('app-header')) renderHeader('cart');
+          cart[idx].quantity++;
+          saveCart(cart);
+          if (isLoggedInMember()) pushCartToServer(cart);
+          render();
+          if (document.getElementById('app-header')) renderHeader('cart');
         });
       });
       listEl.querySelectorAll('.qty-input').forEach(inp => {
         inp.addEventListener('change', () => {
           const cart = getCart(); const idx = Number(inp.dataset.idx);
-          cart[idx].quantity = Math.max(1, Number(inp.value) || 1); saveCart(cart); render(); if (document.getElementById('app-header')) renderHeader('cart');
+          cart[idx].quantity = Math.max(1, Number(inp.value) || 1);
+          saveCart(cart);
+          if (isLoggedInMember()) pushCartToServer(cart);
+          render();
+          if (document.getElementById('app-header')) renderHeader('cart');
         });
       });
       listEl.querySelectorAll('.del-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const cart = getCart(); const idx = Number(btn.dataset.idx);
           cart.splice(idx, 1); saveCart(cart);
+          if (isLoggedInMember()) pushCartToServer(cart);
           const newSel = new Set();
           selectedIndexes.forEach(i => { if (i < idx) newSel.add(i); else if (i > idx) newSel.add(i - 1); });
           selectedIndexes = newSel;
-          render(); if (document.getElementById('app-header')) renderHeader('cart');
+          render();
+          if (document.getElementById('app-header')) renderHeader('cart');
         });
       });
       document.getElementById('checkout-btn').onclick = () => {
@@ -540,6 +556,12 @@
 
         const remainingCart = getCart().filter((_, idx) => !selectedIndexes.has(idx));
         saveCart(remainingCart);
+
+        // ⭐ 서버 장바구니도 반영
+        if (isLoggedInMember()) {
+          pushCartToServer(remainingCart);
+        }
+
         selectedIndexes.clear();
         if (document.getElementById('app-header')) renderHeader('cart');
         showOrderComplete(modal, orderNumber, finalTotal, closeModal);
@@ -593,7 +615,18 @@
       box.querySelector('#go-main').onclick = () => { closeModal(); location.href = 'index.html'; };
     }
 
-    (async () => { await loadShipping(); await loadAccountInfo(); render(); })();
+    (async () => {
+      await loadShipping();
+      await loadAccountInfo();
+      render();
+      // ⭐ 로그인 상태면 서버 장바구니 새로 불러온 뒤 재렌더
+      if (isLoggedInMember()) {
+        try {
+          await syncCartFromServer();
+          render();
+        } catch (e) {}
+      }
+    })();
   </script>
 </body>
 </html>

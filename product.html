@@ -109,7 +109,6 @@
     .ship-cal-box .scal-legend .lg-sun { background: #f87171; }
     .ship-cal-box .scal-legend .lg-sat { background: #60a5fa; }
 
-    /* 📱 모바일에서는 살짝 작게 */
     @media (max-width: 768px) {
       .ship-cal-box { padding: 14px; }
       .ship-cal-box .scal-title { font-size: 15px; }
@@ -123,7 +122,6 @@
       .ship-cal-box .scal-dow { font-size: 12px; padding: 6px 0; }
       .ship-cal-box .scal-day { font-size: 15px; min-height: 48px; }
     }
-    /* ⬆️⬆️ 배송기간 참고용 달력 스타일 끝 ⬆️⬆️ */
 
     /* ⬇️⬇️ 사이즈 상세 테이블 스타일 ⬇️⬇️ */
     .size-detail-box {
@@ -177,7 +175,6 @@
       .size-detail-table thead th { font-size: 11px; padding: 10px 4px; }
       .size-detail-table tbody td { font-size: 12px; padding: 10px 4px; }
     }
-    /* ⬆️⬆️ 사이즈 상세 테이블 스타일 끝 ⬆️⬆️ */
   </style>
 </head>
 <body>
@@ -265,10 +262,8 @@
       return { targetGrade: tg, basePrice, discountRate, finalPrice, shippingFee, shippingLabel, shippingMethod };
     }
 
-    // ⭐ 사이즈 상세 테이블 HTML 생성
     function buildSizeDetailHtml(sizeDetail) {
       if (!Array.isArray(sizeDetail) || sizeDetail.length === 0) return '';
-      // 완전히 빈 행은 걸러냄
       const rows = sizeDetail.filter(r => r && (r.size || r.weight || r.height));
       if (rows.length === 0) return '';
       return `
@@ -420,11 +415,9 @@
              <p style="color:#ef4444; font-weight:700; font-size:24px; margin:0;">${pricing.finalPrice.toLocaleString()}원</p>
            </div>`;
 
-      // ⭐ 사이즈 상세 테이블 HTML (달력 아래에 삽입)
       const sizeDetailHtml = buildSizeDetailHtml(data.size_detail);
 
       detailEl.innerHTML = `
-        <!-- ⬇️⬇️ 상품 카드 (원래대로) ⬇️⬇️ -->
         <div style="background:#151515; border:1px solid #222; border-radius:12px; padding:16px;">
           <div style="display:flex; gap:24px; flex-wrap:wrap; align-items:stretch;">
             <div style="flex:1 1 320px; min-width:0;">
@@ -464,13 +457,9 @@
             </div>
           </div>
         </div>
-        <!-- ⬆️⬆️ 상품 카드 끝 ⬆️⬆️ -->
 
-        <!-- ⬇️⬇️ 공지 이미지 ⬇️⬇️ -->
         ${sharedNoticeImage ? `<div class="global-product-detail-notice" style="margin-top:16px;"><img src="${sharedNoticeImage}" alt="상품 공지" loading="lazy" style="display:block;width:100%;height:auto;border-radius:8px;"></div>` : ''}
-        <!-- ⬆️⬆️ 공지 이미지 끝 ⬆️⬆️ -->
 
-        <!-- ⬇️⬇️ 배송기간 참고용 달력 (공지 이미지 바로 아래, 전체폭 한 줄) ⬇️⬇️ -->
         <div class="ship-cal-box" id="ship-cal-box">
           <div class="scal-title">배송기간 참고 달력</div>
           <div id="scal-root"></div>
@@ -479,11 +468,8 @@
             <span><span class="lg-box lg-sat"></span> 토요일 (배송 지연 가능)</span>
           </div>
         </div>
-        <!-- ⬆️⬆️ 배송기간 참고용 달력 끝 ⬆️⬆️ -->
 
-        <!-- ⬇️⬇️ ⭐ 사이즈 상세 테이블 (달력 바로 아래) ⬇️⬇️ -->
         ${sizeDetailHtml}
-        <!-- ⬆️⬆️ 사이즈 상세 테이블 끝 ⬆️⬆️ -->
 
         ${detailImgs ? `<div style="margin-top:8px;">${detailImgs}</div>` : ''}
         ${sharedFooterImage ? `<div class="global-product-detail-footer" style="margin-top:16px;"><img src="${sharedFooterImage}" alt="상품 사용설명 및 배송안내" loading="lazy" style="display:block;width:100%;height:auto;border-radius:8px;"></div>` : ''}
@@ -695,6 +681,12 @@
           }
         });
         localStorage.setItem('cart', JSON.stringify(cart));
+
+        // ⭐ 로그인 상태면 서버에도 저장 (다른 기기 동기화)
+        if (isLoggedInMember()) {
+          pushCartToServer(cart);
+        }
+
         let msg = '✅ 장바구니에 담았습니다!';
         if (merged > 0) msg = `✅ 장바구니에 추가되었습니다.\n(중복 ${merged}개 옵션은 수량이 합산됨)`;
         alert(msg);
