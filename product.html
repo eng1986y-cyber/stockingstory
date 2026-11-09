@@ -24,6 +24,13 @@
     .coupon-picker .cp-title { font-size: 13px; font-weight: 700; color: #fbbf24; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
     .coupon-picker select { width: 100%; padding: 10px 12px; background: #151515; border: 1px solid #333; border-radius: 6px; color: #e5e7eb; font-family: inherit; font-size: 13px; }
 
+    /* 도매전용 상품 쿠폰 비활성화 안내 */
+    .coupon-disabled-notice {
+      background: #1a1a1a; border: 1px dashed #f59e0b; border-radius: 8px;
+      padding: 12px; margin-top: 8px; font-size: 13px; color: #fbbf24;
+      display: flex; align-items: center; gap: 8px;
+    }
+
     /* ⬇️⬇️ 배송기간 참고용 달력 스타일 (전체폭, 높이 최대화) ⬇️⬇️ */
     .ship-cal-box {
       background: #151515;
@@ -221,6 +228,11 @@
       return (Date.now() - created) < 7 * 24 * 60 * 60 * 1000;
     }
     function shouldHidePrice(product) { return !isLoggedIn() && isNewProduct(product); }
+
+    // ⭐ 도매전용 상품인지 확인
+    function isWholesaleProduct(product) {
+      return (product?.target_grade || 'all') === 'wholesale';
+    }
 
     async function loadShippingFee() {
       const { data } = await db.from('settings').select('value').eq('key', 'shipping_fee').maybeSingle();
@@ -682,7 +694,6 @@
         });
         localStorage.setItem('cart', JSON.stringify(cart));
 
-        // ⭐ 로그인 상태면 서버에도 저장 (다른 기기 동기화)
         if (isLoggedInMember()) {
           pushCartToServer(cart);
         }
@@ -738,12 +749,42 @@
       const shippingFee = pricing.shippingFee;
 
       const m = getMember();
-      const coupons = await loadUsableCoupons();
+
+      // ⭐⭐⭐ 도매전용 상품이면 쿠폰 사용 불가 ⭐⭐⭐
+      const isWholesale = isWholesaleProduct(currentProduct);
+      const coupons = isWholesale ? [] : await loadUsableCoupons();
+
       const inputStyle = 'width:100%; padding:10px 12px; background:#0f0f0f; border:1px solid #2a2a2a; border-radius:8px; color:#e5e7eb; font-family:inherit; font-size:14px; box-sizing:border-box;';
       const labelStyle = 'font-size:13px; font-weight:600; color:#ccc; display:block; margin-bottom:4px;';
 
       const modal = document.createElement('div');
       modal.className = 'checkout-modal-backdrop';
+
+      // ⭐ 쿠폰 섹션 HTML
+      let couponSectionHtml = '';
+      if (isWholesale) {
+        couponSectionHtml = `
+          <div class="coupon-disabled-notice">
+            🏭 도매전용 상품은 쿠폰 사용이 불가합니다.
+          </div>
+        `;
+      } else if (coupons.length > 0) {
+        couponSectionHtml = `
+          <div class="coupon-picker">
+            <div class="cp-title">🎟️ 쿠폰 사용</div>
+            <select id="coupon-select">
+              <option value="">쿠폰 선택 안 함</option>
+              ${coupons.map(c => {
+                const label = c.type === 'percent'
+                  ? `${c.discount_value}% 할인`
+                  : `${Number(c.discount_value).toLocaleString()}원 할인`;
+                return `<option value="${c.id}" data-type="${c.type}" data-value="${c.discount_value}">${label} (${c.code})</option>`;
+              }).join('')}
+            </select>
+          </div>
+        `;
+      }
+
       modal.innerHTML = `
         <div class="checkout-modal-box">
           <h2>주문 정보 입력</h2>
@@ -763,20 +804,7 @@
             <label style="${labelStyle}">요청사항</label>
             <textarea name="memo" style="${inputStyle} min-height:60px;"></textarea>
 
-            ${coupons.length > 0 ? `
-              <div class="coupon-picker">
-                <div class="cp-title">🎟️ 쿠폰 사용</div>
-                <select id="coupon-select">
-                  <option value="">쿠폰 선택 안 함</option>
-                  ${coupons.map(c => {
-                    const label = c.type === 'percent'
-                      ? `${c.discount_value}% 할인`
-                      : `${Number(c.discount_value).toLocaleString()}원 할인`;
-                    return `<option value="${c.id}" data-type="${c.type}" data-value="${c.discount_value}">${label} (${c.code})</option>`;
-                  }).join('')}
-                </select>
-              </div>
-            ` : ''}
+            ${couponSectionHtml}
 
             <div id="price-summary" style="text-align:right; font-size:14px; font-weight:600; color:#ef4444; line-height:1.7; margin-top:8px;">
               <div>상품: <b id="p-subtotal">${subTotal.toLocaleString()}</b>원</div>
@@ -831,6 +859,7 @@
 
         let couponIdToUse = null;
         let discountAmount = 0;
+        // ⭐ 도매전용이면 couponSelect가 없으므로 자동으로 쿠폰 미사용
         if (couponSelect && couponSelect.value) {
           const opt = couponSelect.selectedOptions[0];
           couponIdToUse = couponSelect.value;
