@@ -39,12 +39,19 @@
     .coupon-picker select { width: 100%; padding: 10px 12px; background: #151515; border: 1px solid #333; border-radius: 6px; color: #e5e7eb; font-family: inherit; font-size: 13px; }
     .coupon-picker select:disabled { opacity: 0.6; }
 
-    /* 도매전용 상품만 있을 때 쿠폰 비활성화 안내 */
     .coupon-disabled-notice {
       background: #1a1a1a; border: 1px dashed #f59e0b; border-radius: 8px;
       padding: 12px; margin-top: 8px; font-size: 13px; color: #fbbf24;
       display: flex; align-items: center; gap: 8px;
     }
+
+    /* ⭐ 도매회원 일반상품 구매차단 안내 */
+    .block-notice {
+      margin-bottom: 12px; padding: 12px 14px;
+      background: #1a1a1a; border: 1px dashed #f59e0b; border-radius: 8px;
+      font-size: 13px; color: #fbbf24; line-height: 1.7;
+    }
+    .block-notice a { color: #60a5fa; text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -138,12 +145,6 @@
       return cart;
     }
 
-    // ⭐ 선택된 상품 중 도매전용 상품이 있는지 확인
-    function hasWholesaleItem(selectedCart) {
-      return selectedCart.some(it => (it.target_grade || 'all') === 'wholesale');
-    }
-
-    // ⭐ 선택된 상품이 모두 도매전용인지 확인 (쿠폰 완전 비활성화 조건)
     function isAllWholesale(selectedCart) {
       if (selectedCart.length === 0) return false;
       return selectedCart.every(it => (it.target_grade || 'all') === 'wholesale');
@@ -235,7 +236,22 @@
           shortGroups.push({ targetGrade: tg, need: g.minQty, have: g.qty });
         }
       });
-      const canOrder = selectedCart.length > 0 && shortGroups.length === 0;
+
+      // ⭐ 등급별 구매 차단 로직
+      // - 도매회원: 일반상품(all) 구매 불가
+      // - VIP회원: 도매전용(wholesale) 구매 불가 (원칙상 도매전용관 자체 이용불가지만 안전장치)
+      // - 일반회원: 도매/VIP 상품 구매 불가
+      const illegalItems = selectedCart.filter(it => {
+        const tg = it.target_grade || 'all';
+        if (memberGrade === '도매회원') return tg === 'all' || tg === 'vip';
+        if (memberGrade === 'VIP회원') return tg === 'wholesale';
+        return tg === 'wholesale' || tg === 'vip'; // 일반회원
+      });
+      const purchaseBlocked = illegalItems.length > 0;
+      const wholesaleHasNormalItem = (memberGrade === '도매회원') &&
+        selectedCart.some(it => (it.target_grade || 'all') === 'all');
+
+      const canOrder = selectedCart.length > 0 && shortGroups.length === 0 && !purchaseBlocked;
       const allChecked = selectedIndexes.size === cart.length && cart.length > 0;
 
       let gradeInfoHtml = '';
@@ -243,13 +259,13 @@
         gradeInfoHtml = `
           <div class="grade-info-card wholesale">
             <span class="gi-label">🏭 도매회원</span>
-            <span class="gi-detail">도매전용 상품에만 50% 할인 · 배송: 해운/착불 (일반 상품은 정가·설정배송비)</span>
+            <span class="gi-detail">도매전용 상품만 구매 가능 · 일반상품은 열람만 가능 · 배송: 해운/착불</span>
           </div>`;
       } else if (memberGrade === 'VIP회원') {
         gradeInfoHtml = `
           <div class="grade-info-card vip">
             <span class="gi-label">⭐ VIP회원</span>
-            <span class="gi-detail">VIP전용 상품에만 30% 할인 · 배송: 택배/무료 (일반 상품은 정가·설정배송비)</span>
+            <span class="gi-detail">일반 + VIP전용 상품 구매 가능 · VIP상품 30% 할인 · 배송: 택배/무료</span>
           </div>`;
       }
 
@@ -269,9 +285,25 @@
         }).join('');
       }
 
+      // ⭐ 구매 차단 안내 문구
+      let blockNoticeHtml = '';
+      if (wholesaleHasNormalItem) {
+        blockNoticeHtml = `
+          <div class="block-notice">
+            🏭 <b>도매회원</b>은 일반상품을 구매할 수 없습니다.<br>
+            아래 상품 중 일반상품을 제외하거나 <a href="wholesale.html">도매전용관</a> 상품만 주문해주세요.
+          </div>`;
+      } else if (purchaseBlocked) {
+        blockNoticeHtml = `
+          <div class="block-notice">
+            ⚠️ 현재 회원 등급에서 구매할 수 없는 상품이 포함되어 있습니다.
+          </div>`;
+      }
+
       summaryEl.style.display = 'block';
       summaryEl.innerHTML = `
         ${gradeInfoHtml}
+        ${blockNoticeHtml}
         <div style="background:#151515; border:1px solid #222; padding:20px; border-radius:12px; font-size:14px; line-height:1.8; color:#e5e7eb;">
           <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:12px; border-bottom:1px solid #222; margin-bottom:16px;">
             <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:14px; font-weight:600; color:#e5e7eb;">
@@ -283,7 +315,7 @@
           <div class="rule-card">
             <span class="rule-text">📦 상품별 최소 주문수량을 확인해주세요.</span>
             <span class="rule-status" style="color:${canOrder ? '#10b981' : '#f59e0b'};">
-              ${canOrder ? '✅ 주문 가능' : (selectedCart.length === 0 ? '상품을 선택하세요' : '⚠️ 수량 부족')}
+              ${canOrder ? '✅ 주문 가능' : (selectedCart.length === 0 ? '상품을 선택하세요' : '⚠️ 주문 불가')}
             </span>
             ${shortMsgHtml}
           </div>
@@ -294,7 +326,7 @@
             <hr style="border:0; border-top:1px solid #222; margin:12px 0;">
             <p style="font-size:18px; margin-bottom:16px;">총 합계: <b style="color:#ef4444; font-size:22px;">${total.toLocaleString()}원</b></p>
             <button id="checkout-btn" style="padding:14px 28px; background:${canOrder ? '#e5e7eb' : '#333'}; color:${canOrder ? '#111' : '#777'}; border:0; border-radius:8px; cursor:${canOrder ? 'pointer' : 'not-allowed'}; font-weight:600; font-size:15px; font-family:inherit;">
-              ${canOrder ? `선택한 상품 주문 (${selectedQty}개)` : (selectedCart.length === 0 ? '상품을 선택하세요' : '최소 수량을 확인하세요')}
+              ${canOrder ? `선택한 상품 주문 (${selectedQty}개)` : (selectedCart.length === 0 ? '상품을 선택하세요' : '주문 조건을 확인하세요')}
             </button>
           </div>
         </div>
@@ -358,6 +390,14 @@
       });
       document.getElementById('checkout-btn').onclick = () => {
         if (selectedCart.length === 0) { alert('주문할 상품을 선택해주세요.'); return; }
+        if (wholesaleHasNormalItem) {
+          alert('도매회원은 일반상품을 구매할 수 없습니다.\n도매전용관 상품만 주문 가능합니다.');
+          return;
+        }
+        if (purchaseBlocked) {
+          alert('현재 회원 등급에서 구매할 수 없는 상품이 포함되어 있습니다.\n상품 구성을 다시 확인해주세요.');
+          return;
+        }
         if (!canOrder) {
           const detail = shortGroups.map(g => {
             const label = g.targetGrade === 'wholesale' ? '도매상품' : g.targetGrade === 'vip' ? 'VIP상품' : '일반상품';
@@ -399,10 +439,12 @@
       });
 
       const m = getMember();
+      const memberGrade = m?.grade || '일반회원';
 
-      // ⭐⭐⭐ 도매전용 상품만 선택된 경우 쿠폰 사용 불가 ⭐⭐⭐
       const allWholesale = isAllWholesale(cart);
-      const coupons = allWholesale ? [] : await loadUsableCoupons();
+      // 도매회원은 일반상품 주문 자체가 불가하므로 쿠폰 노출하지 않음
+      const showCoupon = !allWholesale && memberGrade !== '도매회원';
+      const coupons = showCoupon ? await loadUsableCoupons() : [];
 
       const inputStyle = 'width:100%; padding:10px 12px; background:#0f0f0f; border:1px solid #2a2a2a; border-radius:8px; color:#e5e7eb; font-family:inherit; font-size:14px; box-sizing:border-box;';
       const labelStyle = 'font-size:13px; font-weight:600; color:#ccc; display:block; margin-bottom:4px;';
@@ -424,12 +466,18 @@
       const modal = document.createElement('div');
       modal.className = 'checkout-modal-backdrop';
 
-      // ⭐ 쿠폰 섹션 HTML: 도매전용이면 비활성화 안내, 아니면 쿠폰 선택
       let couponSectionHtml = '';
       if (allWholesale) {
         couponSectionHtml = `
           <div class="coupon-disabled-notice">
             🏭 도매전용 상품은 쿠폰 사용이 불가합니다.
+          </div>
+        `;
+      } else if (memberGrade === '도매회원') {
+        // 도매회원은 이 모달에 도달하면 안 되지만 안전상 안내
+        couponSectionHtml = `
+          <div class="coupon-disabled-notice">
+            🏭 도매회원은 일반상품 구매가 불가합니다.
           </div>
         `;
       } else if (coupons.length > 0) {
@@ -521,9 +569,23 @@
         ev.preventDefault();
         const f = ev.target;
 
+        // ⭐ 제출 직전 안전장치
+        const mg = getMember()?.grade || '일반회원';
+        if (mg === '도매회원') {
+          const bad = cart.find(it => (it.target_grade || 'all') === 'all');
+          if (bad) { alert('도매회원은 일반상품을 구매할 수 없습니다.'); return; }
+        }
+        if (mg === 'VIP회원') {
+          const bad = cart.find(it => (it.target_grade || 'all') === 'wholesale');
+          if (bad) { alert('VIP회원은 도매전용 상품을 구매할 수 없습니다.'); return; }
+        }
+        if (mg === '일반회원') {
+          const bad = cart.find(it => ['wholesale','vip'].includes(it.target_grade || 'all'));
+          if (bad) { alert('일반회원은 도매전용/VIP전용 상품을 구매할 수 없습니다.'); return; }
+        }
+
         let couponIdToUse = null;
         let discountAmount = 0;
-        // ⭐ 도매전용만 있는 경우 쿠폰 사용 불가 (couponSelect가 없음)
         if (couponSelect && couponSelect.value) {
           const opt = couponSelect.selectedOptions[0];
           couponIdToUse = couponSelect.value;

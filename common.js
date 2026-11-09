@@ -18,6 +18,27 @@ const GRADE_SHIPPING = {
   'VIP회원': { method: '택배', fee: '무료' },
 };
 
+// ============================================================
+// ⭐ 등급별 구매/열람 권한 규칙
+// - 일반회원: 일반상품 구매가능
+// - 도매회원: 일반상품 열람가능(구매불가) / 도매전용관 상품만 구매가능
+// - VIP회원: 일반상품 구매가능 + VIP전용관 상품 구매가능 / 도매전용관 이용불가
+// ============================================================
+function canAccessWholesale(memberGrade) {
+  return memberGrade === '도매회원';
+}
+function canAccessVip(memberGrade) {
+  return memberGrade === 'VIP회원';
+}
+function canPurchaseProduct(memberGrade, targetGrade) {
+  const g = memberGrade || '일반회원';
+  const tg = targetGrade || 'all';
+  if (tg === 'wholesale') return g === '도매회원';
+  if (tg === 'vip') return g === 'VIP회원';
+  // 일반상품: 일반회원, VIP회원만 구매 가능 / 도매회원은 열람만
+  return g === '일반회원' || g === 'VIP회원';
+}
+
 function getMemberGrade() {
   try {
     const m = JSON.parse(localStorage.getItem('member') || 'null');
@@ -970,7 +991,6 @@ async function syncCartFromServer() {
     if (typeof renderHeader === 'function' && document.getElementById('app-header')) {
       const mapPath = { 'index':'home','login':'login','signup':'signup','cart':'cart','orders':'orders','product':'product','mypage':'mypage','myorders':'myorders','wholesale':'wholesale','vip':'vip' };
       const current = mapPath[_pathName] || 'home';
-      // renderHeader는 _headerRendered 상태면 배지/메뉴만 갱신
       renderHeader(current);
     }
   } catch (e) {
@@ -979,14 +999,12 @@ async function syncCartFromServer() {
 }
 
 // 로컬 장바구니 전체를 서버에 반영 (전체 삭제 후 재삽입)
-// 비로그인 상태면 그냥 무시
 async function pushCartToServer(cartArray) {
   const m = getLoggedMember();
   if (!m || !m.id) return;
   const client = getSupabaseClient();
   if (!client) return;
   try {
-    // 기존 서버 행 전체 삭제
     const { error: delErr } = await client.from('carts').delete().eq('member_id', m.id);
     if (delErr) { console.warn('장바구니 서버 초기화 실패:', delErr.message); return; }
 
@@ -1013,7 +1031,6 @@ async function pushCartToServer(cartArray) {
     const { data, error } = await client.from('carts').insert(rows).select('id');
     if (error) { console.warn('장바구니 서버 저장 실패:', error.message); return; }
 
-    // 서버 id를 로컬에 반영
     if (Array.isArray(data)) {
       data.forEach((r, i) => {
         if (cartArray[i]) cartArray[i]._server_id = r.id;
@@ -1270,8 +1287,10 @@ async function verifyMemberStatus() {
 
 let _headerRendered = false;
 
-// ⭐ 도매전용관 버튼은 모든 회원에게 항상 노출 (접근 제한은 wholesale.html에서 처리)
-// ⭐ VIP전용관 버튼은 VIP회원에게만 노출
+// ⭐ 등급별 하단 탭 구성
+// - 일반회원: 도매/VIP 버튼 모두 없음
+// - 도매회원: 도매전용관만
+// - VIP회원: VIP전용관만 (도매 이용불가)
 function buildBottomNav(current, isMember, svgIcons, memberGrade) {
   const commonTabs = `
     <a href="index.html" data-nav="home"
@@ -1303,10 +1322,10 @@ function buildBottomNav(current, isMember, svgIcons, memberGrade) {
        </a>`;
 
   let gradeTabs = '';
-  if (isMember && memberGrade === 'VIP회원') {
-    gradeTabs = wholesaleTab + vipTab;
-  } else if (isMember) {
+  if (isMember && memberGrade === '도매회원') {
     gradeTabs = wholesaleTab;
+  } else if (isMember && memberGrade === 'VIP회원') {
+    gradeTabs = vipTab;
   }
 
   const memberTabs = isMember
@@ -1367,7 +1386,6 @@ function bindBottomLogout() {
 
 // ============================================================
 // ⭐ 공통 상단 상품 검색
-// 검색 결과는 헤더 아래 팝업으로 표시하고, 선택 시 상품 상세로 이동
 // ============================================================
 let _headerSearchProducts = null;
 let _headerSearchLoading = false;
@@ -1619,7 +1637,8 @@ function renderHeader(current) {
     flex-shrink: 0;
   `;
 
-  const wholesaleBtn = isMember
+  // ⭐ 등급별 버튼 노출 규칙
+  const wholesaleBtn = (isMember && memberGrade === '도매회원')
     ? `<a href="wholesale.html" data-nav="wholesale" style="${btnStyle(current === 'wholesale')}">도매전용관</a>`
     : '';
 
@@ -1751,7 +1770,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const isOk = await verifyMemberStatus();
   if (!isOk) return;
 
-  // ⭐ 로그인 상태라면 서버 장바구니를 먼저 동기화 (다른 기기 → 이 기기)
   if (isLoggedInMember()) {
     try { await syncCartFromServer(); } catch (e) {}
   }

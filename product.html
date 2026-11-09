@@ -229,11 +229,6 @@
     }
     function shouldHidePrice(product) { return !isLoggedIn() && isNewProduct(product); }
 
-    // ⭐ 도매전용 상품인지 확인
-    function isWholesaleProduct(product) {
-      return (product?.target_grade || 'all') === 'wholesale';
-    }
-
     async function loadShippingFee() {
       const { data } = await db.from('settings').select('value').eq('key', 'shipping_fee').maybeSingle();
       globalShipping = data ? Number(data.value) || 0 : 0;
@@ -316,7 +311,10 @@
 
       const member = getMember();
       const memberGrade = member?.grade || '일반회원';
-      if (data.target_grade === 'wholesale' && memberGrade !== '도매회원') {
+      const targetGrade = data.target_grade || 'all';
+
+      // ⭐ 도매전용 상품: 도매회원만 접근
+      if (targetGrade === 'wholesale' && memberGrade !== '도매회원') {
         detailEl.innerHTML = `<div style="max-width:420px; margin:40px auto; text-align:center; background:#151515; border:1px solid #222; padding:32px 20px; border-radius:12px;">
           <div style="font-size:36px; margin-bottom:12px;">🔒</div>
           <h2 style="color:#fff; font-size:18px; margin:0 0 8px;">도매회원 전용 상품</h2>
@@ -325,7 +323,9 @@
         </div>`;
         return;
       }
-      if (data.target_grade === 'vip' && memberGrade !== 'VIP회원') {
+
+      // ⭐ VIP전용 상품: VIP회원만 접근
+      if (targetGrade === 'vip' && memberGrade !== 'VIP회원') {
         detailEl.innerHTML = `<div style="max-width:420px; margin:40px auto; text-align:center; background:#151515; border:1px solid #222; padding:32px 20px; border-radius:12px;">
           <div style="font-size:36px; margin-bottom:12px;">🔒</div>
           <h2 style="color:#fff; font-size:18px; margin:0 0 8px;">VIP회원 전용 상품</h2>
@@ -335,10 +335,16 @@
         return;
       }
 
+      // ⭐ 일반상품 + 도매회원 = 열람만 가능 (구매 불가)
+      const isWholesaleViewOnly = (targetGrade === 'all' && memberGrade === '도매회원');
+
       const hidePrice = shouldHidePrice(data);
       const isNew = isNewProduct(data);
       const pricing = getPricing(data);
       const hasDiscount = pricing.discountRate > 0;
+
+      // ⭐ 구매 UI 노출 여부
+      const showPurchaseUI = !hidePrice && !isWholesaleViewOnly;
 
       const { data: sharedImageRows } = await db
         .from('settings')
@@ -400,9 +406,9 @@
       ` : '';
 
       const newBadge = isNew ? `<span style="display:inline-block; margin-left:8px; background:#e53935; color:#fff; font-size:11px; font-weight:700; padding:3px 8px; border-radius:4px; vertical-align:middle;">NEW</span>` : '';
-      const gradeBadge = (data.target_grade === 'wholesale')
+      const gradeBadge = (targetGrade === 'wholesale')
         ? `<span style="display:inline-block; margin-left:8px; background:#f59e0b; color:#fff; font-size:11px; font-weight:700; padding:3px 8px; border-radius:4px; vertical-align:middle;">도매전용</span>`
-        : (data.target_grade === 'vip')
+        : (targetGrade === 'vip')
         ? `<span style="display:inline-block; margin-left:8px; background:#a855f7; color:#fff; font-size:11px; font-weight:700; padding:3px 8px; border-radius:4px; vertical-align:middle;">VIP전용</span>`
         : '';
 
@@ -427,6 +433,13 @@
              <p style="color:#ef4444; font-weight:700; font-size:24px; margin:0;">${pricing.finalPrice.toLocaleString()}원</p>
            </div>`;
 
+      // ⭐ 도매회원 열람 전용 안내 배너
+      const viewOnlyBanner = isWholesaleViewOnly ? `
+        <div style="margin:0 0 12px; padding:12px 14px; background:#1a1a1a; border:1px dashed #f59e0b; border-radius:8px; font-size:13px; color:#fbbf24; line-height:1.7;">
+          🏭 <b>도매회원</b>은 일반상품을 열람만 할 수 있으며, 구매는 <b>도매전용관 상품</b>만 가능합니다.
+        </div>
+      ` : '';
+
       const sizeDetailHtml = buildSizeDetailHtml(data.size_detail);
 
       detailEl.innerHTML = `
@@ -443,16 +456,17 @@
                   ${shareBtn}
                 </div>
                 ${priceHtml}
+                ${viewOnlyBanner}
                 <p style="margin:0 0 16px;">${shippingLabel}</p>
                 ${minQtyNotice}
-                ${hidePrice ? '' : `
+                ${showPurchaseUI ? `
                   <div style="margin-top:12px; font-size:13px; font-weight:600; color:#fff; margin-bottom:8px;">옵션 선택 (필수) <span style="color:#ef4444;">*</span></div>
                   ${row1}
                   ${row2}
                   <div id="selected-items" style="margin-top:12px;"></div>
-                `}
+                ` : ''}
               </div>
-              ${hidePrice ? '' : `
+              ${showPurchaseUI ? `
                 <div style="margin-top:20px;">
                   <div id="total-preview" style="text-align:right; font-size:14px; font-weight:600; color:#ef4444; line-height:1.6; margin-bottom:16px;"></div>
                   <div style="display:flex; gap:8px;">
@@ -460,7 +474,13 @@
                     <button id="buy-btn" style="flex:1; padding:14px; background:#e5e7eb; color:#111; border:0; border-radius:8px; cursor:pointer; font-weight:600; font-size:15px; font-family:inherit;">바로 구매</button>
                   </div>
                 </div>
-              `}
+              ` : ''}
+              ${isWholesaleViewOnly ? `
+                <div style="margin-top:20px; padding:14px; background:#1a1a1a; color:#f59e0b; border:1px dashed #f59e0b; border-radius:8px; font-weight:600; font-size:14px; text-align:center; line-height:1.7;">
+                  🏭 도매회원은 이 상품을 구매할 수 없습니다.<br>
+                  <a href="wholesale.html" style="color:#60a5fa; text-decoration:underline; display:inline-block; margin-top:6px;">도매전용관으로 이동 →</a>
+                </div>
+              ` : ''}
               ${hidePrice ? `
                 <div style="margin-top:20px; padding:14px; background:#1a1a1a; color:#666; border:1px dashed #333; border-radius:8px; font-weight:600; font-size:14px; text-align:center;">
                   🔒 로그인 후 구매 가능
@@ -490,7 +510,7 @@
       const shareEl = document.getElementById('share-btn');
       if (shareEl) shareEl.onclick = () => shareProduct(data);
 
-      if (!hidePrice) {
+      if (showPurchaseUI) {
         detailEl.querySelectorAll('select[data-opt-name]').forEach(sel => {
           sel.addEventListener('change', () => handleOptionChange());
         });
@@ -664,6 +684,21 @@
       const p = currentProduct;
       if (!p) return;
       if (shouldHidePrice(p)) { alert('로그인 후 이용 가능합니다.'); return; }
+      const memberGrade = getMember()?.grade || '일반회원';
+      const tg = p.target_grade || 'all';
+      if (tg === 'all' && memberGrade === '도매회원') {
+        alert('도매회원은 일반상품을 구매할 수 없습니다.\n도매전용관 상품만 구매 가능합니다.');
+        return;
+      }
+      if (tg === 'wholesale' && memberGrade !== '도매회원') {
+        alert('도매회원만 구매 가능한 상품입니다.');
+        return;
+      }
+      if (tg === 'vip' && memberGrade !== 'VIP회원') {
+        alert('VIP회원만 구매 가능한 상품입니다.');
+        return;
+      }
+
       if (selectedItems.length === 0) { alert('옵션을 선택해주세요.'); return; }
       const totalQty = selectedItems.reduce((s, it) => s + it.qty, 0);
       const pricing = getPricing(p);
@@ -750,8 +785,7 @@
 
       const m = getMember();
 
-      // ⭐⭐⭐ 도매전용 상품이면 쿠폰 사용 불가 ⭐⭐⭐
-      const isWholesale = isWholesaleProduct(currentProduct);
+      const isWholesale = (currentProduct.target_grade || 'all') === 'wholesale';
       const coupons = isWholesale ? [] : await loadUsableCoupons();
 
       const inputStyle = 'width:100%; padding:10px 12px; background:#0f0f0f; border:1px solid #2a2a2a; border-radius:8px; color:#e5e7eb; font-family:inherit; font-size:14px; box-sizing:border-box;';
@@ -760,7 +794,6 @@
       const modal = document.createElement('div');
       modal.className = 'checkout-modal-backdrop';
 
-      // ⭐ 쿠폰 섹션 HTML
       let couponSectionHtml = '';
       if (isWholesale) {
         couponSectionHtml = `
@@ -857,9 +890,21 @@
         ev.preventDefault();
         const f = ev.target;
 
+        // ⭐ 제출 직전 안전장치 (등급별 구매 차단)
+        const mg = getMember()?.grade || '일반회원';
+        const tg = currentProduct.target_grade || 'all';
+        if (tg === 'all' && mg === '도매회원') {
+          alert('도매회원은 일반상품을 구매할 수 없습니다.'); return;
+        }
+        if (tg === 'wholesale' && mg !== '도매회원') {
+          alert('도매회원만 구매 가능한 상품입니다.'); return;
+        }
+        if (tg === 'vip' && mg !== 'VIP회원') {
+          alert('VIP회원만 구매 가능한 상품입니다.'); return;
+        }
+
         let couponIdToUse = null;
         let discountAmount = 0;
-        // ⭐ 도매전용이면 couponSelect가 없으므로 자동으로 쿠폰 미사용
         if (couponSelect && couponSelect.value) {
           const opt = couponSelect.selectedOptions[0];
           couponIdToUse = couponSelect.value;
