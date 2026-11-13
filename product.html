@@ -20,6 +20,15 @@
       box-sizing: border-box !important;
     }
 
+    /* ⭐ 상품 정보 카드만 870px 확장 (770px 컨테이너 탈출) */
+    .product-card-wide {
+      width: 870px;
+      max-width: calc(100vw - 32px);
+      margin-left: 50%;
+      transform: translateX(-50%);
+      box-sizing: border-box;
+    }
+
     .checkout-modal-backdrop { position: fixed !important; top: 0; left: 0; right: 0; bottom: 0; width: 100vw !important; height: 100vh !important; height: 100dvh !important; background: rgba(0,0,0,.8); z-index: 999999 !important; display: flex !important; align-items: flex-start !important; justify-content: center !important; padding: 10px !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch; box-sizing: border-box; }
     .checkout-modal-box { background: #151515; border: 1px solid #222; padding: 20px 16px; border-radius: 12px; width: 100% !important; max-width: 460px !important; margin: 20px auto !important; color: #e5e7eb; box-sizing: border-box; position: relative; }
     .checkout-modal-box .checkout-form { display: grid !important; gap: 10px !important; background: none !important; padding: 0 !important; border: 0 !important; max-width: none !important; width: 100% !important; }
@@ -466,8 +475,9 @@
 
       const sizeDetailHtml = buildSizeDetailHtml(data.size_detail);
 
+      // ⭐ 상품 정보 카드만 product-card-wide 클래스로 870px 확장
       detailEl.innerHTML = `
-        <div style="background:#151515; border:1px solid #222; border-radius:12px; padding:16px;">
+        <div class="product-card-wide" style="background:#151515; border:1px solid #222; border-radius:12px; padding:16px;">
           <div style="display:flex; gap:24px; flex-wrap:wrap; align-items:stretch;">
             <div style="flex:1 1 320px; min-width:0;">
               <img src="${data.main_image}" alt="${data.name}" style="width:100%; border-radius:8px; display:block;">
