@@ -182,6 +182,20 @@
       .size-detail-table thead th { font-size: 11px; padding: 10px 4px; }
       .size-detail-table tbody td { font-size: 12px; padding: 10px 4px; }
     }
+
+    /* ⭐ 상세/공지/사용설명 이미지 최대 폭 770px 제한 */
+    .detail-image-wrap {
+      width: 100%;
+      max-width: 770px;
+      margin: 0 auto;
+    }
+    .detail-image-wrap img {
+      display: block;
+      width: 100%;
+      height: auto;
+      margin: 0 auto;
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body>
@@ -355,7 +369,10 @@
       const sharedNoticeImage = sharedImageMap.global_product_detail_notice_image || '';
       const sharedFooterImage = sharedImageMap.global_product_detail_footer_image || '';
 
-      const detailImgs = (data.detail_images || []).map(url => `<img src="${url}" alt="상세" loading="lazy" style="width:100%; display:block; margin-top:8px; border-radius:8px;">`).join('');
+      // ⭐ 상세 이미지: 최대 770px 제한
+      const detailImgs = (data.detail_images || []).map(url =>
+        `<div class="detail-image-wrap"><img src="${url}" alt="상세" loading="lazy"></div>`
+      ).join('');
 
       let shippingLabel = '';
       if (pricing.targetGrade === 'wholesale') {
@@ -490,7 +507,7 @@
           </div>
         </div>
 
-        ${sharedNoticeImage ? `<div class="global-product-detail-notice" style="margin-top:16px;"><img src="${sharedNoticeImage}" alt="상품 공지" loading="lazy" style="display:block;width:100%;height:auto;border-radius:8px;"></div>` : ''}
+        ${sharedNoticeImage ? `<div class="global-product-detail-notice detail-image-wrap" style="margin-top:16px;"><img src="${sharedNoticeImage}" alt="상품 공지" loading="lazy"></div>` : ''}
 
         <div class="ship-cal-box" id="ship-cal-box">
           <div class="scal-title">배송기간 참고 달력</div>
@@ -504,7 +521,7 @@
         ${sizeDetailHtml}
 
         ${detailImgs ? `<div style="margin-top:8px;">${detailImgs}</div>` : ''}
-        ${sharedFooterImage ? `<div class="global-product-detail-footer" style="margin-top:16px;"><img src="${sharedFooterImage}" alt="상품 사용설명 및 배송안내" loading="lazy" style="display:block;width:100%;height:auto;border-radius:8px;"></div>` : ''}
+        ${sharedFooterImage ? `<div class="global-product-detail-footer detail-image-wrap" style="margin-top:16px;"><img src="${sharedFooterImage}" alt="상품 사용설명 및 배송안내" loading="lazy"></div>` : ''}
       `;
 
       const shareEl = document.getElementById('share-btn');
