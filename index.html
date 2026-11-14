@@ -69,7 +69,7 @@
       #new-item-heading .ni-sub { font-size: 11px; }
     }
 
-    /* ⭐ 인기 아이템 헤딩 (주황/골드 계열) */
+    /* ⭐ 인기 아이템 헤딩 */
     #popular-item-heading {
       display: flex;
       max-width: 1400px;
@@ -229,7 +229,6 @@
     let currentPage = 1;
     let currentSearch = '';
 
-    // ⭐ 인기상품용 변수
     let popularProducts = [];
     let popularCurrentPage = 1;
 
@@ -391,9 +390,6 @@
       }, { passive: true });
     })();
 
-    // ============================================================
-    // ⭐ 신규 상품 (일반 상품만 노출: target_grade = 'all' 또는 null)
-    // ============================================================
     async function loadProducts() {
       const list = document.getElementById('product-list');
       const { data, error } = await db.from('products').select('*').or('target_grade.eq.all,target_grade.is.null').order('created_at', { ascending: false });
@@ -512,16 +508,9 @@
       });
     }
 
-    // ============================================================
-    // ⭐ 인기 상품 (product_views 기준 클릭수 많은 순)
-    // ============================================================
     async function loadPopularProducts() {
       const list = document.getElementById('popular-list');
       if (!list) return;
-
-      // 1) 인기 상품: 일반 상품(all/null) 전체 로드
-      // 2) product_views 에서 product_id별 카운트 집계
-      // 3) 클릭수 내림차순 정렬 (동률이면 최신순)
 
       let products = [];
       try {
@@ -546,7 +535,6 @@
         return;
       }
 
-      // 클릭수 집계
       const viewCountMap = {};
       try {
         const { data: viewData, error: viewErr } = await db
@@ -565,7 +553,6 @@
         console.warn('인기상품 - 클릭수 로드 오류(무시):', e);
       }
 
-      // 정렬: 클릭수 desc → 최신 created_at desc
       popularProducts = products
         .map(p => ({ ...p, _viewCount: viewCountMap[String(p.id)] || 0 }))
         .sort((a, b) => {
@@ -594,7 +581,7 @@
       list.innerHTML = items.map((p, idx) => {
         const globalRank = start + idx + 1;
         const hidePrice = shouldHidePrice(p);
-        const rankClass = globalRank <= 1 ? 'rank-1' : globalRank === 2 ? 'rank-2' : globalRank === 3 ? 'rank-3' : '';
+        const rankClass = globalRank === 1 ? 'rank-1' : globalRank === 2 ? 'rank-2' : globalRank === 3 ? 'rank-3' : '';
         const rankBadge = globalRank <= 20
           ? `<span class="rank-badge ${rankClass}">#${globalRank}</span>`
           : '';
