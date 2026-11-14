@@ -11,21 +11,20 @@
     input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 
-    /* ⭐ 상품 상세 페이지 전체 폭 770px 통일 */
+    /* ⭐ 상품 상세 페이지 전체 폭 1177px 통일 */
     #product-detail {
-      max-width: 770px !important;
+      max-width: 1177px !important;
       width: 100% !important;
       margin: 20px auto !important;
       padding: 0 16px !important;
       box-sizing: border-box !important;
     }
 
-    /* ⭐ 상품 정보 카드만 1177px 확장 (770px 컨테이너 탈출) */
+    /* ⭐ 상품 정보 카드도 1177px로 통일 (부모 폭과 동일) */
     .product-card-wide {
-      width: 1177px;
-      max-width: calc(100vw - 32px);
-      margin-left: 50%;
-      transform: translateX(-50%);
+      width: 100%;
+      max-width: 1177px;
+      margin: 0 auto;
       box-sizing: border-box;
     }
 
@@ -201,7 +200,7 @@
       .size-detail-table tbody td { font-size: 12px; padding: 10px 4px; }
     }
 
-    /* ⭐ 상세/공지/사용설명 이미지 (상위 770px 폭에 자동 맞춤) */
+    /* ⭐ 상세/공지/사용설명 이미지 (상위 1177px 폭에 자동 맞춤) */
     .detail-image-wrap {
       width: 100%;
       max-width: 100%;
@@ -386,7 +385,7 @@
       const sharedNoticeImage = sharedImageMap.global_product_detail_notice_image || '';
       const sharedFooterImage = sharedImageMap.global_product_detail_footer_image || '';
 
-      // 상세 이미지 (770px 폭 안에서 자동 맞춤)
+      // 상세 이미지 (1177px 폭 안에서 자동 맞춤)
       const detailImgs = (data.detail_images || []).map(url =>
         `<div class="detail-image-wrap"><img src="${url}" alt="상세" loading="lazy"></div>`
       ).join('');
@@ -475,7 +474,7 @@
 
       const sizeDetailHtml = buildSizeDetailHtml(data.size_detail);
 
-      // ⭐ 상품 정보 카드만 product-card-wide 클래스로 870px 확장
+      // ⭐ 상품 정보 카드 + 전체 폭 1177px 통일
       detailEl.innerHTML = `
         <div class="product-card-wide" style="background:#151515; border:1px solid #222; border-radius:12px; padding:16px;">
           <div style="display:flex; gap:24px; flex-wrap:wrap; align-items:stretch;">
