@@ -454,6 +454,7 @@
         <button class="nav-item" data-tab="members">👥 회원</button>
         <button class="nav-item" data-tab="coupons">🎟️ 쿠폰</button>
         <button class="nav-item" data-tab="notices">📢 공지사항</button>
+        <button class="nav-item" data-tab="boards">💬 게시판</button>
         <button class="nav-item" data-tab="stats">📊 접속통계</button>
         <button class="nav-item" data-tab="settings">⚙️ 사이트 설정</button>
       </div>
@@ -675,14 +676,17 @@
 
         <section id="tab-notices" class="admin-section">
           <h1 class="page-title">공지사항 관리</h1>
-          <p class="page-subtitle">공지사항을 등록/삭제합니다 (메인페이지 하단에 표시됩니다)</p>
+          <p class="page-subtitle">공지사항을 등록, 수정, 삭제합니다 (메인페이지 하단에 표시됩니다)</p>
 
           <div class="card">
-            <div class="card-title">📝 새 공지사항 등록</div>
+            <div class="card-title" id="notice-form-title">📝 새 공지사항 등록</div>
             <form id="notice-form" style="display:grid; gap:10px;">
               <input name="title" placeholder="공지사항 제목" required maxlength="100">
               <textarea name="content" placeholder="공지사항 내용" required style="min-height:120px;"></textarea>
-              <button type="submit" class="btn btn-primary" style="justify-self:start;">공지 등록</button>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button type="submit" id="notice-submit-btn" class="btn btn-primary" style="justify-self:start;">공지 등록</button>
+                <button type="button" id="notice-cancel-edit" class="btn btn-secondary" style="display:none;">수정 취소</button>
+              </div>
             </form>
             <p id="notice-msg" class="msg"></p>
           </div>
@@ -691,6 +695,29 @@
             <div class="card-title">📋 등록된 공지사항 <span id="notice-admin-count" class="hint"></span></div>
             <div id="notice-admin-list" class="row-list">로딩중...</div>
             <div id="notice-admin-pagination" class="admin-list-pagination"></div>
+          </div>
+        </section>
+
+        <section id="tab-boards" class="admin-section">
+          <h1 class="page-title">게시판 관리</h1>
+          <p class="page-subtitle">메인페이지의 상품문의 / 게시판 글을 관리합니다. 관리자가 직접 글을 등록하고 수정하거나 삭제할 수 있습니다.</p>
+          <div class="card">
+            <div class="card-title" id="board-admin-form-title">📝 게시글 등록</div>
+            <form id="board-admin-form" style="display:grid;gap:10px;">
+              <input name="title" placeholder="게시글 제목" required maxlength="100">
+              <textarea name="content" placeholder="게시글 내용" required style="min-height:140px;"></textarea>
+              <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;"><input type="checkbox" name="is_secret" style="width:18px;height:18px;"> 비밀글로 등록</label>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button type="submit" id="board-admin-submit" class="btn btn-primary">게시글 등록</button>
+                <button type="button" id="board-admin-cancel" class="btn btn-secondary" style="display:none;">수정 취소</button>
+              </div>
+            </form>
+            <p id="board-admin-msg" class="msg"></p>
+          </div>
+          <div class="card">
+            <div class="card-title">📋 등록된 게시글 <span id="board-admin-count" class="hint"></span></div>
+            <div id="board-admin-list" class="row-list">로딩중...</div>
+            <div id="board-admin-pagination" class="admin-list-pagination"></div>
           </div>
         </section>
 
@@ -976,6 +1003,7 @@
         if (btn.dataset.tab === 'stats') loadStats();
         if (btn.dataset.tab === 'coupons') loadCouponsAndMembers();
         if (btn.dataset.tab === 'notices') loadNoticeAdminList();
+        if (btn.dataset.tab === 'boards') loadBoardAdminList();
       });
     });
 
@@ -998,6 +1026,7 @@
       loadAdminList(); loadGlobalDetailImages(); loadOrders(); loadMembers();
       loadCouponsAndMembers();
       loadNoticeAdminList();
+      loadBoardAdminList();
     }
 
     loginForm.addEventListener('submit', async (e) => {
@@ -2150,10 +2179,11 @@
       el.innerHTML = data.map(n => `
         <div class="row-item">
           <span class="badge" style="background:#111827;">📢</span>
-          <span class="row-strong" style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis;">${String(n.title || '').replace(/</g,'&lt;')}</span>
+          <span class="row-strong" style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(n.title || '')}</span>
           <span class="row-muted">${formatKST(n.created_at, { dateOnly: true })}</span>
           <div class="row-actions">
             <button class="btn btn-secondary btn-sm notice-view" data-id="${n.id}">보기</button>
+            <button class="btn btn-primary btn-sm notice-edit" data-id="${n.id}">수정</button>
             <button class="btn btn-danger btn-sm notice-del" data-id="${n.id}">삭제</button>
           </div>
         </div>
@@ -2163,6 +2193,20 @@
           const n = data.find(x => String(x.id) === String(btn.dataset.id));
           if (!n) return;
           alert(`제목: ${n.title}\n\n내용:\n${n.content}\n\n작성일: ${formatKST(n.created_at, { full: true })}`);
+        });
+      });
+      el.querySelectorAll('.notice-edit').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const n = data.find(x => String(x.id) === String(btn.dataset.id));
+          if (!n) return;
+          const f = document.getElementById('notice-form');
+          f.dataset.editId = n.id;
+          f.elements.title.value = n.title || '';
+          f.elements.content.value = n.content || '';
+          document.getElementById('notice-form-title').textContent = '✏️ 공지사항 수정';
+          document.getElementById('notice-submit-btn').textContent = '수정 저장';
+          document.getElementById('notice-cancel-edit').style.display = 'inline-flex';
+          f.scrollIntoView({ behavior: 'smooth', block: 'center' });
         });
       });
       el.querySelectorAll('.notice-del').forEach(btn => {
@@ -2197,27 +2241,73 @@
       });
     }
 
+    function resetNoticeForm() {
+      const f = document.getElementById('notice-form');
+      f.reset(); delete f.dataset.editId;
+      document.getElementById('notice-form-title').textContent = '📝 새 공지사항 등록';
+      document.getElementById('notice-submit-btn').textContent = '공지 등록';
+      document.getElementById('notice-cancel-edit').style.display = 'none';
+    }
+    document.getElementById('notice-cancel-edit')?.addEventListener('click', resetNoticeForm);
     document.getElementById('notice-form')?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const f = e.target;
-      const m = document.getElementById('notice-msg');
-      m.className = 'msg';
-      m.textContent = '등록 중...';
-      const { error } = await db.from('notices').insert({
-        title: f.title.value.trim(),
-        content: f.content.value.trim(),
+      const f = e.target, m = document.getElementById('notice-msg');
+      m.className = 'msg'; m.textContent = '저장 중...';
+      const payload = { title: f.elements.title.value.trim(), content: f.elements.content.value.trim() };
+      const editId = f.dataset.editId;
+      const result = editId
+        ? await db.from('notices').update(payload).eq('id', editId)
+        : await db.from('notices').insert(payload);
+      if (result.error) { m.className = 'msg error'; m.textContent = '❌ ' + result.error.message; return; }
+      m.className = 'msg success'; m.textContent = editId ? '✅ 수정 완료!' : '✅ 등록 완료!';
+      resetNoticeForm(); noticeAdminPage = 1; loadNoticeAdminList();
+    });
+
+    // ============================================================
+    // 게시판 관리자 CRUD
+    // ============================================================
+    let boardAdminPage = 1, boardAdminTotal = 0;
+    const BOARD_ADMIN_PER_PAGE = 10;
+    let boardAdminSessionId = null;
+    async function loadBoardAdminList() {
+      const el = document.getElementById('board-admin-list'); if (!el) return;
+      el.innerHTML = '로딩중...';
+      const from = (boardAdminPage - 1) * BOARD_ADMIN_PER_PAGE;
+      const { data, count, error } = await db.from('board_posts').select('*', {count:'exact'}).order('created_at',{ascending:false}).range(from, from + BOARD_ADMIN_PER_PAGE - 1);
+      if (error) { el.innerHTML = `<p style="color:#dc2626;">${escapeHtml(error.message)}</p>`; return; }
+      boardAdminTotal = count || 0;
+      document.getElementById('board-admin-count').textContent = `총 ${boardAdminTotal}건`;
+      if (!data || !data.length) { el.innerHTML = '<p style="text-align:center;color:#9ca3af;padding:20px;">등록된 게시글이 없습니다.</p>'; document.getElementById('board-admin-pagination').innerHTML=''; return; }
+      el.innerHTML = data.map(b => `<div class="row-item"><span class="badge" style="background:#2563eb;">${b.is_secret ? '🔒 비밀' : '💬 게시글'}</span><span class="row-strong" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(b.title || '')}</span><span class="row-muted">${escapeHtml(b.member_name || '관리자')} · ${formatKST(b.created_at,{dateOnly:true})}</span><div class="row-actions"><button class="btn btn-primary btn-sm board-admin-edit" data-id="${b.id}">수정</button><button class="btn btn-danger btn-sm board-admin-del" data-id="${b.id}">삭제</button></div></div>`).join('');
+      el.querySelectorAll('.board-admin-edit').forEach(btn => btn.onclick = () => {
+        const b = data.find(x => String(x.id) === String(btn.dataset.id)); if (!b) return;
+        const f = document.getElementById('board-admin-form'); f.dataset.editId = b.id;
+        f.elements.title.value = b.title || ''; f.elements.content.value = b.content || ''; f.elements.is_secret.checked = !!b.is_secret;
+        document.getElementById('board-admin-form-title').textContent = '✏️ 게시글 수정';
+        document.getElementById('board-admin-submit').textContent = '수정 저장';
+        document.getElementById('board-admin-cancel').style.display = 'inline-flex'; f.scrollIntoView({behavior:'smooth',block:'center'});
       });
-      if (error) {
-        m.className = 'msg error';
-        m.textContent = '❌ ' + error.message;
-      } else {
-        m.className = 'msg success';
-        m.textContent = '✅ 등록 완료!';
-        f.reset();
-        noticeAdminPage = 1;
-        loadNoticeAdminList();
-        setTimeout(() => m.textContent = '', 2000);
-      }
+      el.querySelectorAll('.board-admin-del').forEach(btn => btn.onclick = async () => {
+        if (!confirm('이 게시글을 삭제할까요?')) return;
+        const {error} = await db.from('board_posts').delete().eq('id',btn.dataset.id);
+        if (error) { alert('❌ 삭제 실패: '+error.message); return; }
+        alert('✅ 삭제되었습니다.'); loadBoardAdminList();
+      });
+      const pages = Math.ceil(boardAdminTotal / BOARD_ADMIN_PER_PAGE), pg = document.getElementById('board-admin-pagination');
+      pg.innerHTML = pages <= 1 ? '' : Array.from({length:pages},(_,i)=>`<button class="btn btn-sm ${i+1===boardAdminPage?'btn-primary':'btn-secondary'}" data-page="${i+1}">${i+1}</button>`).join('');
+      pg.querySelectorAll('button').forEach(b=>b.onclick=()=>{boardAdminPage=Number(b.dataset.page);loadBoardAdminList();});
+    }
+    function resetBoardAdminForm() { const f=document.getElementById('board-admin-form'); f.reset(); delete f.dataset.editId; document.getElementById('board-admin-form-title').textContent='📝 게시글 등록'; document.getElementById('board-admin-submit').textContent='게시글 등록'; document.getElementById('board-admin-cancel').style.display='none'; }
+    document.getElementById('board-admin-cancel')?.addEventListener('click',resetBoardAdminForm);
+    document.getElementById('board-admin-form')?.addEventListener('submit',async e=>{
+      e.preventDefault(); const f=e.target, msg=document.getElementById('board-admin-msg'); msg.className='msg'; msg.textContent='저장 중...';
+      const {data:{session}} = await db.auth.getSession();
+      const payload={title:f.elements.title.value.trim(),content:f.elements.content.value.trim(),is_secret:f.elements.is_secret.checked};
+      const editId=f.dataset.editId; let result;
+      if(editId) result=await db.from('board_posts').update(payload).eq('id',editId);
+      else { payload.member_id=session?.user?.id || null; payload.member_name='관리자'; payload.member_username='admin'; result=await db.from('board_posts').insert(payload); }
+      if(result.error){msg.className='msg error';msg.textContent='❌ '+result.error.message;return;}
+      msg.className='msg success';msg.textContent=editId?'✅ 수정 완료!':'✅ 게시글 등록 완료!'; resetBoardAdminForm(); boardAdminPage=1; loadBoardAdminList();
     });
 
     // ===== 주문 관리 =====
