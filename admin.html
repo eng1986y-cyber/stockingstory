@@ -1034,6 +1034,35 @@
       return data.publicUrl;
     }
 
+    // ⭐⭐⭐ Storage에서 실제 파일 삭제 (URL → path 추출) ⭐⭐⭐
+    async function deleteSiteImageByUrl(url, folderHint) {
+      if (!url || typeof url !== 'string') return;
+      try {
+        // Supabase Storage public URL 패턴:
+        // https://<project>.supabase.co/storage/v1/object/public/site-assets/<path>
+        const marker = `/storage/v1/object/public/${SITE_ASSET_BUCKET}/`;
+        const idx = url.indexOf(marker);
+        if (idx === -1) return; // 다른 도메인/외부 URL이면 무시
+
+        let path = url.slice(idx + marker.length);
+        // 쿼리스트링 제거
+        const qIdx = path.indexOf('?');
+        if (qIdx !== -1) path = path.slice(0, qIdx);
+        path = decodeURIComponent(path);
+        if (!path) return;
+
+        // folderHint가 주어졌고 경로가 일치하지 않으면 그래도 시도 (삭제 실패시 무시)
+        const { error } = await db.storage.from(SITE_ASSET_BUCKET).remove([path]);
+        if (error) {
+          console.warn('[Storage 삭제 실패]', path, error.message);
+        } else {
+          console.log('[Storage 삭제 완료]', path);
+        }
+      } catch (e) {
+        console.warn('[Storage 삭제 오류]', e);
+      }
+    }
+
     const GLOBAL_DETAIL_IMAGE_KEYS = {
       notice: 'global_product_detail_notice_image',
       footer: 'global_product_detail_footer_image'
@@ -1100,6 +1129,19 @@
         const url = document.getElementById(prefix + '-url').value.trim();
         msgEl.className = 'msg';
         msgEl.textContent = '저장 중...';
+
+        // ⭐ 기존 URL 조회 → 새 URL과 다르면 기존 Storage 파일 삭제
+        try {
+          const key = GLOBAL_DETAIL_IMAGE_KEYS[type];
+          const { data: oldRow } = await db.from('settings').select('value').eq('key', key).maybeSingle();
+          const oldUrl = oldRow?.value || '';
+          if (oldUrl && oldUrl !== url) {
+            await deleteSiteImageByUrl(oldUrl, 'product-detail-global');
+          }
+        } catch (e) {
+          console.warn('기존 공통 이미지 삭제 실패(무시):', e);
+        }
+
         const { error } = await db.from('settings').upsert({
           key: GLOBAL_DETAIL_IMAGE_KEYS[type],
           value: url
@@ -1118,6 +1160,15 @@
         const msgEl = document.getElementById(prefix + '-msg');
         msgEl.className = 'msg';
         msgEl.textContent = '삭제 중...';
+
+        // ⭐ Storage에서도 실제 파일 삭제
+        try {
+          const key = GLOBAL_DETAIL_IMAGE_KEYS[type];
+          const { data: oldRow } = await db.from('settings').select('value').eq('key', key).maybeSingle();
+          const oldUrl = oldRow?.value || '';
+          if (oldUrl) await deleteSiteImageByUrl(oldUrl, 'product-detail-global');
+        } catch (e) { console.warn('Storage 삭제 실패(무시):', e); }
+
         const { error } = await db.from('settings').delete().eq('key', GLOBAL_DETAIL_IMAGE_KEYS[type]);
         if (error) {
           msgEl.className = 'msg error';
@@ -1132,7 +1183,6 @@
     });
 
     // ===== ⭐ 사이즈 상세 입력 로직 =====
-    // 데이터 구조: [{ size: 'FREE', weight: '40~60kg', height: '155~165cm' }, ...]
     function createSizeDetailRow(data = {}) {
       const row = document.createElement('div');
       row.className = 'sd-row';
@@ -1180,7 +1230,7 @@
         const size = row.querySelector('.sd-size').value.trim();
         const weight = row.querySelector('.sd-weight').value.trim();
         const height = row.querySelector('.sd-height').value.trim();
-        if (!size && !weight && !height) return; // 완전히 빈 행은 제외
+        if (!size && !weight && !height) return;
         result.push({ size, weight, height });
       });
       return result;
@@ -1197,11 +1247,12 @@
       rows.forEach(r => container.appendChild(createSizeDetailRow(r)));
     }
 
-    // 초기 상태
     updateSizeDetailEmptyState();
     // ===== 사이즈 상세 입력 로직 끝 =====
 
     let currentLogoId = null;
+    let currentLogoUrl = ''; // ⭐ 기존 로고 URL 저장 (수정 시 파일 삭제용)
+
     async function loadLogo() {
       const { data, error } = await db.from('logos').select('*').order('id', { ascending: false }).limit(1).maybeSingle();
       const preview = document.getElementById('logo-preview');
@@ -1212,14 +1263,17 @@
         preview.style.display = 'none';
         siteNameInput.value = ''; imgUrlInput.value = '';
         currentLogoId = null;
+        currentLogoUrl = '';
         return;
       }
       currentLogoId = data.id;
+      currentLogoUrl = data.image_url || '';
       siteNameInput.value = data.site_name || '';
       imgUrlInput.value = data.image_url || '';
       if (data.image_url) { img.src = data.image_url; preview.style.display = 'block'; }
       else preview.style.display = 'none';
     }
+
     document.getElementById('logo-image-file').addEventListener('change', async (e) => {
       const file = e.target.files && e.target.files[0];
       if (!file) return;
@@ -1245,6 +1299,12 @@
       const imageUrl = document.getElementById('logo-image-url').value.trim();
       if (!siteName && !imageUrl) { msg.className = 'msg error'; msg.textContent = '❌ 사이트명 또는 이미지 URL 중 하나는 필요합니다.'; return; }
       msg.className = 'msg'; msg.textContent = '저장 중...';
+
+      // ⭐ 기존 로고 이미지가 있고 새 URL과 다르면 기존 Storage 파일 삭제
+      if (currentLogoUrl && currentLogoUrl !== imageUrl) {
+        await deleteSiteImageByUrl(currentLogoUrl, 'logos');
+      }
+
       let error;
       if (currentLogoId) {
         ({ error } = await db.from('logos').update({ site_name: siteName || null, image_url: imageUrl || null, updated_at: new Date().toISOString() }).eq('id', currentLogoId));
@@ -1256,10 +1316,17 @@
       if (error) { msg.className = 'msg error'; msg.textContent = '❌ ' + error.message; }
       else { msg.className = 'msg success'; msg.textContent = '✅ 저장 완료!'; loadLogo(); setTimeout(() => msg.textContent = '', 2000); }
     });
+
     document.getElementById('logo-delete-btn').addEventListener('click', async () => {
       const msg = document.getElementById('logo-msg');
       if (!currentLogoId) { msg.className = 'msg error'; msg.textContent = '❌ 삭제할 로고가 없습니다.'; return; }
       if (!confirm('로고를 삭제할까요?')) return;
+
+      // ⭐ Storage에서도 실제 파일 삭제
+      if (currentLogoUrl) {
+        await deleteSiteImageByUrl(currentLogoUrl, 'logos');
+      }
+
       const { error } = await db.from('logos').delete().eq('id', currentLogoId);
       if (error) { msg.className = 'msg error'; msg.textContent = '❌ ' + error.message; }
       else {
@@ -1268,6 +1335,7 @@
         document.getElementById('logo-image-url').value = '';
         document.getElementById('logo-preview').style.display = 'none';
         currentLogoId = null;
+        currentLogoUrl = '';
         setTimeout(() => msg.textContent = '', 2000);
       }
     });
@@ -1432,6 +1500,15 @@
           const id = btn.dataset.id;
           if (!confirm('이 배너를 삭제할까요?')) return;
           btn.disabled = true; btn.textContent = '...';
+
+          // ⭐ Storage에서도 실제 파일 삭제
+          try {
+            const target = list.find(x => String(x.id) === String(id));
+            if (target && target.image_url) {
+              await deleteSiteImageByUrl(target.image_url, 'banners');
+            }
+          } catch (e) { console.warn('배너 Storage 삭제 실패(무시):', e); }
+
           const { error } = await db.from('banners').delete().eq('id', id);
           if (error) { alert('❌ 삭제 실패: ' + error.message); btn.disabled = false; btn.textContent = '삭제'; }
           else {
@@ -1500,6 +1577,12 @@
         const linkUrl = form.link_url.value.trim();
         if (!imageUrl) { alert('배너 이미지 URL을 입력하세요.'); return; }
         submitBtn.disabled = true; submitBtn.textContent = '저장 중...';
+
+        // ⭐ 기존 배너 이미지가 새 URL과 다르면 Storage 파일 삭제
+        if (banner.image_url && banner.image_url !== imageUrl) {
+          await deleteSiteImageByUrl(banner.image_url, 'banners');
+        }
+
         const { error } = await db.from('banners').update({ image_url: imageUrl, link_url: linkUrl || null }).eq('id', banner.id);
         if (error) { alert('❌ 수정 실패: ' + error.message); submitBtn.disabled = false; submitBtn.textContent = '저장'; }
         else {
@@ -1544,6 +1627,7 @@
 
     // ===== 배경 이미지 (배너 없을 때 메인 상단 노출) =====
     const HERO_BG_KEY = 'hero_bg_image';
+    let currentHeroBgUrl = ''; // ⭐ 기존 배경이미지 URL 저장
 
     function setHeroBgPreview(url) {
       const box = document.getElementById('hero-bg-preview');
@@ -1555,6 +1639,7 @@
     async function loadHeroBg() {
       const { data } = await db.from('settings').select('value').eq('key', HERO_BG_KEY).maybeSingle();
       const url = data?.value || '';
+      currentHeroBgUrl = url;
       document.getElementById('hero-bg-image-url').value = url;
       setHeroBgPreview(url);
     }
@@ -1585,20 +1670,33 @@
       const url = document.getElementById('hero-bg-image-url').value.trim();
       if (!url) { msg.className = 'msg error'; msg.textContent = '❌ 이미지 URL을 입력하세요.'; return; }
       msg.className = 'msg'; msg.textContent = '저장 중...';
+
+      // ⭐ 기존 배경 이미지가 새 URL과 다르면 Storage 파일 삭제
+      if (currentHeroBgUrl && currentHeroBgUrl !== url) {
+        await deleteSiteImageByUrl(currentHeroBgUrl, 'hero-bg');
+      }
+
       const { error } = await db.from('settings').upsert({ key: HERO_BG_KEY, value: url });
       if (error) { msg.className = 'msg error'; msg.textContent = '❌ ' + error.message; }
-      else { msg.className = 'msg success'; msg.textContent = '✅ 저장 완료!'; setTimeout(() => msg.textContent = '', 2000); }
+      else { msg.className = 'msg success'; msg.textContent = '✅ 저장 완료!'; loadHeroBg(); setTimeout(() => msg.textContent = '', 2000); }
     });
 
     document.getElementById('hero-bg-delete-btn').addEventListener('click', async () => {
       if (!confirm('배경 이미지를 삭제할까요?')) return;
       const msg = document.getElementById('hero-bg-msg');
       msg.className = 'msg'; msg.textContent = '삭제 중...';
+
+      // ⭐ Storage에서도 실제 파일 삭제
+      if (currentHeroBgUrl) {
+        await deleteSiteImageByUrl(currentHeroBgUrl, 'hero-bg');
+      }
+
       const { error } = await db.from('settings').delete().eq('key', HERO_BG_KEY);
       if (error) { msg.className = 'msg error'; msg.textContent = '❌ ' + error.message; }
       else {
         document.getElementById('hero-bg-image-url').value = '';
         setHeroBgPreview('');
+        currentHeroBgUrl = '';
         msg.className = 'msg success'; msg.textContent = '✅ 삭제 완료!';
         setTimeout(() => msg.textContent = '', 2000);
       }
@@ -1677,13 +1775,13 @@
         other_option: parseList(form.other_option.value),
         min_qty: Number(form.min_qty.value) || 1,
         target_grade: form.target_grade.value || 'all',
-        size_detail: size_detail,  // ⭐ 사이즈 상세 추가
+        size_detail: size_detail,
       });
       if (error) { msg.className = 'msg error'; msg.textContent = '❌ ' + error.message; }
       else {
         msg.className = 'msg success'; msg.textContent = '✅ 등록 완료!';
         form.reset(); form.min_qty.value = 1; form.target_grade.value = 'all';
-        renderSizeDetailRows([]);  // 사이즈 상세 초기화
+        renderSizeDetailRows([]);
         loadAdminList();
       }
     });
@@ -1807,7 +1905,7 @@
             hem_option: p.hem_option || [], other_option: p.other_option || [],
             min_qty: p.min_qty || 1,
             target_grade: p.target_grade || 'all',
-            size_detail: p.size_detail || [],  // ⭐ 사이즈 상세 복사
+            size_detail: p.size_detail || [],
           });
           if (error) { alert('❌ 복사 실패: ' + error.message); btn.disabled = false; btn.textContent = '복제'; }
           else loadAdminList();
@@ -1847,7 +1945,6 @@
             </select>
             <input name="detail_images" type="text" placeholder="상세 이미지 URL" style="grid-column: 1 / -1;" value="${(p.detail_images || []).join(', ')}">
 
-            <!-- ⭐ 수정 모달의 사이즈 상세 -->
             <div class="edit-size-section" style="grid-column: 1 / -1;">
               <div class="es-head">
                 <div class="es-title">📏 사이즈 상세 정보</div>
@@ -1865,7 +1962,6 @@
       `;
       document.body.appendChild(modal);
 
-      // ⭐ 수정 모달 내부 사이즈 상세 행 관리
       function createEditSizeRow(data = {}) {
         const row = document.createElement('div');
         row.className = 'es-row';
@@ -1892,7 +1988,6 @@
         const f = ev.target;
         const detail_images = f.detail_images.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
 
-        // ⭐ 수정 모달의 사이즈 상세 수집
         const sizeRows = modal.querySelectorAll('#edit-size-rows .es-row');
         const size_detail = [];
         sizeRows.forEach(row => {
@@ -1917,7 +2012,7 @@
           other_option: parseList(f.other_option.value),
           min_qty: Number(f.min_qty.value) || 1,
           target_grade: f.target_grade.value || 'all',
-          size_detail: size_detail,  // ⭐ 사이즈 상세 저장
+          size_detail: size_detail,
         }).eq('id', p.id);
         if (error) { alert('❌ 수정 실패: ' + error.message); submitBtn.disabled = false; submitBtn.textContent = '수정 완료'; }
         else { alert('✅ 수정 완료!'); modal.remove(); loadAdminList(); }
