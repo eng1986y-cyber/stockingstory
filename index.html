@@ -150,10 +150,6 @@
     body.dark #popular-list .card .name { color: #e5e7eb; }
     #popular-list .card .price { color: #e53935; font-weight: 700; font-size: 15px; margin-top: 4px; }
     #popular-list .card .price.locked { color: #1976d2; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
-    #popular-list .card .view-count {
-      font-size: 11px; color: #9ca3af; margin-top: 2px;
-      display: flex; align-items: center; gap: 3px;
-    }
 
     #pagination { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 20px; margin-bottom: 40px; flex-wrap: wrap; width: 100%; box-sizing: border-box; min-height: 50px; }
     #popular-pagination { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 20px; margin-bottom: 40px; flex-wrap: wrap; width: 100%; box-sizing: border-box; min-height: 50px; }
@@ -199,7 +195,7 @@
   <!-- ⭐ 인기 아이템 -->
   <div id="popular-item-heading">
     <h2 class="ni-title">BEST ITEM</h2>
-    <span class="ni-sub">인기상품 (클릭순)</span>
+    <span class="ni-sub">인기상품</span>
     <span class="ni-line"></span>
   </div>
 
@@ -588,7 +584,8 @@
         const priceHtml = hidePrice
           ? `<div class="price locked">🔒 로그인 후 가격 확인</div>`
           : `<div class="price">${Number(p.price).toLocaleString()}원</div>`;
-        const viewHtml = `<div class="view-count">🔥 ${p._viewCount.toLocaleString()}회 클릭</div>`;
+        
+        // ⭐ 클릭수(viewHtml) 제거됨
         return `
           <a class="card" href="product.html?id=${p.id}">
             <div class="thumb" style="background-image: ${bgUrl(p.main_image)};">
@@ -597,7 +594,6 @@
             <div class="card-info">
               <div class="name">${p.name}</div>
               ${priceHtml}
-              ${viewHtml}
             </div>
           </a>
         `;
