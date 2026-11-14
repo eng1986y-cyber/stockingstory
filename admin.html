@@ -18,7 +18,7 @@
     .admin-header .logout-btn { padding: 8px 16px; background: #fff; color: #374151; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; font-family: inherit; }
 
     .admin-tabbar { position: fixed !important; top: 65px !important; left: 0 !important; width: 100% !important; background: #f4f6f8 !important; z-index: 99998 !important; padding: 12px 24px 12px; border-bottom: 1px solid #e5e7eb; }
-    .admin-tabbar-inner { max-width: 1600px; margin: 0 auto; background: #fff; border-radius: 10px; padding: 8px; border: 1px solid #e5e7eb; display: flex; flex-direction: row; flex-wrap: nowrap; gap: 8px; width: 100%; }
+    .admin-tabbar-inner { max-width: 1600px; margin: 0 auto; background: #fff; border-radius: 10px; padding: 8px; border: 1px solid #e5e7eb; display: flex; flex-direction: row; flex-wrap: nowrap; gap: 8px; width: 100%; overflow-x: auto; }
     .admin-tabbar .nav-item { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 18px; border-radius: 6px; cursor: pointer; color: #4b5563; font-size: 14px; font-weight: 500; border: 0; background: none; flex: 1 1 0; min-width: 0; white-space: nowrap; text-align: center; font-family: inherit; }
     .admin-tabbar .nav-item.active { background: #111827; color: #fff; }
 
@@ -49,7 +49,6 @@
     .settings-col .card input, .settings-col .card textarea, .settings-col .card button { max-width: 100%; box-sizing: border-box; }
     @media (max-width: 1000px) { .settings-split { grid-template-columns: 1fr; gap: 12px; } }
 
-    /* ===== 상품 등록 폼 (사이즈 상세 추가로 레이아웃 재구성) ===== */
     #product-register-card { min-width: 0; width: 100%; }
     #product-register-card > #product-form {
       display: grid !important;
@@ -68,7 +67,6 @@
     #product-register-card > #product-form select[name="target_grade"] { padding-left: 4px; padding-right: 4px; font-weight: 700; }
     #product-register-card > #product-form button { min-height: 42px; padding: 6px 2px; font-size: 10px; white-space: nowrap; }
 
-    /* 사이즈 상세 입력 영역 (별도 섹션) */
     #size-detail-section {
       grid-column: 1 / -1;
       border: 1px dashed #d1d5db;
@@ -313,7 +311,6 @@
     .modal-box .modal-actions { display: flex; gap: 8px; margin-top: 10px; }
     .modal-box .modal-actions > * { flex: 1; }
 
-    /* 상품 수정 모달의 사이즈 상세 영역 */
     .edit-size-section {
       grid-column: 1 / -1;
       border: 1px dashed #d1d5db;
@@ -456,6 +453,7 @@
         <button class="nav-item" data-tab="orders">🧾 주문</button>
         <button class="nav-item" data-tab="members">👥 회원</button>
         <button class="nav-item" data-tab="coupons">🎟️ 쿠폰</button>
+        <button class="nav-item" data-tab="notices">📢 공지사항</button>
         <button class="nav-item" data-tab="stats">📊 접속통계</button>
         <button class="nav-item" data-tab="settings">⚙️ 사이트 설정</button>
       </div>
@@ -527,7 +525,6 @@
                 </select>
                 <button type="submit" class="btn btn-primary">상품 등록</button>
 
-                <!-- ⭐ 사이즈 상세 입력 영역 -->
                 <div id="size-detail-section">
                   <div class="sd-head">
                     <div class="sd-title">
@@ -674,6 +671,27 @@
 
           <div id="coupon-list" class="row-list">로딩중...</div>
           <div id="coupon-pagination" class="admin-list-pagination"></div>
+        </section>
+
+        <section id="tab-notices" class="admin-section">
+          <h1 class="page-title">공지사항 관리</h1>
+          <p class="page-subtitle">공지사항을 등록/삭제합니다 (메인페이지 하단에 표시됩니다)</p>
+
+          <div class="card">
+            <div class="card-title">📝 새 공지사항 등록</div>
+            <form id="notice-form" style="display:grid; gap:10px;">
+              <input name="title" placeholder="공지사항 제목" required maxlength="100">
+              <textarea name="content" placeholder="공지사항 내용" required style="min-height:120px;"></textarea>
+              <button type="submit" class="btn btn-primary" style="justify-self:start;">공지 등록</button>
+            </form>
+            <p id="notice-msg" class="msg"></p>
+          </div>
+
+          <div class="card">
+            <div class="card-title">📋 등록된 공지사항 <span id="notice-admin-count" class="hint"></span></div>
+            <div id="notice-admin-list" class="row-list">로딩중...</div>
+            <div id="notice-admin-pagination" class="admin-list-pagination"></div>
+          </div>
         </section>
 
         <section id="tab-stats" class="admin-section">
@@ -957,6 +975,7 @@
         document.querySelector('.admin-layout').scrollTop = 0;
         if (btn.dataset.tab === 'stats') loadStats();
         if (btn.dataset.tab === 'coupons') loadCouponsAndMembers();
+        if (btn.dataset.tab === 'notices') loadNoticeAdminList();
       });
     });
 
@@ -978,6 +997,7 @@
       loadAccountSetting();
       loadAdminList(); loadGlobalDetailImages(); loadOrders(); loadMembers();
       loadCouponsAndMembers();
+      loadNoticeAdminList();
     }
 
     loginForm.addEventListener('submit', async (e) => {
@@ -1034,24 +1054,19 @@
       return data.publicUrl;
     }
 
-    // ⭐⭐⭐ Storage에서 실제 파일 삭제 (URL → path 추출) ⭐⭐⭐
     async function deleteSiteImageByUrl(url, folderHint) {
       if (!url || typeof url !== 'string') return;
       try {
-        // Supabase Storage public URL 패턴:
-        // https://<project>.supabase.co/storage/v1/object/public/site-assets/<path>
         const marker = `/storage/v1/object/public/${SITE_ASSET_BUCKET}/`;
         const idx = url.indexOf(marker);
-        if (idx === -1) return; // 다른 도메인/외부 URL이면 무시
+        if (idx === -1) return;
 
         let path = url.slice(idx + marker.length);
-        // 쿼리스트링 제거
         const qIdx = path.indexOf('?');
         if (qIdx !== -1) path = path.slice(0, qIdx);
         path = decodeURIComponent(path);
         if (!path) return;
 
-        // folderHint가 주어졌고 경로가 일치하지 않으면 그래도 시도 (삭제 실패시 무시)
         const { error } = await db.storage.from(SITE_ASSET_BUCKET).remove([path]);
         if (error) {
           console.warn('[Storage 삭제 실패]', path, error.message);
@@ -1130,7 +1145,6 @@
         msgEl.className = 'msg';
         msgEl.textContent = '저장 중...';
 
-        // ⭐ 기존 URL 조회 → 새 URL과 다르면 기존 Storage 파일 삭제
         try {
           const key = GLOBAL_DETAIL_IMAGE_KEYS[type];
           const { data: oldRow } = await db.from('settings').select('value').eq('key', key).maybeSingle();
@@ -1161,7 +1175,6 @@
         msgEl.className = 'msg';
         msgEl.textContent = '삭제 중...';
 
-        // ⭐ Storage에서도 실제 파일 삭제
         try {
           const key = GLOBAL_DETAIL_IMAGE_KEYS[type];
           const { data: oldRow } = await db.from('settings').select('value').eq('key', key).maybeSingle();
@@ -1182,7 +1195,6 @@
       });
     });
 
-    // ===== ⭐ 사이즈 상세 입력 로직 =====
     function createSizeDetailRow(data = {}) {
       const row = document.createElement('div');
       row.className = 'sd-row';
@@ -1248,10 +1260,9 @@
     }
 
     updateSizeDetailEmptyState();
-    // ===== 사이즈 상세 입력 로직 끝 =====
 
     let currentLogoId = null;
-    let currentLogoUrl = ''; // ⭐ 기존 로고 URL 저장 (수정 시 파일 삭제용)
+    let currentLogoUrl = '';
 
     async function loadLogo() {
       const { data, error } = await db.from('logos').select('*').order('id', { ascending: false }).limit(1).maybeSingle();
@@ -1300,7 +1311,6 @@
       if (!siteName && !imageUrl) { msg.className = 'msg error'; msg.textContent = '❌ 사이트명 또는 이미지 URL 중 하나는 필요합니다.'; return; }
       msg.className = 'msg'; msg.textContent = '저장 중...';
 
-      // ⭐ 기존 로고 이미지가 있고 새 URL과 다르면 기존 Storage 파일 삭제
       if (currentLogoUrl && currentLogoUrl !== imageUrl) {
         await deleteSiteImageByUrl(currentLogoUrl, 'logos');
       }
@@ -1322,7 +1332,6 @@
       if (!currentLogoId) { msg.className = 'msg error'; msg.textContent = '❌ 삭제할 로고가 없습니다.'; return; }
       if (!confirm('로고를 삭제할까요?')) return;
 
-      // ⭐ Storage에서도 실제 파일 삭제
       if (currentLogoUrl) {
         await deleteSiteImageByUrl(currentLogoUrl, 'logos');
       }
@@ -1368,7 +1377,6 @@
       else { msg.className = 'msg success'; msg.textContent = '✅ 저장 완료!'; localStorage.removeItem('footer_cache'); setTimeout(() => msg.textContent = '', 2000); }
     });
 
-    // ===== 입금 계좌 =====
     async function loadAccountSetting() {
       const keys = ['account_bank', 'account_number', 'account_holder'];
       const { data } = await db.from('settings').select('key, value').in('key', keys);
@@ -1501,7 +1509,6 @@
           if (!confirm('이 배너를 삭제할까요?')) return;
           btn.disabled = true; btn.textContent = '...';
 
-          // ⭐ Storage에서도 실제 파일 삭제
           try {
             const target = list.find(x => String(x.id) === String(id));
             if (target && target.image_url) {
@@ -1578,7 +1585,6 @@
         if (!imageUrl) { alert('배너 이미지 URL을 입력하세요.'); return; }
         submitBtn.disabled = true; submitBtn.textContent = '저장 중...';
 
-        // ⭐ 기존 배너 이미지가 새 URL과 다르면 Storage 파일 삭제
         if (banner.image_url && banner.image_url !== imageUrl) {
           await deleteSiteImageByUrl(banner.image_url, 'banners');
         }
@@ -1625,9 +1631,8 @@
       }
     });
 
-    // ===== 배경 이미지 (배너 없을 때 메인 상단 노출) =====
     const HERO_BG_KEY = 'hero_bg_image';
-    let currentHeroBgUrl = ''; // ⭐ 기존 배경이미지 URL 저장
+    let currentHeroBgUrl = '';
 
     function setHeroBgPreview(url) {
       const box = document.getElementById('hero-bg-preview');
@@ -1671,7 +1676,6 @@
       if (!url) { msg.className = 'msg error'; msg.textContent = '❌ 이미지 URL을 입력하세요.'; return; }
       msg.className = 'msg'; msg.textContent = '저장 중...';
 
-      // ⭐ 기존 배경 이미지가 새 URL과 다르면 Storage 파일 삭제
       if (currentHeroBgUrl && currentHeroBgUrl !== url) {
         await deleteSiteImageByUrl(currentHeroBgUrl, 'hero-bg');
       }
@@ -1686,7 +1690,6 @@
       const msg = document.getElementById('hero-bg-msg');
       msg.className = 'msg'; msg.textContent = '삭제 중...';
 
-      // ⭐ Storage에서도 실제 파일 삭제
       if (currentHeroBgUrl) {
         await deleteSiteImageByUrl(currentHeroBgUrl, 'hero-bg');
       }
@@ -2118,6 +2121,106 @@
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
+    // ============================================================
+    // ⭐⭐⭐ 공지사항 관리 ⭐⭐⭐
+    // ============================================================
+    let noticeAdminPage = 1;
+    const NOTICE_ADMIN_PER_PAGE = 10;
+    let noticeAdminTotal = 0;
+
+    async function loadNoticeAdminList() {
+      const el = document.getElementById('notice-admin-list');
+      if (!el) return;
+      el.innerHTML = '로딩중...';
+      const from = (noticeAdminPage - 1) * NOTICE_ADMIN_PER_PAGE;
+      const to = from + NOTICE_ADMIN_PER_PAGE - 1;
+      const { data, count, error } = await db
+        .from('notices')
+        .select('*', { count: 'exact' })
+        .order('created_at', { ascending: false })
+        .range(from, to);
+      if (error) { el.innerHTML = '<p style="color:#dc2626;">' + error.message + '</p>'; return; }
+      noticeAdminTotal = count || 0;
+      document.getElementById('notice-admin-count').textContent = `총 ${noticeAdminTotal}건`;
+      if (!data || data.length === 0) {
+        el.innerHTML = '<p style="text-align:center; color:#9ca3af; padding:20px;">등록된 공지사항이 없습니다.</p>';
+        document.getElementById('notice-admin-pagination').innerHTML = '';
+        return;
+      }
+      el.innerHTML = data.map(n => `
+        <div class="row-item">
+          <span class="badge" style="background:#111827;">📢</span>
+          <span class="row-strong" style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis;">${String(n.title || '').replace(/</g,'&lt;')}</span>
+          <span class="row-muted">${formatKST(n.created_at, { dateOnly: true })}</span>
+          <div class="row-actions">
+            <button class="btn btn-secondary btn-sm notice-view" data-id="${n.id}">보기</button>
+            <button class="btn btn-danger btn-sm notice-del" data-id="${n.id}">삭제</button>
+          </div>
+        </div>
+      `).join('');
+      el.querySelectorAll('.notice-view').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const n = data.find(x => String(x.id) === String(btn.dataset.id));
+          if (!n) return;
+          alert(`제목: ${n.title}\n\n내용:\n${n.content}\n\n작성일: ${formatKST(n.created_at, { full: true })}`);
+        });
+      });
+      el.querySelectorAll('.notice-del').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('이 공지사항을 삭제할까요?')) return;
+          const { error } = await db.from('notices').delete().eq('id', btn.dataset.id);
+          if (error) { alert('❌ 삭제 실패: ' + error.message); return; }
+          alert('✅ 삭제되었습니다.');
+          loadNoticeAdminList();
+        });
+      });
+      renderNoticeAdminPagination();
+    }
+
+    function renderNoticeAdminPagination() {
+      const el = document.getElementById('notice-admin-pagination');
+      if (!el) return;
+      const totalPages = Math.ceil(noticeAdminTotal / NOTICE_ADMIN_PER_PAGE);
+      if (totalPages <= 1) { el.innerHTML = ''; return; }
+      let html = `<button class="btn btn-secondary btn-sm" ${noticeAdminPage === 1 ? 'disabled' : ''} data-page="${noticeAdminPage-1}">‹</button>`;
+      for (let i = 1; i <= totalPages; i++) {
+        html += `<button class="btn btn-sm ${i === noticeAdminPage ? 'btn-primary' : 'btn-secondary'}" data-page="${i}">${i}</button>`;
+      }
+      html += `<button class="btn btn-secondary btn-sm" ${noticeAdminPage === totalPages ? 'disabled' : ''} data-page="${noticeAdminPage+1}">›</button>`;
+      el.innerHTML = html;
+      el.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (btn.disabled) return;
+          noticeAdminPage = Number(btn.dataset.page);
+          loadNoticeAdminList();
+        });
+      });
+    }
+
+    document.getElementById('notice-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const f = e.target;
+      const m = document.getElementById('notice-msg');
+      m.className = 'msg';
+      m.textContent = '등록 중...';
+      const { error } = await db.from('notices').insert({
+        title: f.title.value.trim(),
+        content: f.content.value.trim(),
+      });
+      if (error) {
+        m.className = 'msg error';
+        m.textContent = '❌ ' + error.message;
+      } else {
+        m.className = 'msg success';
+        m.textContent = '✅ 등록 완료!';
+        f.reset();
+        noticeAdminPage = 1;
+        loadNoticeAdminList();
+        setTimeout(() => m.textContent = '', 2000);
+      }
+    });
+
+    // ===== 주문 관리 =====
     let allOrdersRaw = [];
     let allCouponsForOrders = [];
     let selectedOrderKeys = new Set();
@@ -2628,6 +2731,7 @@
       downloadCSV('주문목록' + suffix, rows);
     });
 
+    // ===== 회원 관리 =====
     let allMembers = [];
     let selectedMemberIds = new Set();
 

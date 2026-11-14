@@ -69,7 +69,6 @@
       #new-item-heading .ni-sub { font-size: 11px; }
     }
 
-    /* ⭐ 인기 아이템 헤딩 */
     #popular-item-heading {
       display: flex;
       max-width: 1400px;
@@ -128,7 +127,6 @@
       pointer-events: none;
     }
 
-    /* ⭐ 인기 아이템 순위 뱃지 */
     #popular-list .card .rank-badge {
       position: absolute; top: 8px; left: 8px;
       background: #f59e0b; color: #fff;
@@ -141,7 +139,6 @@
     #popular-list .card .rank-badge.rank-2 { background: #f97316; }
     #popular-list .card .rank-badge.rank-3 { background: #ca8a04; }
 
-    /* 인기상품 리스트도 신규상품과 동일한 그리드 스타일 */
     #popular-list { display: grid; gap: 16px; width: 100%; box-sizing: border-box; }
     #popular-list .card { min-width: 0; display: block; box-sizing: border-box; text-decoration: none; color: inherit; position: relative; }
     #popular-list .card .thumb { width: 100%; padding-bottom: 100%; position: relative; overflow: hidden; border-radius: 10px; background-color: #f0f0f0; background-size: cover; background-position: center; background-repeat: no-repeat; }
@@ -162,6 +159,69 @@
       .banner-dots { bottom: 12px; gap: 6px; }
       .banner-dot { width: 8px; height: 8px; }
     }
+
+    /* ⭐⭐⭐ 게시판 공통 스타일 ⭐⭐⭐ */
+    #board-section { max-width: 1400px; margin: 32px auto 0; padding: 0 16px; box-sizing: border-box; width: 100%; }
+    .board-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .board-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; box-sizing: border-box; display: flex; flex-direction: column; min-height: 320px; }
+    body.dark .board-card { background: #151515; border-color: #222; }
+    .board-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #eee; gap: 8px; }
+    body.dark .board-card-head { border-bottom-color: #222; }
+    .board-card-head h3 { font-size: 16px; font-weight: 700; color: #222; margin: 0; display: flex; align-items: center; gap: 6px; }
+    body.dark .board-card-head h3 { color: #fff; }
+    .board-count { font-size: 11px; color: #9ca3af; font-weight: 400; }
+    .board-write-btn { padding: 6px 12px; background: #111827; color: #fff; border: 0; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; font-family: inherit; white-space: nowrap; }
+    body.dark .board-write-btn { background: #e5e7eb; color: #111; }
+    .board-list { display: flex; flex-direction: column; gap: 0; flex: 1; min-height: 200px; }
+    .board-empty { text-align: center; color: #9ca3af; font-size: 13px; padding: 30px 10px; }
+    .board-item { padding: 12px 4px; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: background 0.12s; }
+    body.dark .board-item { border-bottom-color: #222; }
+    .board-item:hover { background: #fafafa; }
+    body.dark .board-item:hover { background: #1a1a1a; }
+    .board-item:last-child { border-bottom: none; }
+    .board-item-title-row { display: flex; align-items: center; gap: 6px; min-width: 0; }
+    .board-item-title { font-size: 14px; font-weight: 600; color: #222; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
+    body.dark .board-item-title { color: #e5e7eb; }
+    .board-secret-badge { font-size: 10px; background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-weight: 700; flex-shrink: 0; border: 1px solid #f59e0b; }
+    body.dark .board-secret-badge { background: #422006; color: #fbbf24; border-color: #92400e; }
+    .board-item-meta { font-size: 11px; color: #9ca3af; margin-top: 4px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .board-pagination { display: flex; justify-content: center; align-items: center; gap: 4px; margin-top: 12px; flex-wrap: wrap; }
+    .board-pagination button { min-width: 28px; height: 28px; padding: 0 8px; border: 1px solid #e5e7eb; background: #fff; color: #374151; border-radius: 4px; cursor: pointer; font-size: 12px; font-family: inherit; }
+    body.dark .board-pagination button { background: #1a1a1a; border-color: #333; color: #e5e7eb; }
+    .board-pagination button.active { background: #111827; color: #fff; border-color: #111827; }
+    body.dark .board-pagination button.active { background: #e5e7eb; color: #111; border-color: #e5e7eb; }
+    .board-pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .board-admin-actions { display: flex; gap: 4px; flex-shrink: 0; }
+    .board-admin-actions button { padding: 3px 8px; font-size: 11px; border-radius: 4px; cursor: pointer; font-family: inherit; font-weight: 600; border: 0; }
+    .board-del-btn { background: #dc2626; color: #fff; }
+
+    .board-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 999998; display: flex; align-items: flex-start; justify-content: center; padding: 20px 10px; overflow-y: auto; }
+    .board-modal-box { background: #fff; border-radius: 12px; padding: 20px; width: 100%; max-width: 520px; margin: 20px auto; box-sizing: border-box; }
+    body.dark .board-modal-box { background: #151515; color: #e5e7eb; }
+    .board-modal-box h2 { margin: 0 0 16px; font-size: 18px; color: #111; }
+    body.dark .board-modal-box h2 { color: #fff; }
+    .board-modal-form { display: grid; gap: 10px; }
+    .board-modal-form label { font-size: 13px; font-weight: 600; color: #374151; display: block; margin-bottom: 4px; }
+    body.dark .board-modal-form label { color: #ccc; }
+    .board-modal-form input, .board-modal-form textarea, .board-modal-form select { width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; font-family: inherit; box-sizing: border-box; background: #fff; color: #111; }
+    body.dark .board-modal-form input, body.dark .board-modal-form textarea, body.dark .board-modal-form select { background: #0f0f0f; border-color: #2a2a2a; color: #e5e7eb; }
+    .board-modal-form textarea { min-height: 120px; resize: vertical; }
+    .board-secret-check { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #374151; cursor: pointer; padding: 8px 0; }
+    body.dark .board-secret-check { color: #ccc; }
+    .board-secret-check input { width: 18px; height: 18px; accent-color: #111827; }
+    .board-modal-actions { display: flex; gap: 8px; margin-top: 6px; }
+    .board-modal-actions > * { flex: 1; padding: 11px; border-radius: 8px; font-weight: 600; font-family: inherit; font-size: 14px; cursor: pointer; }
+    .board-modal-submit { background: #111827; color: #fff; border: 0; }
+    body.dark .board-modal-submit { background: #e5e7eb; color: #111; }
+    .board-modal-cancel { background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
+    body.dark .board-modal-cancel { background: #1a1a1a; color: #e5e7eb; border-color: #333; }
+    .board-detail-content { font-size: 14px; line-height: 1.7; color: #374151; white-space: pre-wrap; word-break: break-word; padding: 12px; background: #f9fafb; border-radius: 8px; min-height: 100px; margin-bottom: 12px; }
+    body.dark .board-detail-content { background: #0f0f0f; color: #d1d5db; }
+    .board-detail-meta { font-size: 12px; color: #9ca3af; margin-bottom: 12px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    @media (max-width: 768px) {
+      .board-grid { grid-template-columns: 1fr; }
+      .board-card { min-height: 240px; }
+    }
   </style>
 </head>
 <body>
@@ -180,7 +240,6 @@
     <div id="promo-video-inner"></div>
   </div>
 
-  <!-- ⭐ 신규 아이템 -->
   <div id="new-item-heading">
     <h2 class="ni-title">NEW ITEM</h2>
     <span class="ni-sub">신규상품</span>
@@ -192,7 +251,6 @@
     <div id="pagination"></div>
   </main>
 
-  <!-- ⭐ 인기 아이템 -->
   <div id="popular-item-heading">
     <h2 class="ni-title">BEST ITEM</h2>
     <span class="ni-sub">인기상품</span>
@@ -203,6 +261,34 @@
     <div id="popular-list">로딩중...</div>
     <div id="popular-pagination"></div>
   </main>
+
+  <!-- ⭐⭐⭐ 공지사항 + 게시판 (제품목록 아래, 푸터 위) ⭐⭐⭐ -->
+  <div id="board-section">
+    <div class="board-grid">
+      <!-- 공지사항 -->
+      <div class="board-card">
+        <div class="board-card-head">
+          <h3>📢 공지사항 <span class="board-count" id="notice-count"></span></h3>
+        </div>
+        <div id="notice-list" class="board-list">
+          <p class="board-empty">로딩중...</p>
+        </div>
+        <div id="notice-pagination" class="board-pagination"></div>
+      </div>
+
+      <!-- 상품문의 게시판 -->
+      <div class="board-card">
+        <div class="board-card-head">
+          <h3>💬 상품문의 / 게시판 <span class="board-count" id="board-count"></span></h3>
+          <button type="button" id="board-write-btn" class="board-write-btn">✏️ 글쓰기</button>
+        </div>
+        <div id="board-list" class="board-list">
+          <p class="board-empty">로딩중...</p>
+        </div>
+        <div id="board-pagination" class="board-pagination"></div>
+      </div>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -584,8 +670,7 @@
         const priceHtml = hidePrice
           ? `<div class="price locked">🔒 로그인 후 가격 확인</div>`
           : `<div class="price">${Number(p.price).toLocaleString()}원</div>`;
-        
-        // ⭐ 클릭수(viewHtml) 제거됨
+
         return `
           <a class="card" href="product.html?id=${p.id}">
             <div class="thumb" style="background-image: ${bgUrl(p.main_image)};">
@@ -652,11 +737,276 @@
       }, 200);
     });
 
+    // ============================================================
+    // ⭐⭐⭐ 공지사항 & 게시판 로직 ⭐⭐⭐
+    // ============================================================
+    const NOTICE_PER_PAGE = 5;
+    const BOARD_PER_PAGE = 5;
+    let noticePage = 1, boardPage = 1;
+    let noticeTotal = 0, boardTotal = 0;
+    let noticesCache = [], boardCache = [];
+
+    function getLoggedMemberForBoard() {
+      try { return JSON.parse(localStorage.getItem('member') || 'null'); } catch { return null; }
+    }
+
+    function escapeBoardHtml(s) {
+      return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+    }
+
+    async function loadNotices() {
+      const listEl = document.getElementById('notice-list');
+      const countEl = document.getElementById('notice-count');
+      if (!listEl) return;
+      try {
+        const from = (noticePage - 1) * NOTICE_PER_PAGE;
+        const to = from + NOTICE_PER_PAGE - 1;
+        const { data, count, error } = await db
+          .from('notices')
+          .select('*', { count: 'exact' })
+          .order('created_at', { ascending: false })
+          .range(from, to);
+        if (error) throw error;
+        noticesCache = data || [];
+        noticeTotal = count || 0;
+        if (countEl) countEl.textContent = `총 ${noticeTotal}건`;
+
+        if (!noticesCache.length) {
+          listEl.innerHTML = '<p class="board-empty">등록된 공지사항이 없습니다.</p>';
+          document.getElementById('notice-pagination').innerHTML = '';
+          return;
+        }
+        listEl.innerHTML = noticesCache.map(n => `
+          <div class="board-item" data-id="${n.id}" data-type="notice">
+            <div class="board-item-title-row">
+              <span class="board-item-title">📌 ${escapeBoardHtml(n.title)}</span>
+            </div>
+            <div class="board-item-meta">
+              <span>${formatBoardDate(n.created_at)}</span>
+            </div>
+          </div>
+        `).join('');
+        bindBoardItemEvents('notice');
+        renderBoardPagination('notice', noticeTotal, NOTICE_PER_PAGE);
+      } catch (e) {
+        listEl.innerHTML = '<p class="board-empty">공지사항을 불러올 수 없습니다.</p>';
+        console.warn(e);
+      }
+    }
+
+    async function loadBoardPosts() {
+      const listEl = document.getElementById('board-list');
+      if (!listEl) return;
+      try {
+        const from = (boardPage - 1) * BOARD_PER_PAGE;
+        const to = from + BOARD_PER_PAGE - 1;
+        const { data, count, error } = await db
+          .from('board_posts')
+          .select('*', { count: 'exact' })
+          .order('created_at', { ascending: false })
+          .range(from, to);
+        if (error) throw error;
+        boardCache = data || [];
+        boardTotal = count || 0;
+
+        if (!boardCache.length) {
+          listEl.innerHTML = '<p class="board-empty">등록된 문의글이 없습니다.</p>';
+          document.getElementById('board-pagination').innerHTML = '';
+          return;
+        }
+        const me = getLoggedMemberForBoard();
+        listEl.innerHTML = boardCache.map(b => {
+          const isSecret = !!b.is_secret;
+          const isMine = me && String(me.id) === String(b.member_id);
+          const titleText = isSecret && !isMine ? '🔒 비밀글입니다.' : escapeBoardHtml(b.title);
+          return `
+            <div class="board-item" data-id="${b.id}" data-type="board">
+              <div class="board-item-title-row">
+                ${isSecret ? '<span class="board-secret-badge">비밀</span>' : ''}
+                <span class="board-item-title">${titleText}</span>
+                ${isMine ? `<div class="board-admin-actions"><button type="button" class="board-del-btn" data-id="${b.id}">삭제</button></div>` : ''}
+              </div>
+              <div class="board-item-meta">
+                <span>${escapeBoardHtml(b.member_name || b.member_username || '회원')}</span>
+                <span>${formatBoardDate(b.created_at)}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+        bindBoardItemEvents('board');
+        renderBoardPagination('board', boardTotal, BOARD_PER_PAGE);
+      } catch (e) {
+        listEl.innerHTML = '<p class="board-empty">게시판을 불러올 수 없습니다.</p>';
+        console.warn(e);
+      }
+    }
+
+    function formatBoardDate(d) {
+      if (!d) return '-';
+      const dt = new Date(d);
+      if (isNaN(dt.getTime())) return '-';
+      const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit'
+      }).formatToParts(dt);
+      const get = t => parts.find(p => p.type === t)?.value || '00';
+      return `${get('year')}-${get('month')}-${get('day')}`;
+    }
+
+    function renderBoardPagination(type, total, perPage) {
+      const el = document.getElementById(type + '-pagination');
+      if (!el) return;
+      const totalPages = Math.ceil(total / perPage);
+      if (totalPages <= 1) { el.innerHTML = ''; return; }
+      const cur = type === 'notice' ? noticePage : boardPage;
+      let html = `<button ${cur === 1 ? 'disabled' : ''} data-page="${cur-1}" data-type="${type}">‹</button>`;
+      for (let i = 1; i <= totalPages; i++) {
+        html += `<button class="${i === cur ? 'active' : ''}" data-page="${i}" data-type="${type}">${i}</button>`;
+      }
+      html += `<button ${cur === totalPages ? 'disabled' : ''} data-page="${cur+1}" data-type="${type}">›</button>`;
+      el.innerHTML = html;
+      el.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (btn.disabled) return;
+          const page = Number(btn.dataset.page);
+          if (type === 'notice') { noticePage = page; loadNotices(); }
+          else { boardPage = page; loadBoardPosts(); }
+        });
+      });
+    }
+
+    function bindBoardItemEvents(type) {
+      const listId = type === 'notice' ? 'notice-list' : 'board-list';
+      const listEl = document.getElementById(listId);
+      if (!listEl) return;
+      listEl.querySelectorAll('.board-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          if (e.target.closest('.board-del-btn')) return;
+          const id = item.dataset.id;
+          if (type === 'notice') {
+            const n = noticesCache.find(x => String(x.id) === String(id));
+            if (n) showBoardDetailModal('notice', n);
+          } else {
+            const b = boardCache.find(x => String(x.id) === String(id));
+            if (b) {
+              const me = getLoggedMemberForBoard();
+              const isMine = me && String(me.id) === String(b.member_id);
+              if (b.is_secret && !isMine) {
+                alert('🔒 비밀글입니다. 작성자만 열람할 수 있습니다.');
+                return;
+              }
+              showBoardDetailModal('board', b);
+            }
+          }
+        });
+      });
+      listEl.querySelectorAll('.board-del-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const id = btn.dataset.id;
+          if (!confirm('이 글을 삭제할까요?')) return;
+          const { error } = await db.from('board_posts').delete().eq('id', id);
+          if (error) { alert('❌ 삭제 실패: ' + error.message); return; }
+          alert('✅ 삭제되었습니다.');
+          loadBoardPosts();
+        });
+      });
+    }
+
+    function showBoardDetailModal(type, data) {
+      const modal = document.createElement('div');
+      modal.className = 'board-modal-backdrop';
+      const title = type === 'notice' ? '📢 공지사항' : '💬 문의글';
+      const author = type === 'board' ? (data.member_name || data.member_username || '회원') : '관리자';
+      modal.innerHTML = `
+        <div class="board-modal-box">
+          <h2>${title}</h2>
+          <div class="board-detail-meta">
+            <span>작성자: ${escapeBoardHtml(author)}</span>
+            <span>${formatBoardDate(data.created_at)}</span>
+            ${data.is_secret ? '<span class="board-secret-badge">비밀글</span>' : ''}
+          </div>
+          <div style="font-weight:700; font-size:15px; margin-bottom:10px; color:#111; padding:0 4px;">${escapeBoardHtml(data.title)}</div>
+          <div class="board-detail-content">${escapeBoardHtml(data.content)}</div>
+          <div class="board-modal-actions">
+            <button type="button" class="board-modal-cancel" id="board-detail-close">닫기</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      modal.querySelector('#board-detail-close').onclick = () => modal.remove();
+      modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+    }
+
+    function showBoardWriteModal() {
+      const me = getLoggedMemberForBoard();
+      if (!me || !me.id) {
+        alert('로그인 후 이용 가능합니다.');
+        location.href = 'login.html';
+        return;
+      }
+      const modal = document.createElement('div');
+      modal.className = 'board-modal-backdrop';
+      modal.innerHTML = `
+        <div class="board-modal-box">
+          <h2>✏️ 문의글 작성</h2>
+          <form id="board-write-form" class="board-modal-form">
+            <div>
+              <label>제목 *</label>
+              <input name="title" required maxlength="100" placeholder="제목을 입력하세요">
+            </div>
+            <div>
+              <label>내용 *</label>
+              <textarea name="content" required placeholder="문의 내용을 입력하세요"></textarea>
+            </div>
+            <label class="board-secret-check">
+              <input type="checkbox" name="is_secret">
+              🔒 비밀글로 작성 (작성자만 열람)
+            </label>
+            <div class="board-modal-actions">
+              <button type="submit" class="board-modal-submit">등록</button>
+              <button type="button" class="board-modal-cancel" id="board-write-cancel">취소</button>
+            </div>
+          </form>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      modal.querySelector('#board-write-cancel').onclick = () => modal.remove();
+      modal.querySelector('#board-write-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const f = e.target;
+        const submitBtn = f.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = '등록 중...';
+        const { error } = await db.from('board_posts').insert({
+          member_id: me.id,
+          member_name: me.name || '',
+          member_username: me.username || '',
+          title: f.title.value.trim(),
+          content: f.content.value.trim(),
+          is_secret: f.is_secret.checked,
+        });
+        if (error) {
+          alert('❌ 등록 실패: ' + error.message);
+          submitBtn.disabled = false;
+          submitBtn.textContent = '등록';
+          return;
+        }
+        alert('✅ 등록되었습니다.');
+        modal.remove();
+        boardPage = 1;
+        loadBoardPosts();
+      });
+    }
+
+    document.getElementById('board-write-btn')?.addEventListener('click', showBoardWriteModal);
+
     (async () => {
       await loadBanner();
       await loadPromoVideo();
       await loadProducts();
       await loadPopularProducts();
+      await loadNotices();
+      await loadBoardPosts();
     })();
   </script>
 </body>
