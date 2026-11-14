@@ -69,6 +69,43 @@
       #new-item-heading .ni-sub { font-size: 11px; }
     }
 
+    /* ⭐ 인기 아이템 헤딩 (주황/골드 계열) */
+    #popular-item-heading {
+      display: flex;
+      max-width: 1400px;
+      margin: 32px auto 0;
+      padding: 0 16px;
+      box-sizing: border-box;
+      width: 100%;
+      align-items: center;
+      gap: 10px;
+    }
+    #popular-item-heading .ni-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #f59e0b;
+      letter-spacing: 1px;
+      margin: 0;
+    }
+    #popular-item-heading .ni-sub {
+      font-size: 13px;
+      font-weight: 500;
+      color: #888;
+      margin: 0;
+    }
+    #popular-item-heading .ni-line {
+      flex: 1;
+      height: 2px;
+      background: linear-gradient(to right, #f59e0b, transparent);
+      border-radius: 2px;
+    }
+    body.dark #popular-item-heading .ni-sub { color: #aaa; }
+    @media (max-width: 768px) {
+      #popular-item-heading { margin-top: 22px; padding: 0 12px; }
+      #popular-item-heading .ni-title { font-size: 16px; }
+      #popular-item-heading .ni-sub { font-size: 11px; }
+    }
+
     #product-container { max-width: 1400px; margin: 0 auto; padding: 0 16px; box-sizing: border-box; width: 100%; margin-top: 16px; }
     #product-container.no-banner { margin-top: 24px; }
     @media (max-width: 768px) { #product-container { margin-top: 12px; } }
@@ -91,7 +128,35 @@
       pointer-events: none;
     }
 
+    /* ⭐ 인기 아이템 순위 뱃지 */
+    #popular-list .card .rank-badge {
+      position: absolute; top: 8px; left: 8px;
+      background: #f59e0b; color: #fff;
+      font-size: 11px; font-weight: 700;
+      padding: 3px 8px; border-radius: 4px;
+      letter-spacing: 0.5px; z-index: 2;
+      pointer-events: none;
+    }
+    #popular-list .card .rank-badge.rank-1 { background: #e53935; }
+    #popular-list .card .rank-badge.rank-2 { background: #f97316; }
+    #popular-list .card .rank-badge.rank-3 { background: #ca8a04; }
+
+    /* 인기상품 리스트도 신규상품과 동일한 그리드 스타일 */
+    #popular-list { display: grid; gap: 16px; width: 100%; box-sizing: border-box; }
+    #popular-list .card { min-width: 0; display: block; box-sizing: border-box; text-decoration: none; color: inherit; position: relative; }
+    #popular-list .card .thumb { width: 100%; padding-bottom: 100%; position: relative; overflow: hidden; border-radius: 10px; background-color: #f0f0f0; background-size: cover; background-position: center; background-repeat: no-repeat; }
+    #popular-list .card .card-info { padding: 10px 4px; min-width: 0; }
+    #popular-list .card .name { font-size: 14px; font-weight: 500; color: #222; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    body.dark #popular-list .card .name { color: #e5e7eb; }
+    #popular-list .card .price { color: #e53935; font-weight: 700; font-size: 15px; margin-top: 4px; }
+    #popular-list .card .price.locked { color: #1976d2; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+    #popular-list .card .view-count {
+      font-size: 11px; color: #9ca3af; margin-top: 2px;
+      display: flex; align-items: center; gap: 3px;
+    }
+
     #pagination { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 20px; margin-bottom: 40px; flex-wrap: wrap; width: 100%; box-sizing: border-box; min-height: 50px; }
+    #popular-pagination { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 20px; margin-bottom: 40px; flex-wrap: wrap; width: 100%; box-sizing: border-box; min-height: 50px; }
 
     @media (max-width: 768px) {
       .banner-slide img { height: 260px; }
@@ -119,6 +184,7 @@
     <div id="promo-video-inner"></div>
   </div>
 
+  <!-- ⭐ 신규 아이템 -->
   <div id="new-item-heading">
     <h2 class="ni-title">NEW ITEM</h2>
     <span class="ni-sub">신규상품</span>
@@ -128,6 +194,18 @@
   <main id="product-container">
     <div id="product-list">로딩중...</div>
     <div id="pagination"></div>
+  </main>
+
+  <!-- ⭐ 인기 아이템 -->
+  <div id="popular-item-heading">
+    <h2 class="ni-title">BEST ITEM</h2>
+    <span class="ni-sub">인기상품 (클릭순)</span>
+    <span class="ni-line"></span>
+  </div>
+
+  <main id="popular-container" style="max-width:1400px; margin:0 auto; padding:0 16px; box-sizing:border-box; width:100%; margin-top:16px;">
+    <div id="popular-list">로딩중...</div>
+    <div id="popular-pagination"></div>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -150,6 +228,10 @@
     let filteredProducts = [];
     let currentPage = 1;
     let currentSearch = '';
+
+    // ⭐ 인기상품용 변수
+    let popularProducts = [];
+    let popularCurrentPage = 1;
 
     function isLoggedIn() {
       try {
@@ -309,6 +391,9 @@
       }, { passive: true });
     })();
 
+    // ============================================================
+    // ⭐ 신규 상품 (일반 상품만 노출: target_grade = 'all' 또는 null)
+    // ============================================================
     async function loadProducts() {
       const list = document.getElementById('product-list');
       const { data, error } = await db.from('products').select('*').or('target_grade.eq.all,target_grade.is.null').order('created_at', { ascending: false });
@@ -326,7 +411,6 @@
       return String(v ?? '').normalize('NFKC').toLocaleLowerCase().trim();
     }
 
-    // ⭐ 상품명 + 제품번호 모두 부분 일치 검색
     function applySearch(text) {
       currentSearch = text || '';
       const keyword = normalizeSearch(currentSearch);
@@ -346,7 +430,9 @@
 
     function applyGridColumns() {
       const list = document.getElementById('product-list');
-      list.style.gridTemplateColumns = isPC() ? 'repeat(6, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr))';
+      if (list) list.style.gridTemplateColumns = isPC() ? 'repeat(6, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr))';
+      const popList = document.getElementById('popular-list');
+      if (popList) popList.style.gridTemplateColumns = isPC() ? 'repeat(6, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr))';
     }
 
     function getPerPage() { return isPC() ? PC_PER_PAGE : MOBILE_PER_PAGE; }
@@ -425,7 +511,149 @@
         });
       });
     }
-let resizeTimer;
+
+    // ============================================================
+    // ⭐ 인기 상품 (product_views 기준 클릭수 많은 순)
+    // ============================================================
+    async function loadPopularProducts() {
+      const list = document.getElementById('popular-list');
+      if (!list) return;
+
+      // 1) 인기 상품: 일반 상품(all/null) 전체 로드
+      // 2) product_views 에서 product_id별 카운트 집계
+      // 3) 클릭수 내림차순 정렬 (동률이면 최신순)
+
+      let products = [];
+      try {
+        const { data: prodData, error: prodErr } = await db
+          .from('products')
+          .select('*')
+          .or('target_grade.eq.all,target_grade.is.null')
+          .order('created_at', { ascending: false });
+
+        if (prodErr) throw prodErr;
+        products = prodData || [];
+      } catch (e) {
+        console.error('인기상품 - 상품 로드 실패:', e);
+        list.innerHTML = '<p>상품을 불러올 수 없습니다.</p>';
+        document.getElementById('popular-pagination').innerHTML = '';
+        return;
+      }
+
+      if (products.length === 0) {
+        list.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:40px; color:#9ca3af;">등록된 상품이 없습니다.</p>';
+        document.getElementById('popular-pagination').innerHTML = '';
+        return;
+      }
+
+      // 클릭수 집계
+      const viewCountMap = {};
+      try {
+        const { data: viewData, error: viewErr } = await db
+          .from('product_views')
+          .select('product_id');
+
+        if (!viewErr && Array.isArray(viewData)) {
+          viewData.forEach(row => {
+            const pid = String(row.product_id);
+            viewCountMap[pid] = (viewCountMap[pid] || 0) + 1;
+          });
+        } else if (viewErr) {
+          console.warn('인기상품 - 클릭수 로드 실패(무시):', viewErr.message);
+        }
+      } catch (e) {
+        console.warn('인기상품 - 클릭수 로드 오류(무시):', e);
+      }
+
+      // 정렬: 클릭수 desc → 최신 created_at desc
+      popularProducts = products
+        .map(p => ({ ...p, _viewCount: viewCountMap[String(p.id)] || 0 }))
+        .sort((a, b) => {
+          if (b._viewCount !== a._viewCount) return b._viewCount - a._viewCount;
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        });
+
+      popularCurrentPage = 1;
+      applyGridColumns();
+      renderPopularPage();
+    }
+
+    function renderPopularPage() {
+      const list = document.getElementById('popular-list');
+      if (!list) return;
+      const perPage = getPerPage();
+      const start = (popularCurrentPage - 1) * perPage;
+      const items = popularProducts.slice(start, start + perPage);
+
+      if (popularProducts.length === 0) {
+        list.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:40px; color:#9ca3af;">인기 상품이 없습니다.</p>';
+        document.getElementById('popular-pagination').innerHTML = '';
+        return;
+      }
+
+      list.innerHTML = items.map((p, idx) => {
+        const globalRank = start + idx + 1;
+        const hidePrice = shouldHidePrice(p);
+        const rankClass = globalRank <= 1 ? 'rank-1' : globalRank === 2 ? 'rank-2' : globalRank === 3 ? 'rank-3' : '';
+        const rankBadge = globalRank <= 20
+          ? `<span class="rank-badge ${rankClass}">#${globalRank}</span>`
+          : '';
+        const priceHtml = hidePrice
+          ? `<div class="price locked">🔒 로그인 후 가격 확인</div>`
+          : `<div class="price">${Number(p.price).toLocaleString()}원</div>`;
+        const viewHtml = `<div class="view-count">🔥 ${p._viewCount.toLocaleString()}회 클릭</div>`;
+        return `
+          <a class="card" href="product.html?id=${p.id}">
+            <div class="thumb" style="background-image: ${bgUrl(p.main_image)};">
+              ${rankBadge}
+            </div>
+            <div class="card-info">
+              <div class="name">${p.name}</div>
+              ${priceHtml}
+              ${viewHtml}
+            </div>
+          </a>
+        `;
+      }).join('');
+
+      renderPopularPagination();
+    }
+
+    function renderPopularPagination() {
+      const el = document.getElementById('popular-pagination');
+      if (!el) return;
+      const perPage = getPerPage();
+      const maxPages = getMaxPages();
+      const totalPages = Math.min(Math.ceil(popularProducts.length / perPage), maxPages);
+
+      if (totalPages <= 1) { el.innerHTML = ''; return; }
+
+      let html = '';
+      const btnBase = 'padding:8px 14px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; font-family:inherit; transition:all .15s;';
+
+      html += `<button class="page-nav" data-page="${popularCurrentPage-1}" ${popularCurrentPage===1?'disabled':''}
+        style="${btnBase} background:${popularCurrentPage===1?'#f5f5f5':'#fff'}; color:${popularCurrentPage===1?'#bbb':'#222'}; border:1px solid #ddd; cursor:${popularCurrentPage===1?'not-allowed':'pointer'};">이전</button>`;
+
+      for (let i = 1; i <= totalPages; i++) {
+        html += `<button class="page-num" data-page="${i}"
+          style="${btnBase} background:${i===popularCurrentPage?'#222':'#fff'}; color:${i===popularCurrentPage?'#fff':'#222'}; border:1px solid ${i===popularCurrentPage?'#222':'#ddd'};">${i}</button>`;
+      }
+
+      html += `<button class="page-nav" data-page="${popularCurrentPage+1}" ${popularCurrentPage===totalPages?'disabled':''}
+        style="${btnBase} background:${popularCurrentPage===totalPages?'#f5f5f5':'#fff'}; color:${popularCurrentPage===totalPages?'#bbb':'#222'}; border:1px solid #ddd; cursor:${popularCurrentPage===totalPages?'not-allowed':'pointer'};">다음</button>`;
+
+      el.innerHTML = html;
+
+      el.querySelectorAll('.page-num, .page-nav').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (btn.disabled) return;
+          popularCurrentPage = Number(btn.dataset.page);
+          renderPopularPage();
+        });
+      });
+    }
+
+    let resizeTimer;
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
@@ -434,6 +662,10 @@ let resizeTimer;
         const totalP = Math.min(Math.ceil(filteredProducts.length / getPerPage()), maxP);
         if (currentPage > totalP) currentPage = totalP || 1;
         renderPage();
+
+        const popTotalP = Math.min(Math.ceil(popularProducts.length / getPerPage()), maxP);
+        if (popularCurrentPage > popTotalP) popularCurrentPage = popTotalP || 1;
+        if (popularProducts.length) renderPopularPage();
       }, 200);
     });
 
@@ -441,6 +673,7 @@ let resizeTimer;
       await loadBanner();
       await loadPromoVideo();
       await loadProducts();
+      await loadPopularProducts();
     })();
   </script>
 </body>
