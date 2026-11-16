@@ -421,7 +421,10 @@
         return;
       }
 
-      if (MIN_QTY > 1 && totalQty < MIN_QTY) { alert(`최소 주문수량은 ${MIN_QTY}개입니다.\n현재: ${totalQty}개`); return; }
+      if (MIN_QTY > 1 && totalQty < MIN_QTY) {
+  alert(`주문수량은 최소 ${MIN_QTY}장 입니다.\n(다른 옵션 및 디자인과 자유롭게 교차/혼합 구매가능합니다.)\n\n현재 선택: ${totalQty}장`);
+  return;
+}
       const items = selectedItems.map(sel => ({
         product_id: p.id, product_code: p.product_code || '', product_name: p.name,
         product_price: unitPrice, original_price: Number(p.price),
