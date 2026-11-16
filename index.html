@@ -7,33 +7,18 @@
   <link rel="stylesheet" href="style.css">
   <script src="common.js"></script>
   <style>
+    @import url('https://fonts.cdnfonts.com/css/bahnschrift');
     html { overflow-x: hidden; -webkit-text-size-adjust: 100%; }
-    body { overflow-x: hidden; width: 100%; max-width: 100%; margin: 0; }
+    body { overflow-x: hidden; width: 100%; max-width: 100%; margin: 0; font-family: 'Bahnschrift Light', 'Bahnschrift', -apple-system, sans-serif; }
 
-    /* ⭐ [이슈3] 상단 히어로 배경이미지 (배너 없을 때 노출, 헤더 아래 고정) */
+    /* ⭐ 상단 히어로 배경이미지 */
     #hero-bg-section { display: none; width: 100%; position: relative; overflow: hidden; background: #111; }
     #hero-bg-section.show { display: block; }
-    #hero-bg-section .hero-bg-inner {
-      width: 100%; height: 420px;
-      background-size: cover; background-position: center; background-repeat: no-repeat;
-      position: relative;
-    }
-    #hero-bg-section .hero-bg-overlay {
-      position: absolute; inset: 0;
-      background: linear-gradient(180deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,.55) 100%);
-      display: flex; align-items: flex-end; justify-content: center;
-      padding: 32px 16px; box-sizing: border-box;
-    }
-    #hero-bg-section .hero-bg-text {
-      color: #fff; text-align: center;
-      text-shadow: 0 2px 12px rgba(0,0,0,.6);
-    }
-    #hero-bg-section .hero-bg-text h2 {
-      font-size: 28px; font-weight: 800; margin: 0 0 8px; letter-spacing: 1px;
-    }
-    #hero-bg-section .hero-bg-text p {
-      font-size: 14px; margin: 0; opacity: .9;
-    }
+    #hero-bg-section .hero-bg-inner { width: 100%; height: 420px; background-size: cover; background-position: center; background-repeat: no-repeat; position: relative; }
+    #hero-bg-section .hero-bg-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,.55) 100%); display: flex; align-items: flex-end; justify-content: center; padding: 32px 16px; box-sizing: border-box; }
+    #hero-bg-section .hero-bg-text { color: #fff; text-align: center; text-shadow: 0 2px 12px rgba(0,0,0,.6); }
+    #hero-bg-section .hero-bg-text h2 { font-size: 28px; font-weight: 800; margin: 0 0 8px; letter-spacing: 1px; font-family: 'Bahnschrift Light', sans-serif; }
+    #hero-bg-section .hero-bg-text p { font-size: 14px; margin: 0; opacity: .9; font-family: 'Bahnschrift Light', sans-serif; }
     @media (max-width: 768px) {
       #hero-bg-section .hero-bg-inner { height: 260px; }
       #hero-bg-section .hero-bg-text h2 { font-size: 20px; }
@@ -46,7 +31,6 @@
     .banner-slide { flex: 0 0 100%; width: 100%; position: relative; overflow: hidden; display: block; }
     .banner-slide img { width: 100%; height: 700px; object-fit: cover; display: block; pointer-events: none; }
     .banner-slide a { display: block; width: 100%; height: 100%; pointer-events: auto; }
-
     .banner-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 48px; height: 48px; border-radius: 50%; background: rgba(0,0,0,0.4); color: #fff; border: 0; cursor: pointer; font-size: 22px; font-weight: 700; display: flex; align-items: center; justify-content: center; z-index: 10; }
     .banner-arrow.prev { left: 20px; }
     .banner-arrow.next { right: 20px; }
@@ -58,12 +42,12 @@
 
     #promo-video-wrap { display: none; max-width: 1400px; margin: 16px auto 0; padding: 0 16px; box-sizing: border-box; width: 100%; }
     #promo-video-inner { position: relative; width: 100%; padding-bottom: 56.25%; background: #000; border-radius: 10px; overflow: hidden; }
-    #promo-video-inner iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; display: block; }
+    #promo-video-inner iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
     @media (max-width: 768px) { #promo-video-wrap { padding: 0 12px; margin-top: 12px; } #promo-video-inner { border-radius: 8px; } }
 
     #new-item-heading { display: flex; max-width: 1400px; margin: 24px auto 0; padding: 0 16px; box-sizing: border-box; width: 100%; align-items: center; gap: 10px; }
-    #new-item-heading .ni-title { font-size: 20px; font-weight: 800; color: #e53935; letter-spacing: 1px; margin: 0; }
-    #new-item-heading .ni-sub { font-size: 13px; font-weight: 500; color: #888; margin: 0; }
+    #new-item-heading .ni-title { font-size: 20px; font-weight: 800; color: #e53935; letter-spacing: 1px; margin: 0; font-family: 'Bahnschrift Light', sans-serif; }
+    #new-item-heading .ni-sub { font-size: 13px; font-weight: 500; color: #888; margin: 0; font-family: 'Bahnschrift Light', sans-serif; }
     #new-item-heading .ni-line { flex: 1; height: 2px; background: linear-gradient(to right, #e53935, transparent); border-radius: 2px; }
     body.dark #new-item-heading .ni-sub { color: #aaa; }
     @media (max-width: 768px) {
@@ -71,37 +55,27 @@
       #new-item-heading .ni-title { font-size: 16px; }
       #new-item-heading .ni-sub { font-size: 11px; }
     }
-
     #popular-item-heading { display: flex; max-width: 1400px; margin: 32px auto 0; padding: 0 16px; box-sizing: border-box; width: 100%; align-items: center; gap: 10px; }
-    #popular-item-heading .ni-title { font-size: 20px; font-weight: 800; color: #f59e0b; letter-spacing: 1px; margin: 0; }
-    #popular-item-heading .ni-sub { font-size: 13px; font-weight: 500; color: #888; margin: 0; }
+    #popular-item-heading .ni-title { font-size: 20px; font-weight: 800; color: #f59e0b; letter-spacing: 1px; margin: 0; font-family: 'Bahnschrift Light', sans-serif; }
+    #popular-item-heading .ni-sub { font-size: 13px; font-weight: 500; color: #888; margin: 0; font-family: 'Bahnschrift Light', sans-serif; }
     #popular-item-heading .ni-line { flex: 1; height: 2px; background: linear-gradient(to right, #f59e0b, transparent); border-radius: 2px; }
     body.dark #popular-item-heading .ni-sub { color: #aaa; }
 
     #product-container { max-width: 1400px; margin: 0 auto; padding: 0 16px; box-sizing: border-box; width: 100%; margin-top: 16px; }
-    #product-container.no-banner { margin-top: 24px; }
-    #product-list { display: grid; gap: 16px; width: 100%; box-sizing: border-box; }
-    #product-list .card { min-width: 0; display: block; box-sizing: border-box; text-decoration: none; color: inherit; position: relative; }
-    #product-list .card .thumb { width: 100%; padding-bottom: 100%; position: relative; overflow: hidden; border-radius: 10px; background-color: #f0f0f0; background-size: cover; background-position: center; }
-    #product-list .card .card-info { padding: 10px 4px; min-width: 0; }
-    #product-list .card .name { font-size: 14px; font-weight: 500; color: #222; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    body.dark #product-list .card .name { color: #e5e7eb; }
-    #product-list .card .price { color: #e53935; font-weight: 700; font-size: 15px; margin-top: 4px; }
-    #product-list .card .price.locked { color: #1976d2; font-size: 12px; font-weight: 600; }
-    #product-list .card .new-badge { position: absolute; top: 8px; left: 8px; background: #e53935; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; z-index: 2; }
-    #product-list .card .grade-badge { position: absolute; top: 8px; right: 8px; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 3px; z-index: 2; }
+    #product-list, #popular-list { display: grid; gap: 16px; width: 100%; box-sizing: border-box; }
+    #product-list .card, #popular-list .card { min-width: 0; display: block; box-sizing: border-box; text-decoration: none; color: inherit; position: relative; }
+    #product-list .card .thumb, #popular-list .card .thumb { width: 100%; padding-bottom: 100%; position: relative; overflow: hidden; border-radius: 10px; background-color: #f0f0f0; background-size: cover; background-position: center; }
+    #product-list .card .card-info, #popular-list .card .card-info { padding: 10px 4px; min-width: 0; }
+    #product-list .card .name, #popular-list .card .name { font-size: 14px; font-weight: 500; color: #222; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: 'Bahnschrift Light', sans-serif; }
+    body.dark #product-list .card .name, body.dark #popular-list .card .name { color: #e5e7eb; }
+    /* ⭐ 가격: ₩ + Bahnschrift Light */
+    #product-list .card .price, #popular-list .card .price { color: #e53935; font-weight: 700; font-size: 15px; margin-top: 4px; font-family: 'Bahnschrift Light', sans-serif; }
+    #product-list .card .price.locked, #popular-list .card .price.locked { color: #1976d2; font-size: 12px; font-weight: 600; }
+    #product-list .card .new-badge { position: absolute; top: 8px; left: 8px; background: #e53935; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; z-index: 2; font-family: 'Bahnschrift Light', sans-serif; }
+    #product-list .card .grade-badge { position: absolute; top: 8px; right: 8px; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 3px; z-index: 2; font-family: 'Bahnschrift Light', sans-serif; }
     #product-list .card .grade-badge.wholesale { background: #f59e0b; }
     #product-list .card .grade-badge.vip { background: #a855f7; }
-
-    #popular-list { display: grid; gap: 16px; width: 100%; box-sizing: border-box; }
-    #popular-list .card { min-width: 0; display: block; box-sizing: border-box; text-decoration: none; color: inherit; position: relative; }
-    #popular-list .card .thumb { width: 100%; padding-bottom: 100%; position: relative; overflow: hidden; border-radius: 10px; background-color: #f0f0f0; background-size: cover; background-position: center; }
-    #popular-list .card .card-info { padding: 10px 4px; min-width: 0; }
-    #popular-list .card .name { font-size: 14px; font-weight: 500; color: #222; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    body.dark #popular-list .card .name { color: #e5e7eb; }
-    #popular-list .card .price { color: #e53935; font-weight: 700; font-size: 15px; margin-top: 4px; }
-    #popular-list .card .price.locked { color: #1976d2; font-size: 12px; font-weight: 600; }
-    #popular-list .card .rank-badge { position: absolute; top: 8px; left: 8px; background: #f59e0b; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; z-index: 2; }
+    #popular-list .card .rank-badge { position: absolute; top: 8px; left: 8px; background: #f59e0b; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; z-index: 2; font-family: 'Bahnschrift Light', sans-serif; }
     #popular-list .card .rank-badge.rank-1 { background: #e53935; }
     #popular-list .card .rank-badge.rank-2 { background: #f97316; }
     #popular-list .card .rank-badge.rank-3 { background: #ca8a04; }
@@ -123,10 +97,10 @@
     body.dark .board-card { background: #151515; border-color: #222; }
     .board-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #eee; gap: 8px; }
     body.dark .board-card-head { border-bottom-color: #222; }
-    .board-card-head h3 { font-size: 16px; font-weight: 700; color: #222; margin: 0; }
+    .board-card-head h3 { font-size: 16px; font-weight: 700; color: #222; margin: 0; font-family: 'Bahnschrift Light', sans-serif; }
     body.dark .board-card-head h3 { color: #fff; }
     .board-count { font-size: 11px; color: #9ca3af; font-weight: 400; }
-    .board-write-btn { padding: 6px 12px; background: #111827; color: #fff; border: 0; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; font-family: inherit; white-space: nowrap; }
+    .board-write-btn { padding: 6px 12px; background: #111827; color: #fff; border: 0; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; white-space: nowrap; font-family: 'Bahnschrift Light', sans-serif; }
     body.dark .board-write-btn { background: #e5e7eb; color: #111; }
     .board-list { display: flex; flex-direction: column; gap: 0; flex: 1; min-height: 200px; }
     .board-empty { text-align: center; color: #9ca3af; font-size: 13px; padding: 30px 10px; }
@@ -150,7 +124,7 @@
     .board-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 999998; display: flex; align-items: flex-start; justify-content: center; padding: 20px 10px; overflow-y: auto; }
     .board-modal-box { background: #fff; border-radius: 12px; padding: 20px; width: 100%; max-width: 520px; margin: 20px auto; box-sizing: border-box; }
     body.dark .board-modal-box { background: #151515; color: #e5e7eb; }
-    .board-modal-box h2 { margin: 0 0 16px; font-size: 18px; color: #111; }
+    .board-modal-box h2 { margin: 0 0 16px; font-size: 18px; color: #111; font-family: 'Bahnschrift Light', sans-serif; }
     body.dark .board-modal-box h2 { color: #fff; }
     .board-modal-form { display: grid; gap: 10px; }
     .board-modal-form label { font-size: 13px; font-weight: 600; color: #374151; display: block; margin-bottom: 4px; }
@@ -176,7 +150,6 @@
 <body>
   <div id="app-header"></div>
 
-  <!-- ⭐ [이슈3] 상단 고정 히어로 배경이미지 -->
   <section id="hero-bg-section">
     <div class="hero-bg-inner" id="hero-bg-inner">
       <div class="hero-bg-overlay">
@@ -191,15 +164,13 @@
   <div id="banner-wrap" style="display:none;">
     <div id="banner-slider">
       <div id="banner-track"></div>
-      <button type="button" class="banner-arrow prev" id="banner-prev" aria-label="이전 배너" hidden>‹</button>
-      <button type="button" class="banner-arrow next" id="banner-next" aria-label="다음 배너" hidden>›</button>
+      <button type="button" class="banner-arrow prev" id="banner-prev" aria-label="이전" hidden>‹</button>
+      <button type="button" class="banner-arrow next" id="banner-next" aria-label="다음" hidden>›</button>
       <div class="banner-dots" id="banner-dots" hidden></div>
     </div>
   </div>
 
-  <div id="promo-video-wrap">
-    <div id="promo-video-inner"></div>
-  </div>
+  <div id="promo-video-wrap"><div id="promo-video-inner"></div></div>
 
   <div id="new-item-heading">
     <h2 class="ni-title">NEW ITEM</h2>
@@ -258,21 +229,30 @@
     const PC_MAX_PAGES = 10, MOBILE_MAX_PAGES = 5;
     let allProducts = [], filteredProducts = [], currentPage = 1;
     let popularProducts = [], popularCurrentPage = 1;
+    const won = n => '₩ ' + Number(n || 0).toLocaleString();
 
-    function isLoggedIn() {
-      try { const m = JSON.parse(localStorage.getItem('member') || 'null'); return !!(m && m.id); } catch { return false; }
-    }
-    function getMemberGrade() {
-      try { const m = JSON.parse(localStorage.getItem('member') || 'null'); return m?.grade || '일반회원'; } catch { return '일반회원'; }
-    }
-    function isNewProduct(p) {
-      if (!p || !p.created_at) return false;
-      const c = new Date(p.created_at).getTime();
-      return !isNaN(c) && (Date.now() - c) < 7 * 24 * 60 * 60 * 1000;
-    }
+    function getMember() { try { return JSON.parse(localStorage.getItem('member') || 'null'); } catch { return null; } }
+    function isLoggedIn() { const m = getMember(); return !!(m && m.id); }
+    function getMemberGrade() { return getMember()?.grade || '일반회원'; }
+    function isNewProduct(p) { if (!p || !p.created_at) return false; const c = new Date(p.created_at).getTime(); return !isNaN(c) && (Date.now() - c) < 7*24*60*60*1000; }
     function shouldHidePrice(p) { return !isLoggedIn() && isNewProduct(p); }
 
-    // ⭐ [이슈2] 이제 common.js의 getVideoEmbedUrl 사용
+    // ⭐ [요청9] 비로그인 시 일반상품만 / 로그인 시 등급별 필터
+    // 일반회원: 일반상품(all)
+    // 도매회원: 일반상품(all, 열람만) + 도매상품(wholesale)
+    // VIP회원: 일반상품(all) + VIP상품(vip)
+    function filterProductsByGrade(products) {
+      if (!isLoggedIn()) return products.filter(p => (p.target_grade || 'all') === 'all');
+      const grade = getMemberGrade();
+      return products.filter(p => {
+        const tg = p.target_grade || 'all';
+        if (tg === 'all') return true;
+        if (tg === 'wholesale') return grade === '도매회원';
+        if (tg === 'vip') return grade === 'VIP회원';
+        return false;
+      });
+    }
+
     async function loadPromoVideo() {
       const wrap = document.getElementById('promo-video-wrap');
       const inner = document.getElementById('promo-video-inner');
@@ -280,27 +260,25 @@
         const { data } = await db.from('settings').select('value').eq('key', 'promo_video_url').maybeSingle();
         const url = data?.value || '';
         if (!url) { wrap.style.display = 'none'; inner.innerHTML = ''; return; }
-        const embed = getVideoEmbedUrl(url);  // common.js의 다중 플랫폼 함수
+        const embed = getVideoEmbedUrl(url);
         inner.innerHTML = `<iframe src="${embed}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>`;
         wrap.style.display = 'block';
-      } catch (e) { wrap.style.display = 'none'; }
+      } catch { wrap.style.display = 'none'; }
     }
 
-    // ⭐ [이슈3] 히어로 배경이미지 (배너 없을 때만 노출)
     async function loadHeroBg() {
       try {
         const { data } = await db.from('settings').select('value').eq('key', 'hero_bg_image').maybeSingle();
         const url = data?.value || '';
         if (!url) { document.getElementById('hero-bg-section').classList.remove('show'); return; }
         const bannerWrap = document.getElementById('banner-wrap');
-        // 배너가 있으면 히어로는 숨김 (배너 우선)
         if (bannerWrap && bannerWrap.style.display !== 'none' && bannerWrap.querySelector('.banner-slide')) {
           document.getElementById('hero-bg-section').classList.remove('show');
           return;
         }
         document.getElementById('hero-bg-inner').style.backgroundImage = `url('${url}')`;
         document.getElementById('hero-bg-section').classList.add('show');
-      } catch (e) { console.warn('히어로 배경 로드 실패:', e); }
+      } catch {}
     }
 
     const AUTO_INTERVAL = 5000;
@@ -320,11 +298,7 @@
         return;
       }
       bannerList = data.filter(b => b.image_url);
-      if (bannerList.length === 0) {
-        wrap.style.display = 'none';
-        if (container) container.classList.add('no-banner');
-        return;
-      }
+      if (bannerList.length === 0) { wrap.style.display = 'none'; return; }
       wrap.style.display = 'block';
       if (container) container.classList.remove('no-banner');
       track.innerHTML = bannerList.map((b, i) => {
@@ -360,25 +334,13 @@
       else if (bannerList.length > 1) startAuto();
     });
 
-    // ⭐ [이슈5] 등급 무관 통합검색 (도매/VIP 포함)
     async function loadProducts() {
       const list = document.getElementById('product-list');
       const { data, error } = await db.from('products').select('*').order('created_at', { ascending: false });
       if (error) { list.innerHTML = '<p>상품을 불러올 수 없습니다.</p>'; return; }
-      if (!data || data.length === 0) {
-        list.innerHTML = '<p>등록된 상품이 없습니다.</p>';
-        document.getElementById('pagination').innerHTML = '';
-        return;
-      }
-      const memberGrade = getMemberGrade();
-      // 등급별 접근 가능 상품 필터 (도매회원: all + wholesale 열람가능 / VIP: all + vip / 일반: all)
-      allProducts = data.filter(p => {
-        const tg = p.target_grade || 'all';
-        if (tg === 'all') return true;
-        if (tg === 'wholesale') return memberGrade === '도매회원';
-        if (tg === 'vip') return memberGrade === 'VIP회원';
-        return false;
-      });
+      if (!data || data.length === 0) { list.innerHTML = '<p>등록된 상품이 없습니다.</p>'; return; }
+      // ⭐ [요청9] 등급별 필터
+      allProducts = filterProductsByGrade(data);
       applyGridColumns();
       currentPage = 1;
       renderPage();
@@ -386,62 +348,48 @@
 
     function applyGridColumns() {
       const cols = isPC() ? 'repeat(6, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr))';
-      document.getElementById('product-list').style.gridTemplateColumns = cols;
-      document.getElementById('popular-list').style.gridTemplateColumns = cols;
+      const a = document.getElementById('product-list'); if (a) a.style.gridTemplateColumns = cols;
+      const b = document.getElementById('popular-list'); if (b) b.style.gridTemplateColumns = cols;
     }
     function getPerPage() { return isPC() ? PC_PER_PAGE : MOBILE_PER_PAGE; }
     function getMaxPages() { return isPC() ? PC_MAX_PAGES : MOBILE_MAX_PAGES; }
-    function bgUrl(url) {
-      if (!url) return 'none';
-      const safe = String(url).replace(/'/g, "\\'").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
-      return `url('${safe}')`;
-    }
+    function bgUrl(url) { if (!url) return 'none'; return `url('${String(url).replace(/'/g, "\\'")}')`; }
 
     function renderPage() {
       const list = document.getElementById('product-list');
       const perPage = getPerPage();
       const start = (currentPage - 1) * perPage;
-      const items = filteredProducts.length ? filteredProducts.slice(start, start + perPage) : allProducts.slice(start, start + perPage);
+      const items = (filteredProducts.length ? filteredProducts : allProducts).slice(start, start + perPage);
       const source = filteredProducts.length ? filteredProducts : allProducts;
       if (source.length === 0) {
         list.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:40px; color:#9ca3af;">표시할 상품이 없습니다.</p>';
-        document.getElementById('pagination').innerHTML = '';
-        return;
+        document.getElementById('pagination').innerHTML = ''; return;
       }
       list.innerHTML = items.map(p => {
         const hidePrice = shouldHidePrice(p);
         const isNew = isNewProduct(p);
         const tg = p.target_grade || 'all';
         const newBadge = isNew ? `<span class="new-badge">NEW</span>` : '';
-        const gradeBadge = tg === 'wholesale' ? `<span class="grade-badge wholesale">도매</span>`
-                        : tg === 'vip' ? `<span class="grade-badge vip">VIP</span>` : '';
-        const priceHtml = hidePrice
-          ? `<div class="price locked">🔒 로그인 후 가격 확인</div>`
-          : `<div class="price">${Number(p.price).toLocaleString()}원</div>`;
+        const gradeBadge = tg === 'wholesale' ? `<span class="grade-badge wholesale">도매</span>` : tg === 'vip' ? `<span class="grade-badge vip">VIP</span>` : '';
+        const priceHtml = hidePrice ? `<div class="price locked">🔒 로그인 후 가격 확인</div>` : `<div class="price">${won(p.price)}</div>`;
         return `
           <a class="card" href="product.html?id=${p.id}">
             <div class="thumb" style="background-image: ${bgUrl(p.main_image)};">${newBadge}${gradeBadge}</div>
             <div class="card-info"><div class="name">${p.name}</div>${priceHtml}</div>
-          </a>
-        `;
+          </a>`;
       }).join('');
       renderPagination(source.length);
     }
-
     function renderPagination(totalCount) {
       const el = document.getElementById('pagination');
       const totalPages = Math.min(Math.ceil(totalCount / getPerPage()), getMaxPages());
       if (totalPages <= 1) { el.innerHTML = ''; return; }
       const btnBase = 'padding:8px 14px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; font-family:inherit;';
       let html = `<button class="page-nav" data-page="${currentPage-1}" ${currentPage===1?'disabled':''} style="${btnBase} background:${currentPage===1?'#f5f5f5':'#fff'}; color:${currentPage===1?'#bbb':'#222'}; border:1px solid #ddd;">이전</button>`;
-      for (let i = 1; i <= totalPages; i++) {
-        html += `<button class="page-num" data-page="${i}" style="${btnBase} background:${i===currentPage?'#222':'#fff'}; color:${i===currentPage?'#fff':'#222'}; border:1px solid ${i===currentPage?'#222':'#ddd'};">${i}</button>`;
-      }
+      for (let i = 1; i <= totalPages; i++) html += `<button class="page-num" data-page="${i}" style="${btnBase} background:${i===currentPage?'#222':'#fff'}; color:${i===currentPage?'#fff':'#222'}; border:1px solid ${i===currentPage?'#222':'#ddd'};">${i}</button>`;
       html += `<button class="page-nav" data-page="${currentPage+1}" ${currentPage===totalPages?'disabled':''} style="${btnBase} background:${currentPage===totalPages?'#f5f5f5':'#fff'}; color:${currentPage===totalPages?'#bbb':'#222'}; border:1px solid #ddd;">다음</button>`;
       el.innerHTML = html;
-      el.querySelectorAll('.page-num, .page-nav').forEach(btn => {
-        btn.addEventListener('click', () => { if (btn.disabled) return; currentPage = Number(btn.dataset.page); renderPage(); });
-      });
+      el.querySelectorAll('.page-num, .page-nav').forEach(b => b.onclick = () => { if (b.disabled) return; currentPage = Number(b.dataset.page); renderPage(); });
     }
 
     async function loadPopularProducts() {
@@ -450,19 +398,10 @@
       let products = [];
       try {
         const { data } = await db.from('products').select('*').order('created_at', { ascending: false });
-        products = data || [];
-      } catch (e) { list.innerHTML = '<p>상품을 불러올 수 없습니다.</p>'; return; }
-      const memberGrade = getMemberGrade();
-      products = products.filter(p => {
-        const tg = p.target_grade || 'all';
-        if (tg === 'all') return true;
-        if (tg === 'wholesale') return memberGrade === '도매회원';
-        if (tg === 'vip') return memberGrade === 'VIP회원';
-        return false;
-      });
+        products = filterProductsByGrade(data || []);
+      } catch { list.innerHTML = '<p>상품을 불러올 수 없습니다.</p>'; return; }
       if (products.length === 0) {
         list.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:40px; color:#9ca3af;">등록된 상품이 없습니다.</p>';
-        document.getElementById('popular-pagination').innerHTML = '';
         return;
       }
       const viewCountMap = {};
@@ -473,50 +412,38 @@
       popularProducts = products.map(p => ({ ...p, _viewCount: viewCountMap[String(p.id)] || 0 }))
         .sort((a, b) => b._viewCount !== a._viewCount ? b._viewCount - a._viewCount : new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       popularCurrentPage = 1;
-      applyGridColumns();
       renderPopularPage();
     }
-
     function renderPopularPage() {
       const list = document.getElementById('popular-list');
       const perPage = getPerPage();
       const start = (popularCurrentPage - 1) * perPage;
       const items = popularProducts.slice(start, start + perPage);
-      if (popularProducts.length === 0) {
-        list.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:40px; color:#9ca3af;">인기 상품이 없습니다.</p>';
-        document.getElementById('popular-pagination').innerHTML = '';
-        return;
-      }
+      if (popularProducts.length === 0) { list.innerHTML = ''; return; }
       list.innerHTML = items.map((p, idx) => {
         const rank = start + idx + 1;
         const hidePrice = shouldHidePrice(p);
         const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : '';
         const rankBadge = rank <= 20 ? `<span class="rank-badge ${rankClass}">#${rank}</span>` : '';
-        const priceHtml = hidePrice ? `<div class="price locked">🔒 로그인 후 가격 확인</div>` : `<div class="price">${Number(p.price).toLocaleString()}원</div>`;
+        const priceHtml = hidePrice ? `<div class="price locked">🔒 로그인 후 가격 확인</div>` : `<div class="price">${won(p.price)}</div>`;
         return `
           <a class="card" href="product.html?id=${p.id}">
             <div class="thumb" style="background-image: ${bgUrl(p.main_image)};">${rankBadge}</div>
             <div class="card-info"><div class="name">${p.name}</div>${priceHtml}</div>
-          </a>
-        `;
+          </a>`;
       }).join('');
       renderPopularPagination();
     }
-
     function renderPopularPagination() {
       const el = document.getElementById('popular-pagination');
       const totalPages = Math.min(Math.ceil(popularProducts.length / getPerPage()), getMaxPages());
       if (totalPages <= 1) { el.innerHTML = ''; return; }
       const btnBase = 'padding:8px 14px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; font-family:inherit;';
       let html = `<button class="page-nav" data-page="${popularCurrentPage-1}" ${popularCurrentPage===1?'disabled':''} style="${btnBase} background:${popularCurrentPage===1?'#f5f5f5':'#fff'}; color:${popularCurrentPage===1?'#bbb':'#222'}; border:1px solid #ddd;">이전</button>`;
-      for (let i = 1; i <= totalPages; i++) {
-        html += `<button class="page-num" data-page="${i}" style="${btnBase} background:${i===popularCurrentPage?'#222':'#fff'}; color:${i===popularCurrentPage?'#fff':'#222'}; border:1px solid ${i===popularCurrentPage?'#222':'#ddd'};">${i}</button>`;
-      }
+      for (let i = 1; i <= totalPages; i++) html += `<button class="page-num" data-page="${i}" style="${btnBase} background:${i===popularCurrentPage?'#222':'#fff'}; color:${i===popularCurrentPage?'#fff':'#222'}; border:1px solid ${i===popularCurrentPage?'#222':'#ddd'};">${i}</button>`;
       html += `<button class="page-nav" data-page="${popularCurrentPage+1}" ${popularCurrentPage===totalPages?'disabled':''} style="${btnBase} background:${popularCurrentPage===totalPages?'#f5f5f5':'#fff'}; color:${popularCurrentPage===totalPages?'#bbb':'#222'}; border:1px solid #ddd;">다음</button>`;
       el.innerHTML = html;
-      el.querySelectorAll('.page-num, .page-nav').forEach(btn => {
-        btn.addEventListener('click', () => { if (btn.disabled) return; popularCurrentPage = Number(btn.dataset.page); renderPopularPage(); });
-      });
+      el.querySelectorAll('.page-num, .page-nav').forEach(b => b.onclick = () => { if (b.disabled) return; popularCurrentPage = Number(b.dataset.page); renderPopularPage(); });
     }
 
     let resizeTimer;
@@ -524,27 +451,18 @@
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
         applyGridColumns();
-        const maxP = getMaxPages();
-        const totalP = Math.min(Math.ceil((filteredProducts.length || allProducts.length) / getPerPage()), maxP);
-        if (currentPage > totalP) currentPage = totalP || 1;
         renderPage();
-        const popTotalP = Math.min(Math.ceil(popularProducts.length / getPerPage()), maxP);
-        if (popularCurrentPage > popTotalP) popularCurrentPage = popTotalP || 1;
         if (popularProducts.length) renderPopularPage();
       }, 200);
     });
 
-    // ⭐ 게시판 (board.html 없음 → index.html 내 통합)
+    // ===== 게시판 =====
     const NOTICE_PER_PAGE = 5, BOARD_PER_PAGE = 5;
     let noticePage = 1, boardPage = 1, noticeTotal = 0, boardTotal = 0;
     let noticesCache = [], boardCache = [];
 
-    function getLoggedMemberForBoard() {
-      try { return JSON.parse(localStorage.getItem('member') || 'null'); } catch { return null; }
-    }
-    function escapeBoardHtml(s) {
-      return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
-    }
+    function getLoggedMemberForBoard() { try { return JSON.parse(localStorage.getItem('member') || 'null'); } catch { return null; } }
+    function escapeBoardHtml(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
     function formatBoardDate(d) {
       if (!d) return '-';
       const dt = new Date(d);
@@ -557,7 +475,6 @@
     async function loadNotices() {
       const listEl = document.getElementById('notice-list');
       const countEl = document.getElementById('notice-count');
-      if (!listEl) return;
       try {
         const from = (noticePage - 1) * NOTICE_PER_PAGE;
         const to = from + NOTICE_PER_PAGE - 1;
@@ -565,28 +482,20 @@
         if (error) throw error;
         noticesCache = data || [];
         noticeTotal = count || 0;
-        if (countEl) countEl.textContent = `총 ${noticeTotal}건`;
-        if (!noticesCache.length) {
-          listEl.innerHTML = '<p class="board-empty">등록된 공지사항이 없습니다.</p>';
-          document.getElementById('notice-pagination').innerHTML = '';
-          return;
-        }
+        countEl.textContent = `총 ${noticeTotal}건`;
+        if (!noticesCache.length) { listEl.innerHTML = '<p class="board-empty">등록된 공지사항이 없습니다.</p>'; document.getElementById('notice-pagination').innerHTML = ''; return; }
         listEl.innerHTML = noticesCache.map(n => `
           <div class="board-item" data-id="${n.id}" data-type="notice">
             <div class="board-item-title-row"><span class="board-item-title">📌 ${escapeBoardHtml(n.title)}</span></div>
             <div class="board-item-meta"><span>${formatBoardDate(n.created_at)}</span></div>
-          </div>
-        `).join('');
+          </div>`).join('');
         bindBoardItemEvents('notice');
         renderBoardPagination('notice', noticeTotal, NOTICE_PER_PAGE);
-      } catch (e) {
-        listEl.innerHTML = '<p class="board-empty">공지사항을 불러올 수 없습니다.</p>';
-      }
+      } catch { listEl.innerHTML = '<p class="board-empty">공지사항을 불러올 수 없습니다.</p>'; }
     }
 
     async function loadBoardPosts() {
       const listEl = document.getElementById('board-list');
-      if (!listEl) return;
       try {
         const from = (boardPage - 1) * BOARD_PER_PAGE;
         const to = from + BOARD_PER_PAGE - 1;
@@ -594,11 +503,7 @@
         if (error) throw error;
         boardCache = data || [];
         boardTotal = count || 0;
-        if (!boardCache.length) {
-          listEl.innerHTML = '<p class="board-empty">등록된 문의글이 없습니다.</p>';
-          document.getElementById('board-pagination').innerHTML = '';
-          return;
-        }
+        if (!boardCache.length) { listEl.innerHTML = '<p class="board-empty">등록된 문의글이 없습니다.</p>'; document.getElementById('board-pagination').innerHTML = ''; return; }
         const me = getLoggedMemberForBoard();
         listEl.innerHTML = boardCache.map(b => {
           const isSecret = !!b.is_secret;
@@ -615,19 +520,15 @@
                 <span>${escapeBoardHtml(b.member_name || b.member_username || '회원')}</span>
                 <span>${formatBoardDate(b.created_at)}</span>
               </div>
-            </div>
-          `;
+            </div>`;
         }).join('');
         bindBoardItemEvents('board');
         renderBoardPagination('board', boardTotal, BOARD_PER_PAGE);
-      } catch (e) {
-        listEl.innerHTML = '<p class="board-empty">게시판을 불러올 수 없습니다.</p>';
-      }
+      } catch { listEl.innerHTML = '<p class="board-empty">게시판을 불러올 수 없습니다.</p>'; }
     }
 
     function renderBoardPagination(type, total, perPage) {
       const el = document.getElementById(type + '-pagination');
-      if (!el) return;
       const totalPages = Math.ceil(total / perPage);
       if (totalPages <= 1) { el.innerHTML = ''; return; }
       const cur = type === 'notice' ? noticePage : boardPage;
@@ -635,28 +536,22 @@
       for (let i = 1; i <= totalPages; i++) html += `<button class="${i === cur ? 'active' : ''}" data-page="${i}" data-type="${type}">${i}</button>`;
       html += `<button ${cur === totalPages ? 'disabled' : ''} data-page="${cur+1}" data-type="${type}">›</button>`;
       el.innerHTML = html;
-      el.querySelectorAll('button').forEach(btn => {
-        btn.addEventListener('click', () => {
-          if (btn.disabled) return;
-          const page = Number(btn.dataset.page);
-          if (type === 'notice') { noticePage = page; loadNotices(); }
-          else { boardPage = page; loadBoardPosts(); }
-        });
+      el.querySelectorAll('button').forEach(btn => btn.onclick = () => {
+        if (btn.disabled) return;
+        const page = Number(btn.dataset.page);
+        if (type === 'notice') { noticePage = page; loadNotices(); } else { boardPage = page; loadBoardPosts(); }
       });
     }
 
     function bindBoardItemEvents(type) {
       const listId = type === 'notice' ? 'notice-list' : 'board-list';
       const listEl = document.getElementById(listId);
-      if (!listEl) return;
       listEl.querySelectorAll('.board-item').forEach(item => {
-        item.addEventListener('click', e => {
+        item.onclick = e => {
           if (e.target.closest('.board-del-btn')) return;
           const id = item.dataset.id;
-          if (type === 'notice') {
-            const n = noticesCache.find(x => String(x.id) === String(id));
-            if (n) showBoardDetailModal('notice', n);
-          } else {
+          if (type === 'notice') { const n = noticesCache.find(x => String(x.id) === String(id)); if (n) showBoardDetailModal('notice', n); }
+          else {
             const b = boardCache.find(x => String(x.id) === String(id));
             if (b) {
               const me = getLoggedMemberForBoard();
@@ -665,18 +560,15 @@
               showBoardDetailModal('board', b);
             }
           }
-        });
+        };
       });
-      listEl.querySelectorAll('.board-del-btn').forEach(btn => {
-        btn.addEventListener('click', async e => {
-          e.stopPropagation();
-          const id = btn.dataset.id;
-          if (!confirm('이 글을 삭제할까요?')) return;
-          const { error } = await db.from('board_posts').delete().eq('id', id);
-          if (error) { alert('❌ 삭제 실패: ' + error.message); return; }
-          alert('✅ 삭제되었습니다.');
-          loadBoardPosts();
-        });
+      listEl.querySelectorAll('.board-del-btn').forEach(btn => btn.onclick = async e => {
+        e.stopPropagation();
+        if (!confirm('이 글을 삭제할까요?')) return;
+        const { error } = await db.from('board_posts').delete().eq('id', btn.dataset.id);
+        if (error) { alert('❌ 삭제 실패: ' + error.message); return; }
+        alert('✅ 삭제되었습니다.');
+        loadBoardPosts();
       });
     }
 
@@ -695,23 +587,16 @@
           </div>
           <div style="font-weight:700; font-size:15px; margin-bottom:10px; color:#111; padding:0 4px;">${escapeBoardHtml(data.title)}</div>
           <div class="board-detail-content">${escapeBoardHtml(data.content)}</div>
-          <div class="board-modal-actions">
-            <button type="button" class="board-modal-cancel" id="board-detail-close">닫기</button>
-          </div>
-        </div>
-      `;
+          <div class="board-modal-actions"><button type="button" class="board-modal-cancel" id="board-detail-close">닫기</button></div>
+        </div>`;
       document.body.appendChild(modal);
       modal.querySelector('#board-detail-close').onclick = () => modal.remove();
-      modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+      modal.onclick = e => { if (e.target === modal) modal.remove(); };
     }
 
     function showBoardWriteModal() {
       const me = getLoggedMemberForBoard();
-      if (!me || !me.id) {
-        alert('로그인 후 이용 가능합니다.');
-        location.href = 'login.html';
-        return;
-      }
+      if (!me || !me.id) { alert('로그인 후 이용 가능합니다.'); location.href = 'login.html'; return; }
       const modal = document.createElement('div');
       modal.className = 'board-modal-backdrop';
       modal.innerHTML = `
@@ -720,55 +605,34 @@
           <form id="board-write-form" class="board-modal-form">
             <div><label>제목 *</label><input name="title" required maxlength="100"></div>
             <div><label>내용 *</label><textarea name="content" required></textarea></div>
-            <label class="board-secret-check"><input type="checkbox" name="is_secret"> 🔒 비밀글로 작성 (작성자만 열람)</label>
+            <label class="board-secret-check"><input type="checkbox" name="is_secret"> 🔒 비밀글로 작성</label>
             <div class="board-modal-actions">
               <button type="submit" class="board-modal-submit">등록</button>
               <button type="button" class="board-modal-cancel" id="board-write-cancel">취소</button>
             </div>
           </form>
-        </div>
-      `;
+        </div>`;
       document.body.appendChild(modal);
       modal.querySelector('#board-write-cancel').onclick = () => modal.remove();
-      modal.querySelector('#board-write-form').addEventListener('submit', async e => {
+      modal.querySelector('#board-write-form').onsubmit = async e => {
         e.preventDefault();
         const f = e.target;
-        const submitBtn = f.querySelector('button[type="submit"]');
-        submitBtn.disabled = true; submitBtn.textContent = '등록 중...';
-        // ⭐ [이슈1] RLS 정책과 일치하도록 member_id / member_name / member_username 전송
-        const payload = {
-          member_id: me.id,
-          member_name: me.name || '',
-          member_username: me.username || '',
-          title: f.title.value.trim(),
-          content: f.content.value.trim(),
-          is_secret: f.is_secret.checked,
-        };
-        const { error } = await db.from('board_posts').insert(payload);
-        if (error) {
-          alert('❌ 등록 실패: ' + error.message);
-          submitBtn.disabled = false; submitBtn.textContent = '등록';
-          return;
-        }
+        const btn = f.querySelector('button[type="submit"]');
+        btn.disabled = true; btn.textContent = '등록 중...';
+        const { error } = await db.from('board_posts').insert({
+          member_id: me.id, member_name: me.name || '', member_username: me.username || '',
+          title: f.title.value.trim(), content: f.content.value.trim(), is_secret: f.is_secret.checked,
+        });
+        if (error) { alert('❌ 등록 실패: ' + error.message); btn.disabled = false; btn.textContent = '등록'; return; }
         alert('✅ 등록되었습니다.');
-        modal.remove();
-        boardPage = 1;
-        loadBoardPosts();
-      });
+        modal.remove(); boardPage = 1; loadBoardPosts();
+      };
     }
     document.getElementById('board-write-btn')?.addEventListener('click', showBoardWriteModal);
 
-    // 부트스트랩 (병렬 로딩으로 속도 개선)
     (async () => {
-      await Promise.all([
-        loadBanner(),
-        loadPromoVideo(),
-        loadProducts(),
-        loadPopularProducts(),
-        loadNotices(),
-        loadBoardPosts()
-      ]);
-      await loadHeroBg();  // 배너 로드 후 히어로 노출 여부 결정
+      await Promise.all([loadBanner(), loadPromoVideo(), loadProducts(), loadPopularProducts(), loadNotices(), loadBoardPosts()]);
+      await loadHeroBg();
     })();
   </script>
 </body>
