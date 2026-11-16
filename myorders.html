@@ -7,143 +7,80 @@
   <link rel="stylesheet" href="style.css">
   <script src="common.js"></script>
   <style>
+    @import url('https://fonts.cdnfonts.com/css/bahnschrift');
+    body { font-family: 'Bahnschrift Light', 'Bahnschrift', -apple-system, sans-serif; }
+
     .myorders-wrap { max-width: 640px; margin: 40px auto; padding: 0 16px; box-sizing: border-box; }
     .myorders-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding: 0 4px; flex-wrap: wrap; gap: 10px; }
-    .order-history-title { font-size: 22px; font-weight: 700; color: #222; margin: 0; }
+    .order-history-title { font-size: 22px; font-weight: 700; color: #222; margin: 0; font-family: 'Bahnschrift Light', sans-serif; }
     body.dark .order-history-title { color: #fff; }
+
     .bulk-actions { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #4b5563; }
     body.dark .bulk-actions { color: #9ca3af; }
-    .bulk-actions label {
-      display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600;
-      min-height: 44px; padding: 0 4px;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .bulk-actions input[type="checkbox"] {
-      width: 22px; height: 22px; cursor: pointer; accent-color: #10b981;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .btn-delete-selected {
-      padding: 10px 16px; background: #ef4444; color: #fff; border: 0; border-radius: 6px;
-      cursor: pointer; font-size: 13px; font-weight: 600; font-family: inherit;
-      opacity: 0.5; pointer-events: none; transition: opacity 0.15s;
-      min-height: 44px; min-width: 96px;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-    }
+    .bulk-actions label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600; min-height: 44px; padding: 0 4px; }
+    .bulk-actions input[type="checkbox"] { width: 22px; height: 22px; cursor: pointer; accent-color: #10b981; }
+    .btn-delete-selected { padding: 10px 16px; background: #ef4444; color: #fff; border: 0; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; font-family: inherit; opacity: 0.5; pointer-events: none; min-height: 44px; min-width: 96px; }
     .btn-delete-selected.active { opacity: 1; pointer-events: auto; }
+
     .order-history-list { display: flex; flex-direction: column; gap: 16px; width: 100%; }
     .history-card-wrap { display: flex; gap: 12px; align-items: flex-start; width: 100%; }
-    .history-check {
-      width: 24px; height: 24px; cursor: pointer; accent-color: #10b981;
-      margin-top: 20px; flex-shrink: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
+    .history-check { width: 24px; height: 24px; cursor: pointer; accent-color: #10b981; margin-top: 20px; flex-shrink: 0; }
     .history-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; font-size: 14px; line-height: 1.6; color: #222; box-sizing: border-box; width: 100%; flex: 1; min-width: 0; }
     body.dark .history-card { background: #151515; border-color: #222; color: #e5e7eb; }
     .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #eee; flex-wrap: wrap; gap: 8px; }
     body.dark .history-header { border-bottom-color: #222; }
     .history-date { font-size: 13px; color: #888; }
     .history-status { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 4px; color: #fff; }
-    .history-order-num { font-weight: 700; color: #1976d2; font-size: 15px; margin-bottom: 12px; display: block; word-break: break-all; }
+    .history-order-num { font-weight: 700; color: #1976d2; font-size: 15px; margin-bottom: 12px; display: block; word-break: break-all; font-family: 'Bahnschrift Light', sans-serif; }
     body.dark .history-order-num { color: #60a5fa; }
+
     .history-product-item { padding: 10px 0; border-bottom: 1px dashed #eee; }
     body.dark .history-product-item { border-bottom-color: #222; }
     .history-product-item:last-child { border-bottom: none; }
     .history-item-main { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 14px; gap: 8px; }
-    .history-item-main .name { font-weight: 600; word-break: break-all; }
+    .history-item-main .name { font-weight: 600; word-break: break-all; font-family: 'Bahnschrift Light', sans-serif; }
     .history-item-main .qty { color: #888; margin-left: 4px; font-weight: normal; font-size: 13px; }
+    .history-item-main .item-price { font-family: 'Bahnschrift Light', sans-serif; }
     .history-item-detail { font-size: 13px; color: #6b7280; line-height: 1.5; word-break: break-all; }
     body.dark .history-item-detail { color: #9ca3af; }
+
     .history-info-box { margin-top: 16px; background: #f9fafb; padding: 12px; border-radius: 6px; font-size: 13px; color: #4b5563; line-height: 1.6; word-break: break-all; }
     body.dark .history-info-box { background: #0f0f0f; color: #9ca3af; }
-    .history-price-summary { margin-top: 16px; padding-top: 16px; border-top: 1px solid #eee; font-size: 14px; color: #4b5563; }
+
+    .history-price-summary { margin-top: 16px; padding-top: 16px; border-top: 1px solid #eee; font-size: 14px; color: #4b5563; font-family: 'Bahnschrift Light', sans-serif; }
     body.dark .history-price-summary { border-top-color: #222; color: #9ca3af; }
     .history-price-summary .price-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
     .history-price-summary .price-row.total { margin-top: 8px; padding-top: 8px; border-top: 1px dashed #ddd; font-weight: 700; font-size: 16px; color: #e53935; }
     body.dark .history-price-summary .price-row.total { border-top-color: #333; color: #ef4444; }
 
-    .history-account-box {
-      margin-top: 12px;
-      padding: 12px 14px;
-      background: #fef9e7;
-      border: 1px dashed #f59e0b;
-      border-radius: 8px;
-      font-size: 13px;
-      color: #78350f;
-      line-height: 1.7;
-      word-break: break-all;
-    }
-    body.dark .history-account-box {
-      background: #1a1a1a;
-      border-color: #f59e0b;
-      color: #fcd34d;
-    }
-    .history-account-box .ab-title {
-      font-weight: 700;
-      margin-bottom: 6px;
-      display: flex; align-items: center; gap: 6px;
-      color: #92400e;
-    }
+    .history-account-box { margin-top: 12px; padding: 12px 14px; background: #fef9e7; border: 1px dashed #f59e0b; border-radius: 8px; font-size: 13px; color: #78350f; line-height: 1.7; word-break: break-all; }
+    body.dark .history-account-box { background: #1a1a1a; border-color: #f59e0b; color: #fcd34d; }
+    .history-account-box .ab-title { font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; color: #92400e; }
     body.dark .history-account-box .ab-title { color: #fbbf24; }
     .history-account-box .ab-row { display: flex; gap: 6px; font-size: 13px; margin-bottom: 2px; }
     .history-account-box .ab-row .ab-label { color: #92400e; font-weight: 600; flex: 0 0 60px; }
     body.dark .history-account-box .ab-row .ab-label { color: #fbbf24; }
     .history-account-box .ab-row .ab-val { flex: 1; color: #451a03; font-weight: 600; }
     body.dark .history-account-box .ab-row .ab-val { color: #fde68a; }
-    .history-account-box .ab-total { font-size: 15px; color: #dc2626; font-weight: 700; }
+    .history-account-box .ab-total { font-size: 15px; color: #dc2626; font-weight: 700; font-family: 'Bahnschrift Light', sans-serif; }
     body.dark .history-account-box .ab-total { color: #ef4444; }
-    .history-account-box .ab-copy {
-      margin-left: 6px; padding: 2px 8px;
-      background: #fff7ed; color: #92400e;
-      border: 1px solid #f59e0b; border-radius: 4px;
-      cursor: pointer; font-size: 11px; font-family: inherit;
-    }
-    body.dark .history-account-box .ab-copy {
-      background: #222; color: #fbbf24; border-color: #f59e0b;
-    }
+    .history-account-box .ab-copy { margin-left: 6px; padding: 2px 8px; background: #fff7ed; color: #92400e; border: 1px solid #f59e0b; border-radius: 4px; cursor: pointer; font-size: 11px; font-family: inherit; }
+    body.dark .history-account-box .ab-copy { background: #222; color: #fbbf24; border-color: #f59e0b; }
 
-    .history-coupon-box {
-      margin-top: 12px;
-      padding: 12px 14px;
-      background: #fef3c7;
-      border: 1px dashed #f59e0b;
-      border-radius: 8px;
-      font-size: 13px;
-      color: #92400e;
-      line-height: 1.6;
-      word-break: break-all;
-    }
+    .history-coupon-box { margin-top: 12px; padding: 12px 14px; background: #fef3c7; border: 1px dashed #f59e0b; border-radius: 8px; font-size: 13px; color: #92400e; line-height: 1.6; word-break: break-all; }
     body.dark .history-coupon-box { background: #1a1a1a; border-color: #f59e0b; color: #fcd34d; }
-    .history-coupon-box .cc-title {
-      font-weight: 700;
-      margin-bottom: 4px;
-      display: flex; align-items: center; gap: 6px;
-    }
+    .history-coupon-box .cc-title { font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
     .history-coupon-box .cc-row { display: flex; gap: 8px; font-size: 12px; }
     .history-coupon-box .cc-row b { color: #78350f; }
     body.dark .history-coupon-box .cc-row b { color: #fde68a; }
 
-    .history-grade-badge {
-      display: inline-block;
-      padding: 3px 8px; border-radius: 4px;
-      background: #dbeafe; color: #1e40af;
-      font-size: 11px; font-weight: 700;
-      border: 1px solid #93c5fd;
-      margin-bottom: 8px;
-    }
+    .history-grade-badge { display: inline-block; padding: 3px 8px; border-radius: 4px; background: #dbeafe; color: #1e40af; font-size: 11px; font-weight: 700; border: 1px solid #93c5fd; margin-bottom: 8px; }
     body.dark .history-grade-badge { background: #1e3a8a; color: #bfdbfe; border-color: #3b82f6; }
 
-    .btn-delete-single {
-      margin-top: 16px; width: 100%; padding: 12px;
-      background: #fff; color: #ef4444; border: 1px solid #ef4444; border-radius: 6px;
-      cursor: pointer; font-size: 14px; font-weight: 600; font-family: inherit;
-      transition: all 0.15s;
-      min-height: 44px;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-    }
+    .btn-delete-single { margin-top: 16px; width: 100%; padding: 12px; background: #fff; color: #ef4444; border: 1px solid #ef4444; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; font-family: inherit; min-height: 44px; }
     body.dark .btn-delete-single { background: #151515; color: #ef4444; border-color: #ef4444; }
     .btn-delete-single:disabled { opacity: 0.6; cursor: not-allowed; }
+
     @media (max-width: 480px) {
       .myorders-header { flex-direction: column; align-items: stretch; }
       .bulk-actions { justify-content: flex-end; }
@@ -177,19 +114,18 @@
   </script>
 
   <script>
+    // ⭐ 가격 표시: ₩ + Bahnschrift Light
+    const won = n => '₩ ' + Number(n || 0).toLocaleString();
+
     function formatKST(dateStr, opts = {}) {
       if (!dateStr) return '-';
       let normalized = String(dateStr).trim();
       if (!normalized) return '-';
-
-      if (/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/.test(normalized) &&
-          !/(Z|[+-]\d{2}:?\d{2})$/i.test(normalized)) {
+      if (/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/.test(normalized) && !/(Z|[+-]\d{2}:?\d{2})$/i.test(normalized)) {
         normalized = normalized.replace(' ', 'T') + 'Z';
       }
-
       const d = new Date(normalized);
       if (Number.isNaN(d.getTime())) return '-';
-
       const parts = new Intl.DateTimeFormat('en-CA', {
         timeZone: 'Asia/Seoul',
         year: 'numeric', month: '2-digit', day: '2-digit',
@@ -200,9 +136,7 @@
       const y = get('year'), mo = get('month'), da = get('day');
       const hh = get('hour') === '24' ? '00' : get('hour');
       const mi = get('minute'), ss = get('second');
-
       if (opts.dateOnly) return `${y}-${mo}-${da}`;
-      if (opts.shortDate) return `${mo}/${da}`;
       if (opts.timeOnly) return `${hh}:${mi}`;
       if (opts.full) return `${y}-${mo}-${da} ${hh}:${mi}:${ss}`;
       return `${y}-${mo}-${da} ${hh}:${mi}`;
@@ -257,7 +191,7 @@
           number: map.account_number || '',
           holder: map.account_holder || ''
         };
-      } catch (e) {
+      } catch {
         cachedAccount = { bank: '', number: '', holder: '' };
       }
     }
@@ -265,73 +199,28 @@
     async function safeFetchOrders() {
       const name = member.name || '';
       const phone = member.phone || '';
-
       const queries = [];
-
-      if (name && phone) {
-        queries.push(
-          db.from('orders').select('*')
-            .eq('customer_name', name)
-            .eq('customer_phone', phone)
-            .or('is_deleted.eq.false,is_deleted.is.null')
-            .order('created_at', { ascending: false })
-        );
-      }
-
-      if (name) {
-        queries.push(
-          db.from('orders').select('*')
-            .eq('customer_name', name)
-            .eq('depositor_name', name)
-            .or('is_deleted.eq.false,is_deleted.is.null')
-            .order('created_at', { ascending: false })
-        );
-      }
-
-      if (name) {
-        queries.push(
-          db.from('orders').select('*')
-            .eq('customer_name', name)
-            .or('is_deleted.eq.false,is_deleted.is.null')
-            .order('created_at', { ascending: false })
-        );
-      }
+      if (name && phone) queries.push(db.from('orders').select('*').eq('customer_name', name).eq('customer_phone', phone).or('is_deleted.eq.false,is_deleted.is.null').order('created_at', { ascending: false }));
+      if (name) queries.push(db.from('orders').select('*').eq('customer_name', name).eq('depositor_name', name).or('is_deleted.eq.false,is_deleted.is.null').order('created_at', { ascending: false }));
+      if (name) queries.push(db.from('orders').select('*').eq('customer_name', name).or('is_deleted.eq.false,is_deleted.is.null').order('created_at', { ascending: false }));
 
       const results = await Promise.all(queries);
-
       const merged = new Map();
       for (const res of results) {
-        if (res.error) {
-          console.warn('orders 조회 실패:', res.error.message);
-          continue;
-        }
-        (res.data || []).forEach(o => {
-          merged.set(o.id, o);
-        });
+        if (res.error) { console.warn('orders 조회 실패:', res.error.message); continue; }
+        (res.data || []).forEach(o => merged.set(o.id, o));
       }
-      return Array.from(merged.values()).sort((a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
+      return Array.from(merged.values()).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     }
 
     async function loadUsedCoupons(orderNumbers) {
       const map = {};
       if (!orderNumbers || orderNumbers.length === 0) return map;
       try {
-        const { data, error } = await db
-          .from('coupons')
-          .select('*')
-          .eq('member_id', member.id)
-          .eq('is_used', true)
-          .in('used_order_number', orderNumbers);
-        if (error) {
-          console.warn('쿠폰 사용내역 로드 실패:', error.message);
-          return map;
-        }
-        (data || []).forEach(c => {
-          if (c.used_order_number) map[c.used_order_number] = c;
-        });
-      } catch (e) { console.warn(e); }
+        const { data, error } = await db.from('coupons').select('*').eq('member_id', member.id).eq('is_used', true).in('used_order_number', orderNumbers);
+        if (error) return map;
+        (data || []).forEach(c => { if (c.used_order_number) map[c.used_order_number] = c; });
+      } catch {}
       return map;
     }
 
@@ -369,7 +258,6 @@
       });
 
       usedCouponsByOrder = await loadUsedCoupons([...new Set(orderNumbers)]);
-
       renderHistory();
     }
 
@@ -381,6 +269,7 @@
         const timeStr = formatKST(first.created_at, { timeOnly: true });
         const displayNum = first.order_number || `(번호 없음)`;
         const fullAddress = `${first.postcode ? `[${first.postcode}] ` : ''}${first.address || ''} ${first.address_detail || ''}`.trim();
+
         let productTotal = 0, shippingTotal = 0;
         items.forEach(o => {
           const rt = Number(o.total_price || 0);
@@ -429,12 +318,12 @@
               ${acc.holder ? `<div class="ab-row"><span class="ab-label">예금주</span><span class="ab-val">${acc.holder}</span></div>` : ''}
               <div class="ab-row">
                 <span class="ab-label">입금액</span>
-                <span class="ab-val ab-total">${totalAll.toLocaleString()}원</span>
+                <span class="ab-val ab-total">${won(totalAll)}</span>
               </div>
             ` : `<div class="ab-row"><span class="ab-val" style="color:#888;">관리자가 계좌 정보를 등록하지 않았습니다.</span></div>
               <div class="ab-row">
                 <span class="ab-label">입금액</span>
-                <span class="ab-val ab-total">${totalAll.toLocaleString()}원</span>
+                <span class="ab-val ab-total">${won(totalAll)}</span>
               </div>`}
           </div>
         ` : '';
@@ -462,7 +351,7 @@
                     <div class="history-product-item">
                       <div class="history-item-main">
                         <span class="name">${o.product_name} <span class="qty">x ${o.quantity}</span></span>
-                        <span>${itemPrice.toLocaleString()}원</span>
+                        <span class="item-price">${won(itemPrice)}</span>
                       </div>
                       <div class="history-item-detail">${optStr}</div>
                     </div>
@@ -477,9 +366,9 @@
               ${accountBox}
               ${couponBox}
               <div class="history-price-summary">
-                <div class="price-row"><span>상품 금액</span><span>${productTotal.toLocaleString()}원</span></div>
-                <div class="price-row"><span>배송비</span><span>${shippingTotal > 0 ? shippingTotal.toLocaleString() + '원' : '무료'}</span></div>
-                <div class="price-row total"><span>총 결제금액</span><span>${totalAll.toLocaleString()}원</span></div>
+                <div class="price-row"><span>상품 금액</span><span>${won(productTotal)}</span></div>
+                <div class="price-row"><span>배송비</span><span>${shippingTotal > 0 ? won(shippingTotal) : '무료'}</span></div>
+                <div class="price-row total"><span>총 결제금액</span><span>${won(totalAll)}</span></div>
               </div>
               <button type="button" class="btn-delete-single" data-key="${key}">이 주문 삭제</button>
             </div>
@@ -504,19 +393,12 @@
     async function deleteOrderGroup(items) {
       if (!items || items.length === 0) return 0;
       const first = items[0];
-
       if (first.order_number) {
-        const { data, error } = await db.from('orders')
-          .update({ is_deleted: true })
-          .eq('order_number', first.order_number)
-          .select();
+        const { data, error } = await db.from('orders').update({ is_deleted: true }).eq('order_number', first.order_number).select();
         if (error) throw error;
         return Array.isArray(data) ? data.length : 0;
       } else {
-        const { data, error } = await db.from('orders')
-          .update({ is_deleted: true })
-          .eq('id', first.id)
-          .select();
+        const { data, error } = await db.from('orders').update({ is_deleted: true }).eq('id', first.id).select();
         if (error) throw error;
         return Array.isArray(data) ? data.length : 0;
       }
@@ -547,9 +429,7 @@
 
           try {
             const deletedCount = await deleteOrderGroup(items);
-            if (deletedCount === 0) {
-              throw new Error('삭제할 주문이 없거나 이미 삭제된 주문입니다.');
-            }
+            if (deletedCount === 0) throw new Error('삭제할 주문이 없거나 이미 삭제된 주문입니다.');
             alert('✅ 주문이 삭제되었습니다.');
             loadOrderHistory();
           } catch (err) {
@@ -590,41 +470,25 @@
 
       if (orderNumbers.length > 0) {
         try {
-          const { data, error } = await db.from('orders')
-            .update({ is_deleted: true })
-            .in('order_number', orderNumbers)
-            .select();
+          const { data, error } = await db.from('orders').update({ is_deleted: true }).in('order_number', orderNumbers).select();
           if (error) throw error;
           successCount += Array.isArray(data) ? data.length : 0;
-        } catch (err) {
-          console.error(err);
-          errorMsg += (err.message || err) + '\n';
-        }
+        } catch (err) { errorMsg += (err.message || err) + '\n'; }
       }
 
       if (singleIds.length > 0) {
         try {
-          const { data, error } = await db.from('orders')
-            .update({ is_deleted: true })
-            .in('id', singleIds)
-            .select();
+          const { data, error } = await db.from('orders').update({ is_deleted: true }).in('id', singleIds).select();
           if (error) throw error;
           successCount += Array.isArray(data) ? data.length : 0;
-        } catch (err) {
-          console.error(err);
-          errorMsg += (err.message || err) + '\n';
-        }
+        } catch (err) { errorMsg += (err.message || err) + '\n'; }
       }
 
       deleteSelectedBtn.disabled = false;
 
-      if (errorMsg) {
-        alert('❌ 일부 삭제 실패:\n' + errorMsg);
-      } else if (successCount === 0) {
-        alert('⚠️ 삭제된 항목이 없습니다.');
-      } else {
-        alert(`✅ ${successCount}건의 주문이 삭제되었습니다.`);
-      }
+      if (errorMsg) alert('❌ 일부 삭제 실패:\n' + errorMsg);
+      else if (successCount === 0) alert('⚠️ 삭제된 항목이 없습니다.');
+      else alert(`✅ ${successCount}건의 주문이 삭제되었습니다.`);
       loadOrderHistory();
     });
 
