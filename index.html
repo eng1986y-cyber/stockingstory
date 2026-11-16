@@ -68,7 +68,6 @@
     #product-list .card .card-info, #popular-list .card .card-info { padding: 10px 4px; min-width: 0; }
     #product-list .card .name, #popular-list .card .name { font-size: 14px; font-weight: 500; color: #222; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: 'Bahnschrift Light', sans-serif; }
     body.dark #product-list .card .name, body.dark #popular-list .card .name { color: #e5e7eb; }
-    /* ⭐ 가격: ₩ + Bahnschrift Light */
     #product-list .card .price, #popular-list .card .price { color: #e53935; font-weight: 700; font-size: 15px; margin-top: 4px; font-family: 'Bahnschrift Light', sans-serif; }
     #product-list .card .price.locked, #popular-list .card .price.locked { color: #1976d2; font-size: 12px; font-weight: 600; }
     #product-list .card .new-badge { position: absolute; top: 8px; left: 8px; background: #e53935; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; z-index: 2; font-family: 'Bahnschrift Light', sans-serif; }
@@ -145,6 +144,83 @@
       .board-grid { grid-template-columns: 1fr; }
       .board-card { min-height: 240px; }
     }
+
+    /* ⭐ 자동등록방지 스타일 */
+    .captcha-section {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 4px;
+    }
+    body.dark .captcha-section { background: #0f0f0f; border-color: #2a2a2a; }
+    .captcha-section .captcha-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #374151;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    body.dark .captcha-section .captcha-title { color: #ccc; }
+    .captcha-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    @media (max-width: 480px) { .captcha-row { grid-template-columns: 1fr; } }
+    .captcha-item label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #6b7280;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .captcha-item input {
+      padding: 8px 10px !important;
+      font-size: 13px !important;
+      text-align: center;
+      font-family: 'Courier New', monospace !important;
+    }
+    .captcha-question {
+      display: inline-block;
+      padding: 8px 12px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 6px;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 2px;
+      user-select: none;
+    }
+    body.dark .captcha-question { background: #0f0f0f; border-color: #333; color: #e5e7eb; }
+    .captcha-char-question {
+      display: inline-block;
+      padding: 8px 16px;
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      border: 2px dashed #f59e0b;
+      border-radius: 6px;
+      font-size: 18px;
+      font-weight: 800;
+      color: #78350f;
+      margin-bottom: 6px;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 4px;
+      user-select: none;
+      text-decoration: line-through wavy rgba(245,158,11,.3);
+    }
+    .captcha-error {
+      font-size: 12px;
+      color: #dc2626;
+      font-weight: 600;
+      margin-top: 6px;
+      display: none;
+    }
+    .captcha-error.show { display: block; }
   </style>
 </head>
 <body>
@@ -238,9 +314,6 @@
     function shouldHidePrice(p) { return !isLoggedIn() && isNewProduct(p); }
 
     // ⭐ [요청9] 비로그인 시 일반상품만 / 로그인 시 등급별 필터
-    // 일반회원: 일반상품(all)
-    // 도매회원: 일반상품(all, 열람만) + 도매상품(wholesale)
-    // VIP회원: 일반상품(all) + VIP상품(vip)
     function filterProductsByGrade(products) {
       if (!isLoggedIn()) return products.filter(p => (p.target_grade || 'all') === 'all');
       const grade = getMemberGrade();
@@ -339,7 +412,6 @@
       const { data, error } = await db.from('products').select('*').order('created_at', { ascending: false });
       if (error) { list.innerHTML = '<p>상품을 불러올 수 없습니다.</p>'; return; }
       if (!data || data.length === 0) { list.innerHTML = '<p>등록된 상품이 없습니다.</p>'; return; }
-      // ⭐ [요청9] 등급별 필터
       allProducts = filterProductsByGrade(data);
       applyGridColumns();
       currentPage = 1;
@@ -594,9 +666,68 @@
       modal.onclick = e => { if (e.target === modal) modal.remove(); };
     }
 
+    // ============================================================
+    // ⭐⭐⭐ [요청1] 게시판 자동등록방지 (3중 방어) ⭐⭐⭐
+    // 1. 수학 CAPTCHA (랜덤 덧셈/뺄셈)
+    // 2. 글자 입력 CAPTCHA (5글자, 대소문자 무시)
+    // 3. 도배 방지 (같은 계정 30초에 1회)
+    // ============================================================
+
+    // 30초 도배 방지
+    const BOARD_POST_COOLDOWN_MS = 30 * 1000;
+    const BOARD_POST_LAST_KEY = 'board_post_last_at';
+
+    function checkBoardCooldown() {
+      try {
+        const last = Number(localStorage.getItem(BOARD_POST_LAST_KEY) || 0);
+        const remain = last + BOARD_POST_COOLDOWN_MS - Date.now();
+        if (remain > 0) {
+          const sec = Math.ceil(remain / 1000);
+          alert(`⏱️ 도배 방지를 위해 잠시 후 다시 시도해주세요.\n(남은 시간: ${sec}초)`);
+          return false;
+        }
+      } catch {}
+      return true;
+    }
+    function setBoardCooldown() {
+      try { localStorage.setItem(BOARD_POST_LAST_KEY, String(Date.now())); } catch {}
+    }
+
+    // 수학 CAPTCHA 생성
+    function generateMathCaptcha() {
+      const isPlus = Math.random() > 0.5;
+      let a, b, answer;
+      if (isPlus) {
+        a = Math.floor(Math.random() * 20) + 1; // 1~20
+        b = Math.floor(Math.random() * 20) + 1;
+        answer = a + b;
+        return { question: `${a} + ${b} = ?`, answer: String(answer) };
+      } else {
+        a = Math.floor(Math.random() * 20) + 10; // 10~29
+        b = Math.floor(Math.random() * 10) + 1;   // 1~10
+        answer = a - b;
+        return { question: `${a} − ${b} = ?`, answer: String(answer) };
+      }
+    }
+
+    // 글자 CAPTCHA 생성 (혼동 문자 제외: 0/O, 1/l/I 제외)
+    const CAPTCHA_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+    function generateCharCaptcha(length = 5) {
+      let text = '';
+      for (let i = 0; i < length; i++) {
+        text += CAPTCHA_CHARS[Math.floor(Math.random() * CAPTCHA_CHARS.length)];
+      }
+      return text;
+    }
+
     function showBoardWriteModal() {
       const me = getLoggedMemberForBoard();
       if (!me || !me.id) { alert('로그인 후 이용 가능합니다.'); location.href = 'login.html'; return; }
+      if (!checkBoardCooldown()) return;
+
+      const mathCap = generateMathCaptcha();
+      const charCap = generateCharCaptcha(5);
+
       const modal = document.createElement('div');
       modal.className = 'board-modal-backdrop';
       modal.innerHTML = `
@@ -606,6 +737,24 @@
             <div><label>제목 *</label><input name="title" required maxlength="100"></div>
             <div><label>내용 *</label><textarea name="content" required></textarea></div>
             <label class="board-secret-check"><input type="checkbox" name="is_secret"> 🔒 비밀글로 작성</label>
+
+            <div class="captcha-section">
+              <div class="captcha-title">🛡️ 자동등록방지 (스팸 방지)</div>
+              <div class="captcha-row">
+                <div class="captcha-item">
+                  <label>① 수학 문제</label>
+                  <div class="captcha-question">${mathCap.question}</div>
+                  <input name="captcha_math" type="text" inputmode="numeric" placeholder="정답 입력" autocomplete="off" required>
+                </div>
+                <div class="captcha-item">
+                  <label>② 아래 글자를 입력하세요 (대소문자 무관)</label>
+                  <div class="captcha-char-question">${charCap}</div>
+                  <input name="captcha_char" type="text" placeholder="글자 입력" autocomplete="off" maxlength="10" style="text-transform:uppercase;" required>
+                </div>
+              </div>
+              <div class="captcha-error" id="board-captcha-error"></div>
+            </div>
+
             <div class="board-modal-actions">
               <button type="submit" class="board-modal-submit">등록</button>
               <button type="button" class="board-modal-cancel" id="board-write-cancel">취소</button>
@@ -614,18 +763,56 @@
         </div>`;
       document.body.appendChild(modal);
       modal.querySelector('#board-write-cancel').onclick = () => modal.remove();
+
       modal.querySelector('#board-write-form').onsubmit = async e => {
         e.preventDefault();
         const f = e.target;
+        const errEl = f.querySelector('#board-captcha-error');
+        const showErr = (msg) => {
+          errEl.textContent = '❌ ' + msg;
+          errEl.classList.add('show');
+        };
+        errEl.classList.remove('show');
+
+        // 1) 수학 CAPTCHA 검증
+        const mathAns = String(f.captcha_math.value || '').trim();
+        if (mathAns !== mathCap.answer) {
+          showErr('수학 문제의 정답이 올바르지 않습니다.');
+          f.captcha_math.focus();
+          return;
+        }
+
+        // 2) 글자 CAPTCHA 검증 (대소문자 무시)
+        const charAns = String(f.captcha_char.value || '').trim().toLowerCase();
+        if (charAns !== charCap.toLowerCase()) {
+          showErr('보안 글자가 올바르지 않습니다. 다시 확인해주세요.');
+          f.captcha_char.focus();
+          return;
+        }
+
+        // 3) 도배 방지 재확인 (다른 탭에서 이미 등록했을 경우 대비)
+        if (!checkBoardCooldown()) return;
+
         const btn = f.querySelector('button[type="submit"]');
         btn.disabled = true; btn.textContent = '등록 중...';
+
         const { error } = await db.from('board_posts').insert({
           member_id: me.id, member_name: me.name || '', member_username: me.username || '',
           title: f.title.value.trim(), content: f.content.value.trim(), is_secret: f.is_secret.checked,
         });
-        if (error) { alert('❌ 등록 실패: ' + error.message); btn.disabled = false; btn.textContent = '등록'; return; }
+        if (error) {
+          alert('❌ 등록 실패: ' + error.message);
+          btn.disabled = false; btn.textContent = '등록';
+          return;
+        }
+
+        // 4) 도배 방지 쿨다운 기록
+        setBoardCooldown();
+
         alert('✅ 등록되었습니다.');
-        modal.remove(); boardPage = 1; loadBoardPosts();
+        modal.remove();
+        boardPage = 1;
+        loadBoardPosts();
       };
     }
     document.getElementById('board-write-btn')?.addEventListener('click', showBoardWriteModal);

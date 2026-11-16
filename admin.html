@@ -12,16 +12,7 @@
     body { margin: 0; }
     * { box-sizing: border-box; transition: none !important; animation: none !important; transform: none !important; }
 
-    .admin-header {
-      background: #fff;
-      background-image: var(--hero-bg, none);
-      background-size: cover; background-position: center; background-repeat: no-repeat;
-      border-bottom: 1px solid #e5e7eb; padding: 0 24px;
-      display: flex; justify-content: space-between; align-items: center;
-      position: fixed !important; top: 0 !important; left: 0 !important;
-      width: 100% !important; height: 65px; z-index: 99999 !important;
-      overflow: hidden;
-    }
+    .admin-header { background: #fff; background-image: var(--hero-bg, none); background-size: cover; background-position: center; background-repeat: no-repeat; border-bottom: 1px solid #e5e7eb; padding: 0 24px; display: flex; justify-content: space-between; align-items: center; position: fixed !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 65px; z-index: 99999 !important; overflow: hidden; }
     .admin-header::before { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,.85); z-index: 0; pointer-events: none; }
     .admin-header > * { position: relative; z-index: 1; }
     .admin-header-left { display: flex; align-items: center; gap: 16px; }
@@ -44,7 +35,6 @@
     .card { background: #fff !important; border-radius: 12px; padding: 24px; border: 1px solid #e5e7eb; margin-bottom: 16px; }
     .card-title { font-size: 15px; font-weight: 600; color: #111827; margin: 0 0 16px; }
     .card-title .hint { font-size: 12px; font-weight: 400; color: #9ca3af; }
-
     .card input, .card textarea, .card select { width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; font-family: inherit; color: #111827 !important; background: #fff !important; box-sizing: border-box; }
     .card input:focus, .card textarea:focus, .card select:focus { outline: none; border-color: #111827; }
     .card textarea { resize: vertical; min-height: 70px; }
@@ -54,12 +44,8 @@
     .settings-col > .card { margin-bottom: 0 !important; }
     @media (max-width: 1000px) { .settings-split { grid-template-columns: 1fr; gap: 12px; } }
 
-    #product-register-card > #product-form {
-      display: grid; grid-template-columns: 0.9fr 1.2fr 0.55fr 2fr 0.9fr 0.9fr 1fr 0.9fr 0.5fr 2fr 1fr 0.9fr; gap: 8px; align-items: stretch;
-    }
-    #product-register-card > #product-form input,
-    #product-register-card > #product-form select,
-    #product-register-card > #product-form button { width: 100%; min-height: 42px; padding: 8px 7px; font-size: 12px; }
+    #product-register-card > #product-form { display: grid; grid-template-columns: 0.9fr 1.2fr 0.55fr 2fr 0.9fr 0.9fr 1fr 0.9fr 0.5fr 2fr 1fr 0.9fr; gap: 8px; align-items: stretch; }
+    #product-register-card > #product-form input, #product-register-card > #product-form select, #product-register-card > #product-form button { width: 100%; min-height: 42px; padding: 8px 7px; font-size: 12px; }
     #product-register-card > #product-form textarea { min-height: 42px; height: 42px; padding: 8px 7px; font-size: 12px; }
 
     #size-detail-section { grid-column: 1 / -1; border: 1px dashed #d1d5db; border-radius: 10px; padding: 12px; background: #f9fafb; margin-top: 4px; }
@@ -72,11 +58,7 @@
     .sd-row .sd-del-btn { width: 36px; height: 36px; padding: 0; background: #dc2626; color: #fff; border: 0; border-radius: 6px; cursor: pointer; font-size: 16px; }
     .sd-empty { padding: 14px; text-align: center; color: #9ca3af; font-size: 12px; background: #fff; border: 1px dashed #e5e7eb; border-radius: 6px; }
 
-    @media (max-width: 1000px) {
-      #product-register-card > #product-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      #product-register-card > #product-form input[name="detail_images"],
-      #product-register-card > #product-form button { grid-column: 1 / -1; }
-    }
+    @media (max-width: 1000px) { #product-register-card > #product-form { grid-template-columns: repeat(2, minmax(0, 1fr)); } #product-register-card > #product-form input[name="detail_images"], #product-register-card > #product-form button { grid-column: 1 / -1; } }
 
     .form-row { display: flex; gap: 8px; flex-wrap: wrap; }
     .form-row > * { flex: 1; min-width: 150px; }
@@ -116,7 +98,6 @@
     .prod-actions { display: flex; align-items: center; gap: 4px; }
     #admin-pagination { display: flex; justify-content: center; gap: 6px; margin-top: 14px; flex-wrap: wrap; }
 
-    /* ⭐ 요청3: 공통 이미지 미리보기 작게 */
     .preview-box { margin-top: 12px; padding: 10px; background: #f9fafb; border-radius: 8px; border: 1px dashed #e5e7eb; }
     .preview-box .preview-label { font-size: 11px; color: #6b7280; margin-bottom: 4px; }
     .preview-box img { display: block; max-width: 140px !important; max-height: 90px !important; width: auto !important; height: auto !important; object-fit: contain; border-radius: 4px; }
@@ -186,35 +167,14 @@
     .es-row { display: grid; grid-template-columns: 1fr 1fr 1fr 36px; gap: 6px; align-items: center; }
     .es-row .es-del-btn { width: 36px; height: 34px; padding: 0; background: #dc2626; color: #fff; border: 0; border-radius: 6px; cursor: pointer; }
 
-    /* ⭐ 요청6: 쿠폰 입력카드 노란배경 꽉 채우기 */
-    #coupon-issue-card {
-      background: #fef3c7 !important;
-      border: 2px solid #f59e0b !important;
-      padding: 24px !important;
-      width: 100% !important;
-      box-sizing: border-box !important;
-    }
-    #coupon-issue-form {
-      display: grid !important;
-      grid-template-columns: 1.5fr 1fr 1fr 1fr 1.5fr auto !important;
-      gap: 10px !important;
-      align-items: end !important;
-      width: 100% !important;
-      margin: 0 !important;
-    }
+    #coupon-issue-card { background: #fef3c7 !important; border: 2px solid #f59e0b !important; padding: 24px !important; width: 100% !important; box-sizing: border-box !important; }
+    #coupon-issue-form { display: grid !important; grid-template-columns: 1.5fr 1fr 1fr 1fr 1.5fr auto !important; gap: 10px !important; align-items: end !important; width: 100% !important; margin: 0 !important; }
     #coupon-issue-form > div { min-width: 0; }
     #coupon-issue-form select, #coupon-issue-form input { height: 40px !important; padding: 8px 12px !important; font-size: 14px !important; }
     #coupon-issue-form button { height: 40px !important; padding: 0 20px !important; font-size: 14px !important; }
-    @media (max-width: 1000px) {
-      #coupon-issue-form { grid-template-columns: 1fr 1fr !important; }
-      #coupon-issue-form button { grid-column: 1 / -1 !important; }
-    }
+    @media (max-width: 1000px) { #coupon-issue-form { grid-template-columns: 1fr 1fr !important; } #coupon-issue-form button { grid-column: 1 / -1 !important; } }
 
-    @media (max-width: 1000px) {
-      .admin-header { padding: 0 16px; }
-      .admin-tabbar { padding: 10px 16px; }
-      .admin-layout { padding: 16px; height: calc(100vh - 65px - 120px); margin-top: calc(65px + 120px); }
-    }
+    @media (max-width: 1000px) { .admin-header { padding: 0 16px; } .admin-tabbar { padding: 10px 16px; } .admin-layout { padding: 16px; height: calc(100vh - 65px - 120px); margin-top: calc(65px + 120px); } }
 
     .tab-loading { padding: 20px; text-align: center; color: #9ca3af; font-size: 13px; }
     .board-secret-badge { display: inline-block; font-size: 10px; background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-weight: 700; border: 1px solid #f59e0b; }
@@ -630,7 +590,6 @@
       "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya"
     );
   </script>
-
   <script>
     // ============ 유틸 ============
     function formatKST(dateStr, opts = {}) {
@@ -1205,7 +1164,7 @@
       else { m.className = 'msg success'; m.textContent = '✅ 저장 완료!'; localStorage.removeItem('footer_cache'); }
     };
 
-    // ============ [이슈2] 홍보영상 ============
+    // ============ 홍보영상 ============
     let currentPromoVideoUrl = '';
     function getVideoEmbedUrl(url) {
       if (!url) return ''; const s = String(url).trim(); if (!s) return '';
@@ -1340,7 +1299,7 @@
       else { m.className = 'msg success'; m.textContent = '✅ 추가되었습니다!'; document.getElementById('banner-image-url').value = ''; document.getElementById('banner-link-url').value = ''; loadBanner(); }
     };
 
-    // ============ [이슈3] 배경이미지 ============
+    // ============ 배경이미지 ============
     const HERO_BG_KEY = 'hero_bg_image';
     let currentHeroBgUrl = '';
     function setHeroBgPreview(url) {
@@ -1427,7 +1386,6 @@
 
     // ============ 엑셀/인쇄 헬퍼 ============
     function downloadCSV(filename, rows) {
-      // rows: 2D array
       const csv = rows.map(row => row.map(cell => {
         const s = String(cell ?? '');
         return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
@@ -1447,7 +1405,7 @@
       setTimeout(() => { w.focus(); w.print(); }, 300);
     }
 
-    // ============ [요청4] 주문 관리 (수정/삭제 + 개별/선택 엑셀·인쇄) ============
+    // ============ 주문 관리 ============
     const ORDER_COLS = ['order_number','product_code','product_name','product_price','quantity','total_price','customer_name','customer_phone','depositor_name','postcode','address','address_detail','selected_color','selected_size','selected_hem','selected_other','shipping_fee','grade_discount','status','courier','tracking_number','memo','created_at'];
     let orderRows = [], selectedOrders = new Set();
 
@@ -1475,7 +1433,6 @@
           </div>
         </div>`).join('');
 
-      // 체크박스 이벤트
       listEl.querySelectorAll('.order-check').forEach(cb => {
         cb.onchange = () => {
           const id = String(cb.dataset.id);
@@ -1539,7 +1496,6 @@
     };
     document.getElementById('order-reset-btn').onclick = () => { document.getElementById('order-search').value = ''; loadOrders(); };
 
-    // ⭐ [요청4] 주문 수정 모달 (전체 컬럼)
     function openOrderEditModal(o) {
       if (!o) return;
       const modal = document.createElement('div');
@@ -1585,7 +1541,7 @@
       };
     }
 
-    // ============ [요청5] 회원 관리 (수정/삭제 + 개별/선택 엑셀·인쇄, password 제외) ============
+    // ============ 회원 관리 ============
     const MEMBER_COLS = ['username','name','phone','email','address','address_detail','postcode','grade','status','created_at'];
     const MEMBER_SELECT = 'id, username, name, phone, email, address, address_detail, postcode, grade, status, created_at';
     let memberRows = [], selectedMembers = new Set();
@@ -1674,7 +1630,7 @@
     };
     document.getElementById('member-reset-btn').onclick = () => { document.getElementById('member-search').value = ''; loadMembers(); };
 
-    // ⭐ [요청5] 회원 수정 모달 (password 제외)
+    // ⭐ [요청3] 회원 수정 모달 (비밀번호 재설정 + password 제외)
     function openMemberEditModal(m) {
       if (!m) return;
       const modal = document.createElement('div');
@@ -1682,7 +1638,7 @@
       modal.innerHTML = `
         <div class="modal-box modal-lg">
           <h2>회원 수정 - ${esc(m.username || m.id)}</h2>
-          <p style="font-size:12px;color:#9ca3af;margin:0 0 12px;">※ 비밀번호는 보안상 표시되지 않으며 수정할 수 없습니다.</p>
+          <p style="font-size:12px;color:#9ca3af;margin:0 0 12px;">※ 기존 비밀번호는 보안상 표시되지 않으며, 새 비밀번호를 입력하면 재설정됩니다.</p>
           <form id="member-edit-form" class="modal-form" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
             <div><label>아이디</label><input value="${esc(m.username || '')}" readonly></div>
             <div><label>이름</label><input name="name" value="${esc(m.name || '')}"></div>
@@ -1707,6 +1663,20 @@
                 <option value="탈퇴" ${m.status === '탈퇴' ? 'selected' : ''}>탈퇴</option>
               </select>
             </div>
+            <div style="grid-column:1/-1; margin-top:8px; padding-top:12px; border-top:1px dashed #e5e7eb;">
+              <div style="font-size:13px;font-weight:700;color:#dc2626;margin-bottom:8px;">🔐 비밀번호 재설정 (선택사항)</div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <div>
+                  <label>새 비밀번호</label>
+                  <input name="new_password" type="password" placeholder="변경 시에만 입력" autocomplete="new-password">
+                </div>
+                <div>
+                  <label>새 비밀번호 확인</label>
+                  <input name="new_password_confirm" type="password" placeholder="동일하게 입력" autocomplete="new-password">
+                </div>
+              </div>
+              <p id="pw-error-msg" style="font-size:12px;color:#dc2626;font-weight:600;margin-top:6px;display:none;"></p>
+            </div>
             <div class="modal-actions" style="grid-column:1/-1;">
               <button type="submit" class="btn btn-primary">저장</button>
               <button type="button" id="cancel-member-edit" class="btn btn-secondary">취소</button>
@@ -1718,16 +1688,51 @@
       modal.querySelector('#member-edit-form').onsubmit = async ev => {
         ev.preventDefault();
         const f = ev.target;
-        const { error } = await db.from('members').update({
+        const errEl = modal.querySelector('#pw-error-msg');
+        errEl.style.display = 'none';
+
+        const updates = {
           name: f.name.value.trim(), phone: f.phone.value.trim(),
           email: f.email.value.trim() || null,
           postcode: f.postcode.value.trim() || null,
           address: f.address.value.trim() || null,
           address_detail: f.address_detail.value.trim() || null,
           grade: f.grade.value, status: f.status.value,
-        }).eq('id', m.id);
-        if (error) alert('❌ ' + error.message);
-        else { alert('✅ 수정 완료!'); modal.remove(); loadMembers(); }
+        };
+
+        // ⭐ 비밀번호 재설정 처리
+        const newPw = f.new_password.value;
+        const newPwConfirm = f.new_password_confirm.value;
+        if (newPw || newPwConfirm) {
+          if (newPw !== newPwConfirm) {
+            errEl.textContent = '❌ 새 비밀번호가 일치하지 않습니다.';
+            errEl.style.display = 'block';
+            return;
+          }
+          if (newPw.length < 4) {
+            errEl.textContent = '❌ 새 비밀번호는 4자 이상이어야 합니다.';
+            errEl.style.display = 'block';
+            return;
+          }
+          try {
+            const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(newPw));
+            updates.password = 'sha256$' + Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+          } catch (err) {
+            errEl.textContent = '❌ 비밀번호 해시 처리 중 오류 발생';
+            errEl.style.display = 'block';
+            return;
+          }
+        }
+
+        const btn = f.querySelector('button[type="submit"]');
+        btn.disabled = true; btn.textContent = '저장 중...';
+        const { error } = await db.from('members').update(updates).eq('id', m.id);
+        if (error) { alert('❌ ' + error.message); btn.disabled = false; btn.textContent = '저장'; }
+        else {
+          alert(updates.password ? '✅ 회원 정보 및 비밀번호가 재설정되었습니다.' : '✅ 회원 정보가 수정되었습니다.');
+          modal.remove();
+          loadMembers();
+        }
       };
     }
 
@@ -1778,7 +1783,7 @@
       else { m.className = 'msg success'; m.textContent = '✅ 발급 완료!'; loadCouponsAndMembers(); }
     });
 
-    // ============ [요청7/8] 공지사항/게시판 수정·삭제 ============
+    // ============ 공지사항/게시판 ============
     document.querySelectorAll('.notice-subtab-btn').forEach(btn => {
       btn.onclick = () => {
         document.querySelectorAll('.notice-subtab-btn').forEach(b => { b.style.background = '#fff'; b.style.color = '#374151'; b.style.border = '1px solid #e5e7eb'; });
