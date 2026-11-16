@@ -14,31 +14,24 @@
     body.dark .auth-form { background: #151515; border: 1px solid #222; border-radius: 12px; }
     .auth-form input { padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-family: inherit; }
     body.dark .auth-form input { background: #0f0f0f; border-color: #2a2a2a; color: #e5e7eb; }
-    body.dark .auth-form input::placeholder { color: #555; }
-    body.dark .auth-form input:focus { outline: none; border-color: #555; box-shadow: 0 0 0 3px rgba(255,255,255,.05); }
     .auth-form button { padding: 14px; background: #03c75a; color: #fff; border: 0; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 15px; font-family: inherit; }
-    .auth-form button:hover { background: #02b151; }
     .auth-link { text-align: center; margin-top: 16px; font-size: 14px; }
     .auth-link a { color: #1976d2; text-decoration: none; }
-    body.dark .auth-link a { color: #60a5fa; }
     #msg { margin-top: 12px; font-weight: 600; text-align: center; }
   </style>
 </head>
 <body>
   <div id="app-header"></div>
-
   <main>
     <div class="auth-wrap">
       <h2 class="auth-title">로그인</h2>
       <form id="login-form" class="auth-form">
-        <input name="username" placeholder="아이디" required>
-        <input name="password" type="password" placeholder="비밀번호" required>
+        <input name="username" placeholder="아이디" required autocomplete="username">
+        <input name="password" type="password" placeholder="비밀번호" required autocomplete="current-password">
         <button type="submit">로그인</button>
       </form>
       <p id="msg"></p>
-      <div class="auth-link">
-        <a href="signup.html">회원가입 하러가기</a>
-      </div>
+      <div class="auth-link"><a href="signup.html">회원가입 하러가기</a></div>
     </div>
   </main>
 
@@ -54,6 +47,18 @@
     const form = document.getElementById('login-form');
     const msg = document.getElementById('msg');
 
+    // ⭐ [이슈7] signup.html과 동일한 SHA-256 해시 함수
+    async function sha256(text) {
+      if (!window.crypto || !window.crypto.subtle) {
+        let h = 0;
+        for (let i = 0; i < text.length; i++) { h = ((h << 5) - h) + text.charCodeAt(i); h |= 0; }
+        return 'weak_' + Math.abs(h).toString(16) + '_' + text.length;
+      }
+      const data = new TextEncoder().encode(text);
+      const buf = await crypto.subtle.digest('SHA-256', data);
+      return 'sha256$' + Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       msg.textContent = '로그인 중...';
@@ -62,11 +67,15 @@
       const username = form.username.value.trim();
       const password = form.password.value;
 
-      const { data, error } = await db
-        .from('members')
-        .select('*')
+      // ⭐ [이슈7] 해시값으로 비교 (평문 비교 제거)
+      let hashed;
+      try { hashed = await sha256(password); }
+      catch { msg.style.color = '#ef4444'; msg.textContent = '❌ 비밀번호 처리 오류'; return; }
+
+      // ⭐ [이슈7] password 컬럼만 별도 조회해서 비교 (전체 select 대신)
+      const { data: member, error } = await db.from('members')
+        .select('id, username, name, phone, email, address, address_detail, postcode, status, grade, password')
         .eq('username', username)
-        .eq('password', password)
         .maybeSingle();
 
       if (error) {
@@ -74,41 +83,84 @@
         msg.textContent = '❌ ' + error.message;
         return;
       }
-      if (!data) {
+      if (!member) {
         msg.style.color = '#ef4444';
         msg.textContent = '❌ 아이디 또는 비밀번호가 틀렸습니다.';
         return;
       }
 
-      const status = data.status || '정상';
+      // 저장된 비밀번호가 해시값인지 확인 (기존 평문 회원과의 호환 처리)
+      const stored = String(member.password || '');
+      const isHashed = stored.startsWith('sha256$') || stored.startsWith('weak_');
+      const passwordOk = isHashed ? (stored === hashed) : (stored === password);
 
-      if (status === '정지') {
+      if (!passwordOk) {
         msg.style.color = '#ef4444';
-        msg.innerHTML = `❌ <b>정지된 계정</b>입니다.<br>관리자에게 문의하세요.`;
-        return;
-      }
-      if (status === '탈퇴') {
-        msg.style.color = '#ef4444';
-        msg.textContent = '❌ 탈퇴한 계정입니다.';
+        msg.textContent = '❌ 아이디 또는 비밀번호가 틀렸습니다.';
         return;
       }
 
+      // ⭐ 기존 평문 회원이 로그인하면 자동으로 해시로 업그레이드
+      if (!isHashed) {
+        try {
+          await db.from('members').update({ password: hashed }).eq('id', member.id);
+          console.log('[자동 마이그레이션] 평문 → 해시로 업그레이드');
+        } catch (e) { console.warn('해시 업그레이드 실패:', e); }
+      }
+
+      const status = member.status || '정상';
+      if (status === '정지') { msg.style.color = '#ef4444'; msg.innerHTML = `❌ <b>정지된 계정</b>입니다.<br>관리자에게 문의하세요.`; return; }
+      if (status === '탈퇴') { msg.style.color = '#ef4444'; msg.textContent = '❌ 탈퇴한 계정입니다.'; return; }
+
+      // ⭐ [이슈4] 로그인 시 장바구니 병합 (기존 guest 카트를 user 카트로 이동)
+      try {
+        const guestCart = JSON.parse(localStorage.getItem('cart_guest') || '[]');
+        const userKey = `cart_${member.id}`;
+        const userCart = JSON.parse(localStorage.getItem(userKey) || '[]');
+        if (guestCart.length > 0) {
+          const merged = [...userCart];
+          guestCart.forEach(g => {
+            const idx = merged.findIndex(it =>
+              String(it.product_id) === String(g.product_id) &&
+              (it.selected_color || null) === (g.selected_color || null) &&
+              (it.selected_size || null) === (g.selected_size || null) &&
+              (it.selected_hem || null) === (g.selected_hem || null) &&
+              (it.selected_other || null) === (g.selected_other || null)
+            );
+            if (idx >= 0) merged[idx].quantity = Number(merged[idx].quantity) + Number(g.quantity || 1);
+            else merged.push(g);
+          });
+          localStorage.setItem(userKey, JSON.stringify(merged));
+          localStorage.removeItem('cart_guest');
+        }
+      } catch (e) { console.warn('장바구니 병합 오류:', e); }
+
+      // 로그인 정보 저장
       localStorage.setItem('member', JSON.stringify({
-        id: data.id,
-        username: data.username,
-        name: data.name,
-        phone: data.phone,
-        email: data.email,
-        address: data.address || '',
-        address_detail: data.address_detail || '',
-        postcode: data.postcode || '',
-        status: status,
-        grade: data.grade || '일반회원',   // ⭐ 등급 저장
+        id: member.id, username: member.username, name: member.name,
+        phone: member.phone, email: member.email,
+        address: member.address || '', address_detail: member.address_detail || '',
+        postcode: member.postcode || '', status: status, grade: member.grade || '일반회원',
       }));
 
       msg.style.color = '#10b981';
       msg.textContent = '✅ 로그인 성공! 이동 중...';
-      setTimeout(() => location.href = 'index.html', 800);
+
+      // ⭐ 로그인 직후 서버 장바구니와 동기화
+      if (typeof syncCartFromServer === 'function') {
+        try { await syncCartFromServer(); } catch {}
+      }
+
+      // redirect 파라미터 있으면 그쪽으로
+      const params = new URLSearchParams(location.search);
+      const redirect = params.get('redirect');
+      setTimeout(() => {
+        if (redirect && redirect.startsWith('/') === false && !redirect.includes('://')) {
+          location.href = redirect;
+        } else {
+          location.href = 'index.html';
+        }
+      }, 800);
     });
   </script>
 </body>

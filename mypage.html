@@ -8,152 +8,69 @@
   <script src="common.js"></script>
   <style>
     main { max-width: none !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
-    .mypage-wrap { max-width: 640px; width: 100%; margin-left: auto !important; margin-right: auto !important; margin-top: 40px; margin-bottom: 40px; padding: 0 16px; box-sizing: border-box; display: flex; flex-direction: column; align-items: stretch; }
-    
-    /* ⭐ 제목과 등급 뱃지 정렬 */
+    .mypage-wrap { max-width: 640px; width: 100%; margin-left: auto !important; margin-right: auto !important; margin-top: 40px; margin-bottom: 40px; padding: 0 16px; box-sizing: border-box; display: flex; flex-direction: column; }
     .mypage-title-wrap { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding: 0 4px; width: 100%; }
-    .mypage-title { font-size: 22px; font-weight: 700; margin: 0; color: #222; text-align: left; }
+    .mypage-title { font-size: 22px; font-weight: 700; margin: 0; color: #222; }
     body.dark .mypage-title { color: #fff; }
-    
-    /* ⭐ 헤더 옆 등급 뱃지 스타일 */
-    .title-grade-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 12px; line-height: 1.2; }
+    .title-grade-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 12px; }
     .title-grade-일반회원 { background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
     .title-grade-도매회원 { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
     .title-grade-VIP회원 { background: #fce7f3; color: #9f1239; border: 1px solid #fbcfe8; }
-    body.dark .title-grade-일반회원 { background: #1f2937; color: #d1d5db; border-color: #374151; }
-    body.dark .title-grade-도매회원 { background: #1e3a8a; color: #bfdbfe; border-color: #1e40af; }
-    body.dark .title-grade-VIP회원 { background: #831843; color: #fbcfe8; border-color: #9f1239; }
-
-    .mypage-form { background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 32px; box-sizing: border-box; width: 100%; display: block; }
-    body.dark .mypage-form { background: #151515; border: 1px solid #222; border-radius: 12px; }
+    body.dark .title-grade-일반회원 { background: #1f2937; color: #d1d5db; }
+    body.dark .title-grade-도매회원 { background: #1e3a8a; color: #bfdbfe; }
+    body.dark .title-grade-VIP회원 { background: #831843; color: #fbcfe8; }
+    .mypage-form { background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 32px; }
+    body.dark .mypage-form { background: #151515; border: 1px solid #222; }
     .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 12px; }
-    @media (max-width: 768px) {
-      .form-grid-2 { grid-template-columns: 1fr; gap: 10px; }
-      .mypage-wrap { margin-top: 24px; margin-bottom: 24px; padding: 0 12px; }
-    }
+    @media (max-width: 768px) { .form-grid-2 { grid-template-columns: 1fr; gap: 10px; } .mypage-wrap { margin-top: 24px; padding: 0 12px; } }
     .form-group { display: flex; flex-direction: column; gap: 6px; }
     .mypage-form label { font-size: 13px; color: #666; font-weight: 500; }
     body.dark .mypage-form label { color: #999; }
-    .mypage-form input { padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-family: inherit; box-sizing: border-box; width: 100%; }
+    .mypage-form input { padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-family: inherit; width: 100%; box-sizing: border-box; }
     body.dark .mypage-form input { background: #0f0f0f; border-color: #2a2a2a; color: #e5e7eb; }
-    body.dark .mypage-form input::placeholder { color: #555; }
     .mypage-form input[readonly] { background: #f5f5f5; color: #888; }
-    body.dark .mypage-form input[readonly] { background: #1a1a1a; color: #666; }
-    body.dark .mypage-form input:focus { outline: none; border-color: #555; box-shadow: 0 0 0 3px rgba(255,255,255,.05); }
-    .mypage-form button[type="submit"] { width: 100%; padding: 14px; background: #03c75a; color: #fff; border: 0; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 15px; font-family: inherit; margin-top: 24px; }
-    .mypage-form button[type="submit"]:hover { background: #02b151; }
-    #msg { margin-top: 12px; margin-bottom: 0; font-weight: 600; text-align: center; min-height: 20px; }
-
-    /* ⭐ 쿠폰함 */
-    .coupon-section {
-      background: #fff; padding: 20px; border-radius: 8px;
-      border: 1px solid #e5e7eb; margin-bottom: 32px;
-      box-sizing: border-box; width: 100%;
-    }
+    .mypage-form button[type="submit"] { width: 100%; padding: 14px; background: #03c75a; color: #fff; border: 0; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 15px; margin-top: 24px; font-family: inherit; }
+    #msg { margin-top: 12px; font-weight: 600; text-align: center; min-height: 20px; }
+    .coupon-section { background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 32px; }
     body.dark .coupon-section { background: #151515; border-color: #222; }
-    .coupon-section h3 {
-      font-size: 16px; font-weight: 700; color: #111827; margin: 0 0 12px;
-      display: flex; justify-content: space-between; align-items: center;
-    }
+    .coupon-section h3 { font-size: 16px; font-weight: 700; color: #111827; margin: 0 0 12px; display: flex; justify-content: space-between; }
     body.dark .coupon-section h3 { color: #fff; }
     .coupon-count { font-size: 12px; color: #6b7280; font-weight: 500; }
-
     .coupon-list { display: flex; flex-direction: column; gap: 10px; }
-    .coupon-card {
-      display: flex; justify-content: space-between; align-items: center;
-      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-      border-radius: 10px; padding: 14px 16px;
-      border: 1px dashed #f59e0b;
-      color: #78350f;
-      position: relative;
-    }
-    .coupon-card.used {
-      background: #f3f4f6; border-color: #d1d5db; color: #9ca3af;
-      opacity: 0.7;
-    }
-    .coupon-card .c-info { flex: 1; min-width: 0; }
+    .coupon-card { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 10px; padding: 14px 16px; border: 1px dashed #f59e0b; color: #78350f; }
+    .coupon-card.used { background: #f3f4f6; border-color: #d1d5db; color: #9ca3af; opacity: 0.7; }
     .coupon-card .c-title { font-weight: 700; font-size: 15px; margin-bottom: 2px; }
     .coupon-card .c-meta { font-size: 12px; line-height: 1.5; }
-    .coupon-card .c-badge {
-      background: #dc2626; color: #fff;
-      padding: 4px 10px; border-radius: 6px;
-      font-size: 12px; font-weight: 700; white-space: nowrap;
-    }
+    .coupon-card .c-badge { background: #dc2626; color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; white-space: nowrap; }
     .coupon-card.used .c-badge { background: #9ca3af; }
-
-    .empty-coupons {
-      text-align: center; color: #9ca3af; font-size: 13px; padding: 20px;
-    }
-    @media (max-width: 768px) { #mypage-form input:focus { outline: none; } }
+    .empty-coupons { text-align: center; color: #9ca3af; font-size: 13px; padding: 20px; }
   </style>
 </head>
 <body>
   <div id="app-header"></div>
-
   <main>
     <div class="mypage-wrap">
-      <!-- ⭐ 내 정보 제목과 등급 뱃지 -->
       <div class="mypage-title-wrap">
         <h2 class="mypage-title">내 정보</h2>
         <span id="title-grade-badge" class="title-grade-badge title-grade-일반회원">일반회원</span>
       </div>
-      
       <form id="mypage-form" class="mypage-form">
         <div class="form-grid-2">
-          <div class="form-group">
-            <label>아이디 (변경 불가)</label>
-            <input name="username" readonly>
-          </div>
-          
-          <div class="form-group">
-            <label>비밀번호</label>
-            <input name="password" type="password" placeholder="변경 시 입력">
-          </div>
-
-          <div class="form-group">
-            <label>이름</label>
-            <input name="name" required>
-          </div>
-
-          <div class="form-group">
-            <label>연락처</label>
-            <input name="phone" type="tel" inputmode="numeric" required>
-          </div>
-
-          <div class="form-group">
-            <label>이메일</label>
-            <input name="email" type="email">
-          </div>
-
-          <div class="form-group">
-            <label>우편번호</label>
-            <input name="postcode">
-          </div>
-
-          <div class="form-group">
-            <label>주소</label>
-            <input name="address">
-          </div>
-
-          <div class="form-group">
-            <label>상세주소</label>
-            <input name="address_detail">
-          </div>
+          <div class="form-group"><label>아이디 (변경 불가)</label><input name="username" readonly></div>
+          <div class="form-group"><label>비밀번호</label><input name="password" type="password" placeholder="변경 시 입력"></div>
+          <div class="form-group"><label>이름</label><input name="name" required></div>
+          <div class="form-group"><label>연락처</label><input name="phone" type="tel" inputmode="numeric" required></div>
+          <div class="form-group"><label>이메일</label><input name="email" type="email"></div>
+          <div class="form-group"><label>우편번호</label><input name="postcode"></div>
+          <div class="form-group"><label>주소</label><input name="address"></div>
+          <div class="form-group"><label>상세주소</label><input name="address_detail"></div>
         </div>
-        
         <button type="submit">저장</button>
       </form>
       <p id="msg"></p>
-
-      <!-- ⭐ 내 쿠폰함 -->
       <div class="coupon-section">
-        <h3>
-          🎟️ 내 쿠폰함
-          <span class="coupon-count" id="coupon-count"></span>
-        </h3>
-        <div class="coupon-list" id="coupon-list">
-          <p class="empty-coupons">쿠폰을 불러오는 중...</p>
-        </div>
+        <h3>🎟️ 내 쿠폰함 <span class="coupon-count" id="coupon-count"></span></h3>
+        <div class="coupon-list" id="coupon-list"><p class="empty-coupons">쿠폰을 불러오는 중...</p></div>
       </div>
     </div>
   </main>
@@ -165,7 +82,6 @@
       "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya"
     );
   </script>
-
   <script>
     const form = document.getElementById('mypage-form');
     const msg = document.getElementById('msg');
@@ -179,31 +95,41 @@
       location.href = 'login.html';
     }
 
+    // ⭐ [이슈7] signup/login과 동일한 해시 함수
+    async function sha256(text) {
+      if (!window.crypto || !window.crypto.subtle) {
+        let h = 0;
+        for (let i = 0; i < text.length; i++) { h = ((h << 5) - h) + text.charCodeAt(i); h |= 0; }
+        return 'weak_' + Math.abs(h).toString(16) + '_' + text.length;
+      }
+      const data = new TextEncoder().encode(text);
+      const buf = await crypto.subtle.digest('SHA-256', data);
+      return 'sha256$' + Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
     function formatKSTShort(dateStr) {
       if (!dateStr) return '-';
       let n = String(dateStr).trim();
-      if (/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/.test(n) && !/(Z|[+-]\d{2}:?\d{2})$/i.test(n)) {
-        n = n.replace(' ', 'T') + 'Z';
-      }
+      if (/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/.test(n) && !/(Z|[+-]\d{2}:?\d{2})$/i.test(n)) n = n.replace(' ', 'T') + 'Z';
       const d = new Date(n);
       if (isNaN(d.getTime())) return '-';
-      const parts = new Intl.DateTimeFormat('en-CA', {
-        timeZone: 'Asia/Seoul',
-        year: 'numeric', month: '2-digit', day: '2-digit',
-      }).formatToParts(d);
-      const get = (t) => parts.find(p => p.type === t)?.value || '00';
+      const parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(d);
+      const get = t => parts.find(p => p.type === t)?.value || '00';
       return `${get('year')}-${get('month')}-${get('day')}`;
     }
 
-    // ⭐ 제목 옆 등급 뱃지 렌더링
     function renderTitleGradeBadge(grade) {
       const g = grade || '일반회원';
       titleGradeBadge.textContent = g;
       titleGradeBadge.className = 'title-grade-badge title-grade-' + g;
     }
 
+    // ⭐ [이슈7] password 컬럼 제외하고 조회 (평문 노출 방지)
     async function loadFromServer() {
-      const { data, error } = await db.from('members').select('*').eq('id', member.id).maybeSingle();
+      const { data, error } = await db.from('members')
+        .select('id, username, name, phone, email, postcode, address, address_detail, grade, status')
+        .eq('id', member.id)
+        .maybeSingle();
       if (error) { console.error(error); return; }
       if (!data) {
         alert('회원 정보를 찾을 수 없습니다. 다시 로그인해주세요.');
@@ -211,8 +137,8 @@
         location.href = 'login.html';
         return;
       }
-      member = data;
-      localStorage.setItem('member', JSON.stringify(data));
+      member = { ...member, ...data };
+      localStorage.setItem('member', JSON.stringify(member));
 
       form.username.value = data.username || '';
       form.name.value = data.name || '';
@@ -221,60 +147,30 @@
       form.postcode.value = data.postcode || '';
       form.address.value = data.address || '';
       form.address_detail.value = data.address_detail || '';
-
       renderTitleGradeBadge(data.grade);
-
       await loadCoupons();
     }
 
     async function loadCoupons() {
-      const { data, error } = await db
-        .from('coupons')
-        .select('*')
-        .eq('member_id', member.id)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        couponListEl.innerHTML = '<p class="empty-coupons">쿠폰을 불러올 수 없습니다.</p>';
-        couponCountEl.textContent = '';
-        return;
-      }
-
+      const { data, error } = await db.from('coupons').select('*').eq('member_id', member.id).order('created_at', { ascending: false });
+      if (error) { couponListEl.innerHTML = '<p class="empty-coupons">쿠폰을 불러올 수 없습니다.</p>'; return; }
       const list = data || [];
       const usable = list.filter(c => !c.is_used && new Date(c.expires_at).getTime() > Date.now());
       couponCountEl.textContent = `사용 가능 ${usable.length}장 / 전체 ${list.length}장`;
-
-      if (list.length === 0) {
-        couponListEl.innerHTML = '<p class="empty-coupons">보유한 쿠폰이 없습니다.</p>';
-        return;
-      }
-
+      if (list.length === 0) { couponListEl.innerHTML = '<p class="empty-coupons">보유한 쿠폰이 없습니다.</p>'; return; }
       couponListEl.innerHTML = list.map(c => {
         const isUsed = !!c.is_used;
         const isExpired = new Date(c.expires_at).getTime() < Date.now();
-        const discountLabel = c.type === 'percent'
-          ? `${c.discount_value}% 할인`
-          : `${Number(c.discount_value).toLocaleString()}원 할인`;
-        const expDate = formatKSTShort(c.expires_at);
-
-        return `
-          <div class="coupon-card ${isUsed || isExpired ? 'used' : ''}">
-            <div class="c-info">
-              <div class="c-title">🎁 ${c.name || '쿠폰'}</div>
-              <div class="c-meta">
-                <b>${discountLabel}</b> · ${c.code || '-'}<br>
-                ${isUsed
-                  ? `사용완료 (${c.used_at ? formatKSTShort(c.used_at) : '-'})`
-                  : isExpired
-                    ? `만료됨 (${expDate}까지)`
-                    : `유효기간: ${expDate}까지`}
-              </div>
-            </div>
-            <div class="c-badge">
-              ${isUsed ? '사용완료' : isExpired ? '만료' : '사용가능'}
+        const discountLabel = c.type === 'percent' ? `${c.discount_value}% 할인` : `${Number(c.discount_value).toLocaleString()}원 할인`;
+        return `<div class="coupon-card ${isUsed || isExpired ? 'used' : ''}">
+          <div style="flex:1; min-width:0;">
+            <div class="c-title">🎁 ${c.name || '쿠폰'}</div>
+            <div class="c-meta"><b>${discountLabel}</b> · ${c.code || '-'}<br>
+              ${isUsed ? `사용완료 (${c.used_at ? formatKSTShort(c.used_at) : '-'})` : isExpired ? `만료됨 (${formatKSTShort(c.expires_at)}까지)` : `유효기간: ${formatKSTShort(c.expires_at)}까지`}
             </div>
           </div>
-        `;
+          <div class="c-badge">${isUsed ? '사용완료' : isExpired ? '만료' : '사용가능'}</div>
+        </div>`;
       }).join('');
     }
 
@@ -294,44 +190,27 @@
         address_detail: form.address_detail.value.trim() || null,
       };
 
-      if (form.password.value) updates.password = form.password.value;
-
-      const { error } = await db.from('members').update(updates).eq('id', member.id);
-
-      if (error) {
-        msg.style.color = '#ef4444';
-        msg.textContent = '❌ ' + error.message;
-        return;
+      // ⭐ [이슈7] 새 비밀번호는 해시로 저장
+      if (form.password.value) {
+        try {
+          updates.password = await sha256(form.password.value);
+        } catch {
+          msg.style.color = '#ef4444'; msg.textContent = '❌ 비밀번호 처리 오류'; return;
+        }
       }
 
+      const { error } = await db.from('members').update(updates).eq('id', member.id);
+      if (error) { msg.style.color = '#ef4444'; msg.textContent = '❌ ' + error.message; return; }
+
       const updated = { ...member, ...updates };
+      delete updated.password;  // ⭐ 로컬 저장소에는 비밀번호 저장 X
       localStorage.setItem('member', JSON.stringify(updated));
       member = updated;
-
       form.password.value = '';
       msg.style.color = '#10b981';
       msg.textContent = '✅ 저장 완료!';
-      
       setTimeout(() => msg.textContent = '', 2000);
     });
-
-    if (window.matchMedia('(max-width: 768px)').matches) {
-      const pwEl = form.querySelector('input[name="password"]');
-      if (pwEl) {
-        pwEl.setAttribute('autocomplete', 'new-password');
-        pwEl.setAttribute('tabindex', '-1');
-        const blurActive = () => {
-          if (document.activeElement && document.activeElement.tagName === 'INPUT') document.activeElement.blur();
-          pwEl.blur();
-        };
-        blurActive();
-        setTimeout(blurActive, 100);
-        setTimeout(blurActive, 300);
-        setTimeout(blurActive, 600);
-        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') blurActive(); });
-        window.addEventListener('pageshow', blurActive);
-      }
-    }
   </script>
 </body>
 </html>

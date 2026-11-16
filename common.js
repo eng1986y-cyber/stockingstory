@@ -1,15 +1,11 @@
-// ===== 공통 유틸 =====
+// ===== 공통 유틸 (개선판: 이슈 2·4·5·8 반영) =====
 
 const _pathName = location.pathname.split('/').pop().replace('.html','') || 'index';
 const _isIndex = (_pathName === '' || _pathName === 'index');
 const _isAdmin = (_pathName === 'admin' || _pathName === 'edit');
-const _isWholesale = (_pathName === 'wholesale');
-const _isVip = (_pathName === 'vip');
 const _isDark = !_isIndex && !_isAdmin;
 
-if (_isDark) {
-  document.documentElement.style.background = '#0a0a0a';
-}
+if (_isDark) document.documentElement.style.background = '#0a0a0a';
 
 // ⭐ 등급별 할인율
 const GRADE_DISCOUNT = { '일반회원': 0, '도매회원': 50, 'VIP회원': 30 };
@@ -19,934 +15,149 @@ const GRADE_SHIPPING = {
 };
 
 // ============================================================
-// ⭐ 등급별 구매/열람 권한 규칙
-// - 일반회원: 일반상품 구매가능
-// - 도매회원: 일반상품 열람가능(구매불가) / 도매전용관 상품만 구매가능
-// - VIP회원: 일반상품 구매가능 + VIP전용관 상품 구매가능 / 도매전용관 이용불가
+// ⭐ [이슈2] 다중 플랫폼 영상 임베드 URL 변환
+// YouTube / Vimeo / Dailymotion / Naver TV / Kakao TV /
+// Facebook / Instagram / TikTok / Twitter(X) 등 지원
 // ============================================================
-function canAccessWholesale(memberGrade) {
-  return memberGrade === '도매회원';
+function getVideoEmbedUrl(url) {
+  if (!url) return '';
+  const s = String(url).trim();
+  if (!s) return '';
+
+  if (/\/embed\//i.test(s) || /player\.vimeo\.com/i.test(s)) return s;
+
+  let m = s.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/);
+  if (m) return `https://www.youtube.com/embed/${m[1]}?rel=0`;
+
+  m = s.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if (m) return `https://player.vimeo.com/video/${m[1]}`;
+
+  m = s.match(/dailymotion\.com\/video\/([A-Za-z0-9]+)/);
+  if (m) return `https://www.dailymotion.com/embed/video/${m[1]}`;
+
+  m = s.match(/tv\.naver\.com\/v\/(\d+)/);
+  if (m) return `https://tv.naver.com/embed/${m[1]}`;
+
+  m = s.match(/tv\.kakao\.com\/v\/(\w+)/);
+  if (m) return `https://tv.kakao.com/embed/player/cliplink/${m[1]}`;
+
+  if (/facebook\.com\/.+\/videos\//.test(s) || /fb\.watch\//.test(s)) {
+    return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(s)}`;
+  }
+
+  m = s.match(/instagram\.com\/(?:reel|p)\/([A-Za-z0-9_-]+)/);
+  if (m) return `https://www.instagram.com/p/${m[1]}/embed`;
+
+  m = s.match(/tiktok\.com\/.*\/video\/(\d+)/);
+  if (m) return `https://www.tiktok.com/embed/v2/${m[1]}`;
+
+  m = s.match(/(?:twitter|x)\.com\/\w+\/status\/(\d+)/);
+  if (m) return `https://platform.twitter.com/embed/Tweet.html?id=${m[1]}`;
+
+  return s;
 }
-function canAccessVip(memberGrade) {
-  return memberGrade === 'VIP회원';
+// 하위 호환
+function getYouTubeEmbedUrl(url) { return getVideoEmbedUrl(url); }
+
+// ============================================================
+// ⭐ [이슈8] 공통 캐시 + 세션 1회 조회
+// ============================================================
+const _cache = new Map();
+function cachedGet(key, ttl, fetcher) {
+  const now = Date.now();
+  const hit = _cache.get(key);
+  if (hit && now - hit.t < ttl) return Promise.resolve(hit.v);
+  return Promise.resolve(fetcher()).then(v => {
+    _cache.set(key, { v, t: now });
+    return v;
+  });
 }
+function invalidateCache(key) { _cache.delete(key); }
+
+// ⭐ [이슈4] 사용자별 장바구니 키
+function getCartKey() {
+  const m = getLoggedMember();
+  return m?.id ? `cart_${m.id}` : 'cart_guest';
+}
+function getLocalCart() {
+  try { return JSON.parse(localStorage.getItem(getCartKey()) || '[]'); } catch { return []; }
+}
+function saveLocalCart(cart) {
+  try { localStorage.setItem(getCartKey(), JSON.stringify(cart || [])); } catch {}
+}
+
+// ⭐ [이슈4] 장바구니 담기 (로그인 필수 + 유저별 유지)
+function addToCartWithAuth(item) {
+  const m = getLoggedMember();
+  if (!m || !m.id) {
+    if (confirm('로그인 후 장바구니를 이용할 수 있습니다.\n지금 로그인하시겠어요?')) {
+      location.href = 'login.html?redirect=' + encodeURIComponent(location.pathname + location.search);
+    }
+    return { ok: false, reason: 'not_logged_in' };
+  }
+  const cart = getLocalCart();
+  const dup = cart.findIndex(it =>
+    String(it.product_id) === String(item.product_id) &&
+    (it.selected_color || null) === (item.selected_color || null) &&
+    (it.selected_size || null) === (item.selected_size || null) &&
+    (it.selected_hem || null) === (item.selected_hem || null) &&
+    (it.selected_other || null) === (item.selected_other || null)
+  );
+  if (dup >= 0) cart[dup].quantity = Number(cart[dup].quantity || 0) + Number(item.quantity || 1);
+  else cart.push(item);
+  saveLocalCart(cart);
+  if (typeof pushCartToServer === 'function') pushCartToServer(cart);
+  return { ok: true, cart };
+}
+
+// 등급 접근 규칙
+function canAccessWholesale(memberGrade) { return memberGrade === '도매회원'; }
+function canAccessVip(memberGrade) { return memberGrade === 'VIP회원'; }
 function canPurchaseProduct(memberGrade, targetGrade) {
   const g = memberGrade || '일반회원';
   const tg = targetGrade || 'all';
   if (tg === 'wholesale') return g === '도매회원';
   if (tg === 'vip') return g === 'VIP회원';
-  // 일반상품: 일반회원, VIP회원만 구매 가능 / 도매회원은 열람만
   return g === '일반회원' || g === 'VIP회원';
 }
-
 function getMemberGrade() {
   try {
     const m = JSON.parse(localStorage.getItem('member') || 'null');
     return m?.grade || '일반회원';
   } catch { return '일반회원'; }
 }
-
 function applyGradeDiscount(price) {
   const grade = getMemberGrade();
   const rate = GRADE_DISCOUNT[grade] || 0;
   return Math.round(Number(price) * (100 - rate) / 100);
 }
-
-(function() {
-  const style = document.createElement('style');
-  style.textContent = `
-    html, body {
-      margin: 0; padding: 0;
-      height: 100% !important;
-      overflow: hidden !important;
-      width: 100%;
-      -webkit-text-size-adjust: 100%;
-      overscroll-behavior: none;
-    }
-
-    .site-wrapper {
-      display: flex; flex-direction: column;
-      height: 100vh; height: 100dvh;
-      width: 100%; overflow: hidden;
-    }
-
-    #app-header {
-      flex-shrink: 0; flex-grow: 0;
-      position: relative; z-index: 99999;
-      background: #fff; width: 100%;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-      margin-bottom: 0 !important;
-    }
-
-    body.dark #app-header { background: #0f0f0f; }
-
-    .site-main-scroll {
-      flex: 1 1 0; min-height: 0;
-      overflow-y: scroll; overflow-x: hidden;
-      width: 100%; position: relative;
-      padding-top: 0 !important;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior: contain;
-      scrollbar-width: thin;
-      scrollbar-color: #d1d5db transparent;
-    }
-
-    body.dark .site-main-scroll { scrollbar-color: #333 transparent; }
-
-    .site-main-scroll::-webkit-scrollbar { width: 8px; }
-    .site-main-scroll::-webkit-scrollbar-track { background: transparent; }
-    .site-main-scroll::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
-    .site-main-scroll::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
-    body.dark .site-main-scroll::-webkit-scrollbar-thumb { background: #333; }
-    body.dark .site-main-scroll::-webkit-scrollbar-thumb:hover { background: #555; }
-
-    .header-nav-wrap {
-      display: flex; gap: 8px; flex-wrap: wrap;
-      align-items: center; justify-content: flex-end;
-    }
-
-    /* ⭐ 상단 상품검색: 왼쪽 독립 배치, 우측 메뉴와 동일한 높이 */
-    .header-toolbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      width: 100%;
-      min-width: 0;
-      position: relative;
-    }
-    .header-product-search {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      width: min(360px, 42%);
-      min-width: 220px;
-      height: 36px;
-      position: relative;
-      flex: 0 1 360px;
-      margin-right: auto;
-      z-index: 100001;
-    }
-    .header-product-search input {
-      width: 100%;
-      min-width: 0;
-      height: 36px;
-      box-sizing: border-box;
-      padding: 0 12px;
-      border: none;
-      border-radius: 6px;
-      background: #fff;
-      color: #222;
-      font: inherit;
-      font-size: 13px;
-      outline: none;
-      transition: box-shadow .16s ease;
-    }
-    .header-product-search input:focus {
-      box-shadow: 0 0 0 2px rgba(80, 80, 80, .12);
-    }
-    .header-product-search input::placeholder { color: #9ca3af; }
-    .header-product-search button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      min-width: 36px;
-      height: 36px;
-      padding: 0;
-      box-sizing: border-box;
-      border: 1px solid transparent;
-      border-radius: 6px;
-      background: transparent;
-      color: #111;
-      cursor: pointer;
-      flex-shrink: 0;
-      transition: background .16s ease, border-color .16s ease, transform .16s ease;
-    }
-    .header-product-search button:hover {
-      background: transparent;
-      border-color: #9ca3af;
-    }
-    .header-product-search button:active { transform: scale(.94); }
-    .header-product-search button svg {
-      display: block;
-      width: 21px;
-      height: 21px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-    body.dark .header-product-search input {
-      background: #171717;
-      color: #eee;
-    }
-    body.dark .header-product-search input:focus {
-      box-shadow: 0 0 0 2px rgba(255,255,255,.10);
-    }
-    body.dark .header-product-search button {
-      color: #fff;
-      background: transparent;
-      border-color: transparent;
-    }
-    body.dark .header-product-search button:hover {
-      background: transparent;
-      border-color: #6b7280;
-    }
-    .header-search-popup {
-      display: none;
-      position: absolute;
-      top: calc(100% + 7px);
-      left: 0;
-      width: min(520px, calc(100vw - 32px));
-      max-height: min(440px, 65vh);
-      overflow-y: auto;
-      background: #fff;
-      color: #222;
-      border: 1px solid #d9eaf2;
-      border-radius: 10px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.18);
-      z-index: 100005;
-    }
-    .header-search-popup.open { display: block; }
-    body.dark .header-search-popup {
-      background: #171717;
-      color: #eee;
-      border-color: #333;
-    }
-    .header-search-result {
-      display: flex;
-      align-items: center;
-      gap: 11px;
-      min-height: 66px;
-      padding: 9px 12px;
-      box-sizing: border-box;
-      color: inherit;
-      text-decoration: none;
-      border-bottom: 1px solid #eee;
-    }
-    .header-search-result:last-child { border-bottom: 0; }
-    .header-search-result:hover { background: #f0f9fd; }
-    body.dark .header-search-result { border-bottom-color: #2a2a2a; }
-    body.dark .header-search-result:hover { background: #222; }
-    .header-search-result img {
-      width: 48px;
-      height: 48px;
-      object-fit: cover;
-      border-radius: 6px;
-      background: #f2f2f2;
-      flex-shrink: 0;
-    }
-    .header-search-result .hsr-info { min-width: 0; flex: 1; }
-    .header-search-result .hsr-name {
-      font-size: 13px;
-      font-weight: 700;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .header-search-result .hsr-code {
-      margin-top: 4px;
-      font-size: 11px;
-      color: #888;
-    }
-    .header-search-result .hsr-price {
-      font-size: 13px;
-      font-weight: 700;
-      color: #e53935;
-      white-space: nowrap;
-    }
-    .header-search-message {
-      padding: 18px 14px;
-      text-align: center;
-      font-size: 13px;
-      color: #888;
-    }
-    @media (max-width: 768px) {
-      .header-toolbar {
-        display: block;
-        margin-top: 8px;
-      }
-      .header-product-search {
-        width: 100%;
-        min-width: 0;
-        max-width: none;
-        height: 36px;
-      }
-      .header-product-search input { height: 36px; }
-      .header-product-search button { width: 36px; min-width: 36px; height: 36px; }
-      .header-search-popup {
-        width: 100%;
-        max-height: 55vh;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .header-nav-wrap { display: none !important; }
-      #app-header header { padding: 10px 16px 8px 16px !important; }
-
-      .header-name-row {
-        margin-bottom: 0 !important;
-        min-height: 16px !important;
-        line-height: 16px !important;
-      }
-
-      .site-main-scroll { overflow-y: auto; }
-    }
-
-    .page-loader {
-      position: fixed; inset: 0; background: #0a0a0a;
-      display: flex; align-items: center; justify-content: center;
-      z-index: 999999; transition: opacity 0.2s ease;
-    }
-
-    .page-loader.hide { opacity: 0; pointer-events: none; }
-
-    .spinner {
-      width: 40px; height: 40px;
-      border: 3px solid rgba(255,255,255,0.1);
-      border-top-color: #e5e7eb;
-      border-radius: 50%; animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    img {
-      -webkit-user-drag: none !important;
-      user-drag: none !important;
-      user-select: none !important;
-      -webkit-user-select: none !important;
-      -webkit-touch-callout: none !important;
-      pointer-events: none !important;
-    }
-
-    a img { pointer-events: auto !important; }
-
-    /* ============================================================
-       ⭐ 스크롤 버튼
-       - PC/태블릿: 화면 우측 세로 중앙 고정
-       - 모바일: JS에서 생성 자체를 스킵 + CSS로도 display:none
-       ============================================================ */
-    #scroll-btns {
-      position: fixed;
-      right: 24px;
-      top: 50%;
-      transform: translateY(-50%);
-      display: none;
-      flex-direction: column;
-      gap: 10px;
-      z-index: 900;
-      pointer-events: none;
-    }
-
-    #scroll-btns button {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      border: 1px solid #ddd;
-      background: rgba(255,255,255,0.96);
-      color: #222;
-      font-size: 18px;
-      font-weight: 700;
-      cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,.12);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-      line-height: 1;
-      pointer-events: auto;
-      transition: background 0.15s ease;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    #scroll-btns button:hover { background: #f3f4f6; }
-
-    body.dark #scroll-btns button {
-      border-color: #333;
-      background: rgba(26,26,26,0.96);
-      color: #e5e7eb;
-      box-shadow: 0 2px 8px rgba(0,0,0,.5);
-    }
-
-    body.dark #scroll-btns button:hover { background: #222; }
-
-    @media (max-height: 420px) {
-      #scroll-btns { gap: 6px; }
-      #scroll-btns button {
-        width: 38px;
-        height: 38px;
-        font-size: 15px;
-      }
-    }
-
-    @media (max-width: 768px) {
-      #scroll-btns {
-        display: none !important;
-      }
-    }
-
-    #app-footer {
-      margin-top: 40px;
-      padding: 24px 16px;
-      background: #fafafa;
-      border-top: 1px solid #eee;
-      color: #666;
-      font-size: 13px;
-      line-height: 1.8;
-    }
-
-    body.dark #app-footer {
-      background: #0f0f0f;
-      border-top-color: #1f1f1f;
-      color: #888;
-    }
-
-    #app-footer .footer-inner {
-      max-width: 1400px;
-      margin: 0 auto;
-      text-align: center;
-    }
-
-    #app-footer .footer-title {
-      font-weight: 700;
-      font-size: 14px;
-      color: #333;
-      margin-bottom: 8px;
-    }
-
-    body.dark #app-footer .footer-title { color: #ccc; }
-
-    #app-footer .footer-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px 16px;
-      justify-content: center;
-    }
-
-    #app-footer .footer-item { color: #666; }
-    body.dark #app-footer .footer-item { color: #888; }
-
-    #app-footer .footer-text {
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px dashed #ddd;
-      font-size: 12px;
-      color: #999;
-      white-space: pre-wrap;
-      max-width: 800px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    body.dark #app-footer .footer-text {
-      border-top-color: #222;
-      color: #555;
-    }
-
-    #app-footer .footer-sns-row {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 12px;
-      margin-top: 14px;
-    }
-
-    /* ⭐ 푸터 SNS 버튼 + 채널톡 버튼 공통 스타일 (동일하게) */
-    #app-footer .footer-sns-btn,
-    #app-footer .footer-channel-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border: 1px solid #e5e7eb;
-      background: #fff;
-      color: #4b5563;
-      text-decoration: none;
-      transition: all 0.15s ease;
-      pointer-events: auto !important;
-      cursor: pointer;
-      padding: 0;
-      font: inherit;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    #app-footer .footer-sns-btn svg,
-    #app-footer .footer-channel-btn svg {
-      pointer-events: none !important;
-    }
-
-    #app-footer .footer-sns-btn:hover,
-    #app-footer .footer-channel-btn:hover {
-      background: #111827;
-      color: #fff;
-      border-color: #111827;
-    }
-
-    body.dark #app-footer .footer-sns-btn,
-    body.dark #app-footer .footer-channel-btn {
-      background: #1a1a1a;
-      border-color: #333;
-      color: #e5e7eb;
-    }
-
-    body.dark #app-footer .footer-sns-btn:hover,
-    body.dark #app-footer .footer-channel-btn:hover {
-      background: #e5e7eb;
-      color: #111;
-      border-color: #e5e7eb;
-    }
-
-    /* ⭐ 채널톡 버튼: PC에서는 숨김 (플로팅 런처 사용) */
-    #app-footer .footer-channel-btn {
-      display: none !important;
-    }
-
-    @media (max-width: 768px) {
-      #app-footer {
-        padding: 20px 16px;
-        margin-top: 24px;
-        font-size: 12px;
-      }
-
-      #app-footer .footer-sns-row {
-        display: flex !important;
-        visibility: visible !important;
-        gap: 14px;
-        margin-top: 16px;
-        margin-bottom: 4px;
-        flex-wrap: wrap;
-      }
-
-      #app-footer .footer-sns-btn,
-      #app-footer .footer-channel-btn {
-        display: inline-flex !important;
-        visibility: visible !important;
-        width: 44px;
-        height: 44px;
-      }
-
-      #app-footer .footer-sns-btn svg,
-      #app-footer .footer-channel-btn svg {
-        display: block !important;
-        width: 22px;
-        height: 22px;
-      }
-
-      #app-footer .footer-text {
-        margin-top: 14px;
-        padding-top: 14px;
-        font-size: 11px;
-      }
-
-      .site-main-scroll {
-        padding-bottom: calc(65px + env(safe-area-inset-bottom) + 40px);
-      }
-    }
-
-    #mobile-bottom-nav {
-      display: none;
-      height: 65px;
-      flex-shrink: 0;
-      flex-grow: 0;
-      background: #fff;
-      border-top: 1px solid #eee;
-      z-index: 99999;
-      justify-content: space-around;
-      align-items: center;
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-
-    body.dark #mobile-bottom-nav {
-      background: #0f0f0f;
-      border-top-color: #222;
-    }
-
-    .bottom-nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-      text-decoration: none;
-      color: #9ca3af;
-      font-size: 10px;
-      font-weight: 500;
-      flex: 1 1 0;
-      min-width: 0;
-      height: 100%;
-      border: none;
-      background: none;
-      cursor: pointer;
-      padding: 0 2px;
-      white-space: nowrap;
-      -webkit-tap-highlight-color: transparent;
-      position: relative;
-    }
-
-    .bottom-nav-item > span {
-      font-size: 10px;
-      line-height: 1.1;
-      white-space: nowrap;
-    }
-
-    .bottom-nav-item.active { color: #111827; }
-    body.dark .bottom-nav-item.active { color: #fff; }
-
-    .bottom-nav-item .nav-icon {
-      width: 20px;
-      height: 20px;
-      stroke: currentColor;
-      stroke-width: 1.5;
-      fill: none;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    .bottom-nav-item .cart-badge {
-      position: absolute;
-      top: 6px;
-      right: 50%;
-      transform: translateX(16px);
-      background: #ef4444;
-      color: #fff;
-      font-size: 10px;
-      font-weight: bold;
-      border-radius: 10px;
-      padding: 2px 5px;
-      line-height: 1;
-    }
-
-    @media (max-width: 768px) {
-      #mobile-bottom-nav { display: flex; }
-    }
-
-    #mobile-bottom-nav.nav-count-6 .bottom-nav-item { padding: 0 1px; gap: 2px; }
-    #mobile-bottom-nav.nav-count-6 .bottom-nav-item .nav-icon { width: 18px; height: 18px; }
-    #mobile-bottom-nav.nav-count-6 .bottom-nav-item > span { font-size: 9px; }
-
-    #mobile-bottom-nav.nav-count-7 .bottom-nav-item { padding: 0 1px; gap: 2px; }
-    #mobile-bottom-nav.nav-count-7 .bottom-nav-item .nav-icon { width: 16px; height: 16px; }
-    #mobile-bottom-nav.nav-count-7 .bottom-nav-item > span { font-size: 8px; }
-
-    /* ============================================================
-       ⭐ 채널톡 플로팅 런처 (우측 하단)
-       - PC/태블릿: 원래 위치대로 표시
-       - 모바일: 숨김 (푸터의 채널톡 버튼으로 대체)
-       ============================================================ */
-    @media (min-width: 769px) {
-      #ch-plugin-launcher,
-      #ch-plugin-entry {
-        position: fixed !important;
-        right: 24px !important;
-        bottom: 145px !important;
-        top: auto !important;
-        z-index: 899 !important;
-        transform: none !important;
-      }
-    }
-
-    @media (min-width: 769px) and (max-width: 1450px) {
-      #ch-plugin-launcher,
-      #ch-plugin-entry {
-        right: 16px !important;
-        bottom: 145px !important;
-      }
-    }
-
-    @media (max-width: 768px) {
-      #ch-plugin-launcher,
-      #ch-plugin-entry {
-        display: none !important;
-      }
-    }
-  `;
-
-  document.head.appendChild(style);
-})();
-
-// ===== 사이트 전체 우클릭 방지 (관리자 페이지 제외) =====
-
-document.addEventListener('contextmenu', (e) => {
-  if (_isAdmin) return;
-  e.preventDefault();
-});
-
-document.addEventListener('dragstart', (e) => {
-  if (_isAdmin) return;
-  if (e.target.tagName === 'IMG') e.preventDefault();
-});
-
-document.addEventListener('input', (e) => {
-  const el = e.target;
-  if (el.tagName !== 'INPUT') return;
-
-  const isPhone =
-    (el.name && /phone/i.test(el.name)) ||
-    (el.id && /phone/i.test(el.id));
-
-  if (!isPhone) return;
-
-  const num = el.value.replace(/[^0-9]/g, '').slice(0, 11);
-
-  if (num.length < 4) el.value = num;
-  else if (num.length < 7) el.value = num.slice(0,3) + '-' + num.slice(3);
-  else if (num.length < 11) el.value = num.slice(0,3) + '-' + num.slice(3,6) + '-' + num.slice(6);
-  else el.value = num.slice(0,3) + '-' + num.slice(3,7) + '-' + num.slice(7);
-});
-
-function applyPhoneAttrs() {
-  document.querySelectorAll('input[name*="phone" i], input[id*="phone" i]').forEach(el => {
-    el.setAttribute('type', 'tel');
-    el.setAttribute('inputmode', 'numeric');
-    el.setAttribute('autocomplete', 'tel');
-  });
-}
-
-// ============================================================
-// ⭐⭐⭐ 스크롤 버튼 생성 & 가시성 판단 ⭐⭐⭐
-// - PC/태블릿: 우측 세로 중앙 고정
-// - 모바일: 생성 자체를 스킵
-// ============================================================
-function createScrollButtons() {
-  if (_isAdmin) return;
-
-  if (window.matchMedia('(max-width: 768px)').matches) return;
-
-  if (document.getElementById('scroll-btns')) return;
-
-  const wrap = document.createElement('div');
-  wrap.id = 'scroll-btns';
-
-  wrap.innerHTML = `
-    <button id="btn-scroll-top" title="맨 위로" aria-label="맨 위로">▲</button>
-    <button id="btn-scroll-bottom" title="맨 아래로" aria-label="맨 아래로">▼</button>
-  `;
-
-  document.body.appendChild(wrap);
-
-  document.getElementById('btn-scroll-top').addEventListener('click', () => {
-    const mainScroll = document.querySelector('.site-main-scroll');
-    if (mainScroll) mainScroll.scrollTo({ top: 0, behavior: 'smooth' });
-    else window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-
-  document.getElementById('btn-scroll-bottom').addEventListener('click', () => {
-    const mainScroll = document.querySelector('.site-main-scroll');
-    if (mainScroll) {
-      mainScroll.scrollTo({
-        top: mainScroll.scrollHeight,
-        behavior: 'smooth'
-      });
-    } else {
-      window.scrollTo({
-        top: document.documentElement.scrollHeight,
-        behavior: 'smooth'
-      });
-    }
-  });
-
-  let _scrollVisTimer = null;
-  let _lastVisible = null;
-
-  const applyVisibility = () => {
-    const mainScroll = document.querySelector('.site-main-scroll');
-
-    let shouldShow;
-    if (mainScroll) {
-      shouldShow = (mainScroll.scrollHeight - mainScroll.clientHeight) > 10;
-    } else {
-      shouldShow = (document.documentElement.scrollHeight - window.innerHeight) > 10;
-    }
-
-    if (_lastVisible === shouldShow) return;
-    _lastVisible = shouldShow;
-
-    wrap.style.display = shouldShow ? 'flex' : 'none';
-  };
-
-  const updateVisibility = () => {
-    if (_scrollVisTimer) clearTimeout(_scrollVisTimer);
-    _scrollVisTimer = setTimeout(applyVisibility, 120);
-  };
-
-  applyVisibility();
-
-  window.addEventListener('resize', updateVisibility);
-
-  const mainScrollEl = document.querySelector('.site-main-scroll');
-  if (mainScrollEl && typeof ResizeObserver !== 'undefined') {
-    const ro = new ResizeObserver(() => updateVisibility());
-    ro.observe(mainScrollEl);
-
-    Array.from(mainScrollEl.children).forEach(child => {
-      try { ro.observe(child); } catch (e) {}
-    });
-  }
-
-  if (typeof MutationObserver !== 'undefined') {
-    const mo = new MutationObserver(() => {
-      updateVisibility();
-    });
-    mo.observe(document.body, {
-      childList: true,
-      subtree: true
-    });
-  }
-
-  window.addEventListener('load', updateVisibility);
-
-  setTimeout(updateVisibility, 500);
-  setTimeout(updateVisibility, 1500);
-  setTimeout(updateVisibility, 3000);
-}
-
-function getCachedLogo() {
-  try {
-    return JSON.parse(localStorage.getItem('logo_cache') || 'null') || {};
-  } catch { return {}; }
-}
-
-function setCachedLogo(obj) {
-  try { localStorage.setItem('logo_cache', JSON.stringify(obj)); } catch {}
-}
-
-function getCachedFooter() {
-  try {
-    return JSON.parse(localStorage.getItem('footer_cache') || 'null') || {};
-  } catch { return {}; }
-}
-
-function setCachedFooter(obj) {
-  try { localStorage.setItem('footer_cache', JSON.stringify(obj)); } catch {}
-}
-
-function getSupabaseClient() {
-  if (typeof supabase === 'undefined') return null;
-
-  let client = window.db;
-
-  if (!client) {
-    client = supabase.createClient(
-      "https://alpdhgcipjeekzrpxlbh.supabase.co",
-      "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya",
-      {
-        auth: {
-          persistSession: false,
-          autoRefreshToken: false,
-          detectSessionInUrl: false
-        }
-      }
-    );
-
-    window.db = client;
-  }
-
-  return client;
-}
-
-async function refreshLogoCache() {
-  const client = getSupabaseClient();
-  if (!client) return;
-
-  try {
-    const { data } = await client
-      .from('logos')
-      .select('*')
-      .order('id', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (data) {
-      setCachedLogo({
-        image_url: data.image_url || '',
-        site_name: data.site_name || ''
-      });
-    } else {
-      setCachedLogo({ image_url: '', site_name: '' });
-    }
-  } catch (e) {}
-}
-
-async function refreshFooterCache() {
-  const client = getSupabaseClient();
-  if (!client) return;
-
-  try {
-    const { data } = await client
-      .from('settings')
-      .select('key, value')
-      .in('key', [
-        'footer_owner',
-        'footer_phone',
-        'footer_email',
-        'footer_address',
-        'footer_business',
-        'footer_text',
-        'footer_instagram',
-        'footer_blog',
-        'footer_band',
-        'account_bank',
-        'account_number',
-        'account_holder'
-      ]);
-
-    const obj = {};
-
-    (data || []).forEach(row => {
-      obj[row.key] = row.value || '';
-    });
-
-    setCachedFooter(obj);
-  } catch (e) {}
-}
-
-// ⭐ 입금 계좌 캐시 헬퍼
-function getCachedAccount() {
-  const f = getCachedFooter();
-  return {
-    bank: f.account_bank || '',
-    number: f.account_number || '',
-    holder: f.account_holder || ''
-  };
-}
-
-async function fetchAccountFromDB() {
-  const client = getSupabaseClient();
-  if (!client) return { bank: '', number: '', holder: '' };
-  try {
-    const { data } = await client
-      .from('settings')
-      .select('key, value')
-      .in('key', ['account_bank', 'account_number', 'account_holder']);
-    const map = {};
-    (data || []).forEach(row => { map[row.key] = row.value || ''; });
-    return {
-      bank: map.account_bank || '',
-      number: map.account_number || '',
-      holder: map.account_holder || ''
-    };
-  } catch (e) {
-    return { bank: '', number: '', holder: '' };
-  }
-}
-
-// ============================================================
-// ⭐ 장바구니 서버 동기화 (로그인 회원 전용)
-// ============================================================
 function getLoggedMember() {
   try { return JSON.parse(localStorage.getItem('member') || 'null'); } catch { return null; }
 }
-
 function isLoggedInMember() {
   const m = getLoggedMember();
   return !!(m && m.id);
 }
 
-// 서버 carts 행 → 로컬 cart item 형태로 매핑
+// ============================================================
+// ⭐ [이슈8] Supabase 클라이언트 싱글톤
+// ============================================================
+function getSupabaseClient() {
+  if (typeof supabase === 'undefined') return null;
+  let client = window.db;
+  if (!client) {
+    client = supabase.createClient(
+      "https://alpdhgcipjeekzrpxlbh.supabase.co",
+      "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya"
+    );
+    window.db = client;
+  }
+  return client;
+}
+
+// ============================================================
+// ⭐ [이슈4] 서버 장바구니 동기화 (carts 테이블 사용, 로그인 필수)
+// ============================================================
 function mapServerCartRow(row) {
   return {
     product_id: row.product_id,
@@ -966,48 +177,30 @@ function mapServerCartRow(row) {
     _server_id: row.id,
   };
 }
-
-// 서버에서 내 장바구니를 불러와 localStorage 'cart' 덮어쓰기
 async function syncCartFromServer() {
   const m = getLoggedMember();
   if (!m || !m.id) return;
   const client = getSupabaseClient();
   if (!client) return;
   try {
-    const { data, error } = await client
-      .from('carts')
-      .select('*')
-      .eq('member_id', m.id)
-      .order('id', { ascending: true });
-    if (error) {
-      console.warn('장바구니 서버 로드 실패:', error.message);
-      return;
-    }
+    const { data, error } = await client.from('carts').select('*').eq('member_id', m.id).order('id', { ascending: true });
+    if (error) { console.warn('장바구니 서버 로드 실패:', error.message); return; }
     const mapped = (data || []).map(mapServerCartRow);
-    localStorage.setItem('cart', JSON.stringify(mapped));
-
-    // 배지/헤더 갱신
+    saveLocalCart(mapped);
     if (typeof updateBottomNavBadge === 'function') updateBottomNavBadge();
     if (typeof renderHeader === 'function' && document.getElementById('app-header')) {
       const mapPath = { 'index':'home','login':'login','signup':'signup','cart':'cart','orders':'orders','product':'product','mypage':'mypage','myorders':'myorders','wholesale':'wholesale','vip':'vip' };
-      const current = mapPath[_pathName] || 'home';
-      renderHeader(current);
+      renderHeader(mapPath[_pathName] || 'home');
     }
-  } catch (e) {
-    console.warn('장바구니 서버 로드 오류:', e);
-  }
+  } catch (e) { console.warn('장바구니 서버 로드 오류:', e); }
 }
-
-// 로컬 장바구니 전체를 서버에 반영 (전체 삭제 후 재삽입)
 async function pushCartToServer(cartArray) {
   const m = getLoggedMember();
   if (!m || !m.id) return;
   const client = getSupabaseClient();
   if (!client) return;
   try {
-    const { error: delErr } = await client.from('carts').delete().eq('member_id', m.id);
-    if (delErr) { console.warn('장바구니 서버 초기화 실패:', delErr.message); return; }
-
+    await client.from('carts').delete().eq('member_id', m.id);
     const rows = (cartArray || []).map(it => ({
       member_id: m.id,
       product_id: it.product_id,
@@ -1027,188 +220,270 @@ async function pushCartToServer(cartArray) {
       updated_at: new Date().toISOString(),
     }));
     if (rows.length === 0) return;
-
     const { data, error } = await client.from('carts').insert(rows).select('id');
     if (error) { console.warn('장바구니 서버 저장 실패:', error.message); return; }
-
     if (Array.isArray(data)) {
-      data.forEach((r, i) => {
-        if (cartArray[i]) cartArray[i]._server_id = r.id;
-      });
-      localStorage.setItem('cart', JSON.stringify(cartArray));
+      data.forEach((r, i) => { if (cartArray[i]) cartArray[i]._server_id = r.id; });
+      saveLocalCart(cartArray);
     }
-  } catch (e) {
-    console.warn('장바구니 서버 저장 오류:', e);
-  }
+  } catch (e) { console.warn('장바구니 서버 저장 오류:', e); }
 }
 
-// 로그인 상태 변화 감지 후 서버 장바구니 자동 로드
+// [이슈4] 로그인 시 자동 서버 장바구니 로드 (재로그인해도 유지)
 (function setupCartServerWatcher() {
-  if (typeof window === 'undefined') return;
   if (window.__cartServerWatcherInstalled) return;
   window.__cartServerWatcherInstalled = true;
-
-  const onLogin = async () => {
-    if (!isLoggedInMember()) return;
-    await syncCartFromServer();
-  };
-
+  const onLogin = async () => { if (isLoggedInMember()) await syncCartFromServer(); };
   setTimeout(onLogin, 300);
-
-  window.addEventListener('storage', (e) => {
-    if (e.key === 'member') onLogin();
-  });
+  window.addEventListener('storage', e => { if (e.key === 'member') onLogin(); });
 })();
+
+// [이슈4] 로그아웃 시 localStorage의 member만 지우고 cart_${id}는 남김 → 재로그인 유지
+
+function getCachedLogo() { try { return JSON.parse(localStorage.getItem('logo_cache') || 'null') || {}; } catch { return {}; } }
+function setCachedLogo(obj) { try { localStorage.setItem('logo_cache', JSON.stringify(obj)); } catch {} }
+function getCachedFooter() { try { return JSON.parse(localStorage.getItem('footer_cache') || 'null') || {}; } catch { return {}; } }
+function setCachedFooter(obj) { try { localStorage.setItem('footer_cache', JSON.stringify(obj)); } catch {} }
+
+// [이슈8] TTL 캐시 적용
+async function refreshLogoCache() {
+  return cachedGet('logo_cache_db', 5*60*1000, async () => {
+    const client = getSupabaseClient();
+    if (!client) return;
+    try {
+      const { data } = await client.from('logos').select('*').order('id', { ascending: false }).limit(1).maybeSingle();
+      setCachedLogo(data ? { image_url: data.image_url || '', site_name: data.site_name || '' } : { image_url: '', site_name: '' });
+    } catch {}
+  });
+}
+async function refreshFooterCache() {
+  return cachedGet('footer_cache_db', 5*60*1000, async () => {
+    const client = getSupabaseClient();
+    if (!client) return;
+    try {
+      const { data } = await client.from('settings').select('key, value').in('key', [
+        'footer_owner','footer_phone','footer_email','footer_address','footer_business','footer_text',
+        'footer_instagram','footer_blog','footer_band',
+        'account_bank','account_number','account_holder'
+      ]);
+      const obj = {};
+      (data || []).forEach(row => { obj[row.key] = row.value || ''; });
+      setCachedFooter(obj);
+    } catch {}
+  });
+}
+function getCachedAccount() {
+  const f = getCachedFooter();
+  return { bank: f.account_bank || '', number: f.account_number || '', holder: f.account_holder || '' };
+}
 
 function getOrCreateSessionId() {
   try {
     let sid = localStorage.getItem('visitor_sid');
-
     if (!sid) {
-      sid = 'sid_' + Date.now().toString(36) + '_' +
-        Math.random().toString(36).slice(2, 10);
-
+      sid = 'sid_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
       localStorage.setItem('visitor_sid', sid);
     }
-
     return sid;
-  } catch (e) {
-    return 'sid_anon_' + Math.random().toString(36).slice(2, 10);
-  }
+  } catch { return 'sid_anon_' + Math.random().toString(36).slice(2, 10); }
 }
-
 async function recordVisit() {
   const client = getSupabaseClient();
   if (!client) return;
-
   try {
     const key = 'last_visit_' + _pathName;
     const now = Date.now();
     const last = Number(localStorage.getItem(key) || 0);
-
     if (now - last < 5 * 60 * 1000) return;
-
     localStorage.setItem(key, String(now));
-
     await client.from('visits').insert({
       path: _pathName || 'index',
       session_id: getOrCreateSessionId(),
       user_agent: navigator.userAgent ? navigator.userAgent.slice(0, 500) : null,
       referrer: document.referrer ? document.referrer.slice(0, 500) : null
     });
-  } catch (e) {}
+  } catch {}
+}
+
+// ============================================================
+// ⭐ 스타일 (기존 유지, 축약 없음)
+// ============================================================
+(function() {
+  const style = document.createElement('style');
+  style.textContent = `
+    html, body { margin:0; padding:0; height:100%!important; overflow:hidden!important; width:100%; -webkit-text-size-adjust:100%; overscroll-behavior:none; }
+    .site-wrapper { display:flex; flex-direction:column; height:100vh; height:100dvh; width:100%; overflow:hidden; }
+    #app-header { flex-shrink:0; flex-grow:0; position:relative; z-index:99999; background:#fff; width:100%; box-shadow:0 4px 10px rgba(0,0,0,.05); margin-bottom:0!important; }
+    body.dark #app-header { background:#0f0f0f; }
+    .site-main-scroll { flex:1 1 0; min-height:0; overflow-y:scroll; overflow-x:hidden; width:100%; position:relative; padding-top:0!important; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; scrollbar-width:thin; scrollbar-color:#d1d5db transparent; }
+    body.dark .site-main-scroll { scrollbar-color:#333 transparent; }
+    .site-main-scroll::-webkit-scrollbar { width:8px; }
+    .site-main-scroll::-webkit-scrollbar-track { background:transparent; }
+    .site-main-scroll::-webkit-scrollbar-thumb { background:#d1d5db; border-radius:4px; }
+    body.dark .site-main-scroll::-webkit-scrollbar-thumb { background:#333; }
+
+    .header-nav-wrap { display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:flex-end; }
+    .header-toolbar { display:flex; align-items:center; justify-content:space-between; gap:16px; width:100%; min-width:0; position:relative; }
+    .header-product-search { display:flex; align-items:center; gap:6px; width:min(360px,42%); min-width:220px; height:36px; position:relative; flex:0 1 360px; margin-right:auto; z-index:100001; }
+    .header-product-search input { width:100%; min-width:0; height:36px; box-sizing:border-box; padding:0 12px; border:none; border-radius:6px; background:#fff; color:#222; font:inherit; font-size:13px; outline:none; transition:box-shadow .16s ease; }
+    .header-product-search input:focus { box-shadow:0 0 0 2px rgba(80,80,80,.12); }
+    body.dark .header-product-search input { background:#171717; color:#eee; }
+    .header-product-search button { display:inline-flex; align-items:center; justify-content:center; width:36px; min-width:36px; height:36px; padding:0; border:1px solid transparent; border-radius:6px; background:transparent; color:#111; cursor:pointer; flex-shrink:0; }
+    body.dark .header-product-search button { color:#fff; }
+    .header-product-search button svg { display:block; width:21px; height:21px; fill:none; stroke:currentColor; stroke-width:2; }
+    .header-search-popup { display:none; position:absolute; top:calc(100% + 7px); left:0; width:min(520px,calc(100vw - 32px)); max-height:min(440px,65vh); overflow-y:auto; background:#fff; color:#222; border:1px solid #d9eaf2; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,.18); z-index:100005; }
+    .header-search-popup.open { display:block; }
+    body.dark .header-search-popup { background:#171717; color:#eee; border-color:#333; }
+    .header-search-result { display:flex; align-items:center; gap:11px; min-height:66px; padding:9px 12px; box-sizing:border-box; color:inherit; text-decoration:none; border-bottom:1px solid #eee; }
+    body.dark .header-search-result { border-bottom-color:#2a2a2a; }
+    .header-search-result:hover { background:#f0f9fd; }
+    body.dark .header-search-result:hover { background:#222; }
+    .header-search-result img { width:48px; height:48px; object-fit:cover; border-radius:6px; background:#f2f2f2; flex-shrink:0; }
+    .header-search-result .hsr-info { min-width:0; flex:1; }
+    .header-search-result .hsr-name { font-size:13px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .header-search-result .hsr-code { margin-top:4px; font-size:11px; color:#888; }
+    .header-search-result .hsr-price { font-size:13px; font-weight:700; color:#e53935; white-space:nowrap; }
+    .header-search-message { padding:18px 14px; text-align:center; font-size:13px; color:#888; }
+    @media (max-width:768px) {
+      .header-toolbar { display:block; margin-top:8px; }
+      .header-product-search { width:100%; min-width:0; max-width:none; height:36px; }
+      .header-search-popup { width:100%; max-height:55vh; }
+      .header-nav-wrap { display:none!important; }
+      #app-header header { padding:10px 16px 8px 16px!important; }
+      .site-main-scroll { overflow-y:auto; }
+    }
+
+    .page-loader { position:fixed; inset:0; background:#0a0a0a; display:flex; align-items:center; justify-content:center; z-index:999999; transition:opacity .2s ease; }
+    .page-loader.hide { opacity:0; pointer-events:none; }
+    .spinner { width:40px; height:40px; border:3px solid rgba(255,255,255,.1); border-top-color:#e5e7eb; border-radius:50%; animation:spin .8s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    img { -webkit-user-drag:none!important; user-drag:none!important; user-select:none!important; -webkit-user-select:none!important; -webkit-touch-callout:none!important; pointer-events:none!important; }
+    a img { pointer-events:auto!important; }
+
+    #scroll-btns { position:fixed; right:24px; top:50%; transform:translateY(-50%); display:none; flex-direction:column; gap:10px; z-index:900; pointer-events:none; }
+    #scroll-btns button { width:44px; height:44px; border-radius:50%; border:1px solid #ddd; background:rgba(255,255,255,.96); color:#222; font-size:18px; font-weight:700; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,.12); display:flex; align-items:center; justify-content:center; padding:0; pointer-events:auto; }
+    body.dark #scroll-btns button { border-color:#333; background:rgba(26,26,26,.96); color:#e5e7eb; }
+    @media (max-width:768px) { #scroll-btns { display:none!important; } }
+
+    #app-footer { margin-top:40px; padding:24px 16px; background:#fafafa; border-top:1px solid #eee; color:#666; font-size:13px; line-height:1.8; }
+    body.dark #app-footer { background:#0f0f0f; border-top-color:#1f1f1f; color:#888; }
+    #app-footer .footer-inner { max-width:1400px; margin:0 auto; text-align:center; }
+    #app-footer .footer-title { font-weight:700; font-size:14px; color:#333; margin-bottom:8px; }
+    body.dark #app-footer .footer-title { color:#ccc; }
+    #app-footer .footer-row { display:flex; flex-wrap:wrap; gap:6px 16px; justify-content:center; }
+    #app-footer .footer-item { color:#666; }
+    body.dark #app-footer .footer-item { color:#888; }
+    #app-footer .footer-text { margin-top:12px; padding-top:12px; border-top:1px dashed #ddd; font-size:12px; color:#999; white-space:pre-wrap; max-width:800px; margin-left:auto; margin-right:auto; }
+    body.dark #app-footer .footer-text { border-top-color:#222; color:#555; }
+    #app-footer .footer-sns-row { display:flex; justify-content:center; align-items:center; gap:12px; margin-top:14px; }
+    #app-footer .footer-sns-btn, #app-footer .footer-channel-btn { display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:50%; border:1px solid #e5e7eb; background:#fff; color:#4b5563; text-decoration:none; cursor:pointer; padding:0; font:inherit; }
+    #app-footer .footer-sns-btn:hover, #app-footer .footer-channel-btn:hover { background:#111827; color:#fff; border-color:#111827; }
+    body.dark #app-footer .footer-sns-btn, body.dark #app-footer .footer-channel-btn { background:#1a1a1a; border-color:#333; color:#e5e7eb; }
+    #app-footer .footer-channel-btn { display:none!important; }
+    @media (max-width:768px) {
+      #app-footer { padding:20px 16px; margin-top:24px; font-size:12px; }
+      #app-footer .footer-sns-row { display:flex!important; gap:14px; margin-top:16px; margin-bottom:4px; flex-wrap:wrap; }
+      #app-footer .footer-sns-btn, #app-footer .footer-channel-btn { display:inline-flex!important; width:44px; height:44px; }
+      .site-main-scroll { padding-bottom:calc(65px + env(safe-area-inset-bottom) + 40px); }
+    }
+
+    #mobile-bottom-nav { display:none; height:65px; flex-shrink:0; background:#fff; border-top:1px solid #eee; z-index:99999; justify-content:space-around; align-items:center; padding-bottom:env(safe-area-inset-bottom); }
+    body.dark #mobile-bottom-nav { background:#0f0f0f; border-top-color:#222; }
+    .bottom-nav-item { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; text-decoration:none; color:#9ca3af; font-size:10px; font-weight:500; flex:1 1 0; min-width:0; height:100%; border:none; background:none; cursor:pointer; padding:0 2px; white-space:nowrap; position:relative; }
+    .bottom-nav-item > span { font-size:10px; line-height:1.1; white-space:nowrap; }
+    .bottom-nav-item.active { color:#111827; }
+    body.dark .bottom-nav-item.active { color:#fff; }
+    .bottom-nav-item .nav-icon { width:20px; height:20px; stroke:currentColor; stroke-width:1.5; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+    .bottom-nav-item .cart-badge { position:absolute; top:6px; right:50%; transform:translateX(16px); background:#ef4444; color:#fff; font-size:10px; font-weight:bold; border-radius:10px; padding:2px 5px; line-height:1; }
+    @media (max-width:768px) { #mobile-bottom-nav { display:flex; } }
+    #mobile-bottom-nav.nav-count-6 .bottom-nav-item { padding:0 1px; gap:2px; }
+    #mobile-bottom-nav.nav-count-6 .bottom-nav-item .nav-icon { width:18px; height:18px; }
+    #mobile-bottom-nav.nav-count-6 .bottom-nav-item > span { font-size:9px; }
+    #mobile-bottom-nav.nav-count-7 .bottom-nav-item { padding:0 1px; gap:2px; }
+    #mobile-bottom-nav.nav-count-7 .bottom-nav-item .nav-icon { width:16px; height:16px; }
+    #mobile-bottom-nav.nav-count-7 .bottom-nav-item > span { font-size:8px; }
+
+    @media (min-width:769px) {
+      #ch-plugin-launcher, #ch-plugin-entry { position:fixed!important; right:24px!important; bottom:145px!important; top:auto!important; z-index:899!important; transform:none!important; }
+    }
+    @media (max-width:768px) {
+      #ch-plugin-launcher, #ch-plugin-entry { display:none!important; }
+    }
+  `;
+  document.head.appendChild(style);
+})();
+
+document.addEventListener('contextmenu', e => { if (_isAdmin) return; e.preventDefault(); });
+document.addEventListener('dragstart', e => { if (_isAdmin) return; if (e.target.tagName === 'IMG') e.preventDefault(); });
+
+document.addEventListener('input', e => {
+  const el = e.target;
+  if (el.tagName !== 'INPUT') return;
+  const isPhone = (el.name && /phone/i.test(el.name)) || (el.id && /phone/i.test(el.id));
+  if (!isPhone) return;
+  const num = el.value.replace(/[^0-9]/g, '').slice(0, 11);
+  if (num.length < 4) el.value = num;
+  else if (num.length < 7) el.value = num.slice(0,3) + '-' + num.slice(3);
+  else if (num.length < 11) el.value = num.slice(0,3) + '-' + num.slice(3,6) + '-' + num.slice(6);
+  else el.value = num.slice(0,3) + '-' + num.slice(3,7) + '-' + num.slice(7);
+});
+function applyPhoneAttrs() {
+  document.querySelectorAll('input[name*="phone" i], input[id*="phone" i]').forEach(el => {
+    el.setAttribute('type', 'tel');
+    el.setAttribute('inputmode', 'numeric');
+    el.setAttribute('autocomplete', 'tel');
+  });
+}
+
+function createScrollButtons() {
+  if (_isAdmin) return;
+  if (window.matchMedia('(max-width: 768px)').matches) return;
+  if (document.getElementById('scroll-btns')) return;
+  const wrap = document.createElement('div');
+  wrap.id = 'scroll-btns';
+  wrap.innerHTML = `<button id="btn-scroll-top" title="맨 위로">▲</button><button id="btn-scroll-bottom" title="맨 아래로">▼</button>`;
+  document.body.appendChild(wrap);
+  document.getElementById('btn-scroll-top').onclick = () => {
+    const mainScroll = document.querySelector('.site-main-scroll');
+    if (mainScroll) mainScroll.scrollTo({ top: 0, behavior: 'smooth' });
+    else window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  document.getElementById('btn-scroll-bottom').onclick = () => {
+    const mainScroll = document.querySelector('.site-main-scroll');
+    if (mainScroll) mainScroll.scrollTo({ top: mainScroll.scrollHeight, behavior: 'smooth' });
+    else window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+  };
 }
 
 let _footerRenderCount = 0;
-
 function renderFooter() {
   let wrap = document.getElementById('app-footer');
-
   if (!wrap) {
     wrap = document.createElement('div');
     wrap.id = 'app-footer';
-
     const mainScroll = document.querySelector('.site-main-scroll');
-
     if (mainScroll) mainScroll.appendChild(wrap);
     else document.body.appendChild(wrap);
   }
-
   const f = getCachedFooter();
-
-  const owner = f.footer_owner || '';
-  const phone = f.footer_phone || '';
-  const email = f.footer_email || '';
-  const address = f.footer_address || '';
-  const business = f.footer_business || '';
-  const text = f.footer_text || '';
-  const instagram = f.footer_instagram || '';
-  const blog = f.footer_blog || '';
-  const band = f.footer_band || '';
-
+  const owner = f.footer_owner || '', phone = f.footer_phone || '', email = f.footer_email || '';
+  const address = f.footer_address || '', business = f.footer_business || '', text = f.footer_text || '';
+  const instagram = f.footer_instagram || '', blog = f.footer_blog || '', band = f.footer_band || '';
   const hasSns = instagram || blog || band;
-
-  if (
-    !owner && !phone && !email && !address &&
-    !business && !text && !hasSns
-  ) {
-    if (_footerRenderCount < 2) {
-      _footerRenderCount++;
-      refreshFooterCache().then(() => renderFooter());
-      return;
-    }
+  if (!owner && !phone && !email && !address && !business && !text && !hasSns) {
+    if (_footerRenderCount < 2) { _footerRenderCount++; refreshFooterCache().then(() => renderFooter()); return; }
   }
-
   _footerRenderCount = 0;
   wrap.style.display = 'block';
-
   const items = [];
-
   if (phone) items.push(`<span class="footer-item">📞 ${phone}</span>`);
   if (email) items.push(`<span class="footer-item">✉️ ${email}</span>`);
   if (business) items.push(`<span class="footer-item">사업자번호: ${business}</span>`);
-
   const snsLinks = [];
-
-  if (instagram) snsLinks.push(`
-    <a href="${instagram}" target="_blank"
-       rel="noopener noreferrer"
-       class="footer-sns-btn"
-       aria-label="Instagram">
-      <svg viewBox="0 0 24 24" width="20" height="20"
-           fill="none" stroke="currentColor" stroke-width="1.8"
-           stroke-linecap="round" stroke-linejoin="round">
-        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-      </svg>
-    </a>
-  `);
-
-  if (blog) snsLinks.push(`
-    <a href="${blog}" target="_blank"
-       rel="noopener noreferrer"
-       class="footer-sns-btn"
-       aria-label="Naver Blog">
-      <svg viewBox="0 0 24 24" width="20" height="20"
-           fill="none" stroke="currentColor" stroke-width="1.8"
-           stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"></circle>
-        <path d="M8 16V8l8 8V8"></path>
-      </svg>
-    </a>
-  `);
-
-  if (band) snsLinks.push(`
-    <a href="${band}" target="_blank"
-       rel="noopener noreferrer"
-       class="footer-sns-btn"
-       aria-label="Naver Band">
-      <svg viewBox="0 0 24 24" width="20" height="20"
-           fill="none" stroke="currentColor" stroke-width="1.8"
-           stroke-linecap="round" stroke-linejoin="round">
-        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-        <circle cx="9" cy="7" r="4"></circle>
-        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-      </svg>
-    </a>
-  `);
-
-  snsLinks.push(`
-    <button type="button"
-            class="footer-channel-btn"
-            id="footer-channel-btn"
-            aria-label="채널톡 상담"
-            title="채널톡 상담">
-      <svg viewBox="0 0 24 24" width="20" height="20"
-           fill="none" stroke="currentColor" stroke-width="1.8"
-           stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-      </svg>
-    </button>
-  `);
-
+  if (instagram) snsLinks.push(`<a href="${instagram}" target="_blank" rel="noopener noreferrer" class="footer-sns-btn" aria-label="Instagram"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>`);
+  if (blog) snsLinks.push(`<a href="${blog}" target="_blank" rel="noopener noreferrer" class="footer-sns-btn" aria-label="Naver Blog"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"></circle><path d="M8 16V8l8 8V8"></path></svg></a>`);
+  if (band) snsLinks.push(`<a href="${band}" target="_blank" rel="noopener noreferrer" class="footer-sns-btn" aria-label="Naver Band"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></a>`);
   wrap.innerHTML = `
     <div class="footer-inner">
       ${owner ? `<div class="footer-title">${owner}</div>` : ''}
@@ -1218,229 +493,38 @@ function renderFooter() {
       ${text ? `<div class="footer-text">${text}</div>` : ''}
     </div>
   `;
-
-  const chBtn = document.getElementById('footer-channel-btn');
-  if (chBtn) {
-    chBtn.addEventListener('click', () => {
-      try {
-        if (window.ChannelIO) {
-          window.ChannelIO('show');
-        }
-      } catch (e) {}
-    });
-  }
 }
-
-async function verifyMemberStatus() {
-  const memberStr = localStorage.getItem('member');
-  if (!memberStr) return true;
-
-  let member;
-  try { member = JSON.parse(memberStr); } catch { return true; }
-
-  if (!member || !member.id) return true;
-
-  const client = getSupabaseClient();
-  if (!client) return true;
-
-  try {
-    const { data, error } = await client
-      .from('members')
-      .select('id, status, grade')
-      .eq('id', member.id)
-      .maybeSingle();
-
-    if (error) return true;
-
-    if (!data) {
-      localStorage.removeItem('member');
-      alert('회원 정보가 없어졌습니다. 다시 로그인해주세요.');
-      location.href = 'index.html';
-      return false;
-    }
-
-    const status = data.status || '정상';
-
-    if (status === '정지') {
-      localStorage.removeItem('member');
-      alert('정지된 계정입니다. 관리자에게 문의하세요.');
-      location.href = 'index.html';
-      return false;
-    }
-
-    if (status === '탈퇴') {
-      localStorage.removeItem('member');
-      alert('탈퇴한 계정입니다.');
-      location.href = 'index.html';
-      return false;
-    }
-
-    member.status = status;
-    member.grade = data.grade || member.grade || '일반회원';
-
-    localStorage.setItem('member', JSON.stringify(member));
-    return true;
-  } catch (e) {
-    return true;
-  }
-}
-
-let _headerRendered = false;
-
-// ⭐ 등급별 하단 탭 구성
-// - 일반회원: 도매/VIP 버튼 모두 없음
-// - 도매회원: 도매전용관만
-// - VIP회원: VIP전용관만 (도매 이용불가)
-function buildBottomNav(current, isMember, svgIcons, memberGrade) {
-  const commonTabs = `
-    <a href="index.html" data-nav="home"
-       class="bottom-nav-item ${current === 'home' ? 'active' : ''}">
-      ${svgIcons.home}<span>홈</span>
-    </a>
-
-    <a href="cart.html" data-nav="cart"
-       class="bottom-nav-item ${current === 'cart' ? 'active' : ''}">
-      ${svgIcons.cart}
-      <span id="bottom-cart-badge" class="cart-badge" style="display:none;">0</span>
-      <span>장바구니</span>
-    </a>
-
-    <a href="orders.html" data-nav="orders"
-       class="bottom-nav-item ${current === 'orders' ? 'active' : ''}">
-      ${svgIcons.orders}<span>주문조회</span>
-    </a>
-  `;
-
-  const wholesaleTab = `<a href="wholesale.html" data-nav="wholesale"
-         class="bottom-nav-item ${current === 'wholesale' ? 'active' : ''}">
-         ${svgIcons.wholesale}<span>도매</span>
-       </a>`;
-
-  const vipTab = `<a href="vip.html" data-nav="vip"
-         class="bottom-nav-item ${current === 'vip' ? 'active' : ''}">
-         ${svgIcons.vip}<span>VIP</span>
-       </a>`;
-
-  let gradeTabs = '';
-  if (isMember && memberGrade === '도매회원') {
-    gradeTabs = wholesaleTab;
-  } else if (isMember && memberGrade === 'VIP회원') {
-    gradeTabs = vipTab;
-  }
-
-  const memberTabs = isMember
-    ? `<a href="myorders.html" data-nav="myorders"
-         class="bottom-nav-item ${current === 'myorders' ? 'active' : ''}">
-         ${svgIcons.myorders}<span>주문내역</span>
-       </a>
-
-       <a href="mypage.html" data-nav="mypage"
-          class="bottom-nav-item ${current === 'mypage' ? 'active' : ''}">
-         ${svgIcons.mypage}<span>내정보</span>
-       </a>
-
-       <a href="#" data-nav="logout" id="bottom-logout-btn"
-          class="bottom-nav-item">
-         ${svgIcons.logout}<span>로그아웃</span>
-       </a>`
-    : `<a href="login.html" data-nav="login"
-         class="bottom-nav-item ${current === 'login' ? 'active' : ''}">
-         ${svgIcons.login}<span>로그인</span>
-       </a>
-
-       <a href="signup.html" data-nav="signup"
-          class="bottom-nav-item ${current === 'signup' ? 'active' : ''}">
-         ${svgIcons.signup}<span>회원가입</span>
-       </a>`;
-
-  const gradeCount = (gradeTabs.match(/<a /g) || []).length;
-  const count = 3 + gradeCount + (isMember ? 3 : 2);
-
-  return { html: commonTabs + gradeTabs + memberTabs, count };
-}
-
-function updateBottomNavBadge() {
-  const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-  const badge = document.getElementById('bottom-cart-badge');
-
-  if (badge) {
-    badge.textContent = cart.length;
-    badge.style.display = cart.length > 0 ? 'block' : 'none';
-  }
-}
-
-function bindBottomLogout() {
-  const blb = document.getElementById('bottom-logout-btn');
-
-  if (blb) {
-    blb.onclick = (e) => {
-      e.preventDefault();
-      if (confirm('로그아웃 하시겠습니까?')) {
-        localStorage.removeItem('member');
-        location.href = 'index.html';
-      }
-    };
-  }
-}
-
 
 // ============================================================
-// ⭐ 공통 상단 상품 검색
+// ⭐ [이슈5] 헤더 상품검색: 로그인 등급 무관 통합검색 (도매/VIP 포함)
 // ============================================================
 let _headerSearchProducts = null;
 let _headerSearchLoading = false;
+let _headerSearchCacheTime = 0;
 
-function escapeHeaderSearchHtml(value) {
-  return String(value ?? '').replace(/[&<>"']/g, ch => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-  }[ch]));
+function escapeHeaderSearchHtml(v) {
+  return String(v ?? '').replace(/[&<>"']/g, ch => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[ch]));
 }
-
 async function getHeaderSearchProducts() {
-  if (_headerSearchProducts) return _headerSearchProducts;
+  const now = Date.now();
+  if (_headerSearchProducts && now - _headerSearchCacheTime < 60*1000) return _headerSearchProducts;
   if (_headerSearchLoading) {
-    while (_headerSearchLoading) {
-      await new Promise(resolve => setTimeout(resolve, 80));
-    }
+    while (_headerSearchLoading) await new Promise(r => setTimeout(r, 80));
     return _headerSearchProducts || [];
   }
-
   _headerSearchLoading = true;
   try {
-    let client = getSupabaseClient();
-
-    if (!client && typeof window.supabase === 'undefined') {
-      await new Promise((resolve, reject) => {
-        const existing = document.querySelector('script[data-header-search-supabase]');
-        if (existing) {
-          existing.addEventListener('load', resolve, { once: true });
-          existing.addEventListener('error', reject, { once: true });
-          return;
-        }
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-        script.dataset.headerSearchSupabase = '1';
-        script.onload = resolve;
-        script.onerror = reject;
-        document.head.appendChild(script);
-      });
-      client = getSupabaseClient();
-    }
-
-    if (!client) throw new Error('상품 검색 연결을 사용할 수 없습니다.');
-
-    const { data, error } = await client
-      .from('products')
+    const client = getSupabaseClient();
+    if (!client) throw new Error('상품 검색 연결 실패');
+    // [이슈5] 등급 무시 → 전체 상품 로드 (도매/VIP 포함)
+    const { data, error } = await client.from('products')
       .select('id,name,product_code,main_image,price,target_grade,created_at')
-      .or('target_grade.eq.all,target_grade.is.null')
       .order('created_at', { ascending: false });
-
     if (error) throw error;
     _headerSearchProducts = data || [];
+    _headerSearchCacheTime = now;
     return _headerSearchProducts;
-  } finally {
-    _headerSearchLoading = false;
-  }
+  } finally { _headerSearchLoading = false; }
 }
 
 function bindHeaderProductSearch() {
@@ -1449,134 +533,117 @@ function bindHeaderProductSearch() {
   const popup = document.getElementById('header-search-popup');
   if (!form || !input || !popup || form.dataset.bound === '1') return;
   form.dataset.bound = '1';
-
-  const closePopup = () => {
-    popup.classList.remove('open');
-    popup.innerHTML = '';
-  };
-
-  const showMessage = message => {
-    popup.innerHTML = `<div class="header-search-message">${escapeHeaderSearchHtml(message)}</div>`;
-    popup.classList.add('open');
-  };
+  const closePopup = () => { popup.classList.remove('open'); popup.innerHTML = ''; };
+  const showMessage = msg => { popup.innerHTML = `<div class="header-search-message">${escapeHeaderSearchHtml(msg)}</div>`; popup.classList.add('open'); };
 
   const runSearch = async () => {
     const keyword = String(input.value || '').normalize('NFKC').toLocaleLowerCase().trim();
-    if (!keyword) {
-      closePopup();
-      return;
-    }
-
+    if (!keyword) { closePopup(); return; }
     showMessage('상품을 검색하고 있습니다...');
     try {
       const products = await getHeaderSearchProducts();
-      const matches = products.filter(product => {
-        const name = String(product.name || '').normalize('NFKC').toLocaleLowerCase();
-        const code = String(product.product_code || '').normalize('NFKC').toLocaleLowerCase();
+      // [이슈5] 등급 무관 통합검색 + 부적합한 상품 안내 (링크로 이동 시 해당 페이지에서 처리)
+      const matches = products.filter(p => {
+        const name = String(p.name || '').normalize('NFKC').toLocaleLowerCase();
+        const code = String(p.product_code || '').normalize('NFKC').toLocaleLowerCase();
         return name.includes(keyword) || code.includes(keyword);
       }).slice(0, 30);
+      if (!matches.length) { showMessage('검색 결과가 없습니다.'); return; }
 
-      if (!matches.length) {
-        showMessage('검색 결과가 없습니다.');
-        return;
-      }
-
-      popup.innerHTML = matches.map(product => {
-        const id = encodeURIComponent(product.id);
-        const name = escapeHeaderSearchHtml(product.name || '상품명 없음');
-        const code = escapeHeaderSearchHtml(product.product_code || '');
-        const image = escapeHeaderSearchHtml(product.main_image || '');
-        const createdAt = product.created_at ? new Date(product.created_at).getTime() : 0;
-        const isRecent = createdAt > 0 && (Date.now() - createdAt) < 7 * 24 * 60 * 60 * 1000;
-        let member = null;
-        try { member = JSON.parse(localStorage.getItem('member') || 'null'); } catch (e) {}
-        const priceText = (!member?.id && isRecent)
-          ? '로그인 후 가격 확인'
-          : Number(product.price || 0).toLocaleString() + '원';
+      const member = getLoggedMember();
+      const memberGrade = member?.grade || '일반회원';
+      popup.innerHTML = matches.map(p => {
+        const id = encodeURIComponent(p.id);
+        const name = escapeHeaderSearchHtml(p.name || '상품명 없음');
+        const code = escapeHeaderSearchHtml(p.product_code || '');
+        const image = escapeHeaderSearchHtml(p.main_image || '');
+        const tg = p.target_grade || 'all';
+        const badge = tg === 'wholesale' ? ' <span style="background:#f59e0b;color:#fff;font-size:9px;padding:1px 5px;border-radius:3px;">도매</span>'
+                   : tg === 'vip' ? ' <span style="background:#a855f7;color:#fff;font-size:9px;padding:1px 5px;border-radius:3px;">VIP</span>'
+                   : '';
         return `
           <a class="header-search-result" role="option" href="product.html?id=${id}">
             ${image ? `<img src="${image}" alt="" loading="lazy">` : `<span style="width:48px;height:48px;border-radius:6px;background:#f2f2f2;flex-shrink:0;"></span>`}
-            <span class="hsr-info">
-              <span class="hsr-name">${name}</span>
-              ${code ? `<span class="hsr-code">제품번호: ${code}</span>` : ''}
-            </span>
-            <span class="hsr-price">${priceText}</span>
+            <span class="hsr-info"><span class="hsr-name">${name}${badge}</span>${code ? `<span class="hsr-code">제품번호: ${code}</span>` : ''}</span>
+            <span class="hsr-price">${Number(p.price || 0).toLocaleString()}원~</span>
           </a>`;
       }).join('');
       popup.classList.add('open');
     } catch (error) {
       console.error('상단 상품 검색 오류:', error);
-      showMessage('상품 검색 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      showMessage('상품 검색 중 오류가 발생했습니다.');
     }
   };
 
-  form.addEventListener('submit', event => {
-    event.preventDefault();
-    runSearch();
-  });
-
-  input.addEventListener('keydown', event => {
-    if (event.key === 'Escape') closePopup();
-  });
-
-  document.addEventListener('click', event => {
-    if (!form.contains(event.target)) closePopup();
-  });
-
-  input.addEventListener('focus', () => {
-    if (popup.innerHTML.trim()) popup.classList.add('open');
-  });
+  form.addEventListener('submit', e => { e.preventDefault(); runSearch(); });
+  input.addEventListener('keydown', e => { if (e.key === 'Escape') closePopup(); });
+  document.addEventListener('click', e => { if (!form.contains(e.target)) closePopup(); });
+  input.addEventListener('focus', () => { if (popup.innerHTML.trim()) popup.classList.add('open'); });
 }
 
+function buildBottomNav(current, isMember, svgIcons, memberGrade) {
+  const commonTabs = `
+    <a href="index.html" data-nav="home" class="bottom-nav-item ${current === 'home' ? 'active' : ''}">${svgIcons.home}<span>홈</span></a>
+    <a href="cart.html" data-nav="cart" class="bottom-nav-item ${current === 'cart' ? 'active' : ''}">${svgIcons.cart}<span id="bottom-cart-badge" class="cart-badge" style="display:none;">0</span><span>장바구니</span></a>
+    <a href="orders.html" data-nav="orders" class="bottom-nav-item ${current === 'orders' ? 'active' : ''}">${svgIcons.orders}<span>주문조회</span></a>
+  `;
+  const wholesaleTab = `<a href="wholesale.html" data-nav="wholesale" class="bottom-nav-item ${current === 'wholesale' ? 'active' : ''}">${svgIcons.wholesale}<span>도매</span></a>`;
+  const vipTab = `<a href="vip.html" data-nav="vip" class="bottom-nav-item ${current === 'vip' ? 'active' : ''}">${svgIcons.vip}<span>VIP</span></a>`;
+  let gradeTabs = '';
+  if (isMember && memberGrade === '도매회원') gradeTabs = wholesaleTab;
+  else if (isMember && memberGrade === 'VIP회원') gradeTabs = vipTab;
+  const memberTabs = isMember
+    ? `<a href="myorders.html" data-nav="myorders" class="bottom-nav-item ${current === 'myorders' ? 'active' : ''}">${svgIcons.myorders}<span>주문내역</span></a>
+       <a href="mypage.html" data-nav="mypage" class="bottom-nav-item ${current === 'mypage' ? 'active' : ''}">${svgIcons.mypage}<span>내정보</span></a>
+       <a href="#" data-nav="logout" id="bottom-logout-btn" class="bottom-nav-item">${svgIcons.logout}<span>로그아웃</span></a>`
+    : `<a href="login.html" data-nav="login" class="bottom-nav-item ${current === 'login' ? 'active' : ''}">${svgIcons.login}<span>로그인</span></a>
+       <a href="signup.html" data-nav="signup" class="bottom-nav-item ${current === 'signup' ? 'active' : ''}">${svgIcons.signup}<span>회원가입</span></a>`;
+  const gradeCount = (gradeTabs.match(/<a /g) || []).length;
+  const count = 3 + gradeCount + (isMember ? 3 : 2);
+  return { html: commonTabs + gradeTabs + memberTabs, count };
+}
+function updateBottomNavBadge() {
+  const cart = getLocalCart();
+  const badge = document.getElementById('bottom-cart-badge');
+  if (badge) {
+    badge.textContent = cart.length;
+    badge.style.display = cart.length > 0 ? 'block' : 'none';
+  }
+}
+function bindBottomLogout() {
+  const blb = document.getElementById('bottom-logout-btn');
+  if (blb) blb.onclick = e => {
+    e.preventDefault();
+    if (confirm('로그아웃 하시겠습니까?')) {
+      // [이슈4] cart_${id}는 남겨두고 member만 삭제 → 재로그인 시 유지
+      localStorage.removeItem('member');
+      location.href = 'index.html';
+    }
+  };
+}
+
+let _headerRendered = false;
 function renderHeader(current) {
   const wrap = document.getElementById('app-header');
   if (!wrap) return;
-
   const isDark = _isDark;
-
   const theme = isDark ? {
-    headerBg: '#0f0f0f',
-    borderColor: '#222',
-    logoColor: '#fff',
-    btnBg: '#1a1a1a',
-    btnBgActive: '#e5e7eb',
-    btnText: '#e5e7eb',
-    btnTextActive: '#111',
-    btnBorder: '#333',
-    btnBorderActive: '#e5e7eb',
-    nameColor: '#888'
+    headerBg:'#0f0f0f', borderColor:'#222', logoColor:'#fff',
+    btnBg:'#1a1a1a', btnBgActive:'#e5e7eb', btnText:'#e5e7eb', btnTextActive:'#111',
+    btnBorder:'#333', btnBorderActive:'#e5e7eb', nameColor:'#888'
   } : {
-    headerBg: '#fff',
-    borderColor: '#eee',
-    logoColor: '#222',
-    btnBg: '#fff',
-    btnBgActive: '#222',
-    btnText: '#222',
-    btnTextActive: '#fff',
-    btnBorder: '#ddd',
-    btnBorderActive: '#222',
-    nameColor: '#555'
+    headerBg:'#fff', borderColor:'#eee', logoColor:'#222',
+    btnBg:'#fff', btnBgActive:'#222', btnText:'#222', btnTextActive:'#fff',
+    btnBorder:'#ddd', btnBorderActive:'#222', nameColor:'#555'
   };
-
   let bottomNav = document.getElementById('mobile-bottom-nav');
   const wrapper = document.querySelector('.site-wrapper');
-
-  if (!bottomNav) {
-    bottomNav = document.createElement('nav');
-    bottomNav.id = 'mobile-bottom-nav';
-  }
-
+  if (!bottomNav) { bottomNav = document.createElement('nav'); bottomNav.id = 'mobile-bottom-nav'; }
   if (wrapper) wrapper.appendChild(bottomNav);
   else if (!bottomNav.parentNode) document.body.appendChild(bottomNav);
-
-  const member = localStorage.getItem('member');
-
-  let m = null;
-  try { m = member ? JSON.parse(member) : null; } catch { m = null; }
-
+  const m = getLoggedMember();
   const isMember = !!(m && m.id);
   const memberGrade = m?.grade || '일반회원';
-
   const svgIcons = {
     home: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
     cart: `<svg class="nav-icon" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>`,
@@ -1589,13 +656,9 @@ function renderHeader(current) {
     wholesale: `<svg class="nav-icon" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>`,
     vip: `<svg class="nav-icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`
   };
-
-  const { html: navHtml, count } =
-    buildBottomNav(current, isMember, svgIcons, memberGrade);
-
+  const { html: navHtml, count } = buildBottomNav(current, isMember, svgIcons, memberGrade);
   bottomNav.className = `nav-count-${count}`;
   bottomNav.innerHTML = navHtml;
-
   updateBottomNavBadge();
   bindBottomLogout();
 
@@ -1606,9 +669,8 @@ function renderHeader(current) {
       el.style.color = isActive ? theme.btnTextActive : theme.btnText;
       el.style.borderColor = isActive ? theme.btnBorderActive : theme.btnBorder;
     });
-
     const cc = document.getElementById('cart-count');
-    if (cc) cc.textContent = JSON.parse(localStorage.getItem('cart') || '[]').length;
+    if (cc) cc.textContent = getLocalCart().length;
     bindHeaderProductSearch();
     return;
   }
@@ -1616,38 +678,20 @@ function renderHeader(current) {
   const cached = getCachedLogo();
   const logoImageUrl = cached.image_url || '';
   const siteName = cached.site_name || '스타킹스토리 심플라이프';
-
-  const btnStyle = (active) => `
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    padding: 8px 14px;
-    min-width: 76px;
-    height: 36px;
-    background: ${active ? theme.btnBgActive : theme.btnBg};
-    color: ${active ? theme.btnTextActive : theme.btnText};
-    border: 1px solid ${active ? theme.btnBorderActive : theme.btnBorder};
-    border-radius: 6px;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 500;
-    white-space: nowrap;
-    box-sizing: border-box;
-    flex-shrink: 0;
+  const btnStyle = active => `
+    display:inline-flex; align-items:center; justify-content:center; gap:4px;
+    padding:8px 14px; min-width:76px; height:36px;
+    background:${active ? theme.btnBgActive : theme.btnBg};
+    color:${active ? theme.btnTextActive : theme.btnText};
+    border:1px solid ${active ? theme.btnBorderActive : theme.btnBorder};
+    border-radius:6px; text-decoration:none; font-size:14px; font-weight:500;
+    white-space:nowrap; box-sizing:border-box; flex-shrink:0;
   `;
-
-  // ⭐ 등급별 버튼 노출 규칙
   const wholesaleBtn = (isMember && memberGrade === '도매회원')
-    ? `<a href="wholesale.html" data-nav="wholesale" style="${btnStyle(current === 'wholesale')}">도매전용관</a>`
-    : '';
-
+    ? `<a href="wholesale.html" data-nav="wholesale" style="${btnStyle(current === 'wholesale')}">도매전용관</a>` : '';
   const vipBtn = (isMember && memberGrade === 'VIP회원')
-    ? `<a href="vip.html" data-nav="vip" style="${btnStyle(current === 'vip')}">⭐ VIP전용관</a>`
-    : '';
-
+    ? `<a href="vip.html" data-nav="vip" style="${btnStyle(current === 'vip')}">⭐ VIP전용관</a>` : '';
   const gradeBtn = wholesaleBtn + vipBtn;
-
   const userBtns = isMember
     ? `${gradeBtn}
        <a href="mypage.html" data-nav="mypage" style="${btnStyle(current === 'mypage')}">내정보</a>
@@ -1655,36 +699,25 @@ function renderHeader(current) {
        <a href="#" id="logout-btn" style="${btnStyle(false)}">로그아웃</a>`
     : `<a href="login.html" data-nav="login" style="${btnStyle(current === 'login')}">로그인</a>
        <a href="signup.html" data-nav="signup" style="${btnStyle(current === 'signup')}">회원가입</a>`;
-
   const nameRow = `
-    <div class="header-name-row"
-         style="text-align:center; font-size:13px; color:${theme.nameColor}; margin-bottom:8px; min-height:18px; line-height:18px; font-weight:500;">
+    <div class="header-name-row" style="text-align:center; font-size:13px; color:${theme.nameColor}; margin-bottom:8px; min-height:18px; line-height:18px; font-weight:500;">
       ${isMember ? `${m.name}님 <span style="color:${memberGrade === '도매회원' ? '#f59e0b' : memberGrade === 'VIP회원' ? '#a855f7' : '#6b7280'}; font-weight:700;">[${memberGrade}]</span>` : ''}
     </div>
   `;
-
   const logoHtml = logoImageUrl
     ? `<a href="index.html" style="display:inline-block;"><img src="${logoImageUrl}" alt="${siteName}" style="height:40px; max-width:240px; object-fit:contain; display:block; margin:0 auto;"></a>`
     : `<a href="index.html" style="font-size:22px; font-weight:700; color:${theme.logoColor}; text-decoration:none; display:inline-block;">${siteName}</a>`;
-
   wrap.innerHTML = `
     <header style="background:${theme.headerBg}; border-bottom:1px solid ${theme.borderColor}; padding:12px 16px 10px 16px;">
       <div style="max-width:1400px; margin:0 auto;">
         <div style="margin-bottom:8px; text-align:center;">${logoHtml}</div>
         ${nameRow}
-
         <div class="header-toolbar">
           <form class="header-product-search" id="header-product-search" role="search">
-            <input id="header-product-search-input" type="search"
-                   placeholder="상품명 또는 제품번호 검색"
-                   autocomplete="off" aria-label="상품 검색">
-            <button type="submit" aria-label="상품 검색 실행" title="검색">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg>
-            </button>
-            <div class="header-search-popup" id="header-search-popup"
-                 role="listbox" aria-label="상품 검색 결과"></div>
+            <input id="header-product-search-input" type="search" placeholder="상품명 또는 제품번호 검색" autocomplete="off" aria-label="상품 검색">
+            <button type="submit" aria-label="상품 검색 실행"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg></button>
+            <div class="header-search-popup" id="header-search-popup" role="listbox"></div>
           </form>
-
           <nav class="header-nav-wrap" aria-label="회원 메뉴">
             <a href="cart.html" data-nav="cart" style="${btnStyle(current === 'cart')}">장바구니 <span id="cart-count" style="margin-left:4px;">0</span></a>
             <a href="orders.html" data-nav="orders" style="${btnStyle(current === 'orders')}">주문조회</a>
@@ -1694,42 +727,36 @@ function renderHeader(current) {
       </div>
     </header>
   `;
-
   _headerRendered = true;
   bindHeaderProductSearch();
-
   const cc = document.getElementById('cart-count');
-  if (cc) cc.textContent = JSON.parse(localStorage.getItem('cart') || '[]').length;
-
+  if (cc) cc.textContent = getLocalCart().length;
   const lb = document.getElementById('logout-btn');
-  if (lb) {
-    lb.onclick = (e) => {
-      e.preventDefault();
-      localStorage.removeItem('member');
-      location.href = 'index.html';
-    };
-  }
-
+  if (lb) lb.onclick = e => {
+    e.preventDefault();
+    // [이슈4] cart_${id} 유지
+    localStorage.removeItem('member');
+    location.href = 'index.html';
+  };
   refreshLogoCache();
 }
 
+// ============================================================
+// ⭐ [이슈8] 부트스트랩: 병렬 로드로 속도 개선
+// ============================================================
 document.addEventListener('DOMContentLoaded', async () => {
   if (_isAdmin) {
     if (_isDark) document.body.classList.add('dark');
     applyPhoneAttrs();
     return;
   }
-
   const existingHeader = document.getElementById('app-header');
   const existingBottomNav = document.getElementById('mobile-bottom-nav');
   const bodyChildren = Array.from(document.body.children);
-
   const wrapper = document.createElement('div');
   wrapper.className = 'site-wrapper';
-
   const mainScroll = document.createElement('div');
   mainScroll.className = 'site-main-scroll';
-
   bodyChildren.forEach(child => {
     if (child.id === 'app-header') return;
     if (child.id === 'mobile-bottom-nav') return;
@@ -1737,14 +764,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (child.id === 'app-footer') return;
     if (child.classList.contains('page-loader')) return;
     if (child.id === 'scroll-btns') return;
-
     mainScroll.appendChild(child);
   });
-
   if (existingHeader) wrapper.appendChild(existingHeader);
   wrapper.appendChild(mainScroll);
   if (existingBottomNav) wrapper.appendChild(existingBottomNav);
-
   document.body.insertBefore(wrapper, document.body.firstChild);
 
   const loader = document.createElement('div');
@@ -1752,37 +776,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!_isDark) loader.style.background = '#f8f8f8';
   loader.innerHTML = '<div class="spinner"></div>';
   document.body.appendChild(loader);
-
   if (_isDark) document.body.classList.add('dark');
-
   applyPhoneAttrs();
-
-  new MutationObserver(applyPhoneAttrs).observe(document.body, {
-    childList: true,
-    subtree: true
-  });
-
+  new MutationObserver(applyPhoneAttrs).observe(document.body, { childList: true, subtree: true });
   createScrollButtons();
-  renderFooter();
-  refreshFooterCache().then(() => renderFooter());
-  recordVisit();
 
-  const isOk = await verifyMemberStatus();
-  if (!isOk) return;
+  // [이슈8] 병렬 실행
+  const tasks = [
+    refreshFooterCache().then(() => renderFooter()),
+    recordVisit()
+  ];
+  if (isLoggedInMember()) tasks.push(syncCartFromServer().catch(()=>{}));
+  await Promise.allSettled(tasks);
 
-  if (isLoggedInMember()) {
-    try { await syncCartFromServer(); } catch (e) {}
-  }
-
-  const map = {
-    'index': 'home', 'login': 'login', 'signup': 'signup',
-    'cart': 'cart', 'orders': 'orders', 'product': 'product',
-    'mypage': 'mypage', 'myorders': 'myorders',
-    'wholesale': 'wholesale', 'vip': 'vip'
-  };
-
+  const map = { 'index':'home','login':'login','signup':'signup','cart':'cart','orders':'orders','product':'product','mypage':'mypage','myorders':'myorders','wholesale':'wholesale','vip':'vip' };
   const current = map[_pathName] || 'home';
-
   if (document.getElementById('app-header')) renderHeader(current);
 
   setTimeout(() => {
@@ -1791,44 +799,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   }, 300);
 });
 
-// ===== 채널톡(Channel Talk) 연동 =====
-
+// 채널톡 (기존 유지)
 (function() {
   var w = window;
-
-  if (w.ChannelIO) {
-    return (window.console.error || window.console.log)('ChannelIO already loaded');
-  }
-
+  if (w.ChannelIO) return;
   var ch = function() { ch.c(arguments); };
-  ch.q = [];
-  ch.c = function(args) { ch.q.push(args); };
+  ch.q = []; ch.c = function(args) { ch.q.push(args); };
   w.ChannelIO = ch;
-
   function l() {
     if (w.ChannelIOInitialized) return;
     w.ChannelIOInitialized = true;
-
     var s = document.createElement('script');
-    s.type = 'text/javascript';
-    s.async = true;
-    s.src = 'https://cdn.channel.io/plugin/ch-plugin-web.js';
-    s.charset = 'UTF-8';
-
+    s.type = 'text/javascript'; s.async = true;
+    s.src = 'https://cdn.channel.io/plugin/ch-plugin-web.js'; s.charset = 'UTF-8';
     var x = document.getElementsByTagName('script')[0];
     x.parentNode.insertBefore(s, x);
   }
-
-  if (document.readyState === 'complete') {
-    l();
-  } else if (window.attachEvent) {
-    window.attachEvent('onload', l);
-  } else {
-    window.addEventListener('DOMContentLoaded', l, false);
-    window.addEventListener('load', l, false);
-  }
+  if (document.readyState === 'complete') l();
+  else window.addEventListener('DOMContentLoaded', l, false);
+  window.ChannelIO('boot', { "pluginKey": "c5ed9957-c9e6-42af-887e-1b2ab2b6d1dd" });
 })();
-
-window.ChannelIO('boot', {
-  "pluginKey": "c5ed9957-c9e6-42af-887e-1b2ab2b6d1dd",
-});

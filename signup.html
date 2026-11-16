@@ -16,18 +16,10 @@
     body.dark .auth-form label { color: #999; }
     .auth-form input { padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-family: inherit; }
     body.dark .auth-form input { background: #0f0f0f; border-color: #2a2a2a; color: #e5e7eb; }
-    body.dark .auth-form input::placeholder { color: #555; }
-    body.dark .auth-form input:focus { outline: none; border-color: #555; box-shadow: 0 0 0 3px rgba(255,255,255,.05); }
     .auth-form button { padding: 14px; background: #03c75a; color: #fff; border: 0; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 15px; font-family: inherit; margin-top: 4px; }
-    .auth-form button:hover { background: #02b151; }
     #msg { margin-top: 12px; font-weight: 600; text-align: center; }
-    .coupon-notice {
-      background: #fef3c7; color: #92400e;
-      padding: 12px 14px; border-radius: 8px;
-      font-size: 13px; line-height: 1.6;
-      margin-bottom: 16px; border: 1px dashed #f59e0b;
-      font-weight: 600;
-    }
+    .coupon-notice { background: #fef3c7; color: #92400e; padding: 12px 14px; border-radius: 8px; font-size: 13px; line-height: 1.6; margin-bottom: 16px; border: 1px dashed #f59e0b; font-weight: 600; }
+    .id-hint { font-size: 11px; color: #9ca3af; margin-top: -6px; margin-bottom: 2px; }
   </style>
 </head>
 <body>
@@ -38,14 +30,15 @@
       <h2 class="auth-title">회원가입</h2>
       <div class="coupon-notice" id="coupon-notice" style="display:none;">
         🎉 <b>신규 회원 감사 쿠폰</b><br>
-        <span id="coupon-notice-text">10% 할인 쿠폰 (유효기간 30일)이 자동 발급됩니다!</span>
+        <span id="coupon-notice-text"></span>
       </div>
       <form id="signup-form" class="auth-form">
         <label>아이디</label>
-        <input name="username" placeholder="아이디" required>
+        <input name="username" placeholder="아이디 (영문/숫자)" required minlength="4" maxlength="20" autocomplete="username">
+        <div class="id-hint">※ admin, manager, test 등 관리자성 아이디는 사용할 수 없습니다.</div>
 
         <label>비밀번호</label>
-        <input name="password" type="password" placeholder="비밀번호" required>
+        <input name="password" type="password" placeholder="비밀번호 (6자 이상)" required minlength="6" autocomplete="new-password">
 
         <label>이름</label>
         <input name="name" placeholder="이름" required>
@@ -71,17 +64,55 @@
     const form = document.getElementById('signup-form');
     const msg = document.getElementById('msg');
 
-    // ⭐ 관리자 설정에서 회원가입 쿠폰 정보 로드
-    let signupCouponConfig = { enabled: false, name: '가입 감사 10% 할인 쿠폰', type: 'percent', value: 10, days: 30 };
+    // ⭐ [이슈6] 금칙 아이디 목록 (관리자성 아이디 차단)
+    const RESERVED_IDS = new Set([
+      'admin','administrator','root','superuser','master','manager','sysadmin','webmaster','operator',
+      'productadmin','product_admin','shopadmin','shop_admin','malladmin','mall_admin','storeadmin','store_admin',
+      'stkadmin','stk_admin','stkstory','stk_story','test','testadmin','test_admin','guest','system',
+      'support','help','service','official','staff','moderator','mod','host','web','site','team',
+      'admin123','administrator1','root1','master1','manager1'
+    ]);
+    function normalizeId(id) {
+      return String(id || '').toLowerCase().replace(/[\s_\-.]/g, '');
+    }
+    function isReservedId(id) {
+      const v = normalizeId(id);
+      if (!v) return false;
+      if (RESERVED_IDS.has(v)) return true;
+      // 포함 검사: 길이가 비슷하거나 접미사만 다른 경우 (예: admin01, manager_kim)
+      for (const r of RESERVED_IDS) {
+        if (v.startsWith(r) && v.length <= r.length + 3) return true;
+        if (v.endsWith(r) && v.length <= r.length + 3) return true;
+      }
+      return false;
+    }
 
+    // ⭐ [이슈7] 비밀번호 SHA-256 해시 (Web Crypto API, 클라이언트 해시)
+    async function sha256(text) {
+      if (!window.crypto || !window.crypto.subtle) {
+        // 폴백: crypto.subtle 미지원 환경 → 간단 해시 (권장되지 않음, 최소 보안)
+        console.warn('Web Crypto 미지원, 간단 해시로 대체');
+        let h = 0;
+        for (let i = 0; i < text.length; i++) {
+          h = ((h << 5) - h) + text.charCodeAt(i);
+          h |= 0;
+        }
+        return 'weak_' + Math.abs(h).toString(16) + '_' + text.length;
+      }
+      const data = new TextEncoder().encode(text);
+      const buf = await crypto.subtle.digest('SHA-256', data);
+      const arr = Array.from(new Uint8Array(buf));
+      return 'sha256$' + arr.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    // 회원가입 쿠폰 설정 로드
+    let signupCouponConfig = { enabled: false, name: '가입 감사 10% 할인 쿠폰', type: 'percent', value: 10, days: 30 };
     async function loadSignupCouponConfig() {
       try {
         const keys = ['signup_coupon_enabled', 'signup_coupon_name', 'signup_coupon_type', 'signup_coupon_value', 'signup_coupon_days'];
         const { data } = await db.from('settings').select('key, value').in('key', keys);
         const map = {};
         (data || []).forEach(row => { map[row.key] = row.value; });
-
-        // 설정이 아예 없으면 기본값으로 비활성화 (관리자가 명시적으로 켜야 함)
         signupCouponConfig = {
           enabled: map.signup_coupon_enabled === 'true',
           name: map.signup_coupon_name || '가입 감사 10% 할인 쿠폰',
@@ -89,56 +120,84 @@
           value: Number(map.signup_coupon_value) || 10,
           days: Number(map.signup_coupon_days) || 30,
         };
-
         const noticeEl = document.getElementById('coupon-notice');
         const noticeTextEl = document.getElementById('coupon-notice-text');
         if (signupCouponConfig.enabled && noticeEl && noticeTextEl) {
-          const discountLabel = signupCouponConfig.type === 'percent'
-            ? `${signupCouponConfig.value}% 할인`
-            : `${signupCouponConfig.value.toLocaleString()}원 할인`;
+          const discountLabel = signupCouponConfig.type === 'percent' ? `${signupCouponConfig.value}% 할인` : `${signupCouponConfig.value.toLocaleString()}원 할인`;
           noticeTextEl.textContent = `${discountLabel} 쿠폰 (유효기간 ${signupCouponConfig.days}일)이 자동 발급됩니다!`;
           noticeEl.style.display = 'block';
-        } else if (noticeEl) {
-          noticeEl.style.display = 'none';
         }
-      } catch (e) {
-        console.warn('회원가입 쿠폰 설정 로드 실패:', e);
-        signupCouponConfig.enabled = false;
-        const noticeEl = document.getElementById('coupon-notice');
-        if (noticeEl) noticeEl.style.display = 'none';
-      }
+      } catch {}
     }
     loadSignupCouponConfig();
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      msg.textContent = '가입 중...';
       msg.style.color = '#888';
+      const username = form.username.value.trim();
+      const password = form.password.value;
+      const name = form.name.value.trim();
+      const phone = form.phone.value.trim();
 
-      const payload = {
-        username: form.username.value.trim(),
-        password: form.password.value,
-        name: form.name.value.trim(),
-        phone: form.phone.value.trim(),
-        grade: '일반회원',
-      };
+      // ⭐ [이슈6] 금칙 아이디 검증
+      if (username.length < 4) {
+        msg.style.color = '#ef4444';
+        msg.textContent = '❌ 아이디는 4자 이상이어야 합니다.';
+        return;
+      }
+      if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+        msg.style.color = '#ef4444';
+        msg.textContent = '❌ 아이디는 영문, 숫자, 밑줄(_)만 사용 가능합니다.';
+        return;
+      }
+      if (isReservedId(username)) {
+        msg.style.color = '#ef4444';
+        msg.textContent = '❌ 사용할 수 없는 아이디입니다. (관리자 예약어)';
+        return;
+      }
+      // 비밀번호 검증
+      if (password.length < 6) {
+        msg.style.color = '#ef4444';
+        msg.textContent = '❌ 비밀번호는 6자 이상이어야 합니다.';
+        return;
+      }
 
-      const { data: exist } = await db.from('members').select('id').eq('username', payload.username).maybeSingle();
+      msg.textContent = '가입 중...';
+
+      // 아이디 중복 확인
+      const { data: exist } = await db.from('members').select('id').eq('username', username).maybeSingle();
       if (exist) {
         msg.style.color = '#ef4444';
         msg.textContent = '❌ 이미 사용 중인 아이디입니다.';
         return;
       }
 
-      const { data, error } = await db.from('members').insert(payload).select().single();
+      // ⭐ [이슈7] 비밀번호 해시 저장
+      let hashedPassword;
+      try {
+        hashedPassword = await sha256(password);
+      } catch (err) {
+        msg.style.color = '#ef4444';
+        msg.textContent = '❌ 비밀번호 처리 중 오류가 발생했습니다.';
+        return;
+      }
 
+      const payload = {
+        username,
+        password: hashedPassword,  // 해시값 저장
+        name,
+        phone,
+        grade: '일반회원',
+      };
+
+      const { data, error } = await db.from('members').insert(payload).select().single();
       if (error) {
         msg.style.color = '#ef4444';
         msg.textContent = '❌ ' + error.message;
         return;
       }
 
-      // ⭐ 관리자 설정에 따라 회원가입 쿠폰 발급
+      // 쿠폰 발급
       let couponIssued = false;
       if (signupCouponConfig.enabled) {
         try {
@@ -146,39 +205,21 @@
           const expiresAt = new Date(now.getTime() + signupCouponConfig.days * 24 * 60 * 60 * 1000);
           const prefix = signupCouponConfig.type === 'percent' ? 'WELCOME' : 'WON';
           const code = prefix + '-' + Math.random().toString(36).slice(2, 8).toUpperCase();
-
           const { error: couponErr } = await db.from('coupons').insert({
-            member_id: data.id,
-            code: code,
-            name: signupCouponConfig.name,
-            type: signupCouponConfig.type,
-            discount_value: signupCouponConfig.value,
-            min_order_amount: 0,
-            max_discount_amount: null,
-            is_used: false,
-            expires_at: expiresAt.toISOString(),
+            member_id: data.id, code, name: signupCouponConfig.name,
+            type: signupCouponConfig.type, discount_value: signupCouponConfig.value,
+            min_order_amount: 0, max_discount_amount: null, is_used: false, expires_at: expiresAt.toISOString(),
           });
           if (!couponErr) couponIssued = true;
-          else console.warn('쿠폰 발급 실패 (가입은 완료):', couponErr);
-        } catch (couponErr) {
-          console.warn('쿠폰 발급 실패 (가입은 완료):', couponErr);
-        }
+        } catch {}
       }
 
       localStorage.setItem('member', JSON.stringify({
-        id: data.id,
-        username: data.username,
-        name: data.name,
-        phone: data.phone,
-        grade: data.grade || '일반회원',
+        id: data.id, username: data.username, name: data.name, phone: data.phone, grade: data.grade || '일반회원',
       }));
 
       msg.style.color = '#10b981';
-      if (couponIssued) {
-        msg.textContent = '✅ 가입 완료! 쿠폰이 발급되었습니다.';
-      } else {
-        msg.textContent = '✅ 가입 완료!';
-      }
+      msg.textContent = couponIssued ? '✅ 가입 완료! 쿠폰이 발급되었습니다.' : '✅ 가입 완료!';
       setTimeout(() => location.href = 'index.html', 1500);
     });
   </script>
