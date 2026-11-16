@@ -216,7 +216,6 @@
 
     <div class="admin-layout">
       <div class="admin-content">
-        <!-- ===== 상품 탭 ===== -->
         <section id="tab-products" class="admin-section active">
           <h1 class="page-title">상품 관리</h1>
           <p class="page-subtitle">상품을 등록하고 목록을 관리합니다 (일반 / 도매전용 / VIP전용)</p>
@@ -308,10 +307,9 @@
           </div>
         </section>
 
-        <!-- ===== 주문 탭 ===== -->
         <section id="tab-orders" class="admin-section">
           <h1 class="page-title">주문 관리</h1>
-          <p class="page-subtitle">주문 내역 확인 / 엑셀 다운로드(개별·선택) / 인쇄(개별·선택) / 수정·삭제</p>
+          <p class="page-subtitle">주문 내역 확인 (주문번호 기준 묶음 표시) / 엑셀 / 인쇄 / 수정·삭제</p>
           <div class="card">
             <div class="list-action-bar">
               <div class="search-group">
@@ -331,7 +329,6 @@
           <div id="order-pagination" style="display:flex;justify-content:center;gap:6px;margin-top:14px;flex-wrap:wrap;"></div>
         </section>
 
-        <!-- ===== 회원 탭 ===== -->
         <section id="tab-members" class="admin-section">
           <h1 class="page-title">회원 관리</h1>
           <p class="page-subtitle">회원 정보 확인 / 엑셀(개별·선택) / 인쇄(개별·선택) / 수정·삭제 (비밀번호 제외)</p>
@@ -354,7 +351,6 @@
           <div id="member-pagination" style="display:flex;justify-content:center;gap:6px;margin-top:14px;flex-wrap:wrap;"></div>
         </section>
 
-        <!-- ===== 쿠폰 탭 ===== -->
         <section id="tab-coupons" class="admin-section">
           <h1 class="page-title">쿠폰 관리</h1>
           <p class="page-subtitle">회원별 쿠폰 발급 및 관리</p>
@@ -395,7 +391,6 @@
           <div id="coupon-pagination" style="display:flex;justify-content:center;gap:6px;margin-top:14px;flex-wrap:wrap;"></div>
         </section>
 
-        <!-- ===== 공지/게시판 탭 ===== -->
         <section id="tab-notices" class="admin-section">
           <h1 class="page-title">공지사항 / 게시판 관리</h1>
           <p class="page-subtitle">공지사항 등록/수정/삭제 · 회원 게시판 수정/삭제</p>
@@ -431,7 +426,6 @@
           </div>
         </section>
 
-        <!-- ===== 설정 탭 ===== -->
         <section id="tab-settings" class="admin-section">
           <h1 class="page-title">사이트 설정</h1>
           <p class="page-subtitle">로고, 배너, 배경이미지, 푸터, SNS, 배송비, 홍보영상, 회원가입 쿠폰, 입금계좌</p>
@@ -590,6 +584,7 @@
       "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya"
     );
   </script>
+
   <script>
     // ============ 유틸 ============
     function formatKST(dateStr, opts = {}) {
@@ -1065,7 +1060,7 @@
       el.querySelectorAll('button').forEach(b => b.onclick = () => { currentPage = Number(b.dataset.page); renderProducts(); });
     }
 
-    // ============ 로고 ============
+    // ============ 로고/Footer/SNS/영상/배너/배경 ============
     let currentLogoId = null, currentLogoUrl = '';
     async function loadLogo() {
       const { data } = await db.from('logos').select('*').order('id', { ascending: false }).limit(1).maybeSingle();
@@ -1112,7 +1107,6 @@
       else { m.className = 'msg success'; m.textContent = '✅ 삭제 완료!'; document.getElementById('logo-site-name').value = ''; document.getElementById('logo-image-url').value = ''; document.getElementById('logo-preview').style.display = 'none'; currentLogoId = null; currentLogoUrl = ''; localStorage.removeItem('logo_cache'); }
     };
 
-    // ============ Footer/계좌/SNS ============
     async function loadFooter() {
       const { data } = await db.from('settings').select('key, value').in('key', ['footer_owner','footer_phone','footer_email','footer_address','footer_business','footer_text']);
       const map = {}; (data || []).forEach(r => { map[r.key] = r.value || ''; });
@@ -1164,7 +1158,6 @@
       else { m.className = 'msg success'; m.textContent = '✅ 저장 완료!'; localStorage.removeItem('footer_cache'); }
     };
 
-    // ============ 홍보영상 ============
     let currentPromoVideoUrl = '';
     function getVideoEmbedUrl(url) {
       if (!url) return ''; const s = String(url).trim(); if (!s) return '';
@@ -1208,7 +1201,6 @@
       else { m.className = 'msg success'; m.textContent = '✅ 삭제 완료!'; document.getElementById('promo-video-url').value = ''; currentPromoVideoUrl = ''; document.getElementById('promo-video-preview').style.display = 'none'; localStorage.removeItem('footer_cache'); }
     };
 
-    // ============ 배너 ============
     async function loadBanner() {
       const listEl = document.getElementById('banner-list');
       const { data, error } = await db.from('banners').select('*').order('id', { ascending: false });
@@ -1299,7 +1291,6 @@
       else { m.className = 'msg success'; m.textContent = '✅ 추가되었습니다!'; document.getElementById('banner-image-url').value = ''; document.getElementById('banner-link-url').value = ''; loadBanner(); }
     };
 
-    // ============ 배경이미지 ============
     const HERO_BG_KEY = 'hero_bg_image';
     let currentHeroBgUrl = '';
     function setHeroBgPreview(url) {
@@ -1343,7 +1334,6 @@
       else { document.getElementById('hero-bg-image-url').value = ''; setHeroBgPreview(''); currentHeroBgUrl = ''; document.documentElement.style.setProperty('--hero-bg', 'none'); m.className = 'msg success'; m.textContent = '✅ 삭제 완료!'; }
     };
 
-    // ============ 배송비/회원가입 쿠폰 ============
     async function loadShippingSetting() {
       const { data } = await db.from('settings').select('value').eq('key', 'shipping_fee').maybeSingle();
       document.getElementById('global-shipping').value = data ? (data.value || 0) : 0;
@@ -1405,220 +1395,211 @@
       setTimeout(() => { w.focus(); w.print(); }, 300);
     }
 
-    // ============ 주문 관리 ============
+    // ============ [수정] 주문 관리 - order_number 기준 그룹핑 ============
     const ORDER_COLS = ['order_number','product_code','product_name','product_price','quantity','total_price','customer_name','customer_phone','depositor_name','postcode','address','address_detail','selected_color','selected_size','selected_hem','selected_other','shipping_fee','grade_discount','status','courier','tracking_number','memo','created_at'];
+    let orderGroups = [];
     let orderRows = [], selectedOrders = new Set();
 
-    // ⭐ [수정] 주문 관리 - order_number 기준 그룹핑 (주문서 1개로 묶음)
-let orderGroups = [];
-let orderRows = [], selectedOrders = new Set();
+    async function loadOrders() {
+      const listEl = document.getElementById('order-list');
+      listEl.innerHTML = '<div class="tab-loading">로딩 중...</div>';
+      const { data, error } = await db.from('orders').select('*').order('created_at', { ascending: false }).limit(500);
+      if (error) { listEl.innerHTML = '<p style="color:#dc2626;">❌ ' + error.message + '</p>'; return; }
 
-async function loadOrders() {
-  const listEl = document.getElementById('order-list');
-  listEl.innerHTML = '<div class="tab-loading">로딩 중...</div>';
-  const { data, error } = await db.from('orders').select('*').order('created_at', { ascending: false }).limit(500);
-  if (error) { listEl.innerHTML = '<p style="color:#dc2626;">❌ ' + error.message + '</p>'; return; }
+      orderRows = data || [];
+      if (orderRows.length === 0) {
+        listEl.innerHTML = '<p style="text-align:center;color:#9ca3af;">주문이 없습니다.</p>';
+        orderGroups = [];
+        return;
+      }
 
-  orderRows = data || [];
-  if (orderRows.length === 0) {
-    listEl.innerHTML = '<p style="text-align:center;color:#9ca3af;">주문이 없습니다.</p>';
-    orderGroups = [];
-    return;
-  }
+      // ⭐ order_number 기준으로 그룹핑
+      const groupsMap = new Map();
+      orderRows.forEach(o => {
+        const key = o.order_number || `single_${o.id}`;
+        if (!groupsMap.has(key)) {
+          groupsMap.set(key, {
+            orderNumber: key,
+            first: o,
+            items: [],
+            ids: [],
+            totalPrice: 0,
+            totalQty: 0,
+          });
+        }
+        const g = groupsMap.get(key);
+        g.items.push(o);
+        g.ids.push(o.id);
+        g.totalPrice += Number(o.total_price || 0);
+        g.totalQty += Number(o.quantity || 0);
+      });
 
-  // ⭐ order_number 기준으로 그룹핑
-  const groupsMap = new Map();
-  orderRows.forEach(o => {
-    const key = o.order_number || `single_${o.id}`;
-    if (!groupsMap.has(key)) {
-      groupsMap.set(key, {
-        orderNumber: key,
-        first: o,
-        items: [],
-        ids: [],
-        totalPrice: 0,
-        totalQty: 0,
+      orderGroups = Array.from(groupsMap.values());
+
+      // ⭐ 그룹 단위로 렌더링
+      listEl.innerHTML = orderGroups.map((g, gIdx) => {
+        const first = g.first;
+        const itemCount = g.items.length;
+        const productSummary = itemCount === 1
+          ? `${esc(g.items[0].product_name || '-')} ×${g.items[0].quantity || 1}`
+          : `${esc(g.items[0].product_name || '-')} 외 ${itemCount - 1}건`;
+
+        return `
+          <div class="row-item ${first.is_deleted ? 'deleted-order' : ''}" style="flex-wrap:wrap; align-items:flex-start;">
+            <input type="checkbox" class="row-check order-group-check" data-group-idx="${gIdx}">
+            <div style="flex:1; min-width:0;">
+              <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:6px;">
+                <span class="order-num">${esc(g.orderNumber)}</span>
+                <span class="row-strong">${esc(first.customer_name || '-')}</span>
+                <span class="row-muted">${esc(first.customer_phone || '-')}</span>
+                <span class="badge" style="background:#1976d2;">${esc(first.status || '-')}</span>
+                <span class="row-total">${won(g.totalPrice)}</span>
+                <span class="row-muted">총 ${g.totalQty}개 / ${itemCount}종</span>
+              </div>
+              <div style="font-size:12px; color:#6b7280; padding-left:4px;">
+                📦 ${productSummary}
+              </div>
+              ${itemCount > 1 ? `
+                <details style="margin-top:8px; padding-left:4px;">
+                  <summary style="font-size:12px; color:#1976d2; cursor:pointer; user-select:none;">▶ 상품 ${itemCount}건 펼쳐보기</summary>
+                  <div style="margin-top:6px; padding:8px 10px; background:#f9fafb; border-radius:6px; font-size:12px; line-height:1.8;">
+                    ${g.items.map((it, i) => `
+                      <div style="display:flex; justify-content:space-between; gap:8px; padding:3px 0; ${i > 0 ? 'border-top:1px dashed #e5e7eb;' : ''}">
+                        <span>${esc(it.product_name || '-')} ×${it.quantity || 1}</span>
+                        <span style="color:#e53935; font-weight:600;">${won(it.total_price)}</span>
+                      </div>
+                    `).join('')}
+                  </div>
+                </details>
+              ` : ''}
+            </div>
+            <div class="row-actions" style="flex-shrink:0;">
+              <button class="btn btn-warning btn-sm order-group-edit-btn" data-group-idx="${gIdx}">수정</button>
+              <button class="btn btn-excel btn-sm order-group-excel-btn" data-group-idx="${gIdx}">📊</button>
+              <button class="btn btn-print btn-sm order-group-print-btn" data-group-idx="${gIdx}">🖨️</button>
+              <button class="btn btn-danger btn-sm order-group-del-btn" data-group-idx="${gIdx}">삭제</button>
+            </div>
+          </div>`;
+      }).join('');
+
+      listEl.querySelectorAll('.order-group-check').forEach(cb => {
+        cb.onchange = () => {
+          const idx = Number(cb.dataset.groupIdx);
+          if (cb.checked) selectedOrders.add(idx);
+          else selectedOrders.delete(idx);
+          updateOrderBulkBtn();
+        };
+      });
+
+      listEl.querySelectorAll('.order-group-edit-btn').forEach(b => {
+        b.onclick = () => {
+          const g = orderGroups[Number(b.dataset.groupIdx)];
+          if (!g) return;
+          if (g.items.length === 1) {
+            openOrderEditModal(g.items[0]);
+          } else {
+            const idx = prompt(`이 주문에는 상품이 ${g.items.length}개 있습니다.\n수정할 상품 번호를 입력하세요 (1~${g.items.length}):\n\n${g.items.map((it, i) => `${i + 1}. ${it.product_name} ×${it.quantity}`).join('\n')}`, '1');
+            const num = Number(idx);
+            if (num >= 1 && num <= g.items.length) {
+              openOrderEditModal(g.items[num - 1]);
+            }
+          }
+        };
+      });
+
+      listEl.querySelectorAll('.order-group-excel-btn').forEach(b => {
+        b.onclick = () => {
+          const g = orderGroups[Number(b.dataset.groupIdx)];
+          if (!g) return;
+          const rows = [ORDER_COLS, ...g.items.map(o => ORDER_COLS.map(k => k === 'total_price' ? won(o[k]) : (o[k] ?? '')))];
+          downloadCSV(`order_${g.orderNumber}.csv`, rows);
+        };
+      });
+
+      listEl.querySelectorAll('.order-group-print-btn').forEach(b => {
+        b.onclick = () => {
+          const g = orderGroups[Number(b.dataset.groupIdx)];
+          if (!g) return;
+          printHTML(`주문서 - ${g.orderNumber}`, [ORDER_COLS, ...g.items.map(o => ORDER_COLS.map(k => o[k] ?? ''))]);
+        };
+      });
+
+      listEl.querySelectorAll('.order-group-del-btn').forEach(b => {
+        b.onclick = async () => {
+          const g = orderGroups[Number(b.dataset.groupIdx)];
+          if (!g) return;
+          if (!confirm(`주문번호 "${g.orderNumber}" (상품 ${g.items.length}건)을 삭제할까요?`)) return;
+          const { error } = await db.from('orders').delete().in('id', g.ids);
+          if (error) alert('❌ ' + error.message);
+          else { alert('✅ 삭제되었습니다.'); loadOrders(); }
+        };
       });
     }
-    const g = groupsMap.get(key);
-    g.items.push(o);
-    g.ids.push(o.id);
-    g.totalPrice += Number(o.total_price || 0);
-    g.totalQty += Number(o.quantity || 0);
-  });
 
-  orderGroups = Array.from(groupsMap.values());
-
-  // ⭐ 그룹 단위로 렌더링
-  listEl.innerHTML = orderGroups.map((g, gIdx) => {
-    const first = g.first;
-    const itemCount = g.items.length;
-    const productSummary = itemCount === 1
-      ? `${esc(g.items[0].product_name || '-')} ×${g.items[0].quantity || 1}`
-      : `${esc(g.items[0].product_name || '-')} 외 ${itemCount - 1}건`;
-
-    return `
-      <div class="row-item ${first.is_deleted ? 'deleted-order' : ''}" style="flex-wrap:wrap; align-items:flex-start;">
-        <input type="checkbox" class="row-check order-group-check" data-group-idx="${gIdx}">
-        <div style="flex:1; min-width:0;">
-          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:6px;">
-            <span class="order-num">${esc(g.orderNumber)}</span>
-            <span class="row-strong">${esc(first.customer_name || '-')}</span>
-            <span class="row-muted">${esc(first.customer_phone || '-')}</span>
-            <span class="badge" style="background:#1976d2;">${esc(first.status || '-')}</span>
-            <span class="row-total">${won(g.totalPrice)}</span>
-            <span class="row-muted">총 ${g.totalQty}개 / ${itemCount}종</span>
-          </div>
-          <div style="font-size:12px; color:#6b7280; padding-left:4px;">
-            📦 ${productSummary}
-          </div>
-          ${itemCount > 1 ? `
-            <details style="margin-top:8px; padding-left:4px;">
-              <summary style="font-size:12px; color:#1976d2; cursor:pointer; user-select:none;">▶ 상품 ${itemCount}건 펼쳐보기</summary>
-              <div style="margin-top:6px; padding:8px 10px; background:#f9fafb; border-radius:6px; font-size:12px; line-height:1.8;">
-                ${g.items.map((it, i) => `
-                  <div style="display:flex; justify-content:space-between; gap:8px; padding:3px 0; ${i > 0 ? 'border-top:1px dashed #e5e7eb;' : ''}">
-                    <span>${esc(it.product_name || '-')} ×${it.quantity || 1}</span>
-                    <span style="color:#e53935; font-weight:600;">${won(it.total_price)}</span>
-                  </div>
-                `).join('')}
-              </div>
-            </details>
-          ` : ''}
-        </div>
-        <div class="row-actions" style="flex-shrink:0;">
-          <button class="btn btn-warning btn-sm order-group-edit-btn" data-group-idx="${gIdx}">수정</button>
-          <button class="btn btn-excel btn-sm order-group-excel-btn" data-group-idx="${gIdx}">📊</button>
-          <button class="btn btn-print btn-sm order-group-print-btn" data-group-idx="${gIdx}">🖨️</button>
-          <button class="btn btn-danger btn-sm order-group-del-btn" data-group-idx="${gIdx}">삭제</button>
-        </div>
-      </div>`;
-  }).join('');
-
-  listEl.querySelectorAll('.order-group-check').forEach(cb => {
-    cb.onchange = () => {
-      const idx = Number(cb.dataset.groupIdx);
-      if (cb.checked) selectedOrders.add(idx);
-      else selectedOrders.delete(idx);
+    function updateOrderBulkBtn() {
+      const btn = document.getElementById('order-bulk-del-btn');
+      if (selectedOrders.size > 0) {
+        btn.classList.add('active');
+        btn.textContent = `선택 삭제 (${selectedOrders.size}건)`;
+      } else {
+        btn.classList.remove('active');
+        btn.textContent = '선택 삭제';
+      }
+    }
+    document.getElementById('order-check-all').onchange = e => {
+      document.querySelectorAll('.order-group-check').forEach(cb => {
+        cb.checked = e.target.checked;
+        const idx = Number(cb.dataset.groupIdx);
+        if (e.target.checked) selectedOrders.add(idx);
+        else selectedOrders.delete(idx);
+      });
       updateOrderBulkBtn();
     };
-  });
+    document.getElementById('order-bulk-del-btn').onclick = async () => {
+      if (selectedOrders.size === 0) return;
+      if (!confirm(`선택한 ${selectedOrders.size}건의 주문을 삭제할까요?`)) return;
 
-  listEl.querySelectorAll('.order-group-edit-btn').forEach(b => {
-    b.onclick = () => {
-      const g = orderGroups[Number(b.dataset.groupIdx)];
-      if (!g) return;
-      if (g.items.length === 1) {
-        openOrderEditModal(g.items[0]);
-      } else {
-        const idx = prompt(`이 주문에는 상품이 ${g.items.length}개 있습니다.\n수정할 상품 번호를 입력하세요 (1~${g.items.length}):\n\n${g.items.map((it, i) => `${i + 1}. ${it.product_name} ×${it.quantity}`).join('\n')}`, '1');
-        const num = Number(idx);
-        if (num >= 1 && num <= g.items.length) {
-          openOrderEditModal(g.items[num - 1]);
-        }
+      const allIds = [];
+      selectedOrders.forEach(idx => {
+        const g = orderGroups[idx];
+        if (g) allIds.push(...g.ids);
+      });
+
+      if (allIds.length === 0) return;
+      const { error } = await db.from('orders').delete().in('id', allIds);
+      if (error) alert('❌ ' + error.message);
+      else {
+        alert(`✅ ${selectedOrders.size}건 주문이 삭제되었습니다.`);
+        selectedOrders.clear();
+        loadOrders();
       }
     };
-  });
-
-  listEl.querySelectorAll('.order-group-excel-btn').forEach(b => {
-    b.onclick = () => {
-      const g = orderGroups[Number(b.dataset.groupIdx)];
-      if (!g) return;
-      const rows = [ORDER_COLS, ...g.items.map(o => ORDER_COLS.map(k => k === 'total_price' ? won(o[k]) : (o[k] ?? '')))];
-      downloadCSV(`order_${g.orderNumber}.csv`, rows);
+    document.getElementById('order-excel-selected-btn').onclick = () => {
+      if (selectedOrders.size === 0) return alert('선택된 주문이 없습니다.');
+      const rows = [ORDER_COLS];
+      selectedOrders.forEach(idx => {
+        const g = orderGroups[idx];
+        if (g) g.items.forEach(o => rows.push(ORDER_COLS.map(k => o[k] ?? '')));
+      });
+      downloadCSV(`orders_selected_${Date.now()}.csv`, rows);
     };
-  });
-
-  listEl.querySelectorAll('.order-group-print-btn').forEach(b => {
-    b.onclick = () => {
-      const g = orderGroups[Number(b.dataset.groupIdx)];
-      if (!g) return;
-      printHTML(`주문서 - ${g.orderNumber}`, [ORDER_COLS, ...g.items.map(o => ORDER_COLS.map(k => o[k] ?? ''))]);
+    document.getElementById('order-print-selected-btn').onclick = () => {
+      if (selectedOrders.size === 0) return alert('선택된 주문이 없습니다.');
+      const rows = [ORDER_COLS];
+      selectedOrders.forEach(idx => {
+        const g = orderGroups[idx];
+        if (g) g.items.forEach(o => rows.push(ORDER_COLS.map(k => o[k] ?? '')));
+      });
+      printHTML(`주문 목록 (${selectedOrders.size}건)`, rows);
     };
-  });
-
-  listEl.querySelectorAll('.order-group-del-btn').forEach(b => {
-    b.onclick = async () => {
-      const g = orderGroups[Number(b.dataset.groupIdx)];
-      if (!g) return;
-      if (!confirm(`주문번호 "${g.orderNumber}" (상품 ${g.items.length}건)을 삭제할까요?`)) return;
-      const { error } = await db.from('orders').delete().in('id', g.ids);
-      if (error) alert('❌ ' + error.message);
-      else { alert('✅ 삭제되었습니다.'); loadOrders(); }
+    document.getElementById('order-search-btn').onclick = () => {
+      const k = document.getElementById('order-search').value.trim().toLowerCase();
+      if (!k) return loadOrders();
+      document.querySelectorAll('#order-list .row-item').forEach(it => {
+        it.style.display = it.textContent.toLowerCase().includes(k) ? '' : 'none';
+      });
     };
-  });
-}
-
-// 그룹 선택 상태 업데이트
-function updateOrderBulkBtn() {
-  const btn = document.getElementById('order-bulk-del-btn');
-  if (selectedOrders.size > 0) {
-    btn.classList.add('active');
-    btn.textContent = `선택 삭제 (${selectedOrders.size}건)`;
-  } else {
-    btn.classList.remove('active');
-    btn.textContent = '선택 삭제';
-  }
-}
-
-document.getElementById('order-check-all').onchange = e => {
-  document.querySelectorAll('.order-group-check').forEach(cb => {
-    cb.checked = e.target.checked;
-    const idx = Number(cb.dataset.groupIdx);
-    if (e.target.checked) selectedOrders.add(idx);
-    else selectedOrders.delete(idx);
-  });
-  updateOrderBulkBtn();
-};
-
-document.getElementById('order-bulk-del-btn').onclick = async () => {
-  if (selectedOrders.size === 0) return;
-  if (!confirm(`선택한 ${selectedOrders.size}건의 주문을 삭제할까요?`)) return;
-
-  const allIds = [];
-  selectedOrders.forEach(idx => {
-    const g = orderGroups[idx];
-    if (g) allIds.push(...g.ids);
-  });
-
-  if (allIds.length === 0) return;
-  const { error } = await db.from('orders').delete().in('id', allIds);
-  if (error) alert('❌ ' + error.message);
-  else {
-    alert(`✅ ${selectedOrders.size}건 주문이 삭제되었습니다.`);
-    selectedOrders.clear();
-    loadOrders();
-  }
-};
-
-document.getElementById('order-excel-selected-btn').onclick = () => {
-  if (selectedOrders.size === 0) return alert('선택된 주문이 없습니다.');
-  const rows = [ORDER_COLS];
-  selectedOrders.forEach(idx => {
-    const g = orderGroups[idx];
-    if (g) g.items.forEach(o => rows.push(ORDER_COLS.map(k => o[k] ?? '')));
-  });
-  downloadCSV(`orders_selected_${Date.now()}.csv`, rows);
-};
-
-document.getElementById('order-print-selected-btn').onclick = () => {
-  if (selectedOrders.size === 0) return alert('선택된 주문이 없습니다.');
-  const rows = [ORDER_COLS];
-  selectedOrders.forEach(idx => {
-    const g = orderGroups[idx];
-    if (g) g.items.forEach(o => rows.push(ORDER_COLS.map(k => o[k] ?? '')));
-  });
-  printHTML(`주문 목록 (${selectedOrders.size}건)`, rows);
-};
-
-document.getElementById('order-search-btn').onclick = () => {
-  const k = document.getElementById('order-search').value.trim().toLowerCase();
-  if (!k) return loadOrders();
-  document.querySelectorAll('#order-list .row-item').forEach(it => {
-    it.style.display = it.textContent.toLowerCase().includes(k) ? '' : 'none';
-  });
-};
-document.getElementById('order-reset-btn').onclick = () => { document.getElementById('order-search').value = ''; loadOrders(); };
+    document.getElementById('order-reset-btn').onclick = () => { document.getElementById('order-search').value = ''; loadOrders(); };
 
     function openOrderEditModal(o) {
       if (!o) return;
@@ -1754,7 +1735,6 @@ document.getElementById('order-reset-btn').onclick = () => { document.getElement
     };
     document.getElementById('member-reset-btn').onclick = () => { document.getElementById('member-search').value = ''; loadMembers(); };
 
-    // ⭐ [요청3] 회원 수정 모달 (비밀번호 재설정 + password 제외)
     function openMemberEditModal(m) {
       if (!m) return;
       const modal = document.createElement('div');
@@ -1824,7 +1804,6 @@ document.getElementById('order-reset-btn').onclick = () => { document.getElement
           grade: f.grade.value, status: f.status.value,
         };
 
-        // ⭐ 비밀번호 재설정 처리
         const newPw = f.new_password.value;
         const newPwConfirm = f.new_password_confirm.value;
         if (newPw || newPwConfirm) {
