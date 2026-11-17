@@ -118,6 +118,7 @@
     .row-muted { color: #9ca3af; font-size: 12px; }
     .row-total { color: #e53935; font-weight: 700; white-space: nowrap; }
     .row-item .row-check { width: 18px; height: 18px; cursor: pointer; accent-color: #111827; flex-shrink: 0; }
+    .deleted-order { opacity: .92; }
 
     .list-action-bar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
     .list-action-bar .search-group { display: flex; gap: 6px; flex: 1 1 400px; min-width: 0; max-width: 640px; }
@@ -1395,8 +1396,9 @@
       setTimeout(() => { w.focus(); w.print(); }, 300);
     }
 
-    // ============ [수정] 주문 관리 - order_number 기준 그룹핑 ============
+    // ============ 주문 관리 - 주문정보 보호 / 상태·배송정보만 수정 ============
     const ORDER_COLS = ['order_number','product_code','product_name','product_price','quantity','total_price','customer_name','customer_phone','depositor_name','postcode','address','address_detail','selected_color','selected_size','selected_hem','selected_other','shipping_fee','grade_discount','status','courier','tracking_number','memo','created_at'];
+    const ORDER_STATUS_OPTIONS = ['주문접수','입금대기','결제완료','상품준비중','배송준비중','배송중','배송완료','취소요청','취소완료'];
     let orderGroups = [];
     let orderRows = [], selectedOrders = new Set();
 
@@ -1405,79 +1407,62 @@
       listEl.innerHTML = '<div class="tab-loading">로딩 중...</div>';
       const { data, error } = await db.from('orders').select('*').order('created_at', { ascending: false }).limit(500);
       if (error) { listEl.innerHTML = '<p style="color:#dc2626;">❌ ' + error.message + '</p>'; return; }
-
       orderRows = data || [];
-      if (orderRows.length === 0) {
+      if (!orderRows.length) {
         listEl.innerHTML = '<p style="text-align:center;color:#9ca3af;">주문이 없습니다.</p>';
-        orderGroups = [];
-        return;
+        orderGroups = []; return;
       }
 
-      // ⭐ order_number 기준으로 그룹핑
       const groupsMap = new Map();
       orderRows.forEach(o => {
         const key = o.order_number || `single_${o.id}`;
-        if (!groupsMap.has(key)) {
-          groupsMap.set(key, {
-            orderNumber: key,
-            first: o,
-            items: [],
-            ids: [],
-            totalPrice: 0,
-            totalQty: 0,
-          });
-        }
+        if (!groupsMap.has(key)) groupsMap.set(key, {
+          orderNumber:key, first:o, items:[], ids:[], totalPrice:0, totalQty:0,
+          isDeleted:false
+        });
         const g = groupsMap.get(key);
-        g.items.push(o);
-        g.ids.push(o.id);
+        g.items.push(o); g.ids.push(o.id);
         g.totalPrice += Number(o.total_price || 0);
         g.totalQty += Number(o.quantity || 0);
+        if (o.is_deleted) g.isDeleted = true;
       });
-
       orderGroups = Array.from(groupsMap.values());
 
-      // ⭐ 그룹 단위로 렌더링
-      listEl.innerHTML = orderGroups.map((g, gIdx) => {
-        const first = g.first;
-        const itemCount = g.items.length;
-        const productSummary = itemCount === 1
-          ? `${esc(g.items[0].product_name || '-')} ×${g.items[0].quantity || 1}`
-          : `${esc(g.items[0].product_name || '-')} 외 ${itemCount - 1}건`;
-
+      listEl.innerHTML = orderGroups.map((g, idx) => {
+        const f = g.first;
+        const products = g.items.map(it => `${esc(it.product_name || '상품명 없음')} ×${Number(it.quantity || 1)}`).join(' / ');
+        const colors = [...new Set(g.items.map(x => x.selected_color).filter(Boolean))].join(', ');
+        const sizes = [...new Set(g.items.map(x => x.selected_size).filter(Boolean))].join(', ');
+        const courier = [...new Set(g.items.map(x => x.courier).filter(Boolean))].join(', ');
+        const tracking = [...new Set(g.items.map(x => x.tracking_number).filter(Boolean))].join(', ');
+        const memo = [...new Set(g.items.map(x => x.memo).filter(Boolean))].join(' / ');
+        const status = f.status || '주문접수';
         return `
-          <div class="row-item ${first.is_deleted ? 'deleted-order' : ''}" style="flex-wrap:wrap; align-items:flex-start;">
-            <input type="checkbox" class="row-check order-group-check" data-group-idx="${gIdx}">
-            <div style="flex:1; min-width:0;">
-              <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:6px;">
+          <div class="row-item ${g.isDeleted ? 'deleted-order' : ''}" style="align-items:flex-start; ${g.isDeleted ? 'border:2px solid #f59e0b;background:#fffbeb;' : ''}">
+            <input type="checkbox" class="row-check order-group-check" data-group-idx="${idx}">
+            <div style="flex:1;min-width:220px;">
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:7px;">
                 <span class="order-num">${esc(g.orderNumber)}</span>
-                <span class="row-strong">${esc(first.customer_name || '-')}</span>
-                <span class="row-muted">${esc(first.customer_phone || '-')}</span>
-                <span class="badge" style="background:#1976d2;">${esc(first.status || '-')}</span>
+                <span class="row-strong">${esc(f.customer_name || '-')}</span>
+                <span class="row-muted">${esc(f.customer_phone || '-')}</span>
+                <span class="badge" style="background:#1976d2;">${esc(status)}</span>
+                ${g.isDeleted ? '<span class="badge" style="background:#d97706;">사용자 삭제 주문</span>' : ''}
                 <span class="row-total">${won(g.totalPrice)}</span>
-                <span class="row-muted">총 ${g.totalQty}개 / ${itemCount}종</span>
+                <span class="row-muted">총 ${g.totalQty}개 · ${g.items.length}종</span>
               </div>
-              <div style="font-size:12px; color:#6b7280; padding-left:4px;">
-                📦 ${productSummary}
+              <div style="font-size:12px;line-height:1.8;color:#4b5563;">
+                <div>📦 <b>상품</b> : ${products}</div>
+                <div>🎨 <b>색상/사이즈</b> : ${esc(colors || '-')} / ${esc(sizes || '-')}</div>
+                <div>🚚 <b>택배</b> : ${esc(courier || '-')}　<b>운송장</b> : ${esc(tracking || '-')}</div>
+                ${memo ? `<div>📝 <b>요청사항</b> : ${esc(memo)}</div>` : ''}
+                <div class="row-muted">주문일시 : ${esc(formatKST(f.created_at))}</div>
               </div>
-              ${itemCount > 1 ? `
-                <details style="margin-top:8px; padding-left:4px;">
-                  <summary style="font-size:12px; color:#1976d2; cursor:pointer; user-select:none;">▶ 상품 ${itemCount}건 펼쳐보기</summary>
-                  <div style="margin-top:6px; padding:8px 10px; background:#f9fafb; border-radius:6px; font-size:12px; line-height:1.8;">
-                    ${g.items.map((it, i) => `
-                      <div style="display:flex; justify-content:space-between; gap:8px; padding:3px 0; ${i > 0 ? 'border-top:1px dashed #e5e7eb;' : ''}">
-                        <span>${esc(it.product_name || '-')} ×${it.quantity || 1}</span>
-                        <span style="color:#e53935; font-weight:600;">${won(it.total_price)}</span>
-                      </div>
-                    `).join('')}
-                  </div>
-                </details>
-              ` : ''}
             </div>
-            <div class="row-actions" style="flex-shrink:0;">
-              <button class="btn btn-warning btn-sm order-group-edit-btn" data-group-idx="${gIdx}">수정</button>
-              <button class="btn btn-excel btn-sm order-group-excel-btn" data-group-idx="${gIdx}">📊</button>
-              <button class="btn btn-print btn-sm order-group-print-btn" data-group-idx="${gIdx}">🖨️</button>
-              <button class="btn btn-danger btn-sm order-group-del-btn" data-group-idx="${gIdx}">삭제</button>
+            <div class="row-actions" style="margin-left:auto;align-self:center;">
+              <button class="btn btn-warning btn-sm order-group-edit-btn" data-group-idx="${idx}">배송정보 수정</button>
+              ${g.isDeleted ? `<button class="btn btn-success btn-sm order-group-restore-btn" data-group-idx="${idx}">복구</button>` : ''}
+              <button class="btn btn-excel btn-sm order-group-excel-btn" data-group-idx="${idx}">📊</button>
+              <button class="btn btn-print btn-sm order-group-print-btn" data-group-idx="${idx}">🖨️</button>
             </div>
           </div>`;
       }).join('');
@@ -1485,149 +1470,110 @@
       listEl.querySelectorAll('.order-group-check').forEach(cb => {
         cb.onchange = () => {
           const idx = Number(cb.dataset.groupIdx);
-          if (cb.checked) selectedOrders.add(idx);
-          else selectedOrders.delete(idx);
+          cb.checked ? selectedOrders.add(idx) : selectedOrders.delete(idx);
           updateOrderBulkBtn();
         };
       });
-
-      listEl.querySelectorAll('.order-group-edit-btn').forEach(b => {
-        b.onclick = () => {
-          const g = orderGroups[Number(b.dataset.groupIdx)];
+      listEl.querySelectorAll('.order-group-edit-btn').forEach(btn => {
+        btn.onclick = () => {
+          const g = orderGroups[Number(btn.dataset.groupIdx)];
           if (!g) return;
-          if (g.items.length === 1) {
-            openOrderEditModal(g.items[0]);
-          } else {
-            const idx = prompt(`이 주문에는 상품이 ${g.items.length}개 있습니다.\n수정할 상품 번호를 입력하세요 (1~${g.items.length}):\n\n${g.items.map((it, i) => `${i + 1}. ${it.product_name} ×${it.quantity}`).join('\n')}`, '1');
-            const num = Number(idx);
-            if (num >= 1 && num <= g.items.length) {
-              openOrderEditModal(g.items[num - 1]);
-            }
+          if (g.items.length === 1) openOrderEditModal(g.items[0]);
+          else {
+            const choice = prompt(`수정할 상품 번호를 선택하세요 (1~${g.items.length})\\n\\n${g.items.map((it,i)=>`${i+1}. ${it.product_name || '-'} ×${it.quantity || 1}`).join('\\n')}`, '1');
+            const n = Number(choice);
+            if (n >= 1 && n <= g.items.length) openOrderEditModal(g.items[n-1]);
           }
         };
       });
-
-      listEl.querySelectorAll('.order-group-excel-btn').forEach(b => {
-        b.onclick = () => {
-          const g = orderGroups[Number(b.dataset.groupIdx)];
-          if (!g) return;
-          const rows = [ORDER_COLS, ...g.items.map(o => ORDER_COLS.map(k => k === 'total_price' ? won(o[k]) : (o[k] ?? '')))];
-          downloadCSV(`order_${g.orderNumber}.csv`, rows);
+      listEl.querySelectorAll('.order-group-restore-btn').forEach(btn => {
+        btn.onclick = async () => {
+          const g = orderGroups[Number(btn.dataset.groupIdx)];
+          if (!g || !confirm(`주문 ${g.orderNumber}을(를) 복구할까요?`)) return;
+          const { error } = await db.from('orders').update({is_deleted:false}).in('id', g.ids);
+          if (error) alert('❌ 복구 실패: ' + error.message);
+          else { alert('✅ 주문이 복구되었습니다.'); loadOrders(); }
         };
       });
-
-      listEl.querySelectorAll('.order-group-print-btn').forEach(b => {
-        b.onclick = () => {
-          const g = orderGroups[Number(b.dataset.groupIdx)];
-          if (!g) return;
-          printHTML(`주문서 - ${g.orderNumber}`, [ORDER_COLS, ...g.items.map(o => ORDER_COLS.map(k => o[k] ?? ''))]);
+      listEl.querySelectorAll('.order-group-excel-btn').forEach(btn => {
+        btn.onclick = () => {
+          const g = orderGroups[Number(btn.dataset.groupIdx)];
+          if (g) downloadCSV(`order_${g.orderNumber}.csv`, [ORDER_COLS, ...g.items.map(o => ORDER_COLS.map(k => o[k] ?? ''))]);
         };
       });
-
-      listEl.querySelectorAll('.order-group-del-btn').forEach(b => {
-        b.onclick = async () => {
-          const g = orderGroups[Number(b.dataset.groupIdx)];
-          if (!g) return;
-          if (!confirm(`주문번호 "${g.orderNumber}" (상품 ${g.items.length}건)을 삭제할까요?`)) return;
-          const { error } = await db.from('orders').delete().in('id', g.ids);
-          if (error) alert('❌ ' + error.message);
-          else { alert('✅ 삭제되었습니다.'); loadOrders(); }
+      listEl.querySelectorAll('.order-group-print-btn').forEach(btn => {
+        btn.onclick = () => {
+          const g = orderGroups[Number(btn.dataset.groupIdx)];
+          if (g) printHTML(`주문서 - ${g.orderNumber}`, [ORDER_COLS, ...g.items.map(o => ORDER_COLS.map(k => o[k] ?? ''))]);
         };
       });
     }
 
     function updateOrderBulkBtn() {
       const btn = document.getElementById('order-bulk-del-btn');
-      if (selectedOrders.size > 0) {
-        btn.classList.add('active');
-        btn.textContent = `선택 삭제 (${selectedOrders.size}건)`;
-      } else {
-        btn.classList.remove('active');
-        btn.textContent = '선택 삭제';
-      }
+      btn.classList.toggle('active', selectedOrders.size > 0);
+      btn.textContent = selectedOrders.size ? `선택 삭제 표시 (${selectedOrders.size}건)` : '선택 삭제 표시';
     }
     document.getElementById('order-check-all').onchange = e => {
       document.querySelectorAll('.order-group-check').forEach(cb => {
         cb.checked = e.target.checked;
         const idx = Number(cb.dataset.groupIdx);
-        if (e.target.checked) selectedOrders.add(idx);
-        else selectedOrders.delete(idx);
+        e.target.checked ? selectedOrders.add(idx) : selectedOrders.delete(idx);
       });
       updateOrderBulkBtn();
     };
+    // 관리자 목록에서 삭제해도 실제 행은 지우지 않고 삭제표시만 합니다.
     document.getElementById('order-bulk-del-btn').onclick = async () => {
-      if (selectedOrders.size === 0) return;
-      if (!confirm(`선택한 ${selectedOrders.size}건의 주문을 삭제할까요?`)) return;
-
-      const allIds = [];
-      selectedOrders.forEach(idx => {
-        const g = orderGroups[idx];
-        if (g) allIds.push(...g.ids);
-      });
-
-      if (allIds.length === 0) return;
-      const { error } = await db.from('orders').delete().in('id', allIds);
+      if (!selectedOrders.size) return;
+      if (!confirm(`선택한 ${selectedOrders.size}개 주문을 삭제 표시할까요? (데이터는 보존됩니다)`)) return;
+      const ids = [];
+      selectedOrders.forEach(idx => { const g = orderGroups[idx]; if (g) ids.push(...g.ids); });
+      const { error } = await db.from('orders').update({is_deleted:true}).in('id', ids);
       if (error) alert('❌ ' + error.message);
-      else {
-        alert(`✅ ${selectedOrders.size}건 주문이 삭제되었습니다.`);
-        selectedOrders.clear();
-        loadOrders();
-      }
+      else { selectedOrders.clear(); document.getElementById('order-check-all').checked = false; alert('삭제 표시했습니다.'); loadOrders(); }
     };
     document.getElementById('order-excel-selected-btn').onclick = () => {
-      if (selectedOrders.size === 0) return alert('선택된 주문이 없습니다.');
+      if (!selectedOrders.size) return alert('선택된 주문이 없습니다.');
       const rows = [ORDER_COLS];
-      selectedOrders.forEach(idx => {
-        const g = orderGroups[idx];
-        if (g) g.items.forEach(o => rows.push(ORDER_COLS.map(k => o[k] ?? '')));
-      });
+      selectedOrders.forEach(idx => { const g=orderGroups[idx]; if(g) g.items.forEach(o=>rows.push(ORDER_COLS.map(k=>o[k]??''))); });
       downloadCSV(`orders_selected_${Date.now()}.csv`, rows);
     };
     document.getElementById('order-print-selected-btn').onclick = () => {
-      if (selectedOrders.size === 0) return alert('선택된 주문이 없습니다.');
+      if (!selectedOrders.size) return alert('선택된 주문이 없습니다.');
       const rows = [ORDER_COLS];
-      selectedOrders.forEach(idx => {
-        const g = orderGroups[idx];
-        if (g) g.items.forEach(o => rows.push(ORDER_COLS.map(k => o[k] ?? '')));
-      });
+      selectedOrders.forEach(idx => { const g=orderGroups[idx]; if(g) g.items.forEach(o=>rows.push(ORDER_COLS.map(k=>o[k]??''))); });
       printHTML(`주문 목록 (${selectedOrders.size}건)`, rows);
     };
     document.getElementById('order-search-btn').onclick = () => {
       const k = document.getElementById('order-search').value.trim().toLowerCase();
-      if (!k) return loadOrders();
-      document.querySelectorAll('#order-list .row-item').forEach(it => {
-        it.style.display = it.textContent.toLowerCase().includes(k) ? '' : 'none';
-      });
+      document.querySelectorAll('#order-list .row-item').forEach(el => { el.style.display = !k || el.textContent.toLowerCase().includes(k) ? '' : 'none'; });
     };
-    document.getElementById('order-reset-btn').onclick = () => { document.getElementById('order-search').value = ''; loadOrders(); };
+    document.getElementById('order-reset-btn').onclick = () => { document.getElementById('order-search').value=''; loadOrders(); };
 
     function openOrderEditModal(o) {
       if (!o) return;
       const modal = document.createElement('div');
       modal.className = 'modal-backdrop';
-      const fields = [
-        ['order_number','주문번호'],['product_code','제품번호'],['product_name','상품명'],
-        ['product_price','상품가격','number'],['quantity','수량','number'],['total_price','총액','number'],
-        ['customer_name','주문자'],['customer_phone','연락처'],['depositor_name','입금자'],
-        ['postcode','우편번호'],['address','주소'],['address_detail','상세주소'],
-        ['selected_color','색상'],['selected_size','사이즈'],['selected_hem','밑단'],['selected_other','기타옵션'],
-        ['shipping_fee','배송비','number'],['grade_discount','등급할인(%)','number'],
-        ['status','상태'],['courier','택배사'],['tracking_number','운송장번호'],['memo','요청사항'],
-      ];
+      const statusOptions = [...new Set([...ORDER_STATUS_OPTIONS, ...(o.status ? [o.status] : [])])];
       modal.innerHTML = `
-        <div class="modal-box modal-lg">
-          <h2>주문 수정 - ${esc(o.order_number || o.id)}</h2>
-          <form id="order-edit-form" class="modal-form" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-            ${fields.map(([key, label, type]) => `
-              <div>
-                <label>${label}</label>
-                <input name="${key}" ${type ? `type="${type}"` : ''} value="${esc(o[key] ?? '')}">
-              </div>
-            `).join('')}
-            <div class="modal-actions" style="grid-column:1/-1;">
+        <div class="modal-box">
+          <h2>주문 배송정보 수정 - ${esc(o.order_number || o.id)}</h2>
+          <form id="order-edit-form" class="modal-form">
+            <div><label>주문 상태</label>
+              <select name="status">${statusOptions.map(v=>`<option value="${esc(v)}" ${o.status===v?'selected':''}>${esc(v)}</option>`).join('')}</select>
+            </div>
+            <div><label>택배사</label>
+              <select name="courier">
+                ${['','CJ대한통운','롯데택배','한진택배','우체국택배','로젠택배','경동택배','대신택배','기타'].map(v=>`<option value="${esc(v)}" ${(o.courier||'')===v?'selected':''}>${v || '택배사 선택'}</option>`).join('')}
+              </select>
+            </div>
+            <div><label>운송장번호</label><input name="tracking_number" value="${esc(o.tracking_number || '')}" placeholder="운송장번호 입력"></div>
+            <div><label>요청사항</label><textarea name="memo" rows="4">${esc(o.memo || '')}</textarea></div>
+            <div class="modal-actions">
               <button type="submit" class="btn btn-primary">저장</button>
               <button type="button" id="cancel-order-edit" class="btn btn-secondary">취소</button>
             </div>
+            <p style="font-size:11px;color:#9ca3af;margin:0;">※ 주문자·상품·가격·주소 등 나머지 주문정보는 수정할 수 없습니다.</p>
           </form>
         </div>`;
       document.body.appendChild(modal);
@@ -1635,14 +1581,15 @@
       modal.querySelector('#order-edit-form').onsubmit = async ev => {
         ev.preventDefault();
         const f = ev.target;
-        const updates = {};
-        fields.forEach(([key, , type]) => {
-          const v = f[key].value;
-          updates[key] = type === 'number' ? (Number(v) || 0) : (v.trim() || null);
-        });
+        const updates = {
+          status: f.status.value,
+          courier: f.courier.value || null,
+          tracking_number: f.tracking_number.value.trim() || null,
+          memo: f.memo.value.trim() || null
+        };
         const { error } = await db.from('orders').update(updates).eq('id', o.id);
         if (error) alert('❌ ' + error.message);
-        else { alert('✅ 수정 완료!'); modal.remove(); loadOrders(); }
+        else { alert('✅ 배송정보가 수정되었습니다.'); modal.remove(); loadOrders(); }
       };
     }
 
