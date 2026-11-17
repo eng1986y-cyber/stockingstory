@@ -242,7 +242,104 @@
 
     .tab-loading { padding: 20px; text-align: center; color: #9ca3af; font-size: 13px; }
     .board-secret-badge { display: inline-block; font-size: 10px; background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-weight: 700; border: 1px solid #f59e0b; }
-  </style>
+  
+    /* 새 상품 등록: 요청한 3단 배치 */
+    #product-register-card > #product-form {
+      display:grid !important; width:100%; min-width:0;
+      grid-template-columns:repeat(12,minmax(0,1fr)); gap:10px;
+      align-items:stretch;
+    }
+    #product-register-card > #product-form > * { min-width:0; max-width:100%; }
+    #product-register-card > #product-form input,
+    #product-register-card > #product-form select { width:100%; height:44px; min-height:44px; padding:9px 11px; font-size:13px; }
+    #product-register-card > #product-form input[name="product_code"] { grid-column:span 2; grid-row:1; }
+    #product-register-card > #product-form input[name="name"] { grid-column:span 3; grid-row:1; }
+    #product-register-card > #product-form input[name="main_image"] { grid-column:span 3; grid-row:1; }
+    #product-register-card > #product-form input[name="detail_images"] { grid-column:span 4; grid-row:1; }
+    #product-register-card > #product-form input[name="colors"] { grid-column:span 2; grid-row:2; }
+    #product-register-card > #product-form input[name="sizes"] { grid-column:span 2; grid-row:2; }
+    #product-register-card > #product-form input[name="price"] { grid-column:span 2; grid-row:2; }
+    #product-register-card > #product-form input[name="hem_option"] { grid-column:span 2; grid-row:2; }
+    #product-register-card > #product-form input[name="other_option"] { grid-column:span 2; grid-row:2; }
+    #product-register-card > #product-form select[name="target_grade"] { grid-column:span 2; grid-row:2; }
+    #product-register-card > #product-form input[name="min_qty"] { display:none !important; }
+    #product-register-card > #product-form button[type="submit"] { grid-column:1/-1; grid-row:3; width:100%; min-height:42px; }
+    #product-register-card > #product-form #size-detail-section { grid-column:1/-1; grid-row:4; width:100%; }
+    @media(max-width:900px) {
+      #product-register-card > #product-form { grid-template-columns:repeat(6,minmax(0,1fr)); }
+      #product-register-card > #product-form input[name="product_code"],
+      #product-register-card > #product-form input[name="name"],
+      #product-register-card > #product-form input[name="main_image"],
+      #product-register-card > #product-form input[name="detail_images"] { grid-column:span 3; grid-row:auto; }
+      #product-register-card > #product-form input[name="colors"],
+      #product-register-card > #product-form input[name="sizes"],
+      #product-register-card > #product-form input[name="price"],
+      #product-register-card > #product-form input[name="hem_option"],
+      #product-register-card > #product-form input[name="other_option"],
+      #product-register-card > #product-form select[name="target_grade"] { grid-column:span 2; grid-row:auto; }
+    }
+    @media(max-width:560px) {
+      #product-register-card > #product-form { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      #product-register-card > #product-form input[name="product_code"],
+      #product-register-card > #product-form input[name="name"],
+      #product-register-card > #product-form input[name="main_image"],
+      #product-register-card > #product-form input[name="detail_images"] { grid-column:1/-1; }
+      #product-register-card > #product-form input[name="colors"],
+      #product-register-card > #product-form input[name="sizes"],
+      #product-register-card > #product-form input[name="price"],
+      #product-register-card > #product-form input[name="hem_option"],
+      #product-register-card > #product-form input[name="other_option"],
+      #product-register-card > #product-form select[name="target_grade"] { grid-column:span 1; }
+    }
+    /* 네이버 주문상세처럼 간결한 정보/인라인 배송수정 */
+    .order-detail-backdrop { padding:18px; }
+    .nav-order-modal { max-width:980px !important; padding:0 !important; overflow:hidden auto; background:#f5f7fa; }
+    .nav-order-top { display:flex; justify-content:space-between; align-items:center; padding:22px 26px 16px; background:#fff; border-bottom:1px solid #e5e7eb; }
+    .nav-order-top small { color:#03c75a; font-size:10px; font-weight:800; letter-spacing:1.2px; }
+    .nav-order-top h2 { margin:4px 0 5px !important; font-size:21px !important; }
+    .nav-order-top > div > b { color:#64748b; font-size:13px; }
+    .nav-order-close { border:0; background:transparent; font-size:30px; color:#64748b; cursor:pointer; line-height:1; }
+    .nav-order-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1px; background:#e5e7eb; border-bottom:1px solid #e5e7eb; }
+    .nav-order-summary > div { background:#fff; padding:14px 22px; display:flex; flex-direction:column; gap:5px; }
+    .nav-order-summary span,.nav-order-field span { color:#64748b; font-size:11px; }
+    .nav-order-summary b { color:#111827; font-size:14px; }
+    .nav-order-section { margin:12px 16px; padding:18px 20px; background:#fff; border:1px solid #e5e7eb; border-radius:10px; }
+    .nav-order-section h3 { margin:0 0 13px; font-size:14px; color:#111827; }
+    .nav-order-info-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
+    .nav-order-field { min-width:0; padding:9px 11px; border:1px solid #edf0f3; border-radius:7px; display:flex; flex-direction:column; gap:4px; }
+    .nav-order-field b { color:#1f2937; font-size:12px; line-height:1.5; overflow-wrap:anywhere; white-space:pre-wrap; font-weight:600; }
+    .nav-order-product { border:1px solid #e5e7eb; border-radius:9px; padding:14px; margin-top:10px; background:#fff; }
+    .nav-order-product-head { display:flex; justify-content:space-between; gap:12px; align-items:center; }
+    .nav-order-product-head > div { display:flex; align-items:center; gap:9px; min-width:0; flex-wrap:wrap; }
+    .nav-order-product-head small { color:#03a94d; font-weight:700; }
+    .nav-order-product-head strong { color:#111827; font-size:13px; }
+    .nav-order-product-head span { color:#94a3b8; font-size:11px; }
+    .nav-order-product-head > b { color:#e53935; white-space:nowrap; }
+    .nav-order-product-summary { display:flex; gap:14px; flex-wrap:wrap; padding:10px 0; color:#64748b; font-size:11px; border-bottom:1px solid #f1f5f9; }
+    .nav-order-extra { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; padding:9px 0; }
+    .nav-order-edit-grid { display:grid; grid-template-columns:1fr 1fr 1.4fr; gap:9px; padding-top:11px; }
+    .nav-order-edit-grid label { display:flex; flex-direction:column; gap:5px; color:#475569; font-size:11px; font-weight:700; min-width:0; }
+    .nav-order-edit-grid input,.nav-order-edit-grid select,.nav-order-edit-grid textarea { width:100%; min-width:0; border:1px solid #dce2e8; border-radius:6px; padding:9px 10px; color:#1f2937; background:#fff; font:inherit; font-size:12px; box-sizing:border-box; }
+    .nav-order-edit-grid .tracking-field { grid-column:3; }
+    .nav-order-edit-grid .memo-field { grid-column:1/-1; }
+    .nav-order-edit-grid textarea { resize:vertical; min-height:54px; }
+    .nav-order-footer { display:flex; justify-content:flex-end; gap:8px; padding:14px 20px; background:#fff; border-top:1px solid #e5e7eb; }
+    .nav-order-footer button { min-width:120px; }
+    @media(max-width:700px) {
+      .order-detail-backdrop { padding:5px; }
+      .nav-order-top { padding:16px; }
+      .nav-order-summary { grid-template-columns:1fr; }
+      .nav-order-summary > div { padding:10px 16px; }
+      .nav-order-section { margin:8px; padding:13px; }
+      .nav-order-info-grid,.nav-order-extra { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .nav-order-edit-grid { grid-template-columns:1fr 1fr; }
+      .nav-order-edit-grid .tracking-field { grid-column:1/-1; }
+      .nav-order-edit-grid .memo-field { grid-column:1/-1; }
+      .nav-order-footer { padding:12px; }
+      .nav-order-footer button { flex:1; min-width:0; }
+    }
+
+</style>
 </head>
 <body>
   <div id="login-screen" style="display:none;">
@@ -1522,7 +1619,7 @@
               </div>
             </div>
             <div class="row-actions" style="margin-left:auto;align-self:center;">
-              <button class="btn btn-warning btn-sm order-group-edit-btn" data-group-idx="${idx}">배송정보 수정</button>
+              <button class="btn btn-warning btn-sm order-group-edit-btn" data-group-idx="${idx}">주문 상세</button>
               ${g.isDeleted ? `<button class="btn btn-success btn-sm order-group-restore-btn" data-group-idx="${idx}">복구</button>` : ''}
               <button class="btn btn-excel btn-sm order-group-excel-btn" data-group-idx="${idx}">📊</button>
               <button class="btn btn-print btn-sm order-group-print-btn" data-group-idx="${idx}">🖨️</button>
@@ -1541,12 +1638,7 @@
         btn.onclick = () => {
           const g = orderGroups[Number(btn.dataset.groupIdx)];
           if (!g) return;
-          if (g.items.length === 1) openOrderEditModal(g.items[0]);
-          else {
-            const choice = prompt(`수정할 상품 번호를 선택하세요 (1~${g.items.length})\\n\\n${g.items.map((it,i)=>`${i+1}. ${it.product_name || '-'} ×${it.quantity || 1}`).join('\\n')}`, '1');
-            const n = Number(choice);
-            if (n >= 1 && n <= g.items.length) openOrderEditModal(g.items[n-1]);
-          }
+          openOrderEditModal(g);
         };
       });
       listEl.querySelectorAll('.order-group-restore-btn').forEach(btn => {
@@ -1613,77 +1705,108 @@
     };
     document.getElementById('order-reset-btn').onclick = () => { document.getElementById('order-search').value=''; loadOrders(); };
 
-    function openOrderEditModal(o) {
-      if (!o) return;
+    function openOrderEditModal(groupOrOrder) {
+      if (!groupOrOrder) return;
+      const items = Array.isArray(groupOrOrder.items) ? groupOrOrder.items : [groupOrOrder];
+      const first = items[0] || {};
+      const orderNo = groupOrOrder.orderNumber || first.order_number || '-';
       const modal = document.createElement('div');
-      modal.className = 'modal-backdrop';
-      const statusOptions = [...new Set([...ORDER_STATUS_OPTIONS, ...(o.status ? [o.status] : [])])];
-      const fieldLabels = {
-        id:'주문 데이터 ID', order_number:'주문번호', product_code:'상품코드', product_name:'상품명',
-        product_price:'상품 단가', price:'가격', quantity:'수량', total_price:'상품 합계',
-        customer_name:'주문자 이름', customer_phone:'주문자 연락처', customer_email:'주문자 이메일',
-        depositor_name:'입금자명', receiver_name:'받는 사람', receiver_phone:'받는 사람 연락처',
+      modal.className = 'modal-backdrop order-detail-backdrop';
+      const statusOptions = [...new Set([...ORDER_STATUS_OPTIONS, ...items.map(x=>x.status).filter(Boolean)])];
+      const labelMap = {
+        customer_name:'주문자', customer_phone:'주문자 연락처', customer_email:'이메일',
+        depositor_name:'입금자명', receiver_name:'받는 분', receiver_phone:'받는 분 연락처',
         postcode:'우편번호', address:'주소', address_detail:'상세주소',
-        selected_color:'선택 색상', selected_size:'선택 사이즈', selected_hem:'선택 밑단', selected_other:'기타 옵션',
-        shipping_fee:'배송비', grade_discount:'회원 등급 할인', status:'주문 상태', courier:'택배사',
-        tracking_number:'운송장번호', memo:'요청사항', request_content:'요청사항', customs_number:'개인통관고유부호',
-        created_at:'주문일시', updated_at:'수정일시', is_deleted:'삭제 여부'
+        customs_number:'개인통관고유부호', created_at:'주문일시', updated_at:'수정일시',
+        selected_color:'선택 색상', selected_size:'선택 사이즈', selected_hem:'선택 밑단',
+        selected_other:'추가 옵션', shipping_fee:'배송비', grade_discount:'등급 할인',
+        product_code:'상품번호', product_name:'상품명', product_price:'상품 단가',
+        quantity:'수량', total_price:'상품 합계', price:'가격', request_content:'요청사항'
       };
-      const allEntries = Object.entries(o).filter(([key]) => key !== '__proto__');
-      const displayValue = (value) => {
-        if (value === null || value === undefined || value === '') return '-';
-        if (typeof value === 'boolean') return value ? '예' : '아니오';
-        if (typeof value === 'object') return JSON.stringify(value, null, 2);
-        if (typeof value === 'string' && /(^|_)at$/.test('created_at') && value.includes('T')) return value;
-        return String(value);
-      };
-      const infoHtml = allEntries.map(([key, value]) => `
-        <div class="order-info-cell">
-          <span class="oi-label">${esc(fieldLabels[key] || key)}</span>
-          <span class="oi-value">${esc(displayValue(value))}</span>
-        </div>
-      `).join('');
-
+      const val = v => (v === null || v === undefined || v === '') ? '-' :
+        (typeof v === 'object' ? JSON.stringify(v) : String(v));
+      const sharedKeys = ['customer_name','customer_phone','customer_email','depositor_name','receiver_name','receiver_phone','postcode','address','address_detail','customs_number','created_at'];
+      const sharedHtml = sharedKeys.filter(k => first[k] !== undefined && first[k] !== null && first[k] !== '').map(k =>
+        `<div class="nav-order-field"><span>${labelMap[k] || k}</span><b>${esc(k==='created_at' ? formatKST(first[k]) : val(first[k]))}</b></div>`
+      ).join('');
+      const itemHtml = items.map((o,i) => {
+        const details = Object.keys(o).filter(k =>
+          !['id','order_number','customer_name','customer_phone','customer_email','depositor_name','receiver_name','receiver_phone','postcode','address','address_detail','customs_number','created_at','updated_at','status','courier','tracking_number','memo','request_content','is_deleted','product_code','product_name','product_price','price','quantity','total_price','selected_color','selected_size','selected_hem','selected_other','shipping_fee','grade_discount'].includes(k) &&
+          o[k] !== null && o[k] !== ''
+        );
+        const detailHtml = details.map(k => `<div class="nav-order-field"><span>${esc(labelMap[k] || k)}</span><b>${esc(val(o[k]))}</b></div>`).join('');
+        return `
+          <section class="nav-order-product">
+            <div class="nav-order-product-head">
+              <div><small>상품 ${i+1}</small><strong>${esc(o.product_name || '상품명 없음')}</strong><span>${esc(o.product_code || '')}</span></div>
+              <b>${won(o.total_price || (Number(o.product_price || o.price || 0) * Number(o.quantity || 1)))}</b>
+            </div>
+            <div class="nav-order-product-summary">
+              <span>색상 ${esc(val(o.selected_color))}</span>
+              <span>사이즈 ${esc(val(o.selected_size))}</span>
+              <span>밑단 ${esc(val(o.selected_hem))}</span>
+              <span>옵션 ${esc(val(o.selected_other))}</span>
+              <span>수량 ${esc(val(o.quantity))}</span>
+            </div>
+            ${detailHtml ? `<div class="nav-order-extra">${detailHtml}</div>` : ''}
+            <div class="nav-order-edit-grid">
+              <label>주문 상태<select data-field="status" data-id="${esc(o.id)}">${statusOptions.map(v=>`<option value="${esc(v)}" ${o.status===v?'selected':''}>${esc(v)}</option>`).join('')}</select></label>
+              <label>택배사<select data-field="courier" data-id="${esc(o.id)}">${['','CJ대한통운','롯데택배','한진택배','우체국택배','로젠택배','경동택배','대신택배','기타'].map(v=>`<option value="${esc(v)}" ${(o.courier||'')===v?'selected':''}>${v || '택배사 선택'}</option>`).join('')}</select></label>
+              <label class="tracking-field">운송장번호<input data-field="tracking_number" data-id="${esc(o.id)}" value="${esc(o.tracking_number || '')}" placeholder="운송장번호"></label>
+              <label class="memo-field">요청사항<textarea data-field="memo" data-id="${esc(o.id)}" rows="2">${esc(o.memo || o.request_content || '')}</textarea></label>
+            </div>
+          </section>`;
+      }).join('');
       modal.innerHTML = `
-        <div class="modal-box modal-lg">
-          <h2>주문 전체정보 확인 및 배송정보 수정</h2>
-          <div class="order-info-heading">📋 주문 전체정보 (수정 불가 항목 포함)</div>
-          <div class="order-info-grid">${infoHtml || '<div>주문 정보가 없습니다.</div>'}</div>
-          <hr class="order-edit-divider">
-          <div class="order-info-heading">✏️ 수정 가능한 항목</div>
-          <form id="order-edit-form" class="modal-form">
-            <div><label>주문 상태</label>
-              <select name="status">${statusOptions.map(v=>`<option value="${esc(v)}" ${o.status===v?'selected':''}>${esc(v)}</option>`).join('')}</select>
-            </div>
-            <div><label>택배사</label>
-              <select name="courier">
-                ${['','CJ대한통운','롯데택배','한진택배','우체국택배','로젠택배','경동택배','대신택배','기타'].map(v=>`<option value="${esc(v)}" ${(o.courier||'')===v?'selected':''}>${v || '택배사 선택'}</option>`).join('')}
-              </select>
-            </div>
-            <div><label>운송장번호</label><input name="tracking_number" value="${esc(o.tracking_number || '')}" placeholder="운송장번호 입력"></div>
-            <div><label>요청사항</label><textarea name="memo" rows="4">${esc(o.memo || o.request_content || '')}</textarea></div>
-            <div class="modal-actions">
-              <button type="submit" class="btn btn-primary">수정사항 저장</button>
-              <button type="button" id="cancel-order-edit" class="btn btn-secondary">닫기</button>
-            </div>
-            <p style="font-size:11px;color:#6b7280;margin:0;">※ 위 주문 전체정보는 확인용입니다. 상태·택배사·운송장번호·요청사항만 수정할 수 있습니다.</p>
-          </form>
+        <div class="modal-box modal-lg nav-order-modal">
+          <div class="nav-order-top">
+            <div><small>ORDER DETAILS</small><h2>주문 상세내역</h2><b>${esc(orderNo)}</b></div>
+            <button type="button" class="nav-order-close" aria-label="닫기">×</button>
+          </div>
+          <div class="nav-order-summary">
+            <div><span>주문일시</span><b>${esc(formatKST(first.created_at))}</b></div>
+            <div><span>주문상품</span><b>${items.length}종 · ${items.reduce((n,x)=>n+Number(x.quantity||0),0)}개</b></div>
+            <div><span>결제/주문금액</span><b>${won(items.reduce((n,x)=>n+Number(x.total_price || (Number(x.product_price || x.price || 0)*Number(x.quantity||1))),0))}</b></div>
+          </div>
+          <section class="nav-order-section">
+            <h3>배송지 및 주문자 정보</h3>
+            <div class="nav-order-info-grid">${sharedHtml || '<div class="nav-order-field"><span>주문자 정보</span><b>-</b></div>'}</div>
+          </section>
+          <section class="nav-order-section">
+            <h3>주문 상품 및 배송정보</h3>
+            ${itemHtml}
+          </section>
+          <div class="nav-order-footer">
+            <button type="button" class="btn btn-secondary nav-order-close-btn">닫기</button>
+            <button type="button" class="btn btn-primary nav-order-save">변경사항 저장</button>
+          </div>
         </div>`;
       document.body.appendChild(modal);
-      modal.querySelector('#cancel-order-edit').onclick = () => modal.remove();
-      modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
-      modal.querySelector('#order-edit-form').onsubmit = async ev => {
-        ev.preventDefault();
-        const f = ev.target;
-        const updates = {
-          status: f.status.value,
-          courier: f.courier.value || null,
-          tracking_number: f.tracking_number.value.trim() || null,
-          memo: f.memo.value.trim() || null
-        };
-        const { error } = await db.from('orders').update(updates).eq('id', o.id);
-        if (error) alert('❌ ' + error.message);
-        else { alert('✅ 주문 배송정보가 수정되었습니다.'); modal.remove(); loadOrders(); }
+      const close = () => modal.remove();
+      modal.querySelectorAll('.nav-order-close,.nav-order-close-btn').forEach(b=>b.onclick=close);
+      modal.addEventListener('click', e => { if (e.target === modal) close(); });
+      modal.querySelector('.nav-order-save').onclick = async () => {
+        const saveBtn = modal.querySelector('.nav-order-save');
+        saveBtn.disabled = true; saveBtn.textContent = '저장 중...';
+        try {
+          const updates = items.map(o => {
+            const get = field => modal.querySelector(`[data-field="${field}"][data-id="${CSS.escape(String(o.id))}"]`);
+            return db.from('orders').update({
+              status: get('status')?.value || o.status,
+              courier: get('courier')?.value || null,
+              tracking_number: get('tracking_number')?.value.trim() || null,
+              memo: get('memo')?.value.trim() || null
+            }).eq('id', o.id);
+          });
+          const results = await Promise.all(updates);
+          const failed = results.find(r=>r.error);
+          if (failed) throw failed.error;
+          alert('주문 상세정보가 저장되었습니다.');
+          close(); loadOrders();
+        } catch(err) {
+          alert('저장 실패: ' + (err.message || err));
+          saveBtn.disabled = false; saveBtn.textContent = '변경사항 저장';
+        }
       };
     }
 
