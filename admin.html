@@ -367,6 +367,55 @@
     @media(max-width:560px) {
       #product-register-card > #product-form { grid-template-columns:repeat(2,minmax(0,1fr)) !important; }
     }
+
+    /* ============================================================
+       ⭐ 모바일 상품목록: 페이지당 4개 가로 스와이프(캐러셀)
+       ============================================================ */
+    @media (max-width: 560px) {
+      #admin-list-wrap {
+        overflow-x: auto !important;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: thin;
+        padding: 10px 8px;
+      }
+      #admin-list {
+        flex-direction: row !important;
+        min-height: 0 !important;
+        gap: 10px;
+        padding-bottom: 8px;
+        min-width: max-content;
+      }
+      .product-row {
+        min-width: 82vw !important;
+        max-width: 82vw !important;
+        scroll-snap-align: start;
+        grid-template-columns: 22px 60px 1fr !important;
+        grid-template-rows: auto auto auto auto;
+        align-items: start;
+        padding: 12px !important;
+        gap: 10px;
+        box-shadow: 0 1px 4px rgba(0,0,0,.05);
+      }
+      .product-row img { width: 60px; height: 60px; grid-row: span 2; }
+      .prod-info { grid-column: 3; }
+      .prod-price {
+        grid-column: 1 / -1;
+        text-align: left !important;
+        padding: 6px 0 0 !important;
+        font-size: 15px !important;
+        border-top: 1px dashed #f1f5f9;
+        margin-top: 4px;
+      }
+      .prod-actions {
+        grid-column: 1 / -1;
+        flex-wrap: wrap;
+        gap: 6px !important;
+        padding-top: 6px;
+      }
+      .prod-actions .btn { flex: 1 1 auto; min-width: 60px; }
+    }
 </style>
 </head>
 <body>
@@ -1014,7 +1063,9 @@
 
     // ============ 상품 목록 ============
     let allProducts = [], filteredProducts = [], currentPage = 1;
-    const PER_PAGE = 5, MAX_PAGES = 10;
+    const PER_PAGE_DESKTOP = 5, PER_PAGE_MOBILE = 4, MAX_PAGES = 10;
+    const isAdminMobile = () => window.matchMedia('(max-width: 560px)').matches;
+    const getPerPage = () => isAdminMobile() ? PER_PAGE_MOBILE : PER_PAGE_DESKTOP;
     let selectedProductIds = new Set();
     const listEl = document.getElementById('admin-list');
 
@@ -1047,11 +1098,12 @@
     }
 
     function renderProducts() {
-      const totalPages = Math.min(Math.ceil(filteredProducts.length / PER_PAGE), MAX_PAGES);
-      const start = (currentPage - 1) * PER_PAGE;
-      const items = filteredProducts.slice(start, start + PER_PAGE);
+      const perPage = getPerPage();
+      const totalPages = Math.min(Math.ceil(filteredProducts.length / perPage), MAX_PAGES);
+      const start = (currentPage - 1) * perPage;
+      const items = filteredProducts.slice(start, start + perPage);
       if (filteredProducts.length === 0) {
-        listEl.innerHTML = '<p style="text-align:center;color:#9ca3af;padding:20px;">조건에 맞는 상품이 없습니다</p>';
+        listEl.innerHTML = '<p style="text-align:center;color:#9ca3af;padding:20px;width:100%;">조건에 맞는 상품이 없습니다</p>';
         document.getElementById('admin-pagination').innerHTML = '';
         updateBulkBtn(); return;
       }
@@ -1248,6 +1300,17 @@
       el.innerHTML = html;
       el.querySelectorAll('button').forEach(b => b.onclick = () => { currentPage = Number(b.dataset.page); renderProducts(); });
     }
+
+    // 화면 크기 변경 시 페이지당 개수 재계산
+    let __lastAdminMobile = isAdminMobile();
+    window.addEventListener('resize', () => {
+      const now = isAdminMobile();
+      if (now !== __lastAdminMobile) {
+        __lastAdminMobile = now;
+        currentPage = 1;
+        renderProducts();
+      }
+    });
 
     // ============ 로고/Footer/SNS/영상/배너/배경 ============
     let currentLogoId = null, currentLogoUrl = '';
@@ -1584,7 +1647,7 @@
       setTimeout(() => { w.focus(); w.print(); }, 300);
     }
 
-    // ============ 주문 관리 - 주문정보 보호 / 상태·배송정보만 수정 ============
+    // ============ 주문 관리 ============
     const ORDER_COLS = ['order_number','product_code','product_name','product_price','quantity','total_price','customer_name','customer_phone','depositor_name','postcode','address','address_detail','selected_color','selected_size','selected_hem','selected_other','shipping_fee','grade_discount','status','courier','tracking_number','memo','created_at'];
     const ORDER_STATUS_OPTIONS = ['주문접수','입금대기','결제완료','상품준비중','배송준비중','배송중','배송완료','취소요청','취소완료'];
     let orderGroups = [];
@@ -1705,7 +1768,6 @@
       });
       updateOrderBulkBtn();
     };
-    // 관리자 목록에서 삭제해도 실제 행은 지우지 않고 삭제표시만 합니다.
     document.getElementById('order-bulk-del-btn').onclick = async () => {
       if (!selectedOrders.size) return;
       if (!confirm(`선택한 ${selectedOrders.size}개 주문을 삭제 표시할까요? (데이터는 보존됩니다)`)) return;
