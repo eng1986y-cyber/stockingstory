@@ -175,6 +175,69 @@
     #coupon-issue-form button { height: 40px !important; padding: 0 20px !important; font-size: 14px !important; }
     @media (max-width: 1000px) { #coupon-issue-form { grid-template-columns: 1fr 1fr !important; } #coupon-issue-form button { grid-column: 1 / -1 !important; } }
 
+    /* ===== 관리자 입력 카드 폭/정렬 보정 ===== */
+    #product-register-card { width:100%; min-width:0; }
+    #product-register-card > #product-form {
+      width:100%; min-width:0; display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:12px; align-items:stretch;
+    }
+    #product-register-card > #product-form > * { min-width:0; max-width:100%; }
+    #product-register-card > #product-form input,
+    #product-register-card > #product-form select,
+    #product-register-card > #product-form textarea {
+      width:100%; min-width:0; height:44px; min-height:44px;
+      padding:10px 12px; font-size:13px; box-sizing:border-box;
+    }
+    #product-register-card > #product-form input[name="main_image"] { grid-column:span 2; }
+    #product-register-card > #product-form input[name="detail_images"] { grid-column:span 2; }
+    #product-register-card > #product-form button[type="submit"] { width:100%; min-height:44px; grid-column:span 1; }
+    #size-detail-section { width:100%; min-width:0; grid-column:1 / -1; }
+
+    .list-controls { grid-template-columns:minmax(0,1fr) auto; gap:14px; }
+    .list-search { grid-column:1; justify-self:stretch; max-width:760px; width:100%; min-width:0; }
+    .list-search input { flex:1 1 auto; min-width:0; height:42px; padding:10px 14px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; background:#fff; }
+    .list-search .btn { min-width:76px; height:42px; padding:0 16px; flex:0 0 auto; }
+    .bulk-actions { grid-column:2; }
+
+    #coupon-issue-card { padding:22px !important; }
+    #coupon-issue-form { grid-template-columns:repeat(3,minmax(0,1fr)) !important; width:100% !important; }
+    #coupon-issue-form > div { width:100%; min-width:0; }
+    #coupon-issue-form select, #coupon-issue-form input { width:100% !important; min-width:0; }
+    #coupon-issue-form button { width:100% !important; }
+
+    #notice-subsection > .card #notice-form { width:100%; min-width:0; }
+    #notice-form input, #notice-form textarea { width:100%; min-width:0; display:block; box-sizing:border-box; }
+    #notice-form textarea { min-height:180px !important; resize:vertical; }
+    #notice-form button[type="submit"] { width:100%; justify-self:stretch !important; min-height:44px; }
+
+    .order-info-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+    .order-info-cell { min-width:0; padding:9px 11px; border:1px solid #e5e7eb; border-radius:8px; background:#f9fafb; }
+    .order-info-cell .oi-label { display:block; margin-bottom:4px; color:#6b7280; font-size:11px; font-weight:700; }
+    .order-info-cell .oi-value { display:block; color:#111827; font-size:13px; line-height:1.5; white-space:pre-wrap; overflow-wrap:anywhere; }
+    .order-info-heading { margin:4px 0 9px; color:#111827; font-size:14px; font-weight:700; }
+    .order-edit-divider { border:0; border-top:1px solid #e5e7eb; margin:16px 0; }
+    @media (max-width:1000px) {
+      #product-register-card > #product-form { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      #product-register-card > #product-form input[name="main_image"],
+      #product-register-card > #product-form input[name="detail_images"] { grid-column:1 / -1; }
+      .list-controls { grid-template-columns:1fr; }
+      .list-search { grid-column:1; max-width:none; }
+      .bulk-actions { grid-column:1; justify-self:start; }
+      #coupon-issue-form { grid-template-columns:repeat(2,minmax(0,1fr)) !important; }
+    }
+    @media (max-width:560px) {
+      #product-register-card > #product-form { grid-template-columns:1fr; }
+      #product-register-card > #product-form input[name="main_image"],
+      #product-register-card > #product-form input[name="detail_images"],
+      #product-register-card > #product-form button[type="submit"] { grid-column:1; }
+      #coupon-issue-form { grid-template-columns:1fr !important; }
+      #coupon-issue-form button { grid-column:1 !important; }
+      .list-search { display:grid; grid-template-columns:minmax(0,1fr) auto auto; }
+      .list-search .btn { min-width:56px; padding:0 10px; }
+      .order-info-grid { grid-template-columns:1fr; }
+    }
+
     @media (max-width: 1000px) { .admin-header { padding: 0 16px; } .admin-tabbar { padding: 10px 16px; } .admin-layout { padding: 16px; height: calc(100vh - 65px - 120px); margin-top: calc(65px + 120px); } }
 
     .tab-loading { padding: 20px; text-align: center; color: #9ca3af; font-size: 13px; }
@@ -1555,9 +1618,39 @@
       const modal = document.createElement('div');
       modal.className = 'modal-backdrop';
       const statusOptions = [...new Set([...ORDER_STATUS_OPTIONS, ...(o.status ? [o.status] : [])])];
+      const fieldLabels = {
+        id:'주문 데이터 ID', order_number:'주문번호', product_code:'상품코드', product_name:'상품명',
+        product_price:'상품 단가', price:'가격', quantity:'수량', total_price:'상품 합계',
+        customer_name:'주문자 이름', customer_phone:'주문자 연락처', customer_email:'주문자 이메일',
+        depositor_name:'입금자명', receiver_name:'받는 사람', receiver_phone:'받는 사람 연락처',
+        postcode:'우편번호', address:'주소', address_detail:'상세주소',
+        selected_color:'선택 색상', selected_size:'선택 사이즈', selected_hem:'선택 밑단', selected_other:'기타 옵션',
+        shipping_fee:'배송비', grade_discount:'회원 등급 할인', status:'주문 상태', courier:'택배사',
+        tracking_number:'운송장번호', memo:'요청사항', request_content:'요청사항', customs_number:'개인통관고유부호',
+        created_at:'주문일시', updated_at:'수정일시', is_deleted:'삭제 여부'
+      };
+      const allEntries = Object.entries(o).filter(([key]) => key !== '__proto__');
+      const displayValue = (value) => {
+        if (value === null || value === undefined || value === '') return '-';
+        if (typeof value === 'boolean') return value ? '예' : '아니오';
+        if (typeof value === 'object') return JSON.stringify(value, null, 2);
+        if (typeof value === 'string' && /(^|_)at$/.test('created_at') && value.includes('T')) return value;
+        return String(value);
+      };
+      const infoHtml = allEntries.map(([key, value]) => `
+        <div class="order-info-cell">
+          <span class="oi-label">${esc(fieldLabels[key] || key)}</span>
+          <span class="oi-value">${esc(displayValue(value))}</span>
+        </div>
+      `).join('');
+
       modal.innerHTML = `
-        <div class="modal-box">
-          <h2>주문 배송정보 수정 - ${esc(o.order_number || o.id)}</h2>
+        <div class="modal-box modal-lg">
+          <h2>주문 전체정보 확인 및 배송정보 수정</h2>
+          <div class="order-info-heading">📋 주문 전체정보 (수정 불가 항목 포함)</div>
+          <div class="order-info-grid">${infoHtml || '<div>주문 정보가 없습니다.</div>'}</div>
+          <hr class="order-edit-divider">
+          <div class="order-info-heading">✏️ 수정 가능한 항목</div>
           <form id="order-edit-form" class="modal-form">
             <div><label>주문 상태</label>
               <select name="status">${statusOptions.map(v=>`<option value="${esc(v)}" ${o.status===v?'selected':''}>${esc(v)}</option>`).join('')}</select>
@@ -1568,16 +1661,17 @@
               </select>
             </div>
             <div><label>운송장번호</label><input name="tracking_number" value="${esc(o.tracking_number || '')}" placeholder="운송장번호 입력"></div>
-            <div><label>요청사항</label><textarea name="memo" rows="4">${esc(o.memo || '')}</textarea></div>
+            <div><label>요청사항</label><textarea name="memo" rows="4">${esc(o.memo || o.request_content || '')}</textarea></div>
             <div class="modal-actions">
-              <button type="submit" class="btn btn-primary">저장</button>
-              <button type="button" id="cancel-order-edit" class="btn btn-secondary">취소</button>
+              <button type="submit" class="btn btn-primary">수정사항 저장</button>
+              <button type="button" id="cancel-order-edit" class="btn btn-secondary">닫기</button>
             </div>
-            <p style="font-size:11px;color:#9ca3af;margin:0;">※ 주문자·상품·가격·주소 등 나머지 주문정보는 수정할 수 없습니다.</p>
+            <p style="font-size:11px;color:#6b7280;margin:0;">※ 위 주문 전체정보는 확인용입니다. 상태·택배사·운송장번호·요청사항만 수정할 수 있습니다.</p>
           </form>
         </div>`;
       document.body.appendChild(modal);
       modal.querySelector('#cancel-order-edit').onclick = () => modal.remove();
+      modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
       modal.querySelector('#order-edit-form').onsubmit = async ev => {
         ev.preventDefault();
         const f = ev.target;
@@ -1589,7 +1683,7 @@
         };
         const { error } = await db.from('orders').update(updates).eq('id', o.id);
         if (error) alert('❌ ' + error.message);
-        else { alert('✅ 배송정보가 수정되었습니다.'); modal.remove(); loadOrders(); }
+        else { alert('✅ 주문 배송정보가 수정되었습니다.'); modal.remove(); loadOrders(); }
       };
     }
 

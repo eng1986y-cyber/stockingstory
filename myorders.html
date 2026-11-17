@@ -394,11 +394,19 @@
       if (!items || items.length === 0) return 0;
       const first = items[0];
       if (first.order_number) {
-        const { data, error } = await db.from('orders').update({ is_deleted: true }).eq('order_number', first.order_number).select();
+        const { data, error } = await db.from('orders')
+          .update({ is_deleted: true })
+          .eq('order_number', first.order_number)
+          .or('is_deleted.eq.false,is_deleted.is.null')
+          .select();
         if (error) throw error;
         return Array.isArray(data) ? data.length : 0;
       } else {
-        const { data, error } = await db.from('orders').update({ is_deleted: true }).eq('id', first.id).select();
+        const { data, error } = await db.from('orders')
+          .update({ is_deleted: true })
+          .eq('id', first.id)
+          .or('is_deleted.eq.false,is_deleted.is.null')
+          .select();
         if (error) throw error;
         return Array.isArray(data) ? data.length : 0;
       }
@@ -470,7 +478,11 @@
 
       if (orderNumbers.length > 0) {
         try {
-          const { data, error } = await db.from('orders').update({ is_deleted: true }).in('order_number', orderNumbers).select();
+          const { data, error } = await db.from('orders')
+            .update({ is_deleted: true })
+            .in('order_number', orderNumbers)
+            .or('is_deleted.eq.false,is_deleted.is.null')
+            .select();
           if (error) throw error;
           successCount += Array.isArray(data) ? data.length : 0;
         } catch (err) { errorMsg += (err.message || err) + '\n'; }
@@ -478,7 +490,11 @@
 
       if (singleIds.length > 0) {
         try {
-          const { data, error } = await db.from('orders').update({ is_deleted: true }).in('id', singleIds).select();
+          const { data, error } = await db.from('orders')
+            .update({ is_deleted: true })
+            .in('id', singleIds)
+            .or('is_deleted.eq.false,is_deleted.is.null')
+            .select();
           if (error) throw error;
           successCount += Array.isArray(data) ? data.length : 0;
         } catch (err) { errorMsg += (err.message || err) + '\n'; }
