@@ -145,7 +145,7 @@
       .board-card { min-height: 240px; }
     }
 
-    /* ⭐ 자동등록방지 스타일 */
+    /* ⭐ 자동등록방지 스타일 (1개만 유지) */
     .captcha-section {
       background: #f9fafb;
       border: 1px solid #e5e7eb;
@@ -164,12 +164,6 @@
       gap: 6px;
     }
     body.dark .captcha-section .captcha-title { color: #ccc; }
-    .captcha-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-    @media (max-width: 480px) { .captcha-row { grid-template-columns: 1fr; } }
     .captcha-item label {
       font-size: 11px;
       font-weight: 600;
@@ -183,33 +177,18 @@
       text-align: center;
       font-family: 'Courier New', monospace !important;
     }
-    .captcha-question {
-      display: inline-block;
-      padding: 8px 12px;
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 6px;
-      font-size: 15px;
-      font-weight: 700;
-      color: #111827;
-      margin-bottom: 6px;
-      font-family: 'Courier New', monospace;
-      letter-spacing: 2px;
-      user-select: none;
-    }
-    body.dark .captcha-question { background: #0f0f0f; border-color: #333; color: #e5e7eb; }
     .captcha-char-question {
       display: inline-block;
-      padding: 8px 16px;
+      padding: 10px 18px;
       background: linear-gradient(135deg, #fef3c7, #fde68a);
       border: 2px dashed #f59e0b;
       border-radius: 6px;
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 800;
       color: #78350f;
       margin-bottom: 6px;
       font-family: 'Courier New', monospace;
-      letter-spacing: 4px;
+      letter-spacing: 6px;
       user-select: none;
       text-decoration: line-through wavy rgba(245,158,11,.3);
     }
@@ -221,6 +200,39 @@
       display: none;
     }
     .captcha-error.show { display: block; }
+
+    /* ============================================================
+       ⭐ 모바일 상품목록: 페이지당 4개 가로 스와이프(캐러셀)
+       - PC(≥769px): 기존 6열 그리드 유지
+       - 모바일(≤768px): 4개 슬라이드, 화면에 4개 카드 표시
+       ============================================================ */
+    @media (max-width: 768px) {
+      #product-list, #popular-list {
+        display: flex !important;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        gap: 8px;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding-bottom: 6px;
+        grid-template-columns: none !important;
+      }
+      #product-list::-webkit-scrollbar, #popular-list::-webkit-scrollbar { display: none; }
+      #product-list .card, #popular-list .card {
+        flex: 0 0 calc((100% - 24px) / 4);
+        min-width: calc((100% - 24px) / 4);
+        scroll-snap-align: start;
+      }
+      #product-list .card .name, #popular-list .card .name { font-size: 11px; }
+      #product-list .card .price, #popular-list .card .price { font-size: 12px; margin-top: 2px; }
+      #product-list .card .price.locked, #popular-list .card .price.locked { font-size: 10px; }
+      #product-list .card .card-info, #popular-list .card .card-info { padding: 6px 2px; }
+      #product-list .card .thumb, #popular-list .card .thumb { border-radius: 8px; }
+      #product-list .card .new-badge, #popular-list .card .rank-badge { font-size: 9px; padding: 2px 5px; top: 5px; left: 5px; }
+      #product-list .card .grade-badge { font-size: 9px; padding: 2px 5px; top: 5px; right: 5px; }
+    }
   </style>
 </head>
 <body>
@@ -301,7 +313,7 @@
 
   <script>
     const isPC = () => window.innerWidth >= 769;
-    const PC_PER_PAGE = 30, MOBILE_PER_PAGE = 10;
+    const PC_PER_PAGE = 30, MOBILE_PER_PAGE = 4;   // ← 모바일 페이지당 4개
     const PC_MAX_PAGES = 10, MOBILE_MAX_PAGES = 5;
     let allProducts = [], filteredProducts = [], currentPage = 1;
     let popularProducts = [], popularCurrentPage = 1;
@@ -313,7 +325,6 @@
     function isNewProduct(p) { if (!p || !p.created_at) return false; const c = new Date(p.created_at).getTime(); return !isNaN(c) && (Date.now() - c) < 7*24*60*60*1000; }
     function shouldHidePrice(p) { return !isLoggedIn() && isNewProduct(p); }
 
-    // ⭐ [요청9] 비로그인 시 일반상품만 / 로그인 시 등급별 필터
     function filterProductsByGrade(products) {
       if (!isLoggedIn()) return products.filter(p => (p.target_grade || 'all') === 'all');
       const grade = getMemberGrade();
@@ -419,9 +430,16 @@
     }
 
     function applyGridColumns() {
-      const cols = isPC() ? 'repeat(6, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr))';
-      const a = document.getElementById('product-list'); if (a) a.style.gridTemplateColumns = cols;
-      const b = document.getElementById('popular-list'); if (b) b.style.gridTemplateColumns = cols;
+      // PC에서만 6열 그리드, 모바일은 CSS flex 캐러셀이 처리
+      const a = document.getElementById('product-list');
+      const b = document.getElementById('popular-list');
+      if (isPC()) {
+        if (a) { a.style.display = 'grid'; a.style.gridTemplateColumns = 'repeat(6, minmax(0, 1fr))'; }
+        if (b) { b.style.display = 'grid'; b.style.gridTemplateColumns = 'repeat(6, minmax(0, 1fr))'; }
+      } else {
+        if (a) { a.style.display = 'flex'; a.style.gridTemplateColumns = ''; }
+        if (b) { b.style.display = 'flex'; b.style.gridTemplateColumns = ''; }
+      }
     }
     function getPerPage() { return isPC() ? PC_PER_PAGE : MOBILE_PER_PAGE; }
     function getMaxPages() { return isPC() ? PC_MAX_PAGES : MOBILE_MAX_PAGES; }
@@ -434,7 +452,7 @@
       const items = (filteredProducts.length ? filteredProducts : allProducts).slice(start, start + perPage);
       const source = filteredProducts.length ? filteredProducts : allProducts;
       if (source.length === 0) {
-        list.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:40px; color:#9ca3af;">표시할 상품이 없습니다.</p>';
+        list.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:40px; color:#9ca3af; width:100%;">표시할 상품이 없습니다.</p>';
         document.getElementById('pagination').innerHTML = ''; return;
       }
       list.innerHTML = items.map(p => {
@@ -473,7 +491,7 @@
         products = filterProductsByGrade(data || []);
       } catch { list.innerHTML = '<p>상품을 불러올 수 없습니다.</p>'; return; }
       if (products.length === 0) {
-        list.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:40px; color:#9ca3af;">등록된 상품이 없습니다.</p>';
+        list.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:40px; color:#9ca3af; width:100%;">등록된 상품이 없습니다.</p>';
         return;
       }
       const viewCountMap = {};
@@ -667,13 +685,12 @@
     }
 
     // ============================================================
-    // ⭐⭐⭐ [요청1] 게시판 자동등록방지 (3중 방어) ⭐⭐⭐
-    // 1. 수학 CAPTCHA (랜덤 덧셈/뺄셈)
-    // 2. 글자 입력 CAPTCHA (5글자, 대소문자 무시)
-    // 3. 도배 방지 (같은 계정 30초에 1회)
+    // ⭐ 게시판 자동등록방지 (글자 CAPTCHA 1개로 통합)
+    //    - 기존: 수학 문제 + 글자 입력 (2중) → 스팸 과잉, UX 불편
+    //    - 변경: 글자 입력 CAPTCHA 1개 (대소문자 무시, 5글자)
+    //    - 도배 방지: 같은 계정 30초에 1회 (유지)
     // ============================================================
 
-    // 30초 도배 방지
     const BOARD_POST_COOLDOWN_MS = 30 * 1000;
     const BOARD_POST_LAST_KEY = 'board_post_last_at';
 
@@ -693,23 +710,6 @@
       try { localStorage.setItem(BOARD_POST_LAST_KEY, String(Date.now())); } catch {}
     }
 
-    // 수학 CAPTCHA 생성
-    function generateMathCaptcha() {
-      const isPlus = Math.random() > 0.5;
-      let a, b, answer;
-      if (isPlus) {
-        a = Math.floor(Math.random() * 20) + 1; // 1~20
-        b = Math.floor(Math.random() * 20) + 1;
-        answer = a + b;
-        return { question: `${a} + ${b} = ?`, answer: String(answer) };
-      } else {
-        a = Math.floor(Math.random() * 20) + 10; // 10~29
-        b = Math.floor(Math.random() * 10) + 1;   // 1~10
-        answer = a - b;
-        return { question: `${a} − ${b} = ?`, answer: String(answer) };
-      }
-    }
-
     // 글자 CAPTCHA 생성 (혼동 문자 제외: 0/O, 1/l/I 제외)
     const CAPTCHA_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
     function generateCharCaptcha(length = 5) {
@@ -725,7 +725,6 @@
       if (!me || !me.id) { alert('로그인 후 이용 가능합니다.'); location.href = 'login.html'; return; }
       if (!checkBoardCooldown()) return;
 
-      const mathCap = generateMathCaptcha();
       const charCap = generateCharCaptcha(5);
 
       const modal = document.createElement('div');
@@ -740,17 +739,10 @@
 
             <div class="captcha-section">
               <div class="captcha-title">🛡️ 자동등록방지 (스팸 방지)</div>
-              <div class="captcha-row">
-                <div class="captcha-item">
-                  <label>① 수학 문제</label>
-                  <div class="captcha-question">${mathCap.question}</div>
-                  <input name="captcha_math" type="text" inputmode="numeric" placeholder="정답 입력" autocomplete="off" required>
-                </div>
-                <div class="captcha-item">
-                  <label>② 아래 글자를 입력하세요 (대소문자 무관)</label>
-                  <div class="captcha-char-question">${charCap}</div>
-                  <input name="captcha_char" type="text" placeholder="글자 입력" autocomplete="off" maxlength="10" style="text-transform:uppercase;" required>
-                </div>
+              <div class="captcha-item">
+                <label>아래 글자를 입력하세요 (대소문자 무관)</label>
+                <div class="captcha-char-question">${charCap}</div>
+                <input name="captcha_char" type="text" placeholder="글자 입력" autocomplete="off" maxlength="10" style="text-transform:uppercase;" required>
               </div>
               <div class="captcha-error" id="board-captcha-error"></div>
             </div>
@@ -774,15 +766,7 @@
         };
         errEl.classList.remove('show');
 
-        // 1) 수학 CAPTCHA 검증
-        const mathAns = String(f.captcha_math.value || '').trim();
-        if (mathAns !== mathCap.answer) {
-          showErr('수학 문제의 정답이 올바르지 않습니다.');
-          f.captcha_math.focus();
-          return;
-        }
-
-        // 2) 글자 CAPTCHA 검증 (대소문자 무시)
+        // CAPTCHA 검증 (대소문자 무시)
         const charAns = String(f.captcha_char.value || '').trim().toLowerCase();
         if (charAns !== charCap.toLowerCase()) {
           showErr('보안 글자가 올바르지 않습니다. 다시 확인해주세요.');
@@ -790,7 +774,7 @@
           return;
         }
 
-        // 3) 도배 방지 재확인 (다른 탭에서 이미 등록했을 경우 대비)
+        // 도배 방지 재확인
         if (!checkBoardCooldown()) return;
 
         const btn = f.querySelector('button[type="submit"]');
@@ -806,7 +790,6 @@
           return;
         }
 
-        // 4) 도배 방지 쿨다운 기록
         setBoardCooldown();
 
         alert('✅ 등록되었습니다.');
