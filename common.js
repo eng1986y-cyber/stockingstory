@@ -328,8 +328,28 @@ async function recordVisit() {
     .header-product-search input { width:100%; min-width:0; height:36px; box-sizing:border-box; padding:0 12px; border:none; border-radius:6px; background:#fff; color:#222; font:inherit; font-size:13px; outline:none; transition:box-shadow .16s ease; }
     .header-product-search input:focus { box-shadow:0 0 0 2px rgba(80,80,80,.12); }
     body.dark .header-product-search input { background:#171717; color:#eee; }
-    .header-product-search button { display:inline-flex; align-items:center; justify-content:center; width:36px; min-width:36px; height:36px; padding:0; border:1px solid transparent; border-radius:6px; background:transparent; color:#111; cursor:pointer; flex-shrink:0; }
-    body.dark .header-product-search button { color:#fff; }
+    .header-product-search button {
+      display:inline-flex; align-items:center; justify-content:center;
+      width:36px; min-width:36px; height:36px; padding:0;
+      border:1px solid transparent; border-radius:6px;
+      background:transparent!important; background-color:transparent!important;
+      color:#222; box-shadow:none!important; cursor:pointer; flex-shrink:0;
+    }
+    .header-product-search button:hover,
+    .header-product-search button:focus,
+    .header-product-search button:focus-visible,
+    .header-product-search button:active {
+      background:transparent!important; background-color:transparent!important;
+      box-shadow:none!important; outline:none;
+    }
+    body.dark .header-product-search button,
+    body.dark .header-product-search button:hover,
+    body.dark .header-product-search button:focus,
+    body.dark .header-product-search button:focus-visible,
+    body.dark .header-product-search button:active {
+      background:transparent!important; background-color:transparent!important;
+      color:#eee; box-shadow:none!important;
+    }
     .header-product-search button svg { display:block; width:21px; height:21px; fill:none; stroke:currentColor; stroke-width:2; }
     .header-search-popup { display:none; position:absolute; top:calc(100% + 7px); left:0; width:min(520px,calc(100vw - 32px)); max-height:min(440px,65vh); overflow-y:auto; background:#fff; color:#222; border:1px solid #d9eaf2; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,.18); z-index:100005; }
     .header-search-popup.open { display:block; }

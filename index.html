@@ -493,7 +493,7 @@
       } catch {}
       popularProducts = products.map(p => ({ ...p, _viewCount: viewCountMap[String(p.id)] || 0 }))
   .sort((a, b) => b._viewCount !== a._viewCount ? b._viewCount - a._viewCount : new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-  .slice(0, 10);
+  .slice(0, 12);
       popularCurrentPage = 1;
       renderPopularPage();
     }
