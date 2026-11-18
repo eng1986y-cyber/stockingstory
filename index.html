@@ -299,7 +299,7 @@
 
   <script>
     const isPC = () => window.innerWidth >= 769;
-    const PC_PER_PAGE = 30, MOBILE_PER_PAGE = 4;
+    const PC_PER_PAGE = 30, MOBILE_PER_PAGE = 12;
     const PC_MAX_PAGES = Infinity, MOBILE_MAX_PAGES = Infinity;
     let allProducts = [], filteredProducts = [], currentPage = 1;
     let popularProducts = [], popularCurrentPage = 1;
@@ -492,7 +492,8 @@
         (viewData || []).forEach(row => { viewCountMap[String(row.product_id)] = (viewCountMap[String(row.product_id)] || 0) + 1; });
       } catch {}
       popularProducts = products.map(p => ({ ...p, _viewCount: viewCountMap[String(p.id)] || 0 }))
-        .sort((a, b) => b._viewCount !== a._viewCount ? b._viewCount - a._viewCount : new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  .sort((a, b) => b._viewCount !== a._viewCount ? b._viewCount - a._viewCount : new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+  .slice(0, 10);
       popularCurrentPage = 1;
       renderPopularPage();
     }
@@ -503,10 +504,8 @@
       const items = popularProducts.slice(start, start + perPage);
       if (popularProducts.length === 0) { list.innerHTML = ''; return; }
       list.innerHTML = items.map((p, idx) => {
-        const rank = start + idx + 1;
         const hidePrice = shouldHidePrice(p);
-        const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : '';
-        const rankBadge = rank <= 20 ? `<span class="rank-badge ${rankClass}">#${rank}</span>` : '';
+const rankBadge = `<span class="rank-badge">BEST</span>`;
         const priceHtml = hidePrice ? `<div class="price locked">🔒 로그인 후 가격 확인</div>` : `<div class="price">${won(p.price)}</div>`;
         return `
           <a class="card" href="product.html?id=${p.id}">
