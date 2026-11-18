@@ -455,8 +455,10 @@
       const list = document.getElementById('product-list');
       const perPage = getPerPage();
       const start = (currentPage - 1) * perPage;
-      const items = (filteredProducts.length ? filteredProducts : allProducts).slice(start, start + perPage);
       const source = filteredProducts.length ? filteredProducts : allProducts;
+      // PC 신규상품 영역은 페이지 제한 없이 전체 상품을 한 번에 노출하고,
+      // 모바일에서만 4개씩 나누어 표시합니다.
+      const items = isPC() ? source : source.slice(start, start + perPage);
       if (source.length === 0) {
         list.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:40px; color:#9ca3af; width:100%;">표시할 상품이 없습니다.</p>';
         document.getElementById('pagination').innerHTML = ''; return;
@@ -479,17 +481,11 @@
     }
     function renderPagination(totalCount) {
       const el = document.getElementById('pagination');
-      const totalPages = Math.ceil(totalCount / getPerPage());
+      // PC 신규상품은 전체 노출이므로 페이지 버튼을 표시하지 않습니다.
+      if (isPC()) { el.innerHTML = ''; return; }
+      const totalPages = Math.ceil(totalCount / MOBILE_PER_PAGE);
       if (totalPages <= 1) { el.innerHTML = ''; return; }
-      if (!isPC()) {
-        el.innerHTML = `<div class="page-dots" aria-label="상품 페이지">${Array.from({length:totalPages},(_,i)=>`<button type="button" class="page-dot ${i+1===currentPage?'active':''}" data-page="${i+1}" aria-label="${i+1}페이지"></button>`).join('')}</div>`;
-      } else {
-        const btnBase = 'padding:8px 14px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; font-family:inherit;';
-        let html = `<button class="page-nav" data-page="${currentPage-1}" ${currentPage===1?'disabled':''} style="${btnBase} background:${currentPage===1?'#f5f5f5':'#fff'}; color:${currentPage===1?'#bbb':'#222'}; border:1px solid #ddd;">이전</button>`;
-        for (let i = 1; i <= totalPages; i++) html += `<button class="page-num" data-page="${i}" style="${btnBase} background:${i===currentPage?'#222':'#fff'}; color:${i===currentPage?'#fff':'#222'}; border:1px solid ${i===currentPage?'#222':'#ddd'};">${i}</button>`;
-        html += `<button class="page-nav" data-page="${currentPage+1}" ${currentPage===totalPages?'disabled':''} style="${btnBase} background:${currentPage===totalPages?'#f5f5f5':'#fff'}; color:${currentPage===totalPages?'#bbb':'#222'}; border:1px solid #ddd;">다음</button>`;
-        el.innerHTML = html;
-      }
+      el.innerHTML = `<div class="page-dots" aria-label="상품 페이지">${Array.from({length:totalPages},(_,i)=>`<button type="button" class="page-dot ${i+1===currentPage?'active':''}" data-page="${i+1}" aria-label="${i+1}페이지"></button>`).join('')}</div>`;
       el.querySelectorAll('button[data-page]').forEach(b => b.onclick = () => { const page=Number(b.dataset.page); if(page<1||page>totalPages)return; productPageDirection = page >= currentPage ? 1 : -1; currentPage=page; renderPage(); });
     }
 
@@ -512,7 +508,7 @@
       } catch {}
       popularProducts = products.map(p => ({ ...p, _viewCount: viewCountMap[String(p.id)] || 0 }))
   .sort((a, b) => b._viewCount !== a._viewCount ? b._viewCount - a._viewCount : new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-  .slice(0, 10);
+  .slice(0, 12);
       popularCurrentPage = 1;
       renderPopularPage();
     }
