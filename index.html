@@ -201,37 +201,23 @@
     }
     .captcha-error.show { display: block; }
 
-    /* ============================================================
-       ⭐ 모바일 상품목록: 페이지당 4개 가로 스와이프(캐러셀)
-       - PC(≥769px): 기존 6열 그리드 유지
-       - 모바일(≤768px): 4개 슬라이드, 화면에 4개 카드 표시
-       ============================================================ */
+    /* 모바일 상품목록: 12개씩 표시하고 손가락 좌우 스와이프로 페이지 이동 */
+    #pagination .page-dots, #popular-pagination .page-dots { display:flex; justify-content:center; align-items:center; gap:8px; }
+    #pagination .page-dot, #popular-pagination .page-dot { width:7px; height:7px; border:0; border-radius:50%; padding:0; background:#c7c7c7; cursor:pointer; }
+    #pagination .page-dot.active, #popular-pagination .page-dot.active { width:18px; border-radius:8px; background:#222; }
+    body.dark #pagination .page-dot, body.dark #popular-pagination .page-dot { background:#555; }
+    body.dark #pagination .page-dot.active, body.dark #popular-pagination .page-dot.active { background:#eee; }
     @media (max-width: 768px) {
-      #product-list, #popular-list {
-        display: flex !important;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        overflow-y: hidden;
-        gap: 8px;
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-        padding-bottom: 6px;
-        grid-template-columns: none !important;
-      }
-      #product-list::-webkit-scrollbar, #popular-list::-webkit-scrollbar { display: none; }
-      #product-list .card, #popular-list .card {
-        flex: 0 0 calc((100% - 24px) / 4);
-        min-width: calc((100% - 24px) / 4);
-        scroll-snap-align: start;
-      }
-      #product-list .card .name, #popular-list .card .name { font-size: 11px; }
-      #product-list .card .price, #popular-list .card .price { font-size: 12px; margin-top: 2px; }
-      #product-list .card .price.locked, #popular-list .card .price.locked { font-size: 10px; }
-      #product-list .card .card-info, #popular-list .card .card-info { padding: 6px 2px; }
-      #product-list .card .thumb, #popular-list .card .thumb { border-radius: 8px; }
-      #product-list .card .new-badge, #popular-list .card .rank-badge { font-size: 9px; padding: 2px 5px; top: 5px; left: 5px; }
-      #product-list .card .grade-badge { font-size: 9px; padding: 2px 5px; top: 5px; right: 5px; }
+      #product-list, #popular-list { display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:12px 8px; overflow:visible; touch-action:pan-y; }
+      #product-list .card, #popular-list .card { min-width:0; width:100%; }
+      #product-list .card .name, #popular-list .card .name { font-size:12px; }
+      #product-list .card .price, #popular-list .card .price { font-size:13px; margin-top:3px; }
+      #product-list .card .price.locked, #popular-list .card .price.locked { font-size:10px; }
+      #product-list .card .card-info, #popular-list .card .card-info { padding:6px 2px; }
+      #product-list .card .thumb, #popular-list .card .thumb { border-radius:8px; }
+      #product-list .card .new-badge, #popular-list .card .rank-badge { font-size:9px; padding:2px 5px; top:5px; left:5px; }
+      #product-list .card .grade-badge { font-size:9px; padding:2px 5px; top:5px; right:5px; }
+      #pagination, #popular-pagination { min-height:24px; margin-top:14px; margin-bottom:28px; }
     }
   </style>
 </head>
@@ -313,8 +299,8 @@
 
   <script>
     const isPC = () => window.innerWidth >= 769;
-    const PC_PER_PAGE = 30, MOBILE_PER_PAGE = 4;   // ← 모바일 페이지당 4개
-    const PC_MAX_PAGES = 10, MOBILE_MAX_PAGES = 5;
+    const PC_PER_PAGE = 30, MOBILE_PER_PAGE = 12;
+    const PC_MAX_PAGES = Infinity, MOBILE_MAX_PAGES = Infinity;
     let allProducts = [], filteredProducts = [], currentPage = 1;
     let popularProducts = [], popularCurrentPage = 1;
     const won = n => '₩ ' + Number(n || 0).toLocaleString();
@@ -326,12 +312,14 @@
     function shouldHidePrice(p) { return !isLoggedIn() && isNewProduct(p); }
 
     function filterProductsByGrade(products) {
-      if (!isLoggedIn()) return products.filter(p => (p.target_grade || 'all') === 'all');
+      // 일반 메인페이지에서는 도매상품을 회원 등급과 관계없이 절대 노출하지 않음.
+      // 도매상품은 wholesale 전용 페이지에서만 표시.
+      const publicProducts = (products || []).filter(p => (p.target_grade || 'all') !== 'wholesale');
+      if (!isLoggedIn()) return publicProducts.filter(p => (p.target_grade || 'all') === 'all');
       const grade = getMemberGrade();
-      return products.filter(p => {
+      return publicProducts.filter(p => {
         const tg = p.target_grade || 'all';
         if (tg === 'all') return true;
-        if (tg === 'wholesale') return grade === '도매회원';
         if (tg === 'vip') return grade === 'VIP회원';
         return false;
       });
@@ -472,14 +460,18 @@
     }
     function renderPagination(totalCount) {
       const el = document.getElementById('pagination');
-      const totalPages = Math.min(Math.ceil(totalCount / getPerPage()), getMaxPages());
+      const totalPages = Math.ceil(totalCount / getPerPage());
       if (totalPages <= 1) { el.innerHTML = ''; return; }
-      const btnBase = 'padding:8px 14px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; font-family:inherit;';
-      let html = `<button class="page-nav" data-page="${currentPage-1}" ${currentPage===1?'disabled':''} style="${btnBase} background:${currentPage===1?'#f5f5f5':'#fff'}; color:${currentPage===1?'#bbb':'#222'}; border:1px solid #ddd;">이전</button>`;
-      for (let i = 1; i <= totalPages; i++) html += `<button class="page-num" data-page="${i}" style="${btnBase} background:${i===currentPage?'#222':'#fff'}; color:${i===currentPage?'#fff':'#222'}; border:1px solid ${i===currentPage?'#222':'#ddd'};">${i}</button>`;
-      html += `<button class="page-nav" data-page="${currentPage+1}" ${currentPage===totalPages?'disabled':''} style="${btnBase} background:${currentPage===totalPages?'#f5f5f5':'#fff'}; color:${currentPage===totalPages?'#bbb':'#222'}; border:1px solid #ddd;">다음</button>`;
-      el.innerHTML = html;
-      el.querySelectorAll('.page-num, .page-nav').forEach(b => b.onclick = () => { if (b.disabled) return; currentPage = Number(b.dataset.page); renderPage(); });
+      if (!isPC()) {
+        el.innerHTML = `<div class="page-dots" aria-label="상품 페이지">${Array.from({length:totalPages},(_,i)=>`<button type="button" class="page-dot ${i+1===currentPage?'active':''}" data-page="${i+1}" aria-label="${i+1}페이지"></button>`).join('')}</div>`;
+      } else {
+        const btnBase = 'padding:8px 14px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; font-family:inherit;';
+        let html = `<button class="page-nav" data-page="${currentPage-1}" ${currentPage===1?'disabled':''} style="${btnBase} background:${currentPage===1?'#f5f5f5':'#fff'}; color:${currentPage===1?'#bbb':'#222'}; border:1px solid #ddd;">이전</button>`;
+        for (let i = 1; i <= totalPages; i++) html += `<button class="page-num" data-page="${i}" style="${btnBase} background:${i===currentPage?'#222':'#fff'}; color:${i===currentPage?'#fff':'#222'}; border:1px solid ${i===currentPage?'#222':'#ddd'};">${i}</button>`;
+        html += `<button class="page-nav" data-page="${currentPage+1}" ${currentPage===totalPages?'disabled':''} style="${btnBase} background:${currentPage===totalPages?'#f5f5f5':'#fff'}; color:${currentPage===totalPages?'#bbb':'#222'}; border:1px solid #ddd;">다음</button>`;
+        el.innerHTML = html;
+      }
+      el.querySelectorAll('button[data-page]').forEach(b => b.onclick = () => { const page=Number(b.dataset.page); if(page<1||page>totalPages)return; currentPage=page; renderPage(); });
     }
 
     async function loadPopularProducts() {
@@ -526,15 +518,37 @@
     }
     function renderPopularPagination() {
       const el = document.getElementById('popular-pagination');
-      const totalPages = Math.min(Math.ceil(popularProducts.length / getPerPage()), getMaxPages());
+      const totalPages = Math.ceil(popularProducts.length / getPerPage());
       if (totalPages <= 1) { el.innerHTML = ''; return; }
-      const btnBase = 'padding:8px 14px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; font-family:inherit;';
-      let html = `<button class="page-nav" data-page="${popularCurrentPage-1}" ${popularCurrentPage===1?'disabled':''} style="${btnBase} background:${popularCurrentPage===1?'#f5f5f5':'#fff'}; color:${popularCurrentPage===1?'#bbb':'#222'}; border:1px solid #ddd;">이전</button>`;
-      for (let i = 1; i <= totalPages; i++) html += `<button class="page-num" data-page="${i}" style="${btnBase} background:${i===popularCurrentPage?'#222':'#fff'}; color:${i===popularCurrentPage?'#fff':'#222'}; border:1px solid ${i===popularCurrentPage?'#222':'#ddd'};">${i}</button>`;
-      html += `<button class="page-nav" data-page="${popularCurrentPage+1}" ${popularCurrentPage===totalPages?'disabled':''} style="${btnBase} background:${popularCurrentPage===totalPages?'#f5f5f5':'#fff'}; color:${popularCurrentPage===totalPages?'#bbb':'#222'}; border:1px solid #ddd;">다음</button>`;
-      el.innerHTML = html;
-      el.querySelectorAll('.page-num, .page-nav').forEach(b => b.onclick = () => { if (b.disabled) return; popularCurrentPage = Number(b.dataset.page); renderPopularPage(); });
+      if (!isPC()) {
+        el.innerHTML = `<div class="page-dots" aria-label="BEST 상품 페이지">${Array.from({length:totalPages},(_,i)=>`<button type="button" class="page-dot ${i+1===popularCurrentPage?'active':''}" data-page="${i+1}" aria-label="${i+1}페이지"></button>`).join('')}</div>`;
+      } else {
+        const btnBase = 'padding:8px 14px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; font-family:inherit;';
+        let html = `<button class="page-nav" data-page="${popularCurrentPage-1}" ${popularCurrentPage===1?'disabled':''} style="${btnBase} background:${popularCurrentPage===1?'#f5f5f5':'#fff'}; color:${popularCurrentPage===1?'#bbb':'#222'}; border:1px solid #ddd;">이전</button>`;
+        for (let i = 1; i <= totalPages; i++) html += `<button class="page-num" data-page="${i}" style="${btnBase} background:${i===popularCurrentPage?'#222':'#fff'}; color:${i===popularCurrentPage?'#fff':'#222'}; border:1px solid ${i===popularCurrentPage?'#222':'#ddd'};">${i}</button>`;
+        html += `<button class="page-nav" data-page="${popularCurrentPage+1}" ${popularCurrentPage===totalPages?'disabled':''} style="${btnBase} background:${popularCurrentPage===totalPages?'#f5f5f5':'#fff'}; color:${popularCurrentPage===totalPages?'#bbb':'#222'}; border:1px solid #ddd;">다음</button>`;
+        el.innerHTML = html;
+      }
+      el.querySelectorAll('button[data-page]').forEach(b => b.onclick = () => { const page=Number(b.dataset.page); if(page<1||page>totalPages)return; popularCurrentPage=page; renderPopularPage(); });
     }
+
+    // 모바일에서 NEW / BEST 영역을 좌우로 밀면 다음 12개 상품 페이지로 이동
+    function bindProductSwipe(listId, getPage, setPage, getTotal) {
+      const el = document.getElementById(listId);
+      if (!el || el.dataset.swipeBound) return;
+      el.dataset.swipeBound = '1';
+      let sx = 0, sy = 0;
+      el.addEventListener('touchstart', e => { if (!e.touches || e.touches.length !== 1) return; sx=e.touches[0].clientX; sy=e.touches[0].clientY; }, {passive:true});
+      el.addEventListener('touchend', e => {
+        if (!e.changedTouches || !e.changedTouches.length || isPC()) return;
+        const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
+        if (Math.abs(dx)<45 || Math.abs(dx)<Math.abs(dy)*1.25) return;
+        const next=Math.max(1,Math.min(getTotal(),getPage()+(dx<0?1:-1)));
+        if(next!==getPage()){setPage(next); if(listId==='product-list')renderPage(); else renderPopularPage();}
+      }, {passive:true});
+    }
+    bindProductSwipe('product-list',()=>currentPage,v=>currentPage=v,()=>Math.ceil(allProducts.length/getPerPage()));
+    bindProductSwipe('popular-list',()=>popularCurrentPage,v=>popularCurrentPage=v,()=>Math.ceil(popularProducts.length/getPerPage()));
 
     let resizeTimer;
     window.addEventListener('resize', () => {
