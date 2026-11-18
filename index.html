@@ -201,6 +201,16 @@
     }
     .captcha-error.show { display: block; }
 
+    /* 모바일 상품 페이지 전환 애니메이션 */
+    @keyframes productSlideNext { from { opacity:.45; transform:translateX(22px); } to { opacity:1; transform:translateX(0); } }
+    @keyframes productSlidePrev { from { opacity:.45; transform:translateX(-22px); } to { opacity:1; transform:translateX(0); } }
+    #product-list.page-slide-next, #popular-list.page-slide-next { animation:productSlideNext .32s cubic-bezier(.22,.61,.36,1); }
+    #product-list.page-slide-prev, #popular-list.page-slide-prev { animation:productSlidePrev .32s cubic-bezier(.22,.61,.36,1); }
+    @media (prefers-reduced-motion: reduce) {
+      #product-list.page-slide-next, #popular-list.page-slide-next,
+      #product-list.page-slide-prev, #popular-list.page-slide-prev { animation:none; }
+    }
+
     /* 모바일 상품목록: 12개씩 표시하고 손가락 좌우 스와이프로 페이지 이동 */
     #pagination .page-dots, #popular-pagination .page-dots { display:flex; justify-content:center; align-items:center; gap:8px; }
     #pagination .page-dot, #popular-pagination .page-dot { width:7px; height:7px; border:0; border-radius:50%; padding:0; background:#c7c7c7; cursor:pointer; }
@@ -299,10 +309,11 @@
 
   <script>
     const isPC = () => window.innerWidth >= 769;
-    const PC_PER_PAGE = 30, MOBILE_PER_PAGE = 12;
+    const PC_PER_PAGE = 30, MOBILE_PER_PAGE = 4;
     const PC_MAX_PAGES = Infinity, MOBILE_MAX_PAGES = Infinity;
     let allProducts = [], filteredProducts = [], currentPage = 1;
     let popularProducts = [], popularCurrentPage = 1;
+    let productPageDirection = 1, popularPageDirection = 1;
     const won = n => '₩ ' + Number(n || 0).toLocaleString();
 
     function getMember() { try { return JSON.parse(localStorage.getItem('member') || 'null'); } catch { return null; } }
@@ -433,6 +444,13 @@
     function getMaxPages() { return isPC() ? PC_MAX_PAGES : MOBILE_MAX_PAGES; }
     function bgUrl(url) { if (!url) return 'none'; return `url('${String(url).replace(/'/g, "\\'")}')`; }
 
+    function playProductPageAnimation(list, direction) {
+      if (!list || isPC()) return;
+      list.classList.remove('page-slide-next', 'page-slide-prev');
+      void list.offsetWidth;
+      list.classList.add(direction >= 0 ? 'page-slide-next' : 'page-slide-prev');
+    }
+
     function renderPage() {
       const list = document.getElementById('product-list');
       const perPage = getPerPage();
@@ -456,6 +474,7 @@
             <div class="card-info"><div class="name">${p.name}</div>${priceHtml}</div>
           </a>`;
       }).join('');
+      playProductPageAnimation(list, productPageDirection);
       renderPagination(source.length);
     }
     function renderPagination(totalCount) {
@@ -471,7 +490,7 @@
         html += `<button class="page-nav" data-page="${currentPage+1}" ${currentPage===totalPages?'disabled':''} style="${btnBase} background:${currentPage===totalPages?'#f5f5f5':'#fff'}; color:${currentPage===totalPages?'#bbb':'#222'}; border:1px solid #ddd;">다음</button>`;
         el.innerHTML = html;
       }
-      el.querySelectorAll('button[data-page]').forEach(b => b.onclick = () => { const page=Number(b.dataset.page); if(page<1||page>totalPages)return; currentPage=page; renderPage(); });
+      el.querySelectorAll('button[data-page]').forEach(b => b.onclick = () => { const page=Number(b.dataset.page); if(page<1||page>totalPages)return; productPageDirection = page >= currentPage ? 1 : -1; currentPage=page; renderPage(); });
     }
 
     async function loadPopularProducts() {
@@ -493,7 +512,7 @@
       } catch {}
       popularProducts = products.map(p => ({ ...p, _viewCount: viewCountMap[String(p.id)] || 0 }))
   .sort((a, b) => b._viewCount !== a._viewCount ? b._viewCount - a._viewCount : new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-  .slice(0, 12);
+  .slice(0, 10);
       popularCurrentPage = 1;
       renderPopularPage();
     }
@@ -513,6 +532,7 @@ const rankBadge = `<span class="rank-badge">BEST</span>`;
             <div class="card-info"><div class="name">${p.name}</div>${priceHtml}</div>
           </a>`;
       }).join('');
+      playProductPageAnimation(list, popularPageDirection);
       renderPopularPagination();
     }
     function renderPopularPagination() {
@@ -528,10 +548,10 @@ const rankBadge = `<span class="rank-badge">BEST</span>`;
         html += `<button class="page-nav" data-page="${popularCurrentPage+1}" ${popularCurrentPage===totalPages?'disabled':''} style="${btnBase} background:${popularCurrentPage===totalPages?'#f5f5f5':'#fff'}; color:${popularCurrentPage===totalPages?'#bbb':'#222'}; border:1px solid #ddd;">다음</button>`;
         el.innerHTML = html;
       }
-      el.querySelectorAll('button[data-page]').forEach(b => b.onclick = () => { const page=Number(b.dataset.page); if(page<1||page>totalPages)return; popularCurrentPage=page; renderPopularPage(); });
+      el.querySelectorAll('button[data-page]').forEach(b => b.onclick = () => { const page=Number(b.dataset.page); if(page<1||page>totalPages)return; popularPageDirection = page >= popularCurrentPage ? 1 : -1; popularCurrentPage=page; renderPopularPage(); });
     }
 
-    // 모바일에서 NEW / BEST 영역을 좌우로 밀면 다음 12개 상품 페이지로 이동
+    // 모바일에서 NEW / BEST 영역을 좌우로 밀면 다음 4개 상품 페이지로 부드럽게 이동
     function bindProductSwipe(listId, getPage, setPage, getTotal) {
       const el = document.getElementById(listId);
       if (!el || el.dataset.swipeBound) return;
@@ -543,7 +563,7 @@ const rankBadge = `<span class="rank-badge">BEST</span>`;
         const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
         if (Math.abs(dx)<45 || Math.abs(dx)<Math.abs(dy)*1.25) return;
         const next=Math.max(1,Math.min(getTotal(),getPage()+(dx<0?1:-1)));
-        if(next!==getPage()){setPage(next); if(listId==='product-list')renderPage(); else renderPopularPage();}
+        if(next!==getPage()){ const direction = next > getPage() ? 1 : -1; if(listId==='product-list'){productPageDirection=direction;setPage(next);renderPage();} else {popularPageDirection=direction;setPage(next);renderPopularPage();} }
       }, {passive:true});
     }
     bindProductSwipe('product-list',()=>currentPage,v=>currentPage=v,()=>Math.ceil(allProducts.length/getPerPage()));
