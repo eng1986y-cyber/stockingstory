@@ -396,15 +396,36 @@ async function recordVisit() {
     #app-footer .footer-text { margin-top:12px; padding-top:12px; border-top:1px dashed #ddd; font-size:12px; color:#999; white-space:pre-wrap; max-width:800px; margin-left:auto; margin-right:auto; }
     body.dark #app-footer .footer-text { border-top-color:#222; color:#555; }
     #app-footer .footer-sns-row { display:flex; justify-content:center; align-items:center; gap:12px; margin-top:14px; }
-    #app-footer .footer-sns-btn, #app-footer .footer-channel-btn { display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:50%; border:1px solid #e5e7eb; background:#fff; color:#4b5563; text-decoration:none; cursor:pointer; padding:0; font:inherit; }
-    #app-footer .footer-sns-btn:hover, #app-footer .footer-channel-btn:hover { background:#111827; color:#fff; border-color:#111827; }
-    body.dark #app-footer .footer-sns-btn, body.dark #app-footer .footer-channel-btn { background:#1a1a1a; border-color:#333; color:#e5e7eb; }
-    #app-footer .footer-channel-btn { display:none!important; }
+    #app-footer .footer-sns-btn, #app-footer .footer-channel-btn, .desktop-channel-launcher {
+      display:inline-flex; align-items:center; justify-content:center;
+      width:40px; height:40px; box-sizing:border-box; border-radius:50%;
+      border:1px solid #e5e7eb; background:#fff; color:#4b5563;
+      text-decoration:none; cursor:pointer; padding:0; font:inherit;
+    }
+    #app-footer .footer-sns-btn:hover, #app-footer .footer-channel-btn:hover, .desktop-channel-launcher:hover {
+      background:#111827; color:#fff; border-color:#111827;
+    }
+    body.dark #app-footer .footer-sns-btn, body.dark #app-footer .footer-channel-btn, body.dark .desktop-channel-launcher {
+      background:#1a1a1a; border-color:#333; color:#e5e7eb;
+    }
+
+    /* PC: 상품 영역의 오른쪽 끝선에 맞춰 화면 오른쪽 아래 고정 */
+    .desktop-channel-launcher {
+      position:fixed; z-index:99990;
+      right:max(16px, calc((100vw - 1400px) / 2 + 16px));
+      bottom:24px;
+      box-shadow:0 3px 12px rgba(0,0,0,.18);
+    }
+    .desktop-channel-launcher svg { width:20px; height:20px; display:block; }
     @media (max-width:768px) {
+      .desktop-channel-launcher { display:none!important; }
       #app-footer { padding:20px 16px; margin-top:24px; font-size:12px; }
       #app-footer .footer-sns-row { display:flex!important; gap:14px; margin-top:16px; margin-bottom:4px; flex-wrap:wrap; }
       #app-footer .footer-sns-btn, #app-footer .footer-channel-btn { display:inline-flex!important; width:44px; height:44px; }
       .site-main-scroll { padding-bottom:calc(65px + env(safe-area-inset-bottom) + 40px); }
+    }
+    @media (min-width:769px) {
+      #app-footer .footer-channel-btn { display:none!important; }
     }
 
     #mobile-bottom-nav { display:none; height:65px; flex-shrink:0; background:#fff; border-top:1px solid #eee; z-index:99999; justify-content:space-around; align-items:center; padding-bottom:env(safe-area-inset-bottom); }
@@ -423,9 +444,10 @@ async function recordVisit() {
     #mobile-bottom-nav.nav-count-7 .bottom-nav-item .nav-icon { width:16px; height:16px; }
     #mobile-bottom-nav.nav-count-7 .bottom-nav-item > span { font-size:8px; }
 
-    /* ===== 기본 채널톡 플로팅 아이콘 숨김: 하단 SNS 아이콘으로 통합 ===== */
+    /* ChannelIO 기본 런처는 숨기고, 아래에서 만든 사용자 지정 버튼만 사용 */
     #ch-plugin-launcher, #ch-plugin-entry,
-    iframe#ch-plugin-launcher, [id*="ch-plugin-launcher"] {
+    iframe#ch-plugin-launcher, iframe[id^="ch-plugin"],
+    [id="ch-plugin-launcher"], [id="ch-plugin-entry"] {
       display:none!important;
       visibility:hidden!important;
       pointer-events:none!important;
@@ -504,7 +526,7 @@ function renderFooter() {
   if (instagram) snsLinks.push(`<a href="${instagram}" target="_blank" rel="noopener noreferrer" class="footer-sns-btn" aria-label="Instagram"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>`);
   if (blog) snsLinks.push(`<a href="${blog}" target="_blank" rel="noopener noreferrer" class="footer-sns-btn" aria-label="Naver Blog"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"></circle><path d="M8 16V8l8 8V8"></path></svg></a>`);
   if (band) snsLinks.push(`<a href="${band}" target="_blank" rel="noopener noreferrer" class="footer-sns-btn" aria-label="Naver Band"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></a>`);
-  // 채널톡을 SNS 아이콘과 같은 하단 위치/스타일로 표시
+  // 모바일에서는 밴드 버튼 바로 옆에 채널톡 아이콘 표시
   snsLinks.push(`<button type="button" class="footer-channel-btn" aria-label="채널톡 문의" title="채널톡 문의" onclick="if(window.ChannelIO) window.ChannelIO('showMessenger')"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H5l-2 2v-9.5A7.5 7.5 0 0 1 10.5 4h2A7.5 7.5 0 0 1 20 11.5Z"></path><path d="M8 11h8M8 14h5"></path></svg></button>`);
   wrap.innerHTML = `
     <div class="footer-inner">
@@ -799,6 +821,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   applyPhoneAttrs();
   new MutationObserver(applyPhoneAttrs).observe(document.body, { childList: true, subtree: true });
   createScrollButtons();
+
+  // PC 전용 채널톡 버튼: 상품 컨테이너 우측 끝선에 맞춘 화면 오른쪽 아래
+  if (window.matchMedia('(min-width: 769px)').matches && !document.querySelector('.desktop-channel-launcher')) {
+    const channelBtn = document.createElement('button');
+    channelBtn.type = 'button';
+    channelBtn.className = 'desktop-channel-launcher';
+    channelBtn.setAttribute('aria-label', '채널톡 문의');
+    channelBtn.title = '채널톡 문의';
+    channelBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H5l-2 2v-9.5A7.5 7.5 0 0 1 10.5 4h2A7.5 7.5 0 0 1 20 11.5Z"></path><path d="M8 11h8M8 14h5"></path></svg>';
+    channelBtn.addEventListener('click', () => {
+      if (window.ChannelIO) window.ChannelIO('showMessenger');
+    });
+    document.body.appendChild(channelBtn);
+  }
 
   const tasks = [
     refreshFooterCache().then(() => renderFooter()),
