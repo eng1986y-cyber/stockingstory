@@ -445,8 +445,8 @@ async function recordVisit() {
     #mobile-bottom-nav.nav-count-7 .bottom-nav-item > span { font-size:8px; }
 
     /* ChannelIO 기본 런처는 숨기고, 아래에서 만든 사용자 지정 버튼만 사용 */
+    /* 채널톡 기본 런처만 숨김. 채팅창 iframe은 숨기지 않음 */
     #ch-plugin-launcher, #ch-plugin-entry,
-    iframe#ch-plugin-launcher, iframe[id^="ch-plugin"],
     [id="ch-plugin-launcher"], [id="ch-plugin-entry"] {
       display:none!important;
       visibility:hidden!important;
