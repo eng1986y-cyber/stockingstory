@@ -444,14 +444,15 @@ async function recordVisit() {
     #mobile-bottom-nav.nav-count-7 .bottom-nav-item .nav-icon { width:16px; height:16px; }
     #mobile-bottom-nav.nav-count-7 .bottom-nav-item > span { font-size:8px; }
 
-    /* ChannelIO 기본 런처는 숨기고, 아래에서 만든 사용자 지정 버튼만 사용 */
-    /* 채널톡 기본 런처만 숨김. 채팅창 iframe은 숨기지 않음 */
-    #ch-plugin-launcher, #ch-plugin-entry,
-    [id="ch-plugin-launcher"], [id="ch-plugin-entry"] {
-      display:none!important;
-      visibility:hidden!important;
-      pointer-events:none!important;
-    }
+    /* 채널톡 기본 런처만 숨김 - 실제 채팅창은 정상 표시 */
+#ch-plugin-launcher,
+#ch-plugin-entry,
+[id="ch-plugin-launcher"],
+[id="ch-plugin-entry"] {
+  display:none!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
   `;
   document.head.appendChild(style);
 })();
