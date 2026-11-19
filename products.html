@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>전체 상품 - STK스토리 심플라이프</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="common.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const db = supabase.createClient(
+      "https://alpdhgcipjeekzrpxlbh.supabase.co",
+      "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya"
+    );
+  </script>
+  <style>
+    .all-products-wrap {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px 16px 80px;
+    }
+    .all-products-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .all-products-head h1 {
+      font-size: 22px;
+      margin: 0;
+    }
+    .all-products-head .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .all-products-head input {
+      padding: 10px 14px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+      min-width: 220px;
+    }
+    .all-products-head select {
+      padding: 10px 12px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+      background: #fff;
+    }
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+    }
+    @media (max-width: 560px) {
+      .product-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    }
+    .product-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform .15s, box-shadow .15s;
+      cursor: pointer;
+    }
+    .product-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 18px rgba(0,0,0,.06);
+    }
+    .product-card .thumb {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: #f3f4f6;
+      object-fit: cover;
+      display: block;
+    }
+    .product-card .info {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .product-card .name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #111827;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .product-card .price {
+      font-size: 15px;
+      font-weight: 700;
+      color: #e53935;
+    }
+    .product-card .grade {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      align-self: flex-start;
+      background: #e5e7eb;
+      color: #374151;
+      font-weight: 700;
+    }
+    .product-card .grade.wholesale { background:#f59e0b; color:#fff; }
+    .product-card .grade.vip { background:#a855f7; color:#fff; }
+    .empty-state {
+      text-align: center;
+      color: #9ca3af;
+      padding: 60px 20px;
+      font-size: 14px;
+    }
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 28px;
+      flex-wrap: wrap;
+    }
+    .pagination button {
+      padding: 8px 14px;
+      border: 1px solid #e5e7eb;
+      background: #fff;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+    }
+    .pagination button.active {
+      background: #111827;
+      color: #fff;
+      border-color: #111827;
+    }
+  </style>
+</head>
+<body>
+  <div class="all-products-wrap">
+    <div class="all-products-head">
+      <h1>전체 상품</h1>
+      <div class="toolbar">
+        <input id="search-input" placeholder="상품명 / 제품번호 검색">
+        <select id="sort-select">
+          <option value="latest">최신순</option>
+          <option value="price_asc">가격 낮은순</option>
+          <option value="price_desc">가격 높은순</option>
+        </select>
+        <select id="grade-filter">
+          <option value="all">전체</option>
+          <option value="normal">일반</option>
+          <option value="wholesale">도매</option>
+          <option value="vip">VIP</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="products-grid" class="product-grid">
+      <div class="empty-state">로딩 중...</div>
+    </div>
+
+    <div id="pagination" class="pagination"></div>
+  </div>
+
+  <script>
+    const PER_PAGE = window.matchMedia('(max-width: 560px)').matches ? 8 : 12;
+
+    let allProducts = [];
+    let filtered = [];
+    let currentPage = 1;
+
+    const won = n => '₩' + Number(n || 0).toLocaleString();
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+    async function loadProducts() {
+      const { data, error } = await db
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) {
+        document.getElementById('products-grid').innerHTML =
+          `<div class="empty-state">❌ ${esc(error.message)}</div>`;
+        return;
+      }
+      allProducts = data || [];
+      applyFilter();
+    }
+
+    function applyFilter() {
+      const k = document.getElementById('search-input').value.trim().toLowerCase();
+      const grade = document.getElementById('grade-filter').value;
+      const sort = document.getElementById('sort-select').value;
+
+      filtered = allProducts.filter(p => {
+        if (grade !== 'all' && (p.target_grade || 'all') !== grade) return false;
+        if (k) {
+          const hay = `${p.name || ''} ${p.product_code || ''}`.toLowerCase();
+          if (!hay.includes(k)) return false;
+        }
+        return true;
+      });
+
+      if (sort === 'price_asc') filtered.sort((a,b) => Number(a.price||0) - Number(b.price||0));
+      else if (sort === 'price_desc') filtered.sort((a,b) => Number(b.price||0) - Number(a.price||0));
+      // latest: 원본 유지
+
+      currentPage = 1;
+      render();
+    }
+
+    function render() {
+      const grid = document.getElementById('products-grid');
+      const totalPages = Math.ceil(filtered.length / PER_PAGE) || 1;
+      const start = (currentPage - 1) * PER_PAGE;
+      const items = filtered.slice(start, start + PER_PAGE);
+
+      if (!items.length) {
+        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">조건에 맞는 상품이 없습니다.</div>';
+        document.getElementById('pagination').innerHTML = '';
+        return;
+      }
+
+      grid.innerHTML = items.map(p => {
+        const g = p.target_grade || 'all';
+        const gLabel = g === 'wholesale' ? '도매' : g === 'vip' ? 'VIP' : '일반';
+        const gClass = g === 'wholesale' ? 'wholesale' : g === 'vip' ? 'vip' : '';
+        return `
+          <div class="product-card" data-id="${p.id}">
+            <img class="thumb" src="${esc(p.main_image || '')}" alt="${esc(p.name||'')}" loading="lazy">
+            <div class="info">
+              <span class="grade ${gClass}">${gLabel}</span>
+              <span class="name">${esc(p.name || '(상품명 없음)')}</span>
+              <span class="price">${won(p.price)}</span>
+            </div>
+          </div>`;
+      }).join('');
+
+      grid.querySelectorAll('.product-card').forEach(card => {
+        card.onclick = () => {
+          location.href = `product.html?id=${card.dataset.id}`;
+        };
+      });
+
+      renderPagination(totalPages);
+    }
+
+    function renderPagination(totalPages) {
+      const el = document.getElementById('pagination');
+      if (totalPages <= 1) { el.innerHTML = ''; return; }
+      let html = '';
+      for (let i = 1; i <= totalPages; i++) {
+        html += `<button data-page="${i}" class="${i === currentPage ? 'active' : ''}">${i}</button>`;
+      }
+      el.innerHTML = html;
+      el.querySelectorAll('button').forEach(b => {
+        b.onclick = () => {
+          currentPage = Number(b.dataset.page);
+          render();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+      });
+    }
+
+    document.getElementById('search-input').addEventListener('input', applyFilter);
+    document.getElementById('grade-filter').addEventListener('change', applyFilter);
+    document.getElementById('sort-select').addEventListener('change', applyFilter);
+
+    loadProducts();
+  </script>
+</body>
+</html>
