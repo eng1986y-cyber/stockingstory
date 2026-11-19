@@ -396,29 +396,20 @@ async function recordVisit() {
     #app-footer .footer-text { margin-top:12px; padding-top:12px; border-top:1px dashed #ddd; font-size:12px; color:#999; white-space:pre-wrap; max-width:800px; margin-left:auto; margin-right:auto; }
     body.dark #app-footer .footer-text { border-top-color:#222; color:#555; }
     #app-footer .footer-sns-row { display:flex; justify-content:center; align-items:center; gap:12px; margin-top:14px; }
-    #app-footer .footer-sns-btn, #app-footer .footer-channel-btn, .desktop-channel-launcher {
+    #app-footer .footer-sns-btn, #app-footer .footer-channel-btn {
       display:inline-flex; align-items:center; justify-content:center;
       width:40px; height:40px; box-sizing:border-box; border-radius:50%;
       border:1px solid #e5e7eb; background:#fff; color:#4b5563;
       text-decoration:none; cursor:pointer; padding:0; font:inherit;
     }
-    #app-footer .footer-sns-btn:hover, #app-footer .footer-channel-btn:hover, .desktop-channel-launcher:hover {
+    #app-footer .footer-sns-btn:hover, #app-footer .footer-channel-btn:hover {
       background:#111827; color:#fff; border-color:#111827;
     }
-    body.dark #app-footer .footer-sns-btn, body.dark #app-footer .footer-channel-btn, body.dark .desktop-channel-launcher {
+    body.dark #app-footer .footer-sns-btn, body.dark #app-footer .footer-channel-btn {
       background:#1a1a1a; border-color:#333; color:#e5e7eb;
     }
 
-    /* PC: 상품 영역의 오른쪽 끝선에 맞춰 화면 오른쪽 아래 고정 */
-    .desktop-channel-launcher {
-      position:fixed; z-index:99990;
-      right:max(16px, calc((100vw - 1400px) / 2 + 16px));
-      bottom:24px;
-      box-shadow:0 3px 12px rgba(0,0,0,.18);
-    }
-    .desktop-channel-launcher svg { width:20px; height:20px; display:block; }
     @media (max-width:768px) {
-      .desktop-channel-launcher { display:none!important; }
       #app-footer { padding:20px 16px; margin-top:24px; font-size:12px; }
       #app-footer .footer-sns-row { display:flex!important; gap:14px; margin-top:16px; margin-bottom:4px; flex-wrap:wrap; }
       #app-footer .footer-sns-btn, #app-footer .footer-channel-btn { display:inline-flex!important; width:44px; height:44px; }
@@ -444,15 +435,6 @@ async function recordVisit() {
     #mobile-bottom-nav.nav-count-7 .bottom-nav-item .nav-icon { width:16px; height:16px; }
     #mobile-bottom-nav.nav-count-7 .bottom-nav-item > span { font-size:8px; }
 
-    /* 채널톡 기본 런처만 숨김 - 실제 채팅창은 정상 표시 */
-#ch-plugin-launcher,
-#ch-plugin-entry,
-[id="ch-plugin-launcher"],
-[id="ch-plugin-entry"] {
-  display:none!important;
-  visibility:hidden!important;
-  pointer-events:none!important;
-}
   `;
   document.head.appendChild(style);
 })();
@@ -822,20 +804,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   applyPhoneAttrs();
   new MutationObserver(applyPhoneAttrs).observe(document.body, { childList: true, subtree: true });
   createScrollButtons();
-
-  // PC 전용 채널톡 버튼: 상품 컨테이너 우측 끝선에 맞춘 화면 오른쪽 아래
-  if (window.matchMedia('(min-width: 769px)').matches && !document.querySelector('.desktop-channel-launcher')) {
-    const channelBtn = document.createElement('button');
-    channelBtn.type = 'button';
-    channelBtn.className = 'desktop-channel-launcher';
-    channelBtn.setAttribute('aria-label', '채널톡 문의');
-    channelBtn.title = '채널톡 문의';
-    channelBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H5l-2 2v-9.5A7.5 7.5 0 0 1 10.5 4h2A7.5 7.5 0 0 1 20 11.5Z"></path><path d="M8 11h8M8 14h5"></path></svg>';
-    channelBtn.addEventListener('click', () => {
-      if (window.ChannelIO) window.ChannelIO('showMessenger');
-    });
-    document.body.appendChild(channelBtn);
-  }
 
   const tasks = [
     refreshFooterCache().then(() => renderFooter()),
