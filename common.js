@@ -428,8 +428,19 @@ async function recordVisit() {
       #ch-plugin-launcher, #ch-plugin-entry { position:fixed!important; right:24px!important; bottom:145px!important; top:auto!important; z-index:899!important; transform:none!important; }
     }
     @media (max-width:768px) {
-      #ch-plugin-launcher, #ch-plugin-entry { display:none!important; }
-    }
+  /* 모바일에서도 채널톡 launcher 노출 (하단 네비 위로 띄움) */
+  #ch-plugin-launcher, #ch-plugin-entry {
+    display: flex !important;
+    position: fixed !important;
+    right: 16px !important;
+    bottom: calc(65px + env(safe-area-inset-bottom) + 16px) !important;
+    top: auto !important;
+    z-index: 999998 !important;
+    transform: none !important;
+  }
+  /* 자동 포커스 방지: 페이지 로드 시 input에 focus 주지 않도록 */
+  input:-webkit-autofill { -webkit-user-select: auto; }
+}
   `;
   document.head.appendChild(style);
 })();
