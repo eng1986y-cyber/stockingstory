@@ -842,5 +842,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   if (document.readyState === 'complete') l();
   else window.addEventListener('DOMContentLoaded', l, false);
-  window.ChannelIO('boot', { "pluginKey": "c5ed9957-c9e6-42af-887e-1b2ab2b6d1dd" });
+  // 모바일에서는 기본 플로팅 채널톡 버튼을 숨기고,
+  // SNS 영역의 footer-channel-btn으로만 상담창을 열도록 설정합니다.
+  // PC에서는 기존 기본 채널톡 버튼을 그대로 유지합니다.
+  var mobileChannelQuery = window.matchMedia('(max-width: 768px)');
+  window.ChannelIO('boot', {
+    "pluginKey": "c5ed9957-c9e6-42af-887e-1b2ab2b6d1dd",
+    "hideChannelButtonOnBoot": mobileChannelQuery.matches
+  });
+
+  // 화면 크기를 변경한 경우에도 모바일/PC 노출 상태를 맞춥니다.
+  var syncChannelButtonVisibility = function() {
+    if (!window.ChannelIO) return;
+    if (mobileChannelQuery.matches) window.ChannelIO('hideChannelButton');
+    else window.ChannelIO('showChannelButton');
+  };
+  if (typeof mobileChannelQuery.addEventListener === 'function') {
+    mobileChannelQuery.addEventListener('change', syncChannelButtonVisibility);
+  } else if (typeof mobileChannelQuery.addListener === 'function') {
+    mobileChannelQuery.addListener(syncChannelButtonVisibility);
+  }
 })();
