@@ -180,6 +180,26 @@
       #product-list .card .grade-badge { font-size:9px; padding:2px 5px; top:5px; right:5px; }
       #pagination, #popular-pagination { min-height:24px; margin-top:14px; margin-bottom:28px; }
     }
+
+    /* 메인 신규상품 / 베스트상품 카드: 호버 들뜸 효과 제거 및 라이트그레이 스타일 */
+    #product-list .card,
+    #popular-list .card {
+      background: #f5f5f5 !important;
+      border: 1px solid #e5e7eb !important;
+      border-radius: 10px;
+      transform: none !important;
+      box-shadow: none !important;
+      transition: none !important;
+    }
+    #product-list .card:hover,
+    #popular-list .card:hover,
+    #product-list .card:focus,
+    #popular-list .card:focus {
+      background: #f5f5f5 !important;
+      border-color: #e5e7eb !important;
+      transform: none !important;
+      box-shadow: none !important;
+    }
   </style>
 </head>
 <body>
