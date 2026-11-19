@@ -54,16 +54,16 @@
         <h2 class="mypage-title">내 정보</h2>
         <span id="title-grade-badge" class="title-grade-badge title-grade-일반회원">일반회원</span>
       </div>
-      <form id="mypage-form" class="mypage-form">
+      <form id="mypage-form" class="mypage-form" autocomplete="off">
         <div class="form-grid-2">
-          <div class="form-group"><label>아이디 (변경 불가)</label><input name="username" readonly></div>
-          <div class="form-group"><label>비밀번호</label><input name="password" type="password" placeholder="변경 시 입력"></div>
-          <div class="form-group"><label>이름</label><input name="name" required></div>
-          <div class="form-group"><label>연락처</label><input name="phone" type="tel" inputmode="numeric" required></div>
-          <div class="form-group"><label>이메일</label><input name="email" type="email"></div>
-          <div class="form-group"><label>우편번호</label><input name="postcode"></div>
-          <div class="form-group"><label>주소</label><input name="address"></div>
-          <div class="form-group"><label>상세주소</label><input name="address_detail"></div>
+          <div class="form-group"><label>아이디 (변경 불가)</label><input name="username" readonly tabindex="-1"></div>
+          <div class="form-group"><label>비밀번호</label><input name="password" type="password" placeholder="변경 시 입력" autocomplete="new-password"></div>
+          <div class="form-group"><label>이름</label><input name="name" required autocomplete="name"></div>
+          <div class="form-group"><label>연락처</label><input name="phone" type="tel" inputmode="numeric" required autocomplete="tel"></div>
+          <div class="form-group"><label>이메일</label><input name="email" type="email" autocomplete="email"></div>
+          <div class="form-group"><label>우편번호</label><input name="postcode" autocomplete="postal-code"></div>
+          <div class="form-group"><label>주소</label><input name="address" autocomplete="street-address"></div>
+          <div class="form-group"><label>상세주소</label><input name="address_detail" autocomplete="address-line2"></div>
         </div>
         <button type="submit">저장</button>
       </form>
@@ -95,7 +95,26 @@
       location.href = 'login.html';
     }
 
-    // ⭐ [이슈7] signup/login과 동일한 해시 함수
+    // ⭐ 모바일에서 페이지 진입 시 자동 포커스/키보드 팝업 원천 차단
+    (function preventAutoFocus() {
+      const killFocus = () => {
+        const ae = document.activeElement;
+        if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) {
+          ae.blur();
+        }
+      };
+      killFocus();
+      setTimeout(killFocus, 0);
+      setTimeout(killFocus, 100);
+      setTimeout(killFocus, 300);
+
+      // password 필드는 자동 순회 대상 제외 (모바일에서 자동 클릭 방지)
+      const pw = form.querySelector('input[name="password"]');
+      if (pw) pw.setAttribute('tabindex', '-1');
+      // readonly 아이디도 tab 순회 제외
+      form.querySelectorAll('input[readonly]').forEach(el => el.setAttribute('tabindex', '-1'));
+    })();
+
     async function sha256(text) {
       if (!window.crypto || !window.crypto.subtle) {
         let h = 0;
@@ -124,7 +143,6 @@
       titleGradeBadge.className = 'title-grade-badge title-grade-' + g;
     }
 
-    // ⭐ [이슈7] password 컬럼 제외하고 조회 (평문 노출 방지)
     async function loadFromServer() {
       const { data, error } = await db.from('members')
         .select('id, username, name, phone, email, postcode, address, address_detail, grade, status')
@@ -190,7 +208,6 @@
         address_detail: form.address_detail.value.trim() || null,
       };
 
-      // ⭐ [이슈7] 새 비밀번호는 해시로 저장
       if (form.password.value) {
         try {
           updates.password = await sha256(form.password.value);
@@ -203,7 +220,7 @@
       if (error) { msg.style.color = '#ef4444'; msg.textContent = '❌ ' + error.message; return; }
 
       const updated = { ...member, ...updates };
-      delete updated.password;  // ⭐ 로컬 저장소에는 비밀번호 저장 X
+      delete updated.password;
       localStorage.setItem('member', JSON.stringify(updated));
       member = updated;
       form.password.value = '';

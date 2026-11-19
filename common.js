@@ -16,8 +16,6 @@ const GRADE_SHIPPING = {
 
 // ============================================================
 // ⭐ [이슈2] 다중 플랫폼 영상 임베드 URL 변환
-// YouTube / Vimeo / Dailymotion / Naver TV / Kakao TV /
-// Facebook / Instagram / TikTok / Twitter(X) 등 지원
 // ============================================================
 function getVideoEmbedUrl(url) {
   if (!url) return '';
@@ -56,7 +54,6 @@ function getVideoEmbedUrl(url) {
 
   return s;
 }
-// 하위 호환
 function getYouTubeEmbedUrl(url) { return getVideoEmbedUrl(url); }
 
 // ============================================================
@@ -86,7 +83,6 @@ function saveLocalCart(cart) {
   try { localStorage.setItem(getCartKey(), JSON.stringify(cart || [])); } catch {}
 }
 
-// ⭐ [이슈4] 장바구니 담기 (로그인 필수 + 유저별 유지)
 function addToCartWithAuth(item) {
   const m = getLoggedMember();
   if (!m || !m.id) {
@@ -110,7 +106,6 @@ function addToCartWithAuth(item) {
   return { ok: true, cart };
 }
 
-// 등급 접근 규칙
 function canAccessWholesale(memberGrade) { return memberGrade === '도매회원'; }
 function canAccessVip(memberGrade) { return memberGrade === 'VIP회원'; }
 function canPurchaseProduct(memberGrade, targetGrade) {
@@ -156,7 +151,7 @@ function getSupabaseClient() {
 }
 
 // ============================================================
-// ⭐ [이슈4] 서버 장바구니 동기화 (carts 테이블 사용, 로그인 필수)
+// ⭐ [이슈4] 서버 장바구니 동기화
 // ============================================================
 function mapServerCartRow(row) {
   return {
@@ -189,7 +184,7 @@ async function syncCartFromServer() {
     saveLocalCart(mapped);
     if (typeof updateBottomNavBadge === 'function') updateBottomNavBadge();
     if (typeof renderHeader === 'function' && document.getElementById('app-header')) {
-      const mapPath = { 'index':'home','login':'login','signup':'signup','cart':'cart','orders':'orders','product':'product','mypage':'mypage','myorders':'myorders','wholesale':'wholesale','vip':'vip' };
+      const mapPath = { 'index':'home','login':'login','signup':'signup','cart':'cart','orders':'orders','product':'product','mypage':'mypage','myorders':'myorders','wholesale':'wholesale','vip':'vip','products':'products' };
       renderHeader(mapPath[_pathName] || 'home');
     }
   } catch (e) { console.warn('장바구니 서버 로드 오류:', e); }
@@ -229,7 +224,6 @@ async function pushCartToServer(cartArray) {
   } catch (e) { console.warn('장바구니 서버 저장 오류:', e); }
 }
 
-// [이슈4] 로그인 시 자동 서버 장바구니 로드 (재로그인해도 유지)
 (function setupCartServerWatcher() {
   if (window.__cartServerWatcherInstalled) return;
   window.__cartServerWatcherInstalled = true;
@@ -238,14 +232,11 @@ async function pushCartToServer(cartArray) {
   window.addEventListener('storage', e => { if (e.key === 'member') onLogin(); });
 })();
 
-// [이슈4] 로그아웃 시 localStorage의 member만 지우고 cart_${id}는 남김 → 재로그인 유지
-
 function getCachedLogo() { try { return JSON.parse(localStorage.getItem('logo_cache') || 'null') || {}; } catch { return {}; } }
 function setCachedLogo(obj) { try { localStorage.setItem('logo_cache', JSON.stringify(obj)); } catch {} }
 function getCachedFooter() { try { return JSON.parse(localStorage.getItem('footer_cache') || 'null') || {}; } catch { return {}; } }
 function setCachedFooter(obj) { try { localStorage.setItem('footer_cache', JSON.stringify(obj)); } catch {} }
 
-// [이슈8] TTL 캐시 적용
 async function refreshLogoCache() {
   return cachedGet('logo_cache_db', 5*60*1000, async () => {
     const client = getSupabaseClient();
@@ -306,7 +297,7 @@ async function recordVisit() {
 }
 
 // ============================================================
-// ⭐ 스타일 (기존 유지, 축약 없음)
+// ⭐ 스타일 (모바일 채널톡 노출 포함)
 // ============================================================
 (function() {
   const style = document.createElement('style');
@@ -364,12 +355,20 @@ async function recordVisit() {
     .header-search-result .hsr-code { margin-top:4px; font-size:11px; color:#888; }
     .header-search-result .hsr-price { font-size:13px; font-weight:700; color:#e53935; white-space:nowrap; }
     .header-search-message { padding:18px 14px; text-align:center; font-size:13px; color:#888; }
+
+    /* ===== 모바일 헤더: 상품 검색창을 상단에 항상 노출 ===== */
     @media (max-width:768px) {
-      .header-toolbar { display:block; margin-top:8px; }
-      .header-product-search { width:100%; min-width:0; max-width:none; height:36px; }
+      .header-toolbar { display:flex; flex-direction:column; gap:8px; margin-top:8px; }
+      .header-product-search {
+        width:100% !important; min-width:0 !important; max-width:none !important;
+        height:40px !important; flex:1 1 auto !important; margin-right:0 !important;
+        display:flex !important;
+      }
+      .header-product-search input { height:40px !important; font-size:14px; }
+      .header-product-search button { width:40px !important; min-width:40px !important; height:40px !important; }
       .header-search-popup { width:100%; max-height:55vh; }
-      .header-nav-wrap { display:none!important; }
-      #app-header header { padding:10px 16px 8px 16px!important; }
+      .header-nav-wrap { display:none !important; }
+      #app-header header { padding:10px 16px 8px 16px !important; }
       .site-main-scroll { overflow-y:auto; }
     }
 
@@ -424,23 +423,30 @@ async function recordVisit() {
     #mobile-bottom-nav.nav-count-7 .bottom-nav-item .nav-icon { width:16px; height:16px; }
     #mobile-bottom-nav.nav-count-7 .bottom-nav-item > span { font-size:8px; }
 
+    /* ===== 채널톡 위치 (데스크톱/모바일 모두 노출) ===== */
     @media (min-width:769px) {
-      #ch-plugin-launcher, #ch-plugin-entry { position:fixed!important; right:24px!important; bottom:145px!important; top:auto!important; z-index:899!important; transform:none!important; }
+      #ch-plugin-launcher, #ch-plugin-entry {
+        position:fixed!important;
+        right:24px!important;
+        bottom:24px!important;
+        top:auto!important;
+        z-index:999998!important;
+        transform:none!important;
+        display:flex!important;
+      }
     }
     @media (max-width:768px) {
-  /* 모바일에서도 채널톡 launcher 노출 (하단 네비 위로 띄움) */
-  #ch-plugin-launcher, #ch-plugin-entry {
-    display: flex !important;
-    position: fixed !important;
-    right: 16px !important;
-    bottom: calc(65px + env(safe-area-inset-bottom) + 16px) !important;
-    top: auto !important;
-    z-index: 999998 !important;
-    transform: none !important;
-  }
-  /* 자동 포커스 방지: 페이지 로드 시 input에 focus 주지 않도록 */
-  input:-webkit-autofill { -webkit-user-select: auto; }
-}
+      /* 모바일에서도 launcher 노출, 하단 네비 위로 띄움 */
+      #ch-plugin-launcher, #ch-plugin-entry {
+        display:flex!important;
+        position:fixed!important;
+        right:16px!important;
+        bottom:calc(65px + env(safe-area-inset-bottom) + 16px)!important;
+        top:auto!important;
+        z-index:999998!important;
+        transform:none!important;
+      }
+    }
   `;
   document.head.appendChild(style);
 })();
@@ -527,7 +533,7 @@ function renderFooter() {
 }
 
 // ============================================================
-// ⭐ [이슈5] 헤더 상품검색: 로그인 등급 무관 통합검색 (도매/VIP 포함)
+// 헤더 상품검색
 // ============================================================
 let _headerSearchProducts = null;
 let _headerSearchLoading = false;
@@ -547,7 +553,6 @@ async function getHeaderSearchProducts() {
   try {
     const client = getSupabaseClient();
     if (!client) throw new Error('상품 검색 연결 실패');
-    // [이슈5] 등급 무시 → 전체 상품 로드 (도매/VIP 포함)
     const { data, error } = await client.from('products')
       .select('id,name,product_code,main_image,price,target_grade,created_at')
       .order('created_at', { ascending: false });
@@ -573,7 +578,6 @@ function bindHeaderProductSearch() {
     showMessage('상품을 검색하고 있습니다...');
     try {
       const products = await getHeaderSearchProducts();
-      // [이슈5] 등급 무관 통합검색 + 부적합한 상품 안내 (링크로 이동 시 해당 페이지에서 처리)
       const matches = products.filter(p => {
         const name = String(p.name || '').normalize('NFKC').toLocaleLowerCase();
         const code = String(p.product_code || '').normalize('NFKC').toLocaleLowerCase();
@@ -581,8 +585,6 @@ function bindHeaderProductSearch() {
       }).slice(0, 30);
       if (!matches.length) { showMessage('검색 결과가 없습니다.'); return; }
 
-      const member = getLoggedMember();
-      const memberGrade = member?.grade || '일반회원';
       popup.innerHTML = matches.map(p => {
         const id = encodeURIComponent(p.id);
         const name = escapeHeaderSearchHtml(p.name || '상품명 없음');
@@ -615,6 +617,7 @@ function bindHeaderProductSearch() {
 function buildBottomNav(current, isMember, svgIcons, memberGrade) {
   const commonTabs = `
     <a href="index.html" data-nav="home" class="bottom-nav-item ${current === 'home' ? 'active' : ''}">${svgIcons.home}<span>홈</span></a>
+    <a href="products.html" data-nav="products" class="bottom-nav-item ${current === 'products' ? 'active' : ''}">${svgIcons.products}<span>전체상품</span></a>
     <a href="cart.html" data-nav="cart" class="bottom-nav-item ${current === 'cart' ? 'active' : ''}">${svgIcons.cart}<span id="bottom-cart-badge" class="cart-badge" style="display:none;">0</span><span>장바구니</span></a>
     <a href="orders.html" data-nav="orders" class="bottom-nav-item ${current === 'orders' ? 'active' : ''}">${svgIcons.orders}<span>주문조회</span></a>
   `;
@@ -630,7 +633,7 @@ function buildBottomNav(current, isMember, svgIcons, memberGrade) {
     : `<a href="login.html" data-nav="login" class="bottom-nav-item ${current === 'login' ? 'active' : ''}">${svgIcons.login}<span>로그인</span></a>
        <a href="signup.html" data-nav="signup" class="bottom-nav-item ${current === 'signup' ? 'active' : ''}">${svgIcons.signup}<span>회원가입</span></a>`;
   const gradeCount = (gradeTabs.match(/<a /g) || []).length;
-  const count = 3 + gradeCount + (isMember ? 3 : 2);
+  const count = 4 + gradeCount + (isMember ? 3 : 2);
   return { html: commonTabs + gradeTabs + memberTabs, count };
 }
 function updateBottomNavBadge() {
@@ -646,7 +649,6 @@ function bindBottomLogout() {
   if (blb) blb.onclick = e => {
     e.preventDefault();
     if (confirm('로그아웃 하시겠습니까?')) {
-      // [이슈4] cart_${id}는 남겨두고 member만 삭제 → 재로그인 시 유지
       localStorage.removeItem('member');
       location.href = 'index.html';
     }
@@ -677,6 +679,7 @@ function renderHeader(current) {
   const memberGrade = m?.grade || '일반회원';
   const svgIcons = {
     home: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
+    products: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`,
     cart: `<svg class="nav-icon" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>`,
     orders: `<svg class="nav-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,
     myorders: `<svg class="nav-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
@@ -750,6 +753,7 @@ function renderHeader(current) {
             <div class="header-search-popup" id="header-search-popup" role="listbox"></div>
           </form>
           <nav class="header-nav-wrap" aria-label="회원 메뉴">
+            <a href="products.html" data-nav="products" style="${btnStyle(current === 'products')}">전체상품</a>
             <a href="cart.html" data-nav="cart" style="${btnStyle(current === 'cart')}">장바구니 <span id="cart-count" style="margin-left:4px;">0</span></a>
             <a href="orders.html" data-nav="orders" style="${btnStyle(current === 'orders')}">주문조회</a>
             ${userBtns}
@@ -765,7 +769,6 @@ function renderHeader(current) {
   const lb = document.getElementById('logout-btn');
   if (lb) lb.onclick = e => {
     e.preventDefault();
-    // [이슈4] cart_${id} 유지
     localStorage.removeItem('member');
     location.href = 'index.html';
   };
@@ -773,7 +776,7 @@ function renderHeader(current) {
 }
 
 // ============================================================
-// ⭐ [이슈8] 부트스트랩: 병렬 로드로 속도 개선
+// 부트스트랩
 // ============================================================
 document.addEventListener('DOMContentLoaded', async () => {
   if (_isAdmin) {
@@ -812,7 +815,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   new MutationObserver(applyPhoneAttrs).observe(document.body, { childList: true, subtree: true });
   createScrollButtons();
 
-  // [이슈8] 병렬 실행
   const tasks = [
     refreshFooterCache().then(() => renderFooter()),
     recordVisit()
@@ -820,7 +822,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (isLoggedInMember()) tasks.push(syncCartFromServer().catch(()=>{}));
   await Promise.allSettled(tasks);
 
-  const map = { 'index':'home','login':'login','signup':'signup','cart':'cart','orders':'orders','product':'product','mypage':'mypage','myorders':'myorders','wholesale':'wholesale','vip':'vip' };
+  const map = { 'index':'home','login':'login','signup':'signup','cart':'cart','orders':'orders','product':'product','mypage':'mypage','myorders':'myorders','wholesale':'wholesale','vip':'vip','products':'products' };
   const current = map[_pathName] || 'home';
   if (document.getElementById('app-header')) renderHeader(current);
 
@@ -830,7 +832,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   }, 300);
 });
 
-// 채널톡 (기존 유지)
+// ============================================================
+// 채널톡 부트 (모바일에서도 정상 노출)
+// ============================================================
 (function() {
   var w = window;
   if (w.ChannelIO) return;
