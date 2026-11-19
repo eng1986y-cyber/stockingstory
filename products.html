@@ -17,11 +17,11 @@
       flex-wrap: wrap; gap: 12px; margin-bottom: 20px; padding: 0 4px;
     }
     .ap-head h1 {
-      font-size: 22px; font-weight: 800; color: #111827; margin: 0;
+      font-size: 22px; font-weight: 800; color: #fff; margin: 0;
       display: flex; align-items: center; gap: 10px;
     }
     .ap-head h1 .count {
-      font-size: 13px; color: #6b7280; font-weight: 500;
+      font-size: 13px; color: #fff; font-weight: 500;
     }
     .ap-toolbar {
       display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
@@ -104,13 +104,6 @@
     <div class="ap-head">
       <h1>전체 상품 <span class="count" id="ap-count"></span></h1>
       <div class="ap-toolbar">
-        <input id="ap-search" type="search" placeholder="상품명 / 제품번호 검색" autocomplete="off">
-        <select id="ap-grade">
-          <option value="all">전체</option>
-          <option value="normal">일반</option>
-          <option value="wholesale">도매</option>
-          <option value="vip">VIP</option>
-        </select>
         <select id="ap-sort">
           <option value="latest">최신순</option>
           <option value="price_asc">가격 낮은순</option>
@@ -180,21 +173,10 @@
     }
 
     function applyFilter() {
-      const k = document.getElementById('ap-search').value.trim().toLowerCase();
-      const grade = document.getElementById('ap-grade').value;
       const sort = document.getElementById('ap-sort').value;
 
-      filtered = allProducts.filter(p => {
-        const tg = p.target_grade || 'all';
-        if (grade === 'normal' && tg !== 'all') return false;
-        if (grade === 'wholesale' && tg !== 'wholesale') return false;
-        if (grade === 'vip' && tg !== 'vip') return false;
-        if (k) {
-          const hay = `${p.name || ''} ${p.product_code || ''}`.toLowerCase();
-          if (!hay.includes(k)) return false;
-        }
-        return true;
-      });
+      // 검색창과 카테고리 선택 제거: 전체 상품을 정렬만 합니다.
+      filtered = [...allProducts];
 
       if (sort === 'price_asc') filtered.sort((a,b) => Number(a.price||0) - Number(b.price||0));
       else if (sort === 'price_desc') filtered.sort((a,b) => Number(b.price||0) - Number(a.price||0));
@@ -263,8 +245,6 @@
       });
     }
 
-    document.getElementById('ap-search').addEventListener('input', applyFilter);
-    document.getElementById('ap-grade').addEventListener('change', applyFilter);
     document.getElementById('ap-sort').addEventListener('change', applyFilter);
 
     let resizeTimer;
