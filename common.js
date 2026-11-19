@@ -423,29 +423,12 @@ async function recordVisit() {
     #mobile-bottom-nav.nav-count-7 .bottom-nav-item .nav-icon { width:16px; height:16px; }
     #mobile-bottom-nav.nav-count-7 .bottom-nav-item > span { font-size:8px; }
 
-    /* ===== 채널톡 위치 (데스크톱/모바일 모두 노출) ===== */
-    @media (min-width:769px) {
-      #ch-plugin-launcher, #ch-plugin-entry {
-        position:fixed!important;
-        right:24px!important;
-        bottom:24px!important;
-        top:auto!important;
-        z-index:999998!important;
-        transform:none!important;
-        display:flex!important;
-      }
-    }
-    @media (max-width:768px) {
-      /* 모바일에서도 launcher 노출, 하단 네비 위로 띄움 */
-      #ch-plugin-launcher, #ch-plugin-entry {
-        display:flex!important;
-        position:fixed!important;
-        right:16px!important;
-        bottom:calc(65px + env(safe-area-inset-bottom) + 16px)!important;
-        top:auto!important;
-        z-index:999998!important;
-        transform:none!important;
-      }
+    /* ===== 기본 채널톡 플로팅 아이콘 숨김: 하단 SNS 아이콘으로 통합 ===== */
+    #ch-plugin-launcher, #ch-plugin-entry,
+    iframe#ch-plugin-launcher, [id*="ch-plugin-launcher"] {
+      display:none!important;
+      visibility:hidden!important;
+      pointer-events:none!important;
     }
   `;
   document.head.appendChild(style);
@@ -521,6 +504,8 @@ function renderFooter() {
   if (instagram) snsLinks.push(`<a href="${instagram}" target="_blank" rel="noopener noreferrer" class="footer-sns-btn" aria-label="Instagram"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>`);
   if (blog) snsLinks.push(`<a href="${blog}" target="_blank" rel="noopener noreferrer" class="footer-sns-btn" aria-label="Naver Blog"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"></circle><path d="M8 16V8l8 8V8"></path></svg></a>`);
   if (band) snsLinks.push(`<a href="${band}" target="_blank" rel="noopener noreferrer" class="footer-sns-btn" aria-label="Naver Band"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></a>`);
+  // 채널톡을 SNS 아이콘과 같은 하단 위치/스타일로 표시
+  snsLinks.push(`<button type="button" class="footer-channel-btn" aria-label="채널톡 문의" title="채널톡 문의" onclick="if(window.ChannelIO) window.ChannelIO('showMessenger')"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H5l-2 2v-9.5A7.5 7.5 0 0 1 10.5 4h2A7.5 7.5 0 0 1 20 11.5Z"></path><path d="M8 11h8M8 14h5"></path></svg></button>`);
   wrap.innerHTML = `
     <div class="footer-inner">
       ${owner ? `<div class="footer-title">${owner}</div>` : ''}
