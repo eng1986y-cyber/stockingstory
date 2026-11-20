@@ -1984,11 +1984,258 @@
       };
     }
 
-    // ============ 회원 관리 ============
-    async function loadMembers() { /* ... */ }
-    async function loadCouponsAndMembers() { /* ... */ }
-    async function loadNoticeAdminList() { /* ... */ }
-    async function loadBoardAdminList() { /* ... */ }
+    // ============ 회원 관리 (복구 및 추가) ============
+    let allMembers = [], filteredMembers = [], memberPage = 1;
+    const MEMBER_PER_PAGE = 10;
+
+    async function loadMembers() {
+      const listEl = document.getElementById('member-list');
+      listEl.innerHTML = '<div class="tab-loading">회원 목록 로딩 중...</div>';
+      const { data, error } = await db.from('members').select('*').order('created_at', { ascending: false });
+      if (error) { listEl.innerHTML = '<p style="color:#dc2626;">❌ ' + error.message + '</p>'; return; }
+      allMembers = data || [];
+      document.getElementById('member-check-all').checked = false;
+      applyMemberSearch(document.getElementById('member-search').value.trim());
+    }
+
+    function applyMemberSearch(text) {
+      const k = text.toLowerCase().trim();
+      if (!k) filteredMembers = [...allMembers];
+      else filteredMembers = allMembers.filter(m => {
+        return [m.name, m.email, m.phone, m.id].some(v => String(v || '').toLowerCase().includes(k));
+      });
+      memberPage = 1;
+      renderMembers();
+    }
+
+    function renderMembers() {
+      const listEl = document.getElementById('member-list');
+      const total = filteredMembers.length;
+      const totalPages = Math.ceil(total / MEMBER_PER_PAGE) || 1;
+      const start = (memberPage - 1) * MEMBER_PER_PAGE;
+      const items = filteredMembers.slice(start, start + MEMBER_PER_PAGE);
+
+      if (items.length === 0) {
+        listEl.innerHTML = '<p style="text-align:center;color:#9ca3af;padding:20px;">회원이 없습니다.</p>';
+        document.getElementById('member-pagination').innerHTML = ''; return;
+      }
+
+      listEl.innerHTML = items.map(m => `
+        <div class="row-item">
+          <input type="checkbox" class="row-check member-check" data-id="${m.id}">
+          <div style="flex:1; min-width:200px;">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+              <span class="row-strong">${esc(m.name)}</span>
+              <span class="badge grade-${m.grade || '일반회원'}">${m.grade || '일반회원'}</span>
+            </div>
+            <div style="font-size:12px; color:#6b7280; line-height:1.5;">
+              ID: ${esc(m.email)} | 연락처: ${esc(m.phone || '-')}<br>
+              가입일: ${formatKST(m.created_at, { dateOnly: true })}
+            </div>
+          </div>
+          <div class="row-actions">
+            <button class="btn btn-success btn-sm issue-coupon-btn" data-id="${m.id}">🎁 쿠폰 발급</button>
+            <button class="btn btn-secondary btn-sm edit-member-btn" data-id="${m.id}">수정</button>
+            <button class="btn btn-danger btn-sm del-member-btn" data-id="${m.id}">삭제</button>
+          </div>
+        </div>
+      `).join('');
+
+      // 이벤트 바인딩
+      listEl.querySelectorAll('.issue-coupon-btn').forEach(btn => {
+        btn.onclick = () => openCouponIssueModal(btn.dataset.id);
+      });
+      listEl.querySelectorAll('.edit-member-btn').forEach(btn => {
+        btn.onclick = () => openMemberEditModal(btn.dataset.id);
+      });
+      listEl.querySelectorAll('.del-member-btn').forEach(btn => {
+        btn.onclick = async () => {
+          if (!confirm('정말 삭제할까요?')) return;
+          const { error } = await db.from('members').delete().eq('id', btn.dataset.id);
+          if (error) alert('삭제 실패: ' + error.message);
+          else loadMembers();
+        };
+      });
+      
+      renderMemberPagination(totalPages);
+    }
+
+    function renderMemberPagination(totalPages) {
+      const el = document.getElementById('member-pagination');
+      if (totalPages <= 1) { el.innerHTML = ''; return; }
+      let html = '';
+      for (let i = 1; i <= totalPages; i++) html += `<button class="btn ${i === memberPage ? 'btn-primary' : 'btn-secondary'} btn-sm" data-page="${i}">${i}</button>`;
+      el.innerHTML = html;
+      el.querySelectorAll('button').forEach(b => b.onclick = () => { memberPage = Number(b.dataset.page); renderMembers(); });
+    }
+
+    // 쿠폰 발급 모달 (회원 목록에서 호출)
+    function openCouponIssueModal(memberId) {
+      // 쿠폰 탭으로 이동 후 해당 회원 선택
+      document.querySelector('.admin-tabbar .nav-item[data-tab="coupons"]').click();
+      setTimeout(() => {
+        const sel = document.getElementById('coupon-member-select');
+        if (sel) {
+          sel.value = memberId;
+          document.getElementById('coupon-name-input').focus();
+        }
+      }, 100);
+    }
+
+    // 회원 수정 모달
+    function openMemberEditModal(memberId) {
+      const m = allMembers.find(x => String(x.id) === String(memberId));
+      if (!m) return;
+      const modal = document.createElement('div');
+      modal.className = 'modal-backdrop';
+      modal.innerHTML = `
+        <div class="modal-box">
+          <h2>회원 정보 수정</h2>
+          <form id="member-edit-form" class="modal-form">
+            <label>이름</label>
+            <input name="name" value="${esc(m.name)}" required>
+            <label>이메일 (ID)</label>
+            <input name="email" value="${esc(m.email)}" readonly style="background:#f3f4f6;">
+            <label>연락처</label>
+            <input name="phone" value="${esc(m.phone || '')}">
+            <label>등급</label>
+            <select name="grade">
+              <option value="일반회원" ${m.grade === '일반회원' ? 'selected' : ''}>일반회원</option>
+              <option value="도매회원" ${m.grade === '도매회원' ? 'selected' : ''}>도매회원</option>
+              <option value="VIP회원" ${m.grade === 'VIP회원' ? 'selected' : ''}>VIP회원</option>
+            </select>
+            <div class="modal-actions">
+              <button type="submit" class="btn btn-primary">저장</button>
+              <button type="button" id="cancel-member-edit" class="btn btn-secondary">취소</button>
+            </div>
+          </form>
+        </div>`;
+      document.body.appendChild(modal);
+      modal.querySelector('#cancel-member-edit').onclick = () => modal.remove();
+      modal.querySelector('#member-edit-form').onsubmit = async e => {
+        e.preventDefault();
+        const f = e.target;
+        const { error } = await db.from('members').update({
+          name: f.name.value.trim(),
+          phone: f.phone.value.trim(),
+          grade: f.grade.value
+        }).eq('id', m.id);
+        if (error) alert('❌ ' + error.message);
+        else { alert('✅ 수정 완료!'); modal.remove(); loadMembers(); }
+      };
+    }
+
+    document.getElementById('member-search-btn').onclick = () => applyMemberSearch(document.getElementById('member-search').value.trim());
+    document.getElementById('member-reset-btn').onclick = () => { document.getElementById('member-search').value = ''; applyMemberSearch(''); };
+    document.getElementById('member-search').addEventListener('keypress', e => { if (e.key === 'Enter') { e.preventDefault(); applyMemberSearch(e.target.value.trim()); } });
+
+
+    // ============ 쿠폰 관리 (수정: 발급 대상자 표시) ============
+    let allCoupons = [], filteredCoupons = [], couponPage = 1;
+    const COUPON_PER_PAGE = 10;
+
+    async function loadCouponsAndMembers() {
+      // 회원 목록 불러오기 (발급 대상자 표시용)
+      const { data: membersData } = await db.from('members').select('id, name, email').order('name');
+      allMembers = membersData || []; // 전역 변수 업데이트
+
+      // 회원 선택 드롭다운 채우기
+      const sel = document.getElementById('coupon-member-select');
+      sel.innerHTML = '<option value="">회원 선택...</option>' + 
+        allMembers.map(m => `<option value="${m.id}">${esc(m.name)} (${esc(m.email)})</option>`).join('');
+
+      // 쿠폰 목록 불러오기
+      const listEl = document.getElementById('coupon-list');
+      listEl.innerHTML = '<div class="tab-loading">쿠폰 로딩 중...</div>';
+      const { data, error } = await db.from('coupons').select('*').order('created_at', { ascending: false });
+      if (error) { listEl.innerHTML = '<p style="color:#dc2626;">❌ ' + error.message + '</p>'; return; }
+      
+      allCoupons = data || [];
+      renderCoupons();
+    }
+
+    function renderCoupons() {
+      const listEl = document.getElementById('coupon-list');
+      if (allCoupons.length === 0) {
+        listEl.innerHTML = '<p style="text-align:center;color:#9ca3af;padding:20px;">발급된 쿠폰이 없습니다.</p>'; return;
+      }
+
+      // [수정] 쿠폰 발급 대상자(회원 이름/이메일) 매핑
+      const memberMap = new Map(allMembers.map(m => [String(m.id), m]));
+
+      listEl.innerHTML = allCoupons.map(c => {
+        const target = memberMap.get(String(c.member_id));
+        const targetName = target ? `${esc(target.name)} (${esc(target.email)})` : '알 수 없음';
+        const typeLabel = c.type === 'percent' ? `${c.discount_value}% 할인` : `${Number(c.discount_value).toLocaleString()}원 할인`;
+        const isUsed = c.is_used ? '<span class="badge" style="background:#6b7280;">사용됨</span>' : '<span class="badge" style="background:#059669;">사용가능</span>';
+        
+        return `
+          <div class="row-item">
+            <div style="flex:1; min-width:200px;">
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                <span class="row-strong">${esc(c.name || '이름없음')}</span>
+                ${isUsed}
+                <span style="font-size:12px; color:#1976d2; font-weight:600;">👉 ${targetName}</span>
+              </div>
+              <div style="font-size:12px; color:#6b7280; line-height:1.5;">
+                할인: ${typeLabel} | 코드: ${esc(c.code)}<br>
+                유효기간: ~${formatKST(c.expires_at, { dateOnly: true })}
+                ${c.is_used && c.used_at ? ` | 사용일: ${formatKST(c.used_at, { dateOnly: true })}` : ''}
+              </div>
+            </div>
+            <div class="row-actions">
+              <button class="btn btn-danger btn-sm del-coupon-btn" data-id="${c.id}">삭제</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      listEl.querySelectorAll('.del-coupon-btn').forEach(btn => {
+        btn.onclick = async () => {
+          if (!confirm('쿠폰을 삭제할까요?')) return;
+          const { error } = await db.from('coupons').delete().eq('id', btn.dataset.id);
+          if (error) alert('❌ ' + error.message);
+          else loadCouponsAndMembers();
+        };
+      });
+    }
+
+    document.getElementById('coupon-issue-form').onsubmit = async e => {
+      e.preventDefault();
+      const msg = document.getElementById('coupon-issue-msg');
+      const memberId = document.getElementById('coupon-member-select').value;
+      const type = document.getElementById('coupon-type-select').value;
+      const value = Number(document.getElementById('coupon-value-input').value);
+      const days = Number(document.getElementById('coupon-days-input').value);
+      const name = document.getElementById('coupon-name-input').value.trim();
+
+      if (!memberId) { msg.className = 'msg error'; msg.textContent = '회원을 선택하세요.'; return; }
+
+      msg.className = 'msg'; msg.textContent = '발급 중...';
+      
+      const code = 'CP-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + days);
+
+      const { error } = await db.from('coupons').insert({
+        member_id: memberId,
+        code: code,
+        name: name || '관리자 발급 쿠폰',
+        type: type,
+        discount_value: value,
+        expires_at: expiresAt.toISOString(),
+        is_used: false
+      });
+
+      if (error) {
+        msg.className = 'msg error'; msg.textContent = '❌ ' + error.message;
+      } else {
+        msg.className = 'msg success'; msg.textContent = '✅ 쿠폰이 발급되었습니다!';
+        document.getElementById('coupon-name-input').value = '';
+        loadCouponsAndMembers(); // 목록 새로고침
+      }
+    };
+
 
     // 초기 세션 체크 실행
     checkSession();
