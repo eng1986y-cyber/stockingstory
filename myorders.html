@@ -270,14 +270,17 @@
         const displayNum = first.order_number || `(번호 없음)`;
         const fullAddress = `${first.postcode ? `[${first.postcode}] ` : ''}${first.address || ''} ${first.address_detail || ''}`.trim();
 
+        // [수정 4번] 상품 금액과 배송비 분리 계산
         let productTotal = 0, shippingTotal = 0;
         items.forEach(o => {
-          const rt = Number(o.total_price || 0);
-          const rs = Number(o.shipping_fee || 0);
-          productTotal += (rt - rs);
-          shippingTotal += rs;
+          const itemTotal = Number(o.total_price || 0);
+          const itemShipping = Number(o.shipping_fee || 0);
+          // total_price에는 배송비가 포함되어 있으므로, 상품 금액은 total_price - shipping_fee
+          productTotal += (itemTotal - itemShipping);
+          shippingTotal += itemShipping;
         });
-        const totalAll = productTotal + shippingTotal;
+        const totalAll = productTotal + shippingTotal; // 최종 결제 금액
+        
         const isChecked = selectedKeys.has(key);
 
         let gradeDiscount = 0;
@@ -346,6 +349,7 @@
                   if (o.selected_hem) opts.push(`밑단: ${o.selected_hem}`);
                   if (o.selected_other) opts.push(`기타: ${o.selected_other}`);
                   const optStr = opts.length ? opts.join(' | ') : '기본 옵션';
+                  // [수정] 개별 아이템의 상품 금액도 total_price - shipping_fee 로 계산
                   const itemPrice = Number(o.total_price) - Number(o.shipping_fee || 0);
                   return `
                     <div class="history-product-item">
