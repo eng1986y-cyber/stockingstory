@@ -44,6 +44,12 @@
     .coupon-card .c-badge { background: #dc2626; color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; white-space: nowrap; }
     .coupon-card.used .c-badge { background: #9ca3af; }
     .empty-coupons { text-align: center; color: #9ca3af; font-size: 13px; padding: 20px; }
+    
+    /* ⭐ 주소 검색 레이아웃 추가 */
+    .address-group { display: flex; gap: 8px; }
+    .address-group input { flex: 1; }
+    .address-group button { flex: 0 0 auto; padding: 0 16px; background: #e5e7eb; color: #111; font-weight: 600; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; white-space: nowrap; }
+    body.dark .address-group button { background: #333; color: #fff; border-color: #444; }
   </style>
 </head>
 <body>
@@ -61,9 +67,22 @@
           <div class="form-group"><label>이름</label><input name="name" required autocomplete="name"></div>
           <div class="form-group"><label>연락처</label><input name="phone" type="tel" inputmode="numeric" required autocomplete="tel"></div>
           <div class="form-group"><label>이메일</label><input name="email" type="email" autocomplete="email"></div>
-          <div class="form-group"><label>우편번호</label><input name="postcode" autocomplete="postal-code"></div>
-          <div class="form-group"><label>주소</label><input name="address" autocomplete="street-address"></div>
-          <div class="form-group"><label>상세주소</label><input name="address_detail" autocomplete="address-line2"></div>
+          
+          <!-- ⭐ 주소 폼 수정 -->
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label>주소</label>
+            <div class="address-group">
+              <input name="postcode" id="postcode" placeholder="우편번호" readonly style="max-width: 150px;">
+              <button type="button" onclick="openAddressSearch('#postcode', '#address', '#address_detail')">주소 검색</button>
+            </div>
+          </div>
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <input name="address" id="address" placeholder="기본 주소" readonly>
+          </div>
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <input name="address_detail" id="address_detail" placeholder="상세 주소">
+          </div>
+          
         </div>
         <button type="submit">저장</button>
       </form>
@@ -95,7 +114,6 @@
       location.href = 'login.html';
     }
 
-    // ⭐ 모바일에서 페이지 진입 시 자동 포커스/키보드 팝업 원천 차단
     (function preventAutoFocus() {
       const killFocus = () => {
         const ae = document.activeElement;
@@ -108,10 +126,8 @@
       setTimeout(killFocus, 100);
       setTimeout(killFocus, 300);
 
-      // password 필드는 자동 순회 대상 제외 (모바일에서 자동 클릭 방지)
       const pw = form.querySelector('input[name="password"]');
       if (pw) pw.setAttribute('tabindex', '-1');
-      // readonly 아이디도 tab 순회 제외
       form.querySelectorAll('input[readonly]').forEach(el => el.setAttribute('tabindex', '-1'));
     })();
 

@@ -30,6 +30,11 @@
     .coupon-disabled-notice { background: #1a1a1a; border: 1px dashed #f59e0b; border-radius: 8px; padding: 12px; margin-top: 8px; font-size: 13px; color: #fbbf24; }
     .block-notice { margin-bottom: 12px; padding: 12px 14px; background: #1a1a1a; border: 1px dashed #f59e0b; border-radius: 8px; font-size: 13px; color: #fbbf24; line-height: 1.7; }
     .block-notice a { color: #60a5fa; text-decoration: underline; }
+    
+    /* ⭐ 주소 검색 레이아웃 추가 */
+    .address-group { display: flex; gap: 8px; }
+    .address-group input { flex: 1; }
+    .address-group button { flex: 0 0 auto; padding: 0 12px; background: #333; color: #fff; font-weight: 600; border: 1px solid #444; border-radius: 6px; cursor: pointer; white-space: nowrap; }
   </style>
 </head>
 <body>
@@ -62,10 +67,6 @@
       'vip':       { method: '택배', feeType: 'free' },
     };
 
-    // ⭐ [요청10] 등급별 구매 가능 여부
-    // 일반회원: 일반상품(all)만
-    // 도매회원: 도매상품(wholesale)만 (일반상품 열람만, 구매 불가)
-    // VIP회원: 일반상품(all) + VIP상품(vip)
     function canPurchase(memberGrade, targetGrade) {
       const g = memberGrade || '일반회원';
       const tg = targetGrade || 'all';
@@ -75,7 +76,6 @@
       return false;
     }
 
-    // ⭐ [이슈4] 사용자별 장바구니 키
     function getCartKey() {
       const m = getMember();
       return m?.id ? `cart_${m.id}` : 'cart_guest';
@@ -206,7 +206,6 @@
         if (g.minQty > 1 && g.qty < g.minQty) shortGroups.push({ targetGrade: tg, need: g.minQty, have: g.qty });
       });
 
-      // ⭐ [요청10] 등급별 구매 가능 여부
       const illegalItems = selectedCart.filter(it => !canPurchase(memberGrade, it.target_grade || 'all'));
       const purchaseBlocked = illegalItems.length > 0;
 
@@ -377,13 +376,21 @@
           ${coupons.map(c => { const label = c.type === 'percent' ? `${c.discount_value}% 할인` : `${Number(c.discount_value).toLocaleString()}원 할인`; return `<option value="${c.id}" data-type="${c.type}" data-value="${c.discount_value}">${label} (${c.code})</option>`; }).join('')}
         </select></div>`;
       }
+      
+      // ⭐ 주소 레이아웃 수정
       modal.innerHTML = `<div class="checkout-modal-box"><h2>주문 정보 입력</h2>
         <form id="checkout-form" class="checkout-form">
           <label style="${labelStyle}">주문자 이름 *</label><input name="customer_name" required value="${m?.name || ''}" style="${inputStyle}">
           <label style="${labelStyle}">연락처 *</label><input name="customer_phone" type="tel" required value="${m?.phone || ''}" style="${inputStyle}">
-          <label style="${labelStyle}">우편번호</label><input name="postcode" value="${m?.postcode || ''}" style="${inputStyle}">
-          <label style="${labelStyle}">주소 *</label><input name="address" required value="${m?.address || ''}" style="${inputStyle}">
-          <label style="${labelStyle}">상세주소</label><input name="address_detail" value="${m?.address_detail || ''}" style="${inputStyle}">
+          
+          <label style="${labelStyle}">주소 *</label>
+          <div class="address-group">
+            <input name="postcode" id="checkout-postcode" value="${m?.postcode || ''}" placeholder="우편번호" required style="${inputStyle}">
+            <button type="button" onclick="openAddressSearch('#checkout-postcode', '#checkout-address', '#checkout-address_detail')">주소 검색</button>
+          </div>
+          <input name="address" id="checkout-address" required value="${m?.address || ''}" placeholder="기본 주소" style="${inputStyle}">
+          <input name="address_detail" id="checkout-address_detail" value="${m?.address_detail || ''}" placeholder="상세주소" style="${inputStyle}">
+          
           <label style="${labelStyle}">입금자명 *</label><input name="depositor_name" required style="${inputStyle}">
           <label style="${labelStyle}">요청사항</label><textarea name="memo" style="${inputStyle} min-height:60px;"></textarea>
           ${couponSectionHtml}
@@ -424,7 +431,6 @@
         ev.preventDefault();
         const f = ev.target;
         const mg = getMember()?.grade || '일반회원';
-        // ⭐ [요청10] 등급 구매 검증
         for (const it of cart) {
           if (!canPurchase(mg, it.target_grade || 'all')) {
             alert(`현재 등급에서는 "${it.product_name}"을(를) 구매할 수 없습니다.`); return;

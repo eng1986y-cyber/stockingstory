@@ -20,6 +20,10 @@
     #msg { margin-top: 12px; font-weight: 600; text-align: center; }
     .coupon-notice { background: #fef3c7; color: #92400e; padding: 12px 14px; border-radius: 8px; font-size: 13px; line-height: 1.6; margin-bottom: 16px; border: 1px dashed #f59e0b; font-weight: 600; }
     .id-hint { font-size: 11px; color: #9ca3af; margin-top: -6px; margin-bottom: 2px; }
+    .address-group { display: flex; gap: 8px; }
+    .address-group input { flex: 1; }
+    .address-group button { flex: 0 0 auto; padding: 0 16px; background: #e5e7eb; color: #111; font-weight: 600; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; white-space: nowrap; margin-top: 0; }
+    body.dark .address-group button { background: #333; color: #fff; border-color: #444; }
   </style>
 </head>
 <body>
@@ -45,6 +49,14 @@
 
         <label>연락처</label>
         <input name="phone" type="tel" inputmode="numeric" placeholder="010-0000-0000" required>
+
+        <label>주소</label>
+        <div class="address-group">
+          <input name="postcode" id="postcode" placeholder="우편번호" readonly required>
+          <button type="button" onclick="openAddressSearch('#postcode', '#address', '#address_detail')">주소 검색</button>
+        </div>
+        <input name="address" id="address" placeholder="기본 주소" readonly required>
+        <input name="address_detail" id="address_detail" placeholder="상세 주소">
 
         <button type="submit">가입하기</button>
       </form>
@@ -79,7 +91,6 @@
       const v = normalizeId(id);
       if (!v) return false;
       if (RESERVED_IDS.has(v)) return true;
-      // 포함 검사: 길이가 비슷하거나 접미사만 다른 경우 (예: admin01, manager_kim)
       for (const r of RESERVED_IDS) {
         if (v.startsWith(r) && v.length <= r.length + 3) return true;
         if (v.endsWith(r) && v.length <= r.length + 3) return true;
@@ -90,7 +101,6 @@
     // ⭐ [이슈7] 비밀번호 SHA-256 해시 (Web Crypto API, 클라이언트 해시)
     async function sha256(text) {
       if (!window.crypto || !window.crypto.subtle) {
-        // 폴백: crypto.subtle 미지원 환경 → 간단 해시 (권장되지 않음, 최소 보안)
         console.warn('Web Crypto 미지원, 간단 해시로 대체');
         let h = 0;
         for (let i = 0; i < text.length; i++) {
@@ -138,8 +148,10 @@
       const password = form.password.value;
       const name = form.name.value.trim();
       const phone = form.phone.value.trim();
+      const postcode = form.postcode.value.trim();
+      const address = form.address.value.trim();
+      const address_detail = form.address_detail.value.trim();
 
-      // ⭐ [이슈6] 금칙 아이디 검증
       if (username.length < 4) {
         msg.style.color = '#ef4444';
         msg.textContent = '❌ 아이디는 4자 이상이어야 합니다.';
@@ -155,16 +167,19 @@
         msg.textContent = '❌ 사용할 수 없는 아이디입니다. (관리자 예약어)';
         return;
       }
-      // 비밀번호 검증
       if (password.length < 6) {
         msg.style.color = '#ef4444';
         msg.textContent = '❌ 비밀번호는 6자 이상이어야 합니다.';
         return;
       }
+      if (!postcode || !address) {
+        msg.style.color = '#ef4444';
+        msg.textContent = '❌ 주소를 검색하여 입력해주세요.';
+        return;
+      }
 
       msg.textContent = '가입 중...';
 
-      // 아이디 중복 확인
       const { data: exist } = await db.from('members').select('id').eq('username', username).maybeSingle();
       if (exist) {
         msg.style.color = '#ef4444';
@@ -172,7 +187,6 @@
         return;
       }
 
-      // ⭐ [이슈7] 비밀번호 해시 저장
       let hashedPassword;
       try {
         hashedPassword = await sha256(password);
@@ -182,11 +196,15 @@
         return;
       }
 
+      // ⭐ 주소 정보 추가
       const payload = {
         username,
-        password: hashedPassword,  // 해시값 저장
+        password: hashedPassword,
         name,
         phone,
+        postcode,
+        address,
+        address_detail,
         grade: '일반회원',
       };
 
@@ -197,7 +215,6 @@
         return;
       }
 
-      // 쿠폰 발급
       let couponIssued = false;
       if (signupCouponConfig.enabled) {
         try {
@@ -215,7 +232,9 @@
       }
 
       localStorage.setItem('member', JSON.stringify({
-        id: data.id, username: data.username, name: data.name, phone: data.phone, grade: data.grade || '일반회원',
+        id: data.id, username: data.username, name: data.name, phone: data.phone, 
+        postcode: data.postcode, address: data.address, address_detail: data.address_detail,
+        grade: data.grade || '일반회원',
       }));
 
       msg.style.color = '#10b981';

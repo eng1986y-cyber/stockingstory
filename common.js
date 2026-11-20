@@ -15,6 +15,33 @@ const GRADE_SHIPPING = {
 };
 
 // ============================================================
+// ⭐ [추가] 카카오 우편번호(주소 검색) 연동
+// ============================================================
+function loadKakaoPostcode(cb) {
+  if (window.kakao && window.kakao.Postcode) return cb();
+  const s = document.createElement('script');
+  s.src = '//t1.kakaocdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+  s.onload = cb;
+  document.head.appendChild(s);
+}
+
+function openAddressSearch(postcodeSelector, addressSelector, detailSelector) {
+  loadKakaoPostcode(function () {
+    new kakao.Postcode({
+      oncomplete: function (data) {
+        const postcodeEl = document.querySelector(postcodeSelector);
+        const addressEl = document.querySelector(addressSelector);
+        const detailEl = document.querySelector(detailSelector);
+
+        if (postcodeEl) postcodeEl.value = data.zonecode;
+        if (addressEl) addressEl.value = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
+        if (detailEl) detailEl.focus();
+      }
+    }).open();
+  });
+}
+
+// ============================================================
 // ⭐ [이슈2] 다중 플랫폼 영상 임베드 URL 변환
 // ============================================================
 function getVideoEmbedUrl(url) {
@@ -509,7 +536,6 @@ function renderFooter() {
   if (instagram) snsLinks.push(`<a href="${instagram}" target="_blank" rel="noopener noreferrer" class="footer-sns-btn" aria-label="Instagram"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>`);
   if (blog) snsLinks.push(`<a href="${blog}" target="_blank" rel="noopener noreferrer" class="footer-sns-btn" aria-label="Naver Blog"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"></circle><path d="M8 16V8l8 8V8"></path></svg></a>`);
   if (band) snsLinks.push(`<a href="${band}" target="_blank" rel="noopener noreferrer" class="footer-sns-btn" aria-label="Naver Band"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></a>`);
-  // 모바일에서는 밴드 버튼 바로 옆에 채널톡 아이콘 표시
   snsLinks.push(`<button type="button" class="footer-channel-btn" aria-label="채널톡 문의" title="채널톡 문의" onclick="if(window.ChannelIO) window.ChannelIO('showMessenger')"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H5l-2 2v-9.5A7.5 7.5 0 0 1 10.5 4h2A7.5 7.5 0 0 1 20 11.5Z"></path><path d="M8 11h8M8 14h5"></path></svg></button>`);
   wrap.innerHTML = `
     <div class="footer-inner">
@@ -842,16 +868,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   if (document.readyState === 'complete') l();
   else window.addEventListener('DOMContentLoaded', l, false);
-  // 모바일에서는 기본 플로팅 채널톡 버튼을 숨기고,
-  // SNS 영역의 footer-channel-btn으로만 상담창을 열도록 설정합니다.
-  // PC에서는 기존 기본 채널톡 버튼을 그대로 유지합니다.
   var mobileChannelQuery = window.matchMedia('(max-width: 768px)');
   window.ChannelIO('boot', {
     "pluginKey": "c5ed9957-c9e6-42af-887e-1b2ab2b6d1dd",
     "hideChannelButtonOnBoot": mobileChannelQuery.matches
   });
 
-  // 화면 크기를 변경한 경우에도 모바일/PC 노출 상태를 맞춥니다.
   var syncChannelButtonVisibility = function() {
     if (!window.ChannelIO) return;
     if (mobileChannelQuery.matches) window.ChannelIO('hideChannelButton');
