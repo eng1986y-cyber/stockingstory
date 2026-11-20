@@ -416,7 +416,16 @@
       }
       .prod-actions .btn { flex: 1 1 auto; min-width: 60px; }
     }
-</style>
+
+    /* 방문자 통계 카드 스타일 */
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+    .stat-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px; text-align: center; }
+    .stat-card .stat-label { font-size: 12px; color: #6b7280; font-weight: 600; margin-bottom: 8px; }
+    .stat-card .stat-value { font-size: 24px; font-weight: 700; color: #111827; }
+    .stat-card .stat-value.blue { color: #2563eb; }
+    .stat-card .stat-value.green { color: #059669; }
+    .stat-card .stat-value.purple { color: #7c3aed; }
+  </style>
 </head>
 <body>
   <div id="login-screen" style="display:none;">
@@ -457,6 +466,22 @@
         <section id="tab-products" class="admin-section active">
           <h1 class="page-title">상품 관리</h1>
           <p class="page-subtitle">상품을 등록하고 목록을 관리합니다 (일반 / 도매전용 / VIP전용)</p>
+
+          <!-- 방문자 통계 추가 (1번) -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">오늘 방문자</div>
+              <div class="stat-value blue" id="stat-today">-</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">어제 방문자</div>
+              <div class="stat-value green" id="stat-yesterday">-</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">전체 방문자</div>
+              <div class="stat-value purple" id="stat-total">-</div>
+            </div>
+          </div>
 
           <div class="card" id="global-detail-images-card">
             <div class="card-title">🖼️ 전체 상품 상세 공통 이미지</div>
@@ -859,6 +884,7 @@
       adminScreen.style.display = 'block';
       loadAdminList();
       loadGlobalDetailImages();
+      loadVisitorStats(); // 방문자 통계 로드
     }
 
     document.querySelectorAll('.admin-tabbar .nav-item').forEach(btn => {
@@ -894,6 +920,32 @@
       else { loginMsg.textContent = ''; showAdmin(); }
     });
     document.getElementById('logout-btn').addEventListener('click', async () => { await db.auth.signOut(); showLogin(); });
+
+    // ============ 방문자 통계 (1번 추가) ============
+    async function loadVisitorStats() {
+      try {
+        // 오늘, 어제, 전체 방문자 수 조회 (visitors 테이블 기준)
+        // 실제 DB 구조에 따라 수정이 필요할 수 있습니다.
+        const today = new Date().toISOString().split('T')[0];
+        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+        
+        // 오늘 방문자
+        const { count: todayCount } = await db.from('visitors').select('*', { count: 'exact', head: true }).gte('created_at', today);
+        // 어제 방문자
+        const { count: yesterdayCount } = await db.from('visitors').select('*', { count: 'exact', head: true }).gte('created_at', yesterday).lt('created_at', today);
+        // 전체 방문자
+        const { count: totalCount } = await db.from('visitors').select('*', { count: 'exact', head: true });
+
+        document.getElementById('stat-today').textContent = (todayCount || 0).toLocaleString();
+        document.getElementById('stat-yesterday').textContent = (yesterdayCount || 0).toLocaleString();
+        document.getElementById('stat-total').textContent = (totalCount || 0).toLocaleString();
+      } catch (err) {
+        console.warn('방문자 통계 로드 실패:', err);
+        document.getElementById('stat-today').textContent = '-';
+        document.getElementById('stat-yesterday').textContent = '-';
+        document.getElementById('stat-total').textContent = '-';
+      }
+    }
 
     // ============ Storage ============
     const SITE_ASSET_BUCKET = 'site-assets';
@@ -1063,7 +1115,8 @@
 
     // ============ 상품 목록 ============
     let allProducts = [], filteredProducts = [], currentPage = 1;
-    const PER_PAGE_DESKTOP = 5, PER_PAGE_MOBILE = 4, MAX_PAGES = 10;
+    // [수정 5번] 페이지당 상품 수를 10개로 변경
+    const PER_PAGE_DESKTOP = 10, PER_PAGE_MOBILE = 4, MAX_PAGES = 10;
     const isAdminMobile = () => window.matchMedia('(max-width: 560px)').matches;
     const getPerPage = () => isAdminMobile() ? PER_PAGE_MOBILE : PER_PAGE_DESKTOP;
     let selectedProductIds = new Set();
@@ -1795,6 +1848,7 @@
     };
     document.getElementById('order-reset-btn').onclick = () => { document.getElementById('order-search').value=''; loadOrders(); };
 
+    // [수정 2, 3번] 주문 상세 모달에서 배송비 별도 표시
     function openOrderEditModal(groupOrOrder) {
       if (!groupOrOrder) return;
       const items = Array.isArray(groupOrOrder.items) ? groupOrOrder.items : [groupOrOrder];
@@ -1816,450 +1870,124 @@
       const val = v => (v === null || v === undefined || v === '') ? '-' :
         (typeof v === 'object' ? JSON.stringify(v) : String(v));
       const sharedKeys = ['customer_name','customer_phone','customer_email','depositor_name','receiver_name','receiver_phone','postcode','address','address_detail','customs_number','created_at'];
-      const sharedHtml = sharedKeys.filter(k => first[k] !== undefined && first[k] !== null && first[k] !== '').map(k =>
-        `<div class="nav-order-field"><span>${labelMap[k] || k}</span><b>${esc(k==='created_at' ? formatKST(first[k]) : val(first[k]))}</b></div>`
-      ).join('');
-      const itemHtml = items.map((o,i) => {
-        const details = Object.keys(o).filter(k =>
-          !['id','order_number','customer_name','customer_phone','customer_email','depositor_name','receiver_name','receiver_phone','postcode','address','address_detail','customs_number','created_at','updated_at','status','courier','tracking_number','memo','request_content','is_deleted','product_code','product_name','product_price','price','quantity','total_price','selected_color','selected_size','selected_hem','selected_other','shipping_fee','grade_discount'].includes(k) &&
-          o[k] !== null && o[k] !== ''
-        );
-        const detailHtml = details.map(k => `<div class="nav-order-field"><span>${esc(labelMap[k] || k)}</span><b>${esc(val(o[k]))}</b></div>`).join('');
+      
+      // 주문 상품별 합계 및 배송비 계산
+      let totalProductPrice = 0;
+      let totalShippingFee = 0;
+      items.forEach(it => {
+        totalProductPrice += Number(it.total_price || 0);
+        totalShippingFee += Number(it.shipping_fee || 0);
+      });
+      const finalTotal = totalProductPrice + totalShippingFee;
+
+      const sharedHtml = sharedKeys.map(k => {
+        if (first[k] === undefined && !items.some(x=>x[k] !== undefined)) return '';
+        const v = items.map(x=>x[k]).find(x=>x !== undefined && x !== null && x !== '') ?? first[k];
+        return `<div class="nav-order-field"><span>${labelMap[k] || k}</span><b>${esc(val(v))}</b></div>`;
+      }).join('');
+
+      const productsHtml = items.map((it, i) => {
+        const extraKeys = ['selected_color','selected_size','selected_hem','selected_other','request_content'];
+        const extraHtml = extraKeys.map(k => {
+          const v = it[k];
+          if (v === undefined || v === null || v === '') return '';
+          return `<div class="nav-order-field"><span>${labelMap[k] || k}</span><b>${esc(val(v))}</b></div>`;
+        }).join('');
+        
         return `
-          <section class="nav-order-product">
+          <div class="nav-order-product">
             <div class="nav-order-product-head">
-              <div><small>상품 ${i+1}</small><strong>${esc(o.product_name || '상품명 없음')}</strong><span>${esc(o.product_code || '')}</span></div>
-              <b>${won(o.total_price || (Number(o.product_price || o.price || 0) * Number(o.quantity || 1)))}</b>
+              <div>
+                <small>${i+1}</small>
+                <strong>${esc(it.product_name || '상품명 없음')}</strong>
+                <span>${esc(it.product_code || '')}</span>
+              </div>
+              <b>${won(it.total_price)}</b>
             </div>
             <div class="nav-order-product-summary">
-              <span>색상 ${esc(val(o.selected_color))}</span>
-              <span>사이즈 ${esc(val(o.selected_size))}</span>
-              <span>밑단 ${esc(val(o.selected_hem))}</span>
-              <span>옵션 ${esc(val(o.selected_other))}</span>
-              <span>수량 ${esc(val(o.quantity))}</span>
+              <span>단가: ${won(it.product_price)}</span>
+              <span>수량: ${Number(it.quantity || 1)}개</span>
+              <span>배송비: ${won(it.shipping_fee)}</span>
             </div>
-            ${detailHtml ? `<div class="nav-order-extra">${detailHtml}</div>` : ''}
+            <div class="nav-order-extra">${extraHtml}</div>
             <div class="nav-order-edit-grid">
-              <label>주문 상태<select data-field="status" data-id="${esc(o.id)}">${statusOptions.map(v=>`<option value="${esc(v)}" ${o.status===v?'selected':''}>${esc(v)}</option>`).join('')}</select></label>
-              <label>택배사<select data-field="courier" data-id="${esc(o.id)}">${['','CJ대한통운','롯데택배','한진택배','우체국택배','로젠택배','경동택배','대신택배','기타'].map(v=>`<option value="${esc(v)}" ${(o.courier||'')===v?'selected':''}>${v || '택배사 선택'}</option>`).join('')}</select></label>
-              <label class="tracking-field">운송장번호<input data-field="tracking_number" data-id="${esc(o.id)}" value="${esc(o.tracking_number || '')}" placeholder="운송장번호"></label>
-              <label class="memo-field">요청사항<textarea data-field="memo" data-id="${esc(o.id)}" rows="2">${esc(o.memo || o.request_content || '')}</textarea></label>
-            </div>
-          </section>`;
-      }).join('');
-      modal.innerHTML = `
-        <div class="modal-box modal-lg nav-order-modal">
-          <div class="nav-order-top">
-            <div><small>ORDER DETAILS</small><h2>주문 상세내역</h2><b>${esc(orderNo)}</b></div>
-            <button type="button" class="nav-order-close" aria-label="닫기">×</button>
-          </div>
-          <div class="nav-order-summary">
-            <div><span>주문일시</span><b>${esc(formatKST(first.created_at))}</b></div>
-            <div><span>주문상품</span><b>${items.length}종 · ${items.reduce((n,x)=>n+Number(x.quantity||0),0)}개</b></div>
-            <div><span>결제/주문금액</span><b>${won(items.reduce((n,x)=>n+Number(x.total_price || (Number(x.product_price || x.price || 0)*Number(x.quantity||1))),0))}</b></div>
-          </div>
-          <section class="nav-order-section">
-            <h3>배송지 및 주문자 정보</h3>
-            <div class="nav-order-info-grid">${sharedHtml || '<div class="nav-order-field"><span>주문자 정보</span><b>-</b></div>'}</div>
-          </section>
-          <section class="nav-order-section">
-            <h3>주문 상품 및 배송정보</h3>
-            ${itemHtml}
-          </section>
-          <div class="nav-order-footer">
-            <button type="button" class="btn btn-secondary nav-order-close-btn">닫기</button>
-            <button type="button" class="btn btn-primary nav-order-save">변경사항 저장</button>
-          </div>
-        </div>`;
-      document.body.appendChild(modal);
-      const close = () => modal.remove();
-      modal.querySelectorAll('.nav-order-close,.nav-order-close-btn').forEach(b=>b.onclick=close);
-      modal.addEventListener('click', e => { if (e.target === modal) close(); });
-      modal.querySelector('.nav-order-save').onclick = async () => {
-        const saveBtn = modal.querySelector('.nav-order-save');
-        saveBtn.disabled = true; saveBtn.textContent = '저장 중...';
-        try {
-          const updates = items.map(o => {
-            const get = field => modal.querySelector(`[data-field="${field}"][data-id="${CSS.escape(String(o.id))}"]`);
-            return db.from('orders').update({
-              status: get('status')?.value || o.status,
-              courier: get('courier')?.value || null,
-              tracking_number: get('tracking_number')?.value.trim() || null,
-              memo: get('memo')?.value.trim() || null
-            }).eq('id', o.id);
-          });
-          const results = await Promise.all(updates);
-          const failed = results.find(r=>r.error);
-          if (failed) throw failed.error;
-          alert('주문 상세정보가 저장되었습니다.');
-          close(); loadOrders();
-        } catch(err) {
-          alert('저장 실패: ' + (err.message || err));
-          saveBtn.disabled = false; saveBtn.textContent = '변경사항 저장';
-        }
-      };
-    }
-
-    // ============ 회원 관리 ============
-    const MEMBER_COLS = ['username','name','phone','email','address','address_detail','postcode','grade','status','created_at'];
-    const MEMBER_SELECT = 'id, username, name, phone, email, address, address_detail, postcode, grade, status, created_at';
-    let memberRows = [], selectedMembers = new Set();
-
-    async function loadMembers() {
-      const listEl = document.getElementById('member-list');
-      listEl.innerHTML = '<div class="tab-loading">로딩 중...</div>';
-      const { data, error } = await db.from('members').select(MEMBER_SELECT).order('created_at', { ascending: false }).limit(300);
-      if (error) { listEl.innerHTML = '<p style="color:#dc2626;">❌ ' + error.message + '</p>'; return; }
-      memberRows = data || [];
-      if (memberRows.length === 0) { listEl.innerHTML = '<p style="text-align:center;color:#9ca3af;">회원이 없습니다.</p>'; return; }
-      listEl.innerHTML = memberRows.map(m => `
-        <div class="row-item">
-          <input type="checkbox" class="row-check member-check" data-id="${m.id}">
-          <span class="row-strong">${esc(m.username || '-')}</span>
-          <span>${esc(m.name || '-')}</span>
-          <span class="row-muted">${esc(m.phone || '-')}</span>
-          <span class="grade-badge grade-${m.grade || '일반회원'}">${esc(m.grade || '일반회원')}</span>
-          <span class="badge" style="background:${m.status === '정지' ? '#dc2626' : '#059669'};">${esc(m.status || '정상')}</span>
-          <span class="row-muted">${formatKST(m.created_at, { dateOnly: true })}</span>
-          <div class="row-actions">
-            <button class="btn btn-warning btn-sm member-edit-btn" data-id="${m.id}">수정</button>
-            <button class="btn btn-excel btn-sm member-excel-one" data-id="${m.id}">📊</button>
-            <button class="btn btn-print btn-sm member-print-one" data-id="${m.id}">🖨️</button>
-            <button class="btn btn-danger btn-sm member-del-btn" data-id="${m.id}">삭제</button>
-          </div>
-        </div>`).join('');
-
-      listEl.querySelectorAll('.member-check').forEach(cb => cb.onchange = () => {
-        const id = String(cb.dataset.id);
-        if (cb.checked) selectedMembers.add(id); else selectedMembers.delete(id);
-        updateMemberBulkBtn();
-      });
-      listEl.querySelectorAll('.member-edit-btn').forEach(b => b.onclick = () => openMemberEditModal(memberRows.find(x => String(x.id) === String(b.dataset.id))));
-      listEl.querySelectorAll('.member-del-btn').forEach(b => b.onclick = async () => {
-        if (!confirm('이 회원을 삭제할까요?')) return;
-        const { error } = await db.from('members').delete().eq('id', b.dataset.id);
-        if (error) alert('❌ ' + error.message);
-        else { alert('✅ 삭제되었습니다.'); loadMembers(); }
-      });
-      listEl.querySelectorAll('.member-excel-one').forEach(b => b.onclick = () => {
-        const m = memberRows.find(x => String(x.id) === String(b.dataset.id));
-        if (m) downloadCSV(`member_${m.username || m.id}.csv`, [MEMBER_COLS, MEMBER_COLS.map(k => m[k] ?? '')]);
-      });
-      listEl.querySelectorAll('.member-print-one').forEach(b => b.onclick = () => {
-        const m = memberRows.find(x => String(x.id) === String(b.dataset.id));
-        if (m) printHTML(`회원 정보 - ${m.username || m.id}`, [MEMBER_COLS, MEMBER_COLS.map(k => m[k] ?? '')]);
-      });
-    }
-    function updateMemberBulkBtn() {
-      const btn = document.getElementById('member-bulk-del-btn');
-      if (selectedMembers.size > 0) { btn.classList.add('active'); btn.textContent = `선택 삭제 (${selectedMembers.size})`; }
-      else { btn.classList.remove('active'); btn.textContent = '선택 삭제'; }
-    }
-    document.getElementById('member-check-all').onchange = e => {
-      document.querySelectorAll('.member-check').forEach(cb => {
-        cb.checked = e.target.checked;
-        const id = String(cb.dataset.id);
-        if (e.target.checked) selectedMembers.add(id); else selectedMembers.delete(id);
-      });
-      updateMemberBulkBtn();
-    };
-    document.getElementById('member-bulk-del-btn').onclick = async () => {
-      if (selectedMembers.size === 0) return;
-      if (!confirm(`선택한 ${selectedMembers.size}명을 삭제할까요?`)) return;
-      const { error } = await db.from('members').delete().in('id', Array.from(selectedMembers));
-      if (error) alert('❌ ' + error.message);
-      else { alert('✅ 삭제되었습니다.'); selectedMembers.clear(); loadMembers(); }
-    };
-    document.getElementById('member-excel-selected-btn').onclick = () => {
-      const rows = memberRows.filter(m => selectedMembers.has(String(m.id)));
-      if (rows.length === 0) return alert('선택된 회원이 없습니다.');
-      downloadCSV(`members_selected_${Date.now()}.csv`, [MEMBER_COLS, ...rows.map(m => MEMBER_COLS.map(k => m[k] ?? ''))]);
-    };
-    document.getElementById('member-print-selected-btn').onclick = () => {
-      const rows = memberRows.filter(m => selectedMembers.has(String(m.id)));
-      if (rows.length === 0) return alert('선택된 회원이 없습니다.');
-      printHTML(`회원 목록 (${rows.length}명)`, [MEMBER_COLS, ...rows.map(m => MEMBER_COLS.map(k => m[k] ?? ''))]);
-    };
-    document.getElementById('member-search-btn').onclick = () => {
-      const k = document.getElementById('member-search').value.trim().toLowerCase();
-      if (!k) return loadMembers();
-      document.querySelectorAll('#member-list .row-item').forEach(it => {
-        it.style.display = it.textContent.toLowerCase().includes(k) ? '' : 'none';
-      });
-    };
-    document.getElementById('member-reset-btn').onclick = () => { document.getElementById('member-search').value = ''; loadMembers(); };
-
-    function openMemberEditModal(m) {
-      if (!m) return;
-      const modal = document.createElement('div');
-      modal.className = 'modal-backdrop';
-      modal.innerHTML = `
-        <div class="modal-box modal-lg">
-          <h2>회원 수정 - ${esc(m.username || m.id)}</h2>
-          <p style="font-size:12px;color:#9ca3af;margin:0 0 12px;">※ 기존 비밀번호는 보안상 표시되지 않으며, 새 비밀번호를 입력하면 재설정됩니다.</p>
-          <form id="member-edit-form" class="modal-form" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-            <div><label>아이디</label><input value="${esc(m.username || '')}" readonly></div>
-            <div><label>이름</label><input name="name" value="${esc(m.name || '')}"></div>
-            <div><label>연락처</label><input name="phone" value="${esc(m.phone || '')}"></div>
-            <div><label>이메일</label><input name="email" value="${esc(m.email || '')}"></div>
-            <div><label>우편번호</label><input name="postcode" value="${esc(m.postcode || '')}"></div>
-            <div><label>주소</label><input name="address" value="${esc(m.address || '')}"></div>
-            <div><label>상세주소</label><input name="address_detail" value="${esc(m.address_detail || '')}"></div>
-            <div>
-              <label>등급</label>
-              <select name="grade">
-                <option value="일반회원" ${m.grade === '일반회원' ? 'selected' : ''}>일반회원</option>
-                <option value="도매회원" ${m.grade === '도매회원' ? 'selected' : ''}>도매회원</option>
-                <option value="VIP회원" ${m.grade === 'VIP회원' ? 'selected' : ''}>VIP회원</option>
-              </select>
-            </div>
-            <div>
-              <label>상태</label>
-              <select name="status">
-                <option value="정상" ${m.status === '정상' ? 'selected' : ''}>정상</option>
-                <option value="정지" ${m.status === '정지' ? 'selected' : ''}>정지</option>
-                <option value="탈퇴" ${m.status === '탈퇴' ? 'selected' : ''}>탈퇴</option>
-              </select>
-            </div>
-            <div style="grid-column:1/-1; margin-top:8px; padding-top:12px; border-top:1px dashed #e5e7eb;">
-              <div style="font-size:13px;font-weight:700;color:#dc2626;margin-bottom:8px;">🔐 비밀번호 재설정 (선택사항)</div>
-              <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                <div>
-                  <label>새 비밀번호</label>
-                  <input name="new_password" type="password" placeholder="변경 시에만 입력" autocomplete="new-password">
-                </div>
-                <div>
-                  <label>새 비밀번호 확인</label>
-                  <input name="new_password_confirm" type="password" placeholder="동일하게 입력" autocomplete="new-password">
-                </div>
-              </div>
-              <p id="pw-error-msg" style="font-size:12px;color:#dc2626;font-weight:600;margin-top:6px;display:none;"></p>
-            </div>
-            <div class="modal-actions" style="grid-column:1/-1;">
-              <button type="submit" class="btn btn-primary">저장</button>
-              <button type="button" id="cancel-member-edit" class="btn btn-secondary">취소</button>
-            </div>
-          </form>
-        </div>`;
-      document.body.appendChild(modal);
-      modal.querySelector('#cancel-member-edit').onclick = () => modal.remove();
-      modal.querySelector('#member-edit-form').onsubmit = async ev => {
-        ev.preventDefault();
-        const f = ev.target;
-        const errEl = modal.querySelector('#pw-error-msg');
-        errEl.style.display = 'none';
-
-        const updates = {
-          name: f.name.value.trim(), phone: f.phone.value.trim(),
-          email: f.email.value.trim() || null,
-          postcode: f.postcode.value.trim() || null,
-          address: f.address.value.trim() || null,
-          address_detail: f.address_detail.value.trim() || null,
-          grade: f.grade.value, status: f.status.value,
-        };
-
-        const newPw = f.new_password.value;
-        const newPwConfirm = f.new_password_confirm.value;
-        if (newPw || newPwConfirm) {
-          if (newPw !== newPwConfirm) {
-            errEl.textContent = '❌ 새 비밀번호가 일치하지 않습니다.';
-            errEl.style.display = 'block';
-            return;
-          }
-          if (newPw.length < 4) {
-            errEl.textContent = '❌ 새 비밀번호는 4자 이상이어야 합니다.';
-            errEl.style.display = 'block';
-            return;
-          }
-          try {
-            const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(newPw));
-            updates.password = 'sha256$' + Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-          } catch (err) {
-            errEl.textContent = '❌ 비밀번호 해시 처리 중 오류 발생';
-            errEl.style.display = 'block';
-            return;
-          }
-        }
-
-        const btn = f.querySelector('button[type="submit"]');
-        btn.disabled = true; btn.textContent = '저장 중...';
-        const { error } = await db.from('members').update(updates).eq('id', m.id);
-        if (error) { alert('❌ ' + error.message); btn.disabled = false; btn.textContent = '저장'; }
-        else {
-          alert(updates.password ? '✅ 회원 정보 및 비밀번호가 재설정되었습니다.' : '✅ 회원 정보가 수정되었습니다.');
-          modal.remove();
-          loadMembers();
-        }
-      };
-    }
-
-    // ============ 쿠폰 ============
-    async function loadCouponsAndMembers() {
-      const { data: members } = await db.from('members').select('id, username, name').order('created_at', { ascending: false });
-      const sel = document.getElementById('coupon-member-select');
-      sel.innerHTML = '<option value="">회원 선택...</option>' + (members || []).map(m => `<option value="${m.id}">${esc(m.name || '')} (${esc(m.username)})</option>`).join('');
-      const listEl = document.getElementById('coupon-list');
-      listEl.innerHTML = '<div class="tab-loading">로딩 중...</div>';
-      const { data, error } = await db.from('coupons').select('*').order('created_at', { ascending: false }).limit(300);
-      if (error) { listEl.innerHTML = '<p style="color:#dc2626;">❌ ' + error.message + '</p>'; return; }
-      if (!data || data.length === 0) { listEl.innerHTML = '<p style="text-align:center;color:#9ca3af;">쿠폰이 없습니다.</p>'; return; }
-      listEl.innerHTML = data.map(c => {
-        const used = !!c.is_used;
-        const expired = new Date(c.expires_at).getTime() < Date.now();
-        const label = c.type === 'percent' ? `${c.discount_value}% 할인` : `${Number(c.discount_value).toLocaleString()}원 할인`;
-        return `
-          <div class="row-item">
-            <span class="row-strong">${esc(c.name || '쿠폰')}</span>
-            <span>${label}</span>
-            <span class="row-muted">${esc(c.code || '-')}</span>
-            <span class="badge" style="background:${used ? '#6b7280' : expired ? '#dc2626' : '#059669'};">${used ? '사용완료' : expired ? '만료' : '사용가능'}</span>
-            <span class="row-muted">${formatKST(c.expires_at, { dateOnly: true })}까지</span>
-            <div class="row-actions">
-              <button class="btn btn-danger btn-sm" onclick="if(confirm('삭제할까요?')) db.from('coupons').delete().eq('id','${c.id}').then(()=>loadCouponsAndMembers())">삭제</button>
+              <label>배송상태
+                <select class="edit-status">
+                  ${statusOptions.map(s => `<option value="${s}" ${s === (it.status||'주문접수') ? 'selected' : ''}>${s}</option>`).join('')}
+                </select>
+              </label>
+              <label>택배사
+                <input type="text" class="edit-courier" value="${esc(it.courier || '')}" placeholder="예: CJ대한통운">
+              </label>
+              <label class="tracking-field">운송장 번호
+                <input type="text" class="edit-tracking" value="${esc(it.tracking_number || '')}" placeholder="숫자만 입력">
+              </label>
+              <label class="memo-field">관리자 메모
+                <textarea class="edit-memo" placeholder="내부 메모">${esc(it.memo || '')}</textarea>
+              </label>
             </div>
           </div>`;
       }).join('');
-    }
-    document.getElementById('coupon-issue-form').addEventListener('submit', async e => {
-      e.preventDefault();
-      const m = document.getElementById('coupon-issue-msg');
-      const memberId = document.getElementById('coupon-member-select').value;
-      if (!memberId) { m.className = 'msg error'; m.textContent = '회원을 선택하세요.'; return; }
-      m.className = 'msg'; m.textContent = '발급 중...';
-      const type = document.getElementById('coupon-type-select').value;
-      const value = Number(document.getElementById('coupon-value-input').value) || 0;
-      const days = Number(document.getElementById('coupon-days-input').value) || 30;
-      const name = document.getElementById('coupon-name-input').value.trim() || '쿠폰';
-      const code = (type === 'percent' ? 'PCT' : 'WON') + '-' + Math.random().toString(36).slice(2, 8).toUpperCase();
-      const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
-      const { error } = await db.from('coupons').insert({
-        member_id: memberId, code, name, type, discount_value: value,
-        min_order_amount: 0, max_discount_amount: null, is_used: false, expires_at: expires,
-      });
-      if (error) { m.className = 'msg error'; m.textContent = '❌ ' + error.message; }
-      else { m.className = 'msg success'; m.textContent = '✅ 발급 완료!'; loadCouponsAndMembers(); }
-    });
 
-    // ============ 공지사항/게시판 ============
-    document.querySelectorAll('.notice-subtab-btn').forEach(btn => {
-      btn.onclick = () => {
-        document.querySelectorAll('.notice-subtab-btn').forEach(b => { b.style.background = '#fff'; b.style.color = '#374151'; b.style.border = '1px solid #e5e7eb'; });
-        btn.style.background = '#111827'; btn.style.color = '#fff'; btn.style.border = '0';
-        const isNotice = btn.dataset.subtab === 'notice';
-        document.getElementById('notice-subsection').style.display = isNotice ? 'block' : 'none';
-        document.getElementById('board-subsection').style.display = isNotice ? 'none' : 'block';
-      };
-    });
-
-    document.getElementById('notice-form').addEventListener('submit', async e => {
-      e.preventDefault();
-      const m = document.getElementById('notice-msg');
-      const f = e.target;
-      m.className = 'msg'; m.textContent = '등록 중...';
-      const { error } = await db.from('notices').insert({ title: f.title.value.trim(), content: f.content.value.trim() });
-      if (error) { m.className = 'msg error'; m.textContent = '❌ ' + error.message; }
-      else { m.className = 'msg success'; m.textContent = '✅ 등록 완료!'; f.reset(); loadNoticeAdminList(); }
-    });
-
-    async function loadNoticeAdminList() {
-      const listEl = document.getElementById('notice-admin-list');
-      const { data, error } = await db.from('notices').select('*').order('created_at', { ascending: false }).limit(100);
-      if (error) { listEl.innerHTML = '<p>❌ ' + error.message + '</p>'; return; }
-      document.getElementById('notice-admin-count').textContent = `총 ${data?.length || 0}건`;
-      if (!data || data.length === 0) { listEl.innerHTML = '<p style="text-align:center;color:#9ca3af;">공지사항이 없습니다.</p>'; return; }
-      listEl.innerHTML = data.map(n => `
-        <div class="row-item">
-          <span class="row-strong">${esc(n.title || '-')}</span>
-          <span class="row-muted">${formatKST(n.created_at, { dateOnly: true })}</span>
-          <div class="row-actions">
-            <button class="btn btn-warning btn-sm" onclick="openNoticeEditModal('${n.id}')">수정</button>
-            <button class="btn btn-danger btn-sm" onclick="if(confirm('삭제할까요?')) db.from('notices').delete().eq('id','${n.id}').then(()=>loadNoticeAdminList())">삭제</button>
-          </div>
-        </div>`).join('');
-    }
-    window.openNoticeEditModal = async (id) => {
-      const { data: n } = await db.from('notices').select('*').eq('id', id).single();
-      if (!n) return;
-      const modal = document.createElement('div');
-      modal.className = 'modal-backdrop';
       modal.innerHTML = `
-        <div class="modal-box modal-lg">
-          <h2>공지사항 수정</h2>
-          <form id="notice-edit-form" class="modal-form">
-            <label>제목</label>
-            <input name="title" value="${esc(n.title || '')}" required>
-            <label>내용</label>
-            <textarea name="content" style="min-height:200px;">${esc(n.content || '')}</textarea>
-            <div class="modal-actions">
-              <button type="submit" class="btn btn-primary">저장</button>
-              <button type="button" id="cancel-notice-edit" class="btn btn-secondary">취소</button>
+        <div class="modal-box nav-order-modal">
+          <div class="nav-order-top">
+            <div>
+              <small>STK STORY ORDER</small>
+              <h2>주문 상세</h2>
+              <b>${esc(orderNo)}</b>
             </div>
-          </form>
+            <button type="button" class="nav-order-close" id="close-order-modal">×</button>
+          </div>
+          <div class="nav-order-summary">
+            <div><span>총 상품 금액</span><b>${won(totalProductPrice)}</b></div>
+            <div><span>총 배송비</span><b>${won(totalShippingFee)}</b></div>
+            <div><span>최종 결제 금액</span><b style="color:#e53935;">${won(finalTotal)}</b></div>
+          </div>
+          <div class="nav-order-section">
+            <h3>주문자 / 배송지 정보</h3>
+            <div class="nav-order-info-grid">${sharedHtml}</div>
+          </div>
+          <div class="nav-order-section">
+            <h3>주문 상품 (${items.length}건)</h3>
+            ${productsHtml}
+          </div>
+          <div class="nav-order-footer">
+            <button type="button" class="btn btn-secondary" id="cancel-order-edit">취소</button>
+            <button type="button" class="btn btn-primary" id="save-order-edit">변경사항 저장</button>
+          </div>
         </div>`;
       document.body.appendChild(modal);
-      modal.querySelector('#cancel-notice-edit').onclick = () => modal.remove();
-      modal.querySelector('#notice-edit-form').onsubmit = async ev => {
-        ev.preventDefault();
-        const f = ev.target;
-        const { error } = await db.from('notices').update({ title: f.title.value.trim(), content: f.content.value.trim() }).eq('id', id);
-        if (error) alert('❌ ' + error.message);
-        else { alert('✅ 수정 완료!'); modal.remove(); loadNoticeAdminList(); }
-      };
-    };
 
-    async function loadBoardAdminList() {
-      const listEl = document.getElementById('board-admin-list');
-      const { data, error } = await db.from('board_posts').select('*').order('created_at', { ascending: false }).limit(100);
-      if (error) { listEl.innerHTML = '<p>❌ ' + error.message + '</p>'; return; }
-      document.getElementById('board-admin-count').textContent = `총 ${data?.length || 0}건`;
-      if (!data || data.length === 0) { listEl.innerHTML = '<p style="text-align:center;color:#9ca3af;">게시글이 없습니다.</p>'; return; }
-      listEl.innerHTML = data.map(b => `
-        <div class="row-item">
-          ${b.is_secret ? '<span class="board-secret-badge">비밀</span>' : ''}
-          <span class="row-strong">${esc(b.title || '-')}</span>
-          <span class="row-muted">${esc(b.member_name || b.member_username || '회원')}</span>
-          <span class="row-muted">${formatKST(b.created_at, { dateOnly: true })}</span>
-          <div class="row-actions">
-            <button class="btn btn-warning btn-sm" onclick="openBoardEditModal('${b.id}')">수정</button>
-            <button class="btn btn-danger btn-sm" onclick="if(confirm('삭제할까요?')) db.from('board_posts').delete().eq('id','${b.id}').then(()=>loadBoardAdminList())">삭제</button>
-          </div>
-        </div>`).join('');
+      modal.querySelector('#close-order-modal').onclick = () => modal.remove();
+      modal.querySelector('#cancel-order-edit').onclick = () => modal.remove();
+      modal.querySelector('#save-order-edit').onclick = async () => {
+        const btn = modal.querySelector('#save-order-edit');
+        btn.disabled = true; btn.textContent = '저장 중...';
+        const updates = [];
+        const productCards = modal.querySelectorAll('.nav-order-product');
+        items.forEach((it, idx) => {
+          const card = productCards[idx];
+          if (!card) return;
+          updates.push({
+            id: it.id,
+            status: card.querySelector('.edit-status').value,
+            courier: card.querySelector('.edit-courier').value.trim(),
+            tracking_number: card.querySelector('.edit-tracking').value.trim(),
+            memo: card.querySelector('.edit-memo').value.trim(),
+          });
+        });
+        let hasError = false;
+        for (const upd of updates) {
+          const { error } = await db.from('orders').update({
+            status: upd.status, courier: upd.courier, tracking_number: upd.tracking_number, memo: upd.memo
+          }).eq('id', upd.id);
+          if (error) { hasError = true; break; }
+        }
+        if (hasError) { alert('❌ 저장 실패'); btn.disabled = false; btn.textContent = '변경사항 저장'; }
+        else { alert('✅ 저장 완료!'); modal.remove(); loadOrders(); }
+      };
     }
-    window.openBoardEditModal = async (id) => {
-      const { data: b } = await db.from('board_posts').select('*').eq('id', id).single();
-      if (!b) return;
-      const modal = document.createElement('div');
-      modal.className = 'modal-backdrop';
-      modal.innerHTML = `
-        <div class="modal-box modal-lg">
-          <h2>게시글 수정</h2>
-          <form id="board-edit-form" class="modal-form">
-            <label>제목</label>
-            <input name="title" value="${esc(b.title || '')}" required>
-            <label>내용</label>
-            <textarea name="content" style="min-height:200px;">${esc(b.content || '')}</textarea>
-            <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
-              <input type="checkbox" name="is_secret" ${b.is_secret ? 'checked' : ''} style="width:18px;height:18px;accent-color:#111827;"> 비밀글로 설정
-            </label>
-            <div class="modal-actions">
-              <button type="submit" class="btn btn-primary">저장</button>
-              <button type="button" id="cancel-board-edit" class="btn btn-secondary">취소</button>
-            </div>
-          </form>
-        </div>`;
-      document.body.appendChild(modal);
-      modal.querySelector('#cancel-board-edit').onclick = () => modal.remove();
-      modal.querySelector('#board-edit-form').onsubmit = async ev => {
-        ev.preventDefault();
-        const f = ev.target;
-        const { error } = await db.from('board_posts').update({ title: f.title.value.trim(), content: f.content.value.trim(), is_secret: f.is_secret.checked }).eq('id', id);
-        if (error) alert('❌ ' + error.message);
-        else { alert('✅ 수정 완료!'); modal.remove(); loadBoardAdminList(); }
-      };
-    };
-
-    // ============ 시작 ============
-    checkSession();
   </script>
 </body>
 </html>
