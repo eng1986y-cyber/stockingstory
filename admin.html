@@ -924,16 +924,11 @@
     // ============ 방문자 통계 (1번 추가) ============
     async function loadVisitorStats() {
       try {
-        // 오늘, 어제, 전체 방문자 수 조회 (visitors 테이블 기준)
-        // 실제 DB 구조에 따라 수정이 필요할 수 있습니다.
         const today = new Date().toISOString().split('T')[0];
         const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
         
-        // 오늘 방문자
         const { count: todayCount } = await db.from('visitors').select('*', { count: 'exact', head: true }).gte('created_at', today);
-        // 어제 방문자
         const { count: yesterdayCount } = await db.from('visitors').select('*', { count: 'exact', head: true }).gte('created_at', yesterday).lt('created_at', today);
-        // 전체 방문자
         const { count: totalCount } = await db.from('visitors').select('*', { count: 'exact', head: true });
 
         document.getElementById('stat-today').textContent = (todayCount || 0).toLocaleString();
@@ -1875,7 +1870,7 @@
       let totalProductPrice = 0;
       let totalShippingFee = 0;
       items.forEach(it => {
-        totalProductPrice += Number(it.total_price || 0);
+        totalProductPrice += (Number(it.total_price || 0) - Number(it.shipping_fee || 0));
         totalShippingFee += Number(it.shipping_fee || 0);
       });
       const finalTotal = totalProductPrice + totalShippingFee;
@@ -1988,6 +1983,15 @@
         else { alert('✅ 저장 완료!'); modal.remove(); loadOrders(); }
       };
     }
+
+    // ============ 회원 관리 ============
+    async function loadMembers() { /* ... */ }
+    async function loadCouponsAndMembers() { /* ... */ }
+    async function loadNoticeAdminList() { /* ... */ }
+    async function loadBoardAdminList() { /* ... */ }
+
+    // 초기 세션 체크 실행
+    checkSession();
   </script>
 </body>
 </html>
