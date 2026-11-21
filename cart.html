@@ -30,8 +30,6 @@
     .coupon-disabled-notice { background: #1a1a1a; border: 1px dashed #f59e0b; border-radius: 8px; padding: 12px; margin-top: 8px; font-size: 13px; color: #fbbf24; }
     .block-notice { margin-bottom: 12px; padding: 12px 14px; background: #1a1a1a; border: 1px dashed #f59e0b; border-radius: 8px; font-size: 13px; color: #fbbf24; line-height: 1.7; }
     .block-notice a { color: #60a5fa; text-decoration: underline; }
-    
-    /* ⭐ 주소 검색 레이아웃 추가 */
     .address-group { display: flex; gap: 8px; }
     .address-group input { flex: 1; }
     .address-group button { flex: 0 0 auto; padding: 0 12px; background: #333; color: #fff; font-weight: 600; border: 1px solid #444; border-radius: 6px; cursor: pointer; white-space: nowrap; }
@@ -169,7 +167,6 @@
               </span>
               = <b style="color:#ef4444; font-family:'Bahnschrift Light',sans-serif;">${won(it.product_price * it.quantity)}</b>
               ${showDiscount ? `<span style="background:#ef4444; color:#fff; font-size:10px; font-weight:700; padding:2px 5px; border-radius:3px; margin-left:4px;">-${pricing.discountRate}%</span>` : ''}
-              <div style="font-size:11px; color:#9ca3af; margin-top:2px;">배송: ${pricing.shippingMethod} / ${pricing.shippingLabel}</div>
             </div>
             <button data-idx="${idx}" class="del-btn" style="padding:8px 14px; background:#dc2626; color:#fff; border:0; border-radius:8px; cursor:pointer; font-size:13px;">삭제</button>
           </div>`;
@@ -182,13 +179,11 @@
 
       const shippingGroups = new Set();
       let shippingFee = 0;
-      const shippingDetail = [];
       selectedCart.forEach(it => {
         const pricing = getItemPricing(it);
         if (shippingGroups.has(pricing.targetGrade)) return;
         shippingGroups.add(pricing.targetGrade);
         if (pricing.shippingFeePerGroup > 0) shippingFee += pricing.shippingFeePerGroup;
-        shippingDetail.push({ method: pricing.shippingMethod, label: pricing.shippingLabel, fee: pricing.shippingFeePerGroup, targetGrade: pricing.targetGrade });
       });
 
       const total = subTotal + shippingFee;
@@ -214,18 +209,10 @@
 
       let gradeInfoHtml = '';
       if (memberGrade === '도매회원') {
-        gradeInfoHtml = `<div class="grade-info-card wholesale"><span class="gi-label">🏭 도매회원</span><span class="gi-detail">도매전용 상품만 구매 가능 · 일반상품은 열람만 · 배송: 해운/착불</span></div>`;
+        gradeInfoHtml = `<div class="grade-info-card wholesale"><span class="gi-label">도매회원</span><span class="gi-detail">도매전용 상품만 구매 가능 · 일반상품은 열람만 · 배송: 해운/착불</span></div>`;
       } else if (memberGrade === 'VIP회원') {
-        gradeInfoHtml = `<div class="grade-info-card vip"><span class="gi-label">⭐ VIP회원</span><span class="gi-detail">일반 + VIP전용 상품 구매 가능 · VIP상품 30% 할인 · 배송: 택배/무료</span></div>`;
+        gradeInfoHtml = `<div class="grade-info-card vip"><span class="gi-label">VIP회원</span><span class="gi-detail">일반 + VIP전용 상품 구매 가능 · VIP상품 30% 할인 · 배송: 택배/무료</span></div>`;
       }
-
-      const shippingLinesHtml = shippingDetail.map(sd => {
-        let label = sd.label;
-        if (sd.targetGrade === 'wholesale') label = '착불 (해운)';
-        else if (sd.targetGrade === 'vip') label = '무료 (택배)';
-        else label = sd.fee > 0 ? `${won(sd.fee)} (택배)` : '무료 (택배)';
-        return `<div style="font-size:12px; color:#9ca3af;">· ${label}</div>`;
-      }).join('');
 
       let shortMsgHtml = '';
       if (shortGroups.length > 0) {
@@ -238,7 +225,7 @@
       let blockNoticeHtml = '';
       if (purchaseBlocked) {
         const illegalNames = illegalItems.map(it => it.product_name).join(', ');
-        blockNoticeHtml = `<div class="block-notice">⚠️ 현재 회원 등급에서 구매할 수 없는 상품이 포함되어 있습니다.<br><span style="color:#fbbf24; font-size:12px;">(${illegalNames})</span></div>`;
+        blockNoticeHtml = `<div class="block-notice">현재 회원 등급에서 구매할 수 없는 상품이 포함되어 있습니다.<br><span style="color:#fbbf24; font-size:12px;">(${illegalNames})</span></div>`;
       }
 
       summaryEl.style.display = 'block';
@@ -254,14 +241,13 @@
             <span style="font-size:12px; color:#888;">전체 총 수량: ${totalQty}개</span>
           </div>
           <div class="rule-card">
-            <span class="rule-text">📦 상품별 최소 주문수량 확인</span>
-            <span class="rule-status" style="color:${canOrder ? '#10b981' : '#f59e0b'};">${canOrder ? '✅ 주문 가능' : (selectedCart.length === 0 ? '상품을 선택하세요' : '⚠️ 주문 불가')}</span>
+            <span class="rule-text">상품별 최소 주문수량 확인</span>
+            <span class="rule-status" style="color:${canOrder ? '#10b981' : '#f59e0b'};">${canOrder ? '주문 가능' : (selectedCart.length === 0 ? '상품을 선택하세요' : '주문 불가')}</span>
             ${shortMsgHtml}
           </div>
           <div style="text-align:right;">
             <div>선택 상품 합계: <b style="font-family:'Bahnschrift Light',sans-serif;">${won(subTotal)}</b></div>
             <div style="margin-top:2px;">배송비: <b style="font-family:'Bahnschrift Light',sans-serif;">${shippingFee > 0 ? won(shippingFee) : '무료'}</b></div>
-            ${shippingLinesHtml}
             <hr style="border:0; border-top:1px solid #222; margin:12px 0;">
             <p style="font-size:18px; margin-bottom:16px;">총 합계: <b style="color:#ef4444; font-size:22px; font-family:'Bahnschrift Light',sans-serif;">${won(total)}</b></p>
             <button id="checkout-btn" style="padding:14px 28px; background:${canOrder ? '#e5e7eb' : '#333'}; color:${canOrder ? '#111' : '#777'}; border:0; border-radius:8px; cursor:${canOrder ? 'pointer' : 'not-allowed'}; font-weight:600; font-size:15px; font-family:inherit;">
@@ -372,12 +358,11 @@
       let couponSectionHtml = '';
       if (allWholesale) couponSectionHtml = `<div class="coupon-disabled-notice">도매전용 상품은 쿠폰 사용 불가</div>`;
       else if (coupons.length > 0) {
-        couponSectionHtml = `<div class="coupon-picker"><div class="cp-title">🎟️ 쿠폰 사용</div><select id="coupon-select"><option value="">쿠폰 선택 안 함</option>
+        couponSectionHtml = `<div class="coupon-picker"><div class="cp-title">쿠폰 사용</div><select id="coupon-select"><option value="">쿠폰 선택 안 함</option>
           ${coupons.map(c => { const label = c.type === 'percent' ? `${c.discount_value}% 할인` : `${Number(c.discount_value).toLocaleString()}원 할인`; return `<option value="${c.id}" data-type="${c.type}" data-value="${c.discount_value}">${label} (${c.code})</option>`; }).join('')}
         </select></div>`;
       }
       
-      // ⭐ 주소 레이아웃 수정
       modal.innerHTML = `<div class="checkout-modal-box"><h2>주문 정보 입력</h2>
         <form id="checkout-form" class="checkout-form">
           <label style="${labelStyle}">주문자 이름 *</label><input name="customer_name" required value="${m?.name || ''}" style="${inputStyle}">
@@ -460,10 +445,13 @@
             address: f.address.value.trim(), address_detail: f.address_detail.value.trim(), postcode: f.postcode.value.trim(),
             selected_color: it.selected_color, selected_size: it.selected_size, selected_hem: it.selected_hem, selected_other: it.selected_other,
             shipping_fee: rowShipFee, grade_discount: pricing.discountRate, status: '입금대기',
+            // ⭐ 회원 정보에서 수취인, 통관번호 가져오기
+            receiver_name: m?.receiver_name || m?.recipient_name || f.customer_name.value.trim(),
+            customs_number: m?.customs_number || m?.customs_code || '',
           };
         });
         const { error } = await db.from('orders').insert(rows);
-        if (error) { alert('❌ 주문 실패: ' + error.message); return; }
+        if (error) { alert('주문 실패: ' + error.message); return; }
         if (couponIdToUse) {
           try { await db.from('coupons').update({ is_used: true, used_at: new Date().toISOString(), used_order_number: orderNumber }).eq('id', couponIdToUse); } catch {}
         }
@@ -493,7 +481,7 @@
         ${acc.number ? `계좌: <b>${acc.number}</b><br>` : ''}
         ${acc.holder ? `예금주: <b>${acc.holder}</b><br>` : ''}
         입금액: <b>${won(total)}</b>` : `<b>입금 계좌 안내</b><br><span style="color:#888;">관리자가 계좌 정보를 등록하지 않았습니다.</span><br>입금액: <b>${won(total)}</b>`;
-      box.innerHTML = `<h2 style="margin-bottom:16px; color:#10b981;">✅ 주문 접수 완료</h2>
+      box.innerHTML = `<h2 style="margin-bottom:16px; color:#10b981;">주문 접수 완료</h2>
         <div style="background:#0f0f0f; padding:16px; border-radius:8px; margin-bottom:16px; line-height:1.8; font-size:14px; border:1px solid #222;">
           <div style="font-size:13px; color:#888;">주문번호</div>
           <div style="font-size:18px; font-weight:700; color:#60a5fa; margin-bottom:8px; letter-spacing:1px;">${orderNumber}</div>

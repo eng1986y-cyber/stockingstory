@@ -463,19 +463,19 @@
     <header class="admin-header">
       <div class="admin-header-left">
         <span class="logo">ADMIN</span>
-        <a href="index.html" target="_blank" class="main-btn">메인페이지 ↗</a>
+        <a href="index.html" target="_blank" class="main-btn">메인페이지</a>
       </div>
       <button id="logout-btn" class="logout-btn">로그아웃</button>
     </header>
 
     <div class="admin-tabbar">
       <div class="admin-tabbar-inner">
-        <button class="nav-item active" data-tab="products"> 상품</button>
-        <button class="nav-item" data-tab="orders"> 주문</button>
-        <button class="nav-item" data-tab="members"> 회원</button>
-        <button class="nav-item" data-tab="coupons" style="display:none;">️ 쿠폰</button>
-        <button class="nav-item" data-tab="notices"> 공지/게시판</button>
-        <button class="nav-item" data-tab="settings">️ 사이트 설정</button>
+        <button class="nav-item active" data-tab="products">상품</button>
+        <button class="nav-item" data-tab="orders">주문</button>
+        <button class="nav-item" data-tab="members">회원</button>
+        <button class="nav-item" data-tab="coupons" style="display:none;">쿠폰</button>
+        <button class="nav-item" data-tab="notices">공지/게시판</button>
+        <button class="nav-item" data-tab="settings">사이트 설정</button>
       </div>
     </div>
 
@@ -501,12 +501,12 @@
           </div>
 
           <div class="card" id="global-detail-images-card">
-            <div class="card-title">️ 전체 상품 상세 공통 이미지</div>
+            <div class="card-title">전체 상품 상세 공통 이미지</div>
             <p class="upload-help" style="margin:0 0 12px; font-size:12px; color:#6b7280;">모든 상품 상세페이지에 자동 적용됩니다.</p>
             <div class="settings-split" style="margin-bottom:0;">
               <div class="settings-col">
                 <div>
-                  <label class="upload-label" for="detail-notice-file" style="display:block; font-size:12px; font-weight:700; color:#374151; margin-bottom:6px;"> 상세이미지 위 공지 이미지</label>
+                  <label class="upload-label" for="detail-notice-file" style="display:block; font-size:12px; font-weight:700; color:#374151; margin-bottom:6px;">상세이미지 위 공지 이미지</label>
                   <input id="detail-notice-file" type="file" accept="image/*" style="padding:8px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:6px;">
                   <input id="detail-notice-url" placeholder="공지 이미지 URL" style="margin-top:8px;">
                   <div id="detail-notice-preview" class="preview-box" style="display:none;">
@@ -522,7 +522,7 @@
               </div>
               <div class="settings-col">
                 <div>
-                  <label class="upload-label" for="detail-footer-file" style="display:block; font-size:12px; font-weight:700; color:#374151; margin-bottom:6px;"> 사용설명 / 배송안내 이미지</label>
+                  <label class="upload-label" for="detail-footer-file" style="display:block; font-size:12px; font-weight:700; color:#374151; margin-bottom:6px;">사용설명 / 배송안내 이미지</label>
                   <input id="detail-footer-file" type="file" accept="image/*" style="padding:8px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:6px;">
                   <input id="detail-footer-url" placeholder="하단 이미지 URL" style="margin-top:8px;">
                   <div id="detail-footer-preview" class="preview-box" style="display:none;">
@@ -540,7 +540,7 @@
           </div>
 
           <div class="card" id="product-register-card">
-            <div class="card-title"> 새 상품 등록</div>
+            <div class="card-title">새 상품 등록</div>
             <form id="product-form">
               <input name="product_code" placeholder="제품번호">
               <input name="name" placeholder="상품명" required>
@@ -560,7 +560,7 @@
               <button type="submit" class="btn btn-primary">상품 등록</button>
               <div id="size-detail-section">
                 <div class="sd-head">
-                  <div class="sd-title"> 사이즈 상세 정보</div>
+                  <div class="sd-title">사이즈 상세 정보</div>
                   <button type="button" id="sd-add-btn" class="sd-add-btn">+ 행 추가</button>
                 </div>
                 <div id="size-detail-rows"></div>
@@ -570,7 +570,7 @@
           </div>
 
           <div class="card">
-            <div class="card-title"> 등록된 상품 <span id="product-count" class="hint"></span></div>
+            <div class="card-title">등록된 상품 <span id="product-count" class="hint"></span></div>
             <div class="list-controls">
               <div class="list-search">
                 <input id="product-search" placeholder="상품명 / 제품번호 검색">
@@ -601,8 +601,8 @@
                 <label class="select-all-wrap"><input type="checkbox" id="order-check-all"> 전체 선택</label>
                 <button type="button" id="order-bulk-del-btn" class="select-del-btn">선택 삭제</button>
                 <button type="button" id="order-bulk-hard-del-btn" class="btn btn-danger btn-sm">선택 완전 삭제</button>
-                <button id="order-excel-selected-btn" class="btn btn-excel btn-sm"> 선택 엑셀</button>
-                <button id="order-print-selected-btn" class="btn btn-print btn-sm">️ 선택 인쇄</button>
+                <button id="order-excel-selected-btn" class="btn btn-excel btn-sm">선택 엑셀</button>
+                <button id="order-print-selected-btn" class="btn btn-print btn-sm">선택 인쇄</button>
               </div>
             </div>
           </div>
@@ -623,8 +623,8 @@
               <div class="export-group">
                 <label class="select-all-wrap"><input type="checkbox" id="member-check-all"> 전체 선택</label>
                 <button type="button" id="member-bulk-del-btn" class="select-del-btn">선택 삭제</button>
-                <button id="member-excel-selected-btn" class="btn btn-excel btn-sm"> 선택 엑셀</button>
-                <button id="member-print-selected-btn" class="btn btn-print btn-sm">️ 선택 인쇄</button>
+                <button id="member-excel-selected-btn" class="btn btn-excel btn-sm">선택 엑셀</button>
+                <button id="member-print-selected-btn" class="btn btn-print btn-sm">선택 인쇄</button>
               </div>
             </div>
           </div>
@@ -636,7 +636,7 @@
           <h1 class="page-title">쿠폰 관리</h1>
           <p class="page-subtitle">회원별 쿠폰 발급 및 관리</p>
           <div class="card" id="coupon-issue-card">
-            <div class="card-title" style="color:#92400e;"> 새 쿠폰 발급</div>
+            <div class="card-title" style="color:#92400e;">새 쿠폰 발급</div>
             <form id="coupon-issue-form">
               <div>
                 <label style="font-size:12px; font-weight:600; color:#92400e; display:block; margin-bottom:4px;">회원</label>
@@ -678,14 +678,14 @@
 
           <div class="card" style="padding:8px; margin-bottom:16px;">
             <div style="display:flex; gap:8px;">
-              <button type="button" class="notice-subtab-btn active" data-subtab="notice" style="flex:1; padding:10px 14px; border-radius:6px; border:0; cursor:pointer; font-weight:600; font-size:14px; background:#111827; color:#fff;"> 공지사항</button>
-              <button type="button" class="notice-subtab-btn" data-subtab="board" style="flex:1; padding:10px 14px; border-radius:6px; border:1px solid #e5e7eb; cursor:pointer; font-weight:600; font-size:14px; background:#fff; color:#374151;"> 회원 게시판</button>
+              <button type="button" class="notice-subtab-btn active" data-subtab="notice" style="flex:1; padding:10px 14px; border-radius:6px; border:0; cursor:pointer; font-weight:600; font-size:14px; background:#111827; color:#fff;">공지사항</button>
+              <button type="button" class="notice-subtab-btn" data-subtab="board" style="flex:1; padding:10px 14px; border-radius:6px; border:1px solid #e5e7eb; cursor:pointer; font-weight:600; font-size:14px; background:#fff; color:#374151;">회원 게시판</button>
             </div>
           </div>
 
           <div id="notice-subsection">
             <div class="card">
-              <div class="card-title"> 새 공지사항 등록</div>
+              <div class="card-title">새 공지사항 등록</div>
               <form id="notice-form" style="display:grid; gap:10px;">
                 <input name="title" placeholder="공지사항 제목" required maxlength="100">
                 <textarea name="content" placeholder="공지사항 내용" required style="min-height:120px;"></textarea>
@@ -694,14 +694,14 @@
               <p id="notice-msg" class="msg"></p>
             </div>
             <div class="card">
-              <div class="card-title"> 등록된 공지사항 <span id="notice-admin-count" class="hint"></span></div>
+              <div class="card-title">등록된 공지사항 <span id="notice-admin-count" class="hint"></span></div>
               <div id="notice-admin-list" class="row-list">로딩중...</div>
             </div>
           </div>
 
           <div id="board-subsection" style="display:none;">
             <div class="card">
-              <div class="card-title"> 회원 문의글 <span id="board-admin-count" class="hint"></span></div>
+              <div class="card-title">회원 문의글 <span id="board-admin-count" class="hint"></span></div>
               <div id="board-admin-list" class="row-list">로딩중...</div>
             </div>
           </div>
@@ -715,7 +715,7 @@
           <div class="settings-split" id="settings-content" style="display:none;">
             <div class="settings-col">
               <div class="card">
-                <div class="card-title">️ 로고 / 사이트명</div>
+                <div class="card-title">로고 / 사이트명</div>
                 <div style="display:grid; gap:10px;">
                   <input id="logo-site-name" placeholder="사이트명">
                   <input id="logo-image-url" placeholder="로고 이미지 URL">
@@ -734,7 +734,7 @@
               </div>
 
               <div class="card">
-                <div class="card-title"> 홍보 영상 <span class="hint">(메인페이지 상품목록 위)</span></div>
+                <div class="card-title">홍보 영상 <span class="hint">(메인페이지 상품목록 위)</span></div>
                 <div style="display:grid; gap:10px;">
                   <input id="promo-video-url" placeholder="영상 URL (YouTube/Vimeo/NaverTV/KakaoTV/Facebook/Instagram/TikTok/X 등)">
                   <div class="form-row">
@@ -751,23 +751,23 @@
               </div>
 
               <div class="card">
-                <div class="card-title">️ 배너 이미지</div>
+                <div class="card-title">배너 이미지</div>
                 <div style="display:grid; gap:10px;">
                   <input id="banner-image-url" placeholder="배너 이미지 URL">
                   <label class="upload-label" for="banner-image-file">또는 배너 업로드</label>
                   <input id="banner-image-file" type="file" accept="image/*">
                   <input id="banner-link-url" placeholder="클릭 시 이동 링크 (선택)">
-                  <button id="banner-save-btn" class="btn btn-primary"> 새 배너 추가</button>
+                  <button id="banner-save-btn" class="btn btn-primary">새 배너 추가</button>
                 </div>
                 <p id="banner-msg" class="msg"></p>
                 <div style="margin-top:12px;">
-                  <div style="font-size:12px; font-weight:600; color:#6b7280; margin-bottom:8px;"> 등록된 배너 <span id="banner-count"></span></div>
+                  <div style="font-size:12px; font-weight:600; color:#6b7280; margin-bottom:8px;">등록된 배너 <span id="banner-count"></span></div>
                   <div id="banner-list" class="banner-list"><p style="font-size:12px; color:#9ca3af;">로딩중...</p></div>
                 </div>
               </div>
 
               <div class="card">
-                <div class="card-title"> 배경 이미지 <span class="hint">(상단 고정 배경)</span></div>
+                <div class="card-title">배경 이미지 <span class="hint">(상단 고정 배경)</span></div>
                 <div style="display:grid; gap:10px;">
                   <input id="hero-bg-image-url" placeholder="배경 이미지 URL">
                   <label class="upload-label" for="hero-bg-image-file">또는 배경 업로드</label>
@@ -787,7 +787,7 @@
 
             <div class="settings-col">
               <div class="card">
-                <div class="card-title"> 사이트 하단 정보 (Footer)</div>
+                <div class="card-title">사이트 하단 정보 (Footer)</div>
                 <div style="display:grid; gap:10px;">
                   <input id="footer-owner" placeholder="상호명 / 대표자">
                   <input id="footer-phone" placeholder="연락처">
@@ -801,7 +801,7 @@
               </div>
 
               <div class="card">
-                <div class="card-title"> 입금 계좌 정보</div>
+                <div class="card-title">입금 계좌 정보</div>
                 <div style="display:grid; gap:10px;">
                   <input id="account-bank" placeholder="은행명">
                   <input id="account-number" placeholder="계좌번호">
@@ -812,7 +812,7 @@
               </div>
 
               <div class="card">
-                <div class="card-title"> SNS 링크</div>
+                <div class="card-title">SNS 링크</div>
                 <div style="display:grid; gap:10px;">
                   <input id="footer-instagram" placeholder="Instagram URL">
                   <input id="footer-blog" placeholder="Naver Blog URL">
@@ -823,7 +823,7 @@
               </div>
 
               <div class="card">
-                <div class="card-title"> 배송비 설정 <span class="hint">(일반회원 적용)</span></div>
+                <div class="card-title">배송비 설정 <span class="hint">(일반회원 적용)</span></div>
                 <div class="form-row">
                   <input id="global-shipping" type="number" min="0" placeholder="배송비 (0=무료)">
                   <button id="save-shipping" class="btn btn-success" style="flex:0 0 auto;">저장</button>
@@ -832,7 +832,7 @@
               </div>
 
               <div class="card">
-                <div class="card-title"> 회원가입 쿠폰 설정</div>
+                <div class="card-title">회원가입 쿠폰 설정</div>
                 <div style="display:grid; gap:12px;">
                   <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:#374151; cursor:pointer;">
                     <input type="checkbox" id="signup-coupon-enabled" style="width:18px; height:18px; accent-color:#111827; cursor:pointer;">
@@ -934,7 +934,7 @@
       loginMsg.textContent = '로그인 중...';
       loginMsg.className = 'msg';
       const { error } = await db.auth.signInWithPassword({ email: loginForm.email.value.trim(), password: loginForm.password.value });
-      if (error) { loginMsg.className = 'msg error'; loginMsg.textContent = ' ' + error.message; }
+      if (error) { loginMsg.className = 'msg error'; loginMsg.textContent = error.message; }
       else { loginMsg.textContent = ''; showAdmin(); }
     });
     document.getElementById('logout-btn').addEventListener('click', async () => { await db.auth.signOut(); showLogin(); });
@@ -1027,8 +1027,8 @@
           const url = await uploadSiteImage(file, 'product-detail-global');
           document.getElementById(prefix + '-url').value = url;
           setGlobalDetailImagePreview(type, url);
-          m.className = 'msg success'; m.textContent = ' 업로드 완료! 저장 버튼을 누르세요.';
-        } catch (err) { m.className = 'msg error'; m.textContent = ' ' + (err.message || err); }
+          m.className = 'msg success'; m.textContent = '업로드 완료! 저장 버튼을 누르세요.';
+        } catch (err) { m.className = 'msg error'; m.textContent = (err.message || err); }
         finally { e.target.value = ''; }
       });
       document.getElementById(prefix + '-url').addEventListener('input', e => setGlobalDetailImagePreview(type, e.target.value.trim()));
@@ -1040,8 +1040,8 @@
         const { data: old } = await db.from('settings').select('value').eq('key', key).maybeSingle();
         if (old?.value && old.value !== url) await deleteSiteImageByUrl(old.value);
         const { error } = await db.from('settings').upsert({ key, value: url });
-        if (error) { m.className = 'msg error'; m.textContent = ' ' + error.message; }
-        else { m.className = 'msg success'; m.textContent = ' 저장 완료!'; }
+        if (error) { m.className = 'msg error'; m.textContent = error.message; }
+        else { m.className = 'msg success'; m.textContent = '저장 완료!'; }
       });
       document.getElementById(prefix + '-delete').addEventListener('click', async () => {
         if (!confirm('삭제할까요?')) return;
@@ -1050,11 +1050,11 @@
         const { data: old } = await db.from('settings').select('value').eq('key', key).maybeSingle();
         if (old?.value) await deleteSiteImageByUrl(old.value);
         const { error } = await db.from('settings').delete().eq('key', key);
-        if (error) { m.className = 'msg error'; m.textContent = ' ' + error.message; }
+        if (error) { m.className = 'msg error'; m.textContent = error.message; }
         else {
           document.getElementById(prefix + '-url').value = '';
           setGlobalDetailImagePreview(type, '');
-          m.className = 'msg success'; m.textContent = ' 삭제 완료!';
+          m.className = 'msg success'; m.textContent = '삭제 완료!';
         }
       });
     });
@@ -1126,8 +1126,8 @@
         target_grade: form.target_grade.value || 'all',
         size_detail: getSizeDetailFromForm(),
       });
-      if (error) { msg.className = 'msg error'; msg.textContent = ' ' + error.message; }
-      else { msg.className = 'msg success'; msg.textContent = ' 등록 완료!'; form.reset(); form.min_qty.value = 1; form.target_grade.value = 'all'; renderSizeDetailRows([]); loadAdminList(); }
+      if (error) { msg.className = 'msg error'; msg.textContent = error.message; }
+      else { msg.className = 'msg success'; msg.textContent = '등록 완료!'; form.reset(); form.min_qty.value = 1; form.target_grade.value = 'all'; renderSizeDetailRows([]); loadAdminList(); }
     });
 
     // ============ 상품 목록 ============
@@ -1236,7 +1236,7 @@
             hem_option: p.hem_option || [], other_option: p.other_option || [],
             min_qty: p.min_qty || 1, target_grade: p.target_grade || 'all', size_detail: p.size_detail || [],
           });
-          if (error) { alert(' ' + error.message); btn.disabled = false; btn.textContent = '복제'; }
+          if (error) { alert(error.message); btn.disabled = false; btn.textContent = '복제'; }
           else loadAdminList();
         };
       });
@@ -1275,7 +1275,7 @@
             <input name="detail_images" placeholder="상세 이미지 URL" style="grid-column:1/-1;" value="${(p.detail_images || []).join(', ')}">
             <div class="edit-size-section" style="grid-column:1/-1;">
               <div class="es-head">
-                <div style="font-size:13px;font-weight:700;color:#111827;"> 사이즈 상세</div>
+                <div style="font-size:13px;font-weight:700;color:#111827;">사이즈 상세</div>
                 <button type="button" class="es-add-btn" id="es-add-btn">+ 행 추가</button>
               </div>
               <div class="edit-size-rows" id="edit-size-rows"></div>
@@ -1327,8 +1327,8 @@
           hem_option: parseList(f.hem_option.value), other_option: parseList(f.other_option.value),
           min_qty: Number(f.min_qty.value) || 1, target_grade: f.target_grade.value || 'all', size_detail: sd,
         }).eq('id', p.id);
-        if (error) { alert(' ' + error.message); btn.disabled = false; btn.textContent = '수정 완료'; }
-        else { alert(' 수정 완료!'); modal.remove(); loadAdminList(); }
+        if (error) { alert(error.message); btn.disabled = false; btn.textContent = '수정 완료'; }
+        else { alert('수정 완료!'); modal.remove(); loadAdminList(); }
       };
     }
 
@@ -1355,8 +1355,8 @@
       bulkDelBtn.disabled = true;
       const { error } = await db.from('products').delete().in('id', Array.from(selectedProductIds));
       bulkDelBtn.disabled = false;
-      if (error) alert(' ' + error.message);
-      else { alert(' 삭제 완료!'); selectedProductIds.clear(); loadAdminList(); }
+      if (error) alert(error.message);
+      else { alert('삭제 완료!'); selectedProductIds.clear(); loadAdminList(); }
     };
     document.getElementById('product-search-btn').onclick = () => applySearch(document.getElementById('product-search').value.trim());
     document.getElementById('product-reset-btn').onclick = () => { document.getElementById('product-search').value = ''; applySearch(''); };
@@ -1401,30 +1401,30 @@
         document.getElementById('logo-image-url').value = url;
         document.getElementById('logo-preview-img').src = url;
         document.getElementById('logo-preview').style.display = 'block';
-        m.className = 'msg success'; m.textContent = ' 업로드 완료! 저장을 누르세요.';
-      } catch (err) { m.className = 'msg error'; m.textContent = ' ' + (err.message || err); }
+        m.className = 'msg success'; m.textContent = '업로드 완료! 저장을 누르세요.';
+      } catch (err) { m.className = 'msg error'; m.textContent = (err.message || err); }
       finally { e.target.value = ''; }
     });
     document.getElementById('logo-save-btn').onclick = async () => {
       const m = document.getElementById('logo-msg');
       const sn = document.getElementById('logo-site-name').value.trim();
       const url = document.getElementById('logo-image-url').value.trim();
-      if (!sn && !url) { m.className = 'msg error'; m.textContent = ' 사이트명 또는 URL 필요'; return; }
+      if (!sn && !url) { m.className = 'msg error'; m.textContent = '사이트명 또는 URL 필요'; return; }
       m.className = 'msg'; m.textContent = '저장 중...';
       if (currentLogoUrl && currentLogoUrl !== url) await deleteSiteImageByUrl(currentLogoUrl);
       let error;
       if (currentLogoId) ({ error } = await db.from('logos').update({ site_name: sn || null, image_url: url || null, updated_at: new Date().toISOString() }).eq('id', currentLogoId));
       else { const r = await db.from('logos').insert({ site_name: sn || null, image_url: url || null }).select().single(); error = r.error; if (r.data) currentLogoId = r.data.id; }
-      if (error) { m.className = 'msg error'; m.textContent = ' ' + error.message; }
-      else { m.className = 'msg success'; m.textContent = ' 저장 완료!'; localStorage.removeItem('logo_cache'); loadLogo(); }
+      if (error) { m.className = 'msg error'; m.textContent = error.message; }
+      else { m.className = 'msg success'; m.textContent = '저장 완료!'; localStorage.removeItem('logo_cache'); loadLogo(); }
     };
     document.getElementById('logo-delete-btn').onclick = async () => {
       if (!currentLogoId || !confirm('로고를 삭제할까요?')) return;
       const m = document.getElementById('logo-msg');
       if (currentLogoUrl) await deleteSiteImageByUrl(currentLogoUrl);
       const { error } = await db.from('logos').delete().eq('id', currentLogoId);
-      if (error) { m.className = 'msg error'; m.textContent = ' ' + error.message; }
-      else { m.className = 'msg success'; m.textContent = ' 삭제 완료!'; document.getElementById('logo-site-name').value = ''; document.getElementById('logo-image-url').value = ''; document.getElementById('logo-preview').style.display = 'none'; currentLogoId = null; currentLogoUrl = ''; localStorage.removeItem('logo_cache'); }
+      if (error) { m.className = 'msg error'; m.textContent = error.message; }
+      else { m.className = 'msg success'; m.textContent = '삭제 완료!'; document.getElementById('logo-site-name').value = ''; document.getElementById('logo-image-url').value = ''; document.getElementById('logo-preview').style.display = 'none'; currentLogoId = null; currentLogoUrl = ''; localStorage.removeItem('logo_cache'); }
     };
 
     async function loadFooter() {
@@ -1437,8 +1437,8 @@
       m.className = 'msg'; m.textContent = '저장 중...';
       const updates = ['owner','phone','email','address','business','text'].map(k => ({ key: 'footer_' + k, value: document.getElementById('footer-' + k).value.trim() }));
       const { error } = await db.from('settings').upsert(updates);
-      if (error) { m.className = 'msg error'; m.textContent = ' ' + error.message; }
-      else { m.className = 'msg success'; m.textContent = ' 저장 완료!'; localStorage.removeItem('footer_cache'); }
+      if (error) { m.className = 'msg error'; m.textContent = error.message; }
+      else { m.className = 'msg success'; m.textContent = '저장 완료!'; localStorage.removeItem('footer_cache'); }
     };
     async function loadAccountSetting() {
       const { data } = await db.from('settings').select('key, value').in('key', ['account_bank', 'account_number', 'account_holder']);
@@ -1455,8 +1455,8 @@
         { key: 'account_number', value: document.getElementById('account-number').value.trim() },
         { key: 'account_holder', value: document.getElementById('account-holder').value.trim() },
       ]);
-      if (error) { m.className = 'msg error'; m.textContent = ' ' + error.message; }
-      else { m.className = 'msg success'; m.textContent = ' 저장 완료!'; localStorage.removeItem('footer_cache'); }
+      if (error) { m.className = 'msg error'; m.textContent = error.message; }
+      else { m.className = 'msg success'; m.textContent = '저장 완료!'; localStorage.removeItem('footer_cache'); }
     };
     async function loadSnsLinks() {
       const { data } = await db.from('settings').select('key, value').in('key', ['footer_instagram','footer_blog','footer_band']);
@@ -1474,8 +1474,8 @@
         { key: 'footer_blog', value: norm(document.getElementById('footer-blog').value) },
         { key: 'footer_band', value: norm(document.getElementById('footer-band').value) },
       ]);
-      if (error) { m.className = 'msg error'; m.textContent = ' ' + error.message; }
-      else { m.className = 'msg success'; m.textContent = ' 저장 완료!'; localStorage.removeItem('footer_cache'); }
+      if (error) { m.className = 'msg error'; m.textContent = error.message; }
+      else { m.className = 'msg success'; m.textContent = '저장 완료!'; localStorage.removeItem('footer_cache'); }
     };
 
     let currentPromoVideoUrl = '';
@@ -1507,24 +1507,24 @@
     document.getElementById('promo-video-save-btn').onclick = async () => {
       const m = document.getElementById('promo-video-msg');
       const url = document.getElementById('promo-video-url').value.trim();
-      if (!url) { m.className = 'msg error'; m.textContent = ' URL을 입력하세요.'; return; }
+      if (!url) { m.className = 'msg error'; m.textContent = 'URL을 입력하세요.'; return; }
       m.className = 'msg'; m.textContent = '저장 중...';
       const { error } = await db.from('settings').upsert({ key: 'promo_video_url', value: url });
-      if (error) { m.className = 'msg error'; m.textContent = ' ' + error.message; }
-      else { m.className = 'msg success'; m.textContent = ' 저장 완료!'; localStorage.removeItem('footer_cache'); await loadPromoVideo(); }
+      if (error) { m.className = 'msg error'; m.textContent = error.message; }
+      else { m.className = 'msg success'; m.textContent = '저장 완료!'; localStorage.removeItem('footer_cache'); await loadPromoVideo(); }
     };
     document.getElementById('promo-video-delete-btn').onclick = async () => {
       if (!currentPromoVideoUrl || !confirm('영상을 삭제할까요?')) return;
       const m = document.getElementById('promo-video-msg');
       const { error } = await db.from('settings').delete().eq('key', 'promo_video_url');
-      if (error) { m.className = 'msg error'; m.textContent = ' ' + error.message; }
-      else { m.className = 'msg success'; m.textContent = ' 삭제 완료!'; document.getElementById('promo-video-url').value = ''; currentPromoVideoUrl = ''; document.getElementById('promo-video-preview').style.display = 'none'; localStorage.removeItem('footer_cache'); }
+      if (error) { m.className = 'msg error'; m.textContent = error.message; }
+      else { m.className = 'msg success'; m.textContent = '삭제 완료!'; document.getElementById('promo-video-url').value = ''; currentPromoVideoUrl = ''; document.getElementById('promo-video-preview').style.display = 'none'; localStorage.removeItem('footer_cache'); }
     };
 
     async function loadBanner() {
       const listEl = document.getElementById('banner-list');
       const { data, error } = await db.from('banners').select('*').order('id', { ascending: false });
-      if (error) { listEl.innerHTML = '<p style="color:#dc2626;"> ' + error.message + '</p>'; return; }
+      if (error) { listEl.innerHTML = '<p style="color:#dc2626;">' + error.message + '</p>'; return; }
       const list = (data || []).filter(b => b.image_url);
       document.getElementById('banner-count').textContent = `(총 ${list.length}개)`;
       if (list.length === 0) { listEl.innerHTML = '<p style="color:#9ca3af;">등록된 배너가 없습니다.</p>'; return; }
@@ -1532,7 +1532,7 @@
         <div class="banner-item" data-id="${b.id}">
           <img class="banner-item-thumb" src="${b.image_url}" alt="" loading="lazy">
           <div class="banner-item-info">
-            ${b.link_url ? `<a class="b-link" href="${b.link_url}" target="_blank" rel="noopener"> ${esc(b.link_url)}</a>` : `<span style="color:#9ca3af;"> 링크 없음</span>`}
+            ${b.link_url ? `<a class="b-link" href="${b.link_url}" target="_blank" rel="noopener">${esc(b.link_url)}</a>` : `<span style="color:#9ca3af;">링크 없음</span>`}
           </div>
           <div class="b-actions">
             <button class="b-edit-btn" data-id="${b.id}">수정</button>
@@ -1577,7 +1577,7 @@
       form.querySelector('input[name="image_file"]').addEventListener('change', async e => {
         const file = e.target.files?.[0]; if (!file) return;
         try { const url = await uploadSiteImage(file, 'banners'); form.querySelector('input[name="image_url"]').value = url; preview.src = url; }
-        catch (err) { alert(' ' + (err.message || err)); }
+        catch (err) { alert((err.message || err)); }
         finally { e.target.value = ''; }
       });
       modal.querySelector('#cancel-edit').onclick = () => modal.remove();
@@ -1588,7 +1588,7 @@
         if (!imageUrl) return;
         if (b.image_url && b.image_url !== imageUrl) await deleteSiteImageByUrl(b.image_url);
         const { error } = await db.from('banners').update({ image_url: imageUrl, link_url: linkUrl || null }).eq('id', b.id);
-        if (error) alert(' ' + error.message);
+        if (error) alert(error.message);
         else { modal.remove(); loadBanner(); }
       });
     }
@@ -1596,19 +1596,19 @@
       const file = e.target.files?.[0]; if (!file) return;
       const m = document.getElementById('banner-msg');
       m.className = 'msg'; m.textContent = '업로드 중...';
-      try { const url = await uploadSiteImage(file, 'banners'); document.getElementById('banner-image-url').value = url; m.className = 'msg success'; m.textContent = ' 업로드 완료!'; }
-      catch (err) { m.className = 'msg error'; m.textContent = ' ' + (err.message || err); }
+      try { const url = await uploadSiteImage(file, 'banners'); document.getElementById('banner-image-url').value = url; m.className = 'msg success'; m.textContent = '업로드 완료!'; }
+      catch (err) { m.className = 'msg error'; m.textContent = (err.message || err); }
       finally { e.target.value = ''; }
     });
     document.getElementById('banner-save-btn').onclick = async () => {
       const m = document.getElementById('banner-msg');
       const imageUrl = document.getElementById('banner-image-url').value.trim();
       const linkUrl = document.getElementById('banner-link-url').value.trim();
-      if (!imageUrl) { m.className = 'msg error'; m.textContent = ' 이미지 URL 필요'; return; }
+      if (!imageUrl) { m.className = 'msg error'; m.textContent = '이미지 URL 필요'; return; }
       m.className = 'msg'; m.textContent = '저장 중...';
       const { error } = await db.from('banners').insert({ image_url: imageUrl, link_url: linkUrl || null });
-      if (error) { m.className = 'msg error'; m.textContent = ' ' + error.message; }
-      else { m.className = 'msg success'; m.textContent = ' 추가되었습니다!'; document.getElementById('banner-image-url').value = ''; document.getElementById('banner-link-url').value = ''; loadBanner(); }
+      if (error) { m.className = 'msg error'; m.textContent = error.message; }
+      else { m.className = 'msg success'; m.textContent = '추가되었습니다!'; document.getElementById('banner-image-url').value = ''; document.getElementById('banner-link-url').value = ''; loadBanner(); }
     };
 
     const HERO_BG_KEY = 'hero_bg_image';
@@ -1630,28 +1630,28 @@
       const file = e.target.files?.[0]; if (!file) return;
       const m = document.getElementById('hero-bg-msg');
       m.className = 'msg'; m.textContent = '업로드 중...';
-      try { const url = await uploadSiteImage(file, 'hero-bg'); document.getElementById('hero-bg-image-url').value = url; setHeroBgPreview(url); m.className = 'msg success'; m.textContent = ' 업로드 완료!'; }
-      catch (err) { m.className = 'msg error'; m.textContent = ' ' + (err.message || err); }
+      try { const url = await uploadSiteImage(file, 'hero-bg'); document.getElementById('hero-bg-image-url').value = url; setHeroBgPreview(url); m.className = 'msg success'; m.textContent = '업로드 완료!'; }
+      catch (err) { m.className = 'msg error'; m.textContent = (err.message || err); }
       finally { e.target.value = ''; }
     });
     document.getElementById('hero-bg-image-url').addEventListener('input', e => setHeroBgPreview(e.target.value.trim()));
     document.getElementById('hero-bg-save-btn').onclick = async () => {
       const m = document.getElementById('hero-bg-msg');
       const url = document.getElementById('hero-bg-image-url').value.trim();
-      if (!url) { m.className = 'msg error'; m.textContent = ' URL 필요'; return; }
+      if (!url) { m.className = 'msg error'; m.textContent = 'URL 필요'; return; }
       m.className = 'msg'; m.textContent = '저장 중...';
       if (currentHeroBgUrl && currentHeroBgUrl !== url) await deleteSiteImageByUrl(currentHeroBgUrl);
       const { error } = await db.from('settings').upsert({ key: HERO_BG_KEY, value: url });
-      if (error) { m.className = 'msg error'; m.textContent = ' ' + error.message; }
-      else { m.className = 'msg success'; m.textContent = ' 저장 완료!'; loadHeroBg(); }
+      if (error) { m.className = 'msg error'; m.textContent = error.message; }
+      else { m.className = 'msg success'; m.textContent = '저장 완료!'; loadHeroBg(); }
     };
     document.getElementById('hero-bg-delete-btn').onclick = async () => {
       if (!confirm('배경 이미지를 삭제할까요?')) return;
       const m = document.getElementById('hero-bg-msg');
       if (currentHeroBgUrl) await deleteSiteImageByUrl(currentHeroBgUrl);
       const { error } = await db.from('settings').delete().eq('key', HERO_BG_KEY);
-      if (error) { m.className = 'msg error'; m.textContent = ' ' + error.message; }
-      else { document.getElementById('hero-bg-image-url').value = ''; setHeroBgPreview(''); currentHeroBgUrl = ''; document.documentElement.style.setProperty('--hero-bg', 'none'); m.className = 'msg success'; m.textContent = ' 삭제 완료!'; }
+      if (error) { m.className = 'msg error'; m.textContent = error.message; }
+      else { document.getElementById('hero-bg-image-url').value = ''; setHeroBgPreview(''); currentHeroBgUrl = ''; document.documentElement.style.setProperty('--hero-bg', 'none'); m.className = 'msg success'; m.textContent = '삭제 완료!'; }
     };
 
     async function loadShippingSetting() {
@@ -1663,8 +1663,8 @@
       const m = document.getElementById('shipping-msg');
       m.className = 'msg'; m.textContent = '저장 중...';
       const { error } = await db.from('settings').upsert({ key: 'shipping_fee', value: String(val) });
-      if (error) { m.className = 'msg error'; m.textContent = ' ' + error.message; }
-      else { m.className = 'msg success'; m.textContent = ' 저장 완료!'; }
+      if (error) { m.className = 'msg error'; m.textContent = error.message; }
+      else { m.className = 'msg success'; m.textContent = '저장 완료!'; }
     };
     async function loadSignupCouponSetting() {
       const { data } = await db.from('settings').select('key, value').in('key', ['signup_coupon_enabled', 'signup_coupon_name', 'signup_coupon_type', 'signup_coupon_value', 'signup_coupon_days']);
@@ -1690,8 +1690,8 @@
         { key: 'signup_coupon_value', value: String(value) },
         { key: 'signup_coupon_days', value: String(days) },
       ]);
-      if (error) { m.className = 'msg error'; m.textContent = ' ' + error.message; }
-      else { m.className = 'msg success'; m.textContent = ' 저장 완료!'; }
+      if (error) { m.className = 'msg error'; m.textContent = error.message; }
+      else { m.className = 'msg success'; m.textContent = '저장 완료!'; }
     };
 
     // ============ 엑셀/인쇄 헬퍼 ============
@@ -1725,7 +1725,7 @@
       const listEl = document.getElementById('order-list');
       listEl.innerHTML = '<div class="tab-loading">로딩 중...</div>';
       const { data, error } = await db.from('orders').select('*').order('created_at', { ascending: false }).limit(500);
-      if (error) { listEl.innerHTML = '<p style="color:#dc2626;"> ' + error.message + '</p>'; return; }
+      if (error) { listEl.innerHTML = '<p style="color:#dc2626;">' + error.message + '</p>'; return; }
       orderRows = data || [];
       if (!orderRows.length) {
         listEl.innerHTML = '<p style="text-align:center;color:#9ca3af;">주문이 없습니다.</p>';
@@ -1753,8 +1753,6 @@
         const productCodes = [...new Set(g.items.map(it => it.product_code).filter(Boolean))].join(', ');
         const detailOptions = g.items.map(it => [it.selected_color, it.selected_size, it.selected_hem, it.selected_other].filter(Boolean).join(' / ')).filter(Boolean);
         const optionPreview = detailOptions.length ? detailOptions.slice(0, 1).join('') + (detailOptions.length > 1 ? ` 외 ${detailOptions.length - 1}건` : '') : '-';
-        const colors = [...new Set(g.items.map(x => x.selected_color).filter(Boolean))].join(', ');
-        const sizes = [...new Set(g.items.map(x => x.selected_size).filter(Boolean))].join(', ');
         const courier = [...new Set(g.items.map(x => x.courier).filter(Boolean))].join(', ');
         const tracking = [...new Set(g.items.map(x => x.tracking_number).filter(Boolean))].join(', ');
         const memo = [...new Set(g.items.map(x => x.memo).filter(Boolean))].join(' / ');
@@ -1773,19 +1771,19 @@
                 <span class="row-muted">총 ${g.totalQty}개 · ${g.items.length}종</span>
               </div>
               <div style="font-size:12px;line-height:1.8;color:#4b5563;">
-                <div> <b>상품</b> : ${g.items.length > 1 ? `${esc(g.items[0].product_name || '상품명 없음')} 외 ${g.items.length - 1}건` : products}</div>
-                <div> <b>제품번호</b> : ${esc(productCodes || '-')}</div>
-                <div> <b>상세옵션</b> : ${esc(optionPreview)}</div>
-                <div> <b>택배</b> : ${esc(courier || '-')}　<b>운송장</b> : ${esc(tracking || '-')}</div>
-                ${memo ? `<div> <b>요청사항</b> : ${esc(memo)}</div>` : ''}
+                <div><b>상품</b> : ${g.items.length > 1 ? `${esc(g.items[0].product_name || '상품명 없음')} 외 ${g.items.length - 1}건` : products}</div>
+                <div><b>제품번호</b> : ${esc(productCodes || '-')}</div>
+                <div><b>상세옵션</b> : ${esc(optionPreview)}</div>
+                <div><b>택배</b> : ${esc(courier || '-')}　<b>운송장</b> : ${esc(tracking || '-')}</div>
+                ${memo ? `<div><b>요청사항</b> : ${esc(memo)}</div>` : ''}
                 <div class="row-muted">주문일시 : ${esc(formatKST(f.created_at))}</div>
               </div>
             </div>
             <div class="row-actions" style="margin-left:auto;align-self:center;">
               <button class="btn btn-warning btn-sm order-group-edit-btn" data-group-idx="${idx}">주문 상세</button>
               ${g.isDeleted ? `<button class="btn btn-success btn-sm order-group-restore-btn" data-group-idx="${idx}">복구</button>` : ''}
-              <button class="btn btn-excel btn-sm order-group-excel-btn" data-group-idx="${idx}"></button>
-              <button class="btn btn-print btn-sm order-group-print-btn" data-group-idx="${idx}">️</button>
+              <button class="btn btn-excel btn-sm order-group-excel-btn" data-group-idx="${idx}">엑셀</button>
+              <button class="btn btn-print btn-sm order-group-print-btn" data-group-idx="${idx}">인쇄</button>
             </div>
           </div>`;
       }).join('');
@@ -1809,8 +1807,8 @@
           const g = orderGroups[Number(btn.dataset.groupIdx)];
           if (!g || !confirm(`주문 ${g.orderNumber}을(를) 복구할까요?`)) return;
           const { error } = await db.from('orders').update({is_deleted:false}).in('id', g.ids);
-          if (error) alert(' 복구 실패: ' + error.message);
-          else { alert(' 주문이 복구되었습니다.'); loadOrders(); }
+          if (error) alert('복구 실패: ' + error.message);
+          else { alert('주문이 복구되었습니다.'); loadOrders(); }
         };
       });
       listEl.querySelectorAll('.order-group-excel-btn').forEach(btn => {
@@ -1846,7 +1844,7 @@
       const ids = [];
       selectedOrders.forEach(idx => { const g = orderGroups[idx]; if (g) ids.push(...g.ids); });
       const { error } = await db.from('orders').update({is_deleted:true}).in('id', ids);
-      if (error) alert(' ' + error.message);
+      if (error) alert(error.message);
       else { selectedOrders.clear(); document.getElementById('order-check-all').checked = false; alert('삭제 표시했습니다.'); loadOrders(); }
     };
     document.getElementById('order-bulk-hard-del-btn').onclick = async () => {
@@ -1896,11 +1894,16 @@
       };
       const val = v => (v === null || v === undefined || v === '') ? '-' :
         (typeof v === 'object' ? JSON.stringify(v) : String(v));
-      const sharedKeys = ['depositor_name','customs_number','receiver_name','receiver_phone','postcode','address','address_detail'];
+      
+      // ⭐ 수취인/통관번호/연락처 폴백 처리 강화 (orders 테이블에 저장된 값 기준)
       const recipientInputMeta = [
-        ['depositor_name','입금자명'], ['customs_number','개인통관고유부호'],
-        ['receiver_name','수취인'], ['receiver_phone','연락처'],
-        ['postcode','우편번호'], ['address','주소'], ['address_detail','상세주소']
+        ['depositor_name','입금자명'], 
+        ['customs_number','개인통관고유부호'],
+        ['receiver_name','수취인'], 
+        ['receiver_phone','연락처'],
+        ['postcode','우편번호'], 
+        ['address','주소'], 
+        ['address_detail','상세주소']
       ];
       
       let totalProductPrice = 0, totalShippingFee = 0;
@@ -1918,8 +1921,24 @@
         : Math.min(totalProductPrice, Number(usedCoupon.discount_value || 0))) : Number(first.coupon_discount || first.discount_amount || 0);
       const finalTotal = Math.max(0, totalProductPrice + totalShippingFee - couponDiscount);
 
+      // 수취인, 통관번호 등이 주문 데이터에 없으면 회원 데이터에서 폴백
+      let memberData = null;
+      if (first.member_id) {
+        const { data: mData } = await db.from('members').select('*').eq('id', first.member_id).maybeSingle();
+        memberData = mData;
+      }
+
       const sharedHtml = recipientInputMeta.map(([key,label]) => {
-        const v = items.map(x=>x[key]).find(x=>x !== undefined && x !== null && x !== '') ?? first[key] ?? '';
+        let v = items.map(x=>x[key]).find(x=>x !== undefined && x !== null && x !== '') ?? first[key] ?? '';
+        // orders 테이블에 없으면 members 테이블에서 폴백 (수취인, 통관번호)
+        if (!v && memberData) {
+          if (key === 'receiver_name') v = memberData.receiver_name || memberData.recipient_name || '';
+          if (key === 'customs_number') v = memberData.customs_number || memberData.customs_code || '';
+          if (key === 'receiver_phone') v = memberData.phone || '';
+        }
+        if (!v && key === 'receiver_name') v = first.customer_name || '';
+        if (!v && key === 'receiver_phone') v = first.customer_phone || '';
+        
         return `<label>${label}<input class="edit-recipient" data-key="${key}" value="${esc(v)}" placeholder="${label} 입력"></label>`;
       }).join('');
 
@@ -1945,7 +1964,6 @@
               <span>단가: ${won(it.product_price)}</span>
               <span>수량: ${Number(it.quantity || 1)}개</span>
               <span>상품 소계: ${won(Number(it.product_price || 0) * Number(it.quantity || 1))}</span>
-              <span>배송비: ${won(it.shipping_fee)}</span>
             </div>
             <div class="nav-order-extra order-option-grid">${extraHtml}</div>
             ${it.request_content ? `<div class="nav-order-info-cell" style="margin-top:8px"><span class="oi-label">요청사항</span><span class="oi-value">${esc(it.request_content)}</span></div>` : ''}
@@ -2039,8 +2057,8 @@
           }).eq('id', upd.id);
           if (error) { hasError = true; break; }
         }
-        if (hasError) { alert(' 저장 실패'); btn.disabled = false; btn.textContent = '변경사항 저장'; }
-        else { alert(' 저장 완료!'); modal.remove(); loadOrders(); }
+        if (hasError) { alert('저장 실패'); btn.disabled = false; btn.textContent = '변경사항 저장'; }
+        else { alert('저장 완료!'); modal.remove(); loadOrders(); }
       };
     }
 
@@ -2052,7 +2070,7 @@
       const listEl = document.getElementById('member-list');
       listEl.innerHTML = '<div class="tab-loading">회원 목록 로딩 중...</div>';
       const { data, error } = await db.from('members').select('*').order('created_at', { ascending: false });
-      if (error) { listEl.innerHTML = '<p style="color:#dc2626;"> ' + error.message + '</p>'; return; }
+      if (error) { listEl.innerHTML = '<p style="color:#dc2626;">' + error.message + '</p>'; return; }
       allMembers = data || [];
       document.getElementById('member-check-all').checked = false;
       applyMemberSearch(document.getElementById('member-search').value.trim());
@@ -2094,7 +2112,7 @@
             </div>
           </div>
           <div class="row-actions">
-            <button class="btn btn-success btn-sm issue-coupon-btn" data-id="${m.id}"> 쿠폰 발급</button>
+            <button class="btn btn-success btn-sm issue-coupon-btn" data-id="${m.id}">쿠폰 발급</button>
             <button class="btn btn-secondary btn-sm member-detail-btn" data-id="${m.id}">상세보기</button>
             <button class="btn btn-danger btn-sm del-member-btn" data-id="${m.id}">삭제</button>
           </div>
@@ -2134,7 +2152,7 @@
       const modal = document.createElement('div');
       modal.className = 'modal-backdrop';
       modal.innerHTML = `<div class="modal-box" style="max-width:520px;border-radius:4px;">
-        <h2> 회원 쿠폰 발급</h2><p style="font-size:13px;color:#64748b;margin:-5px 0 12px;">${esc(member.name)} / ${esc(member.email)}</p>
+        <h2>회원 쿠폰 발급</h2><p style="font-size:13px;color:#64748b;margin:-5px 0 12px;">${esc(member.name)} / ${esc(member.email)}</p>
         <form id="member-coupon-form" class="modal-form">
           <label>쿠폰명</label><input name="name" placeholder="예: 감사 쿠폰">
           <label>할인 유형</label><select name="type"><option value="percent">퍼센트 할인</option><option value="amount">금액 할인</option></select>
@@ -2169,7 +2187,6 @@
         const part = type => parts.find(x => x.type === type)?.value || '';
         return `${part('year')}/${part('month')}/${part('day')} ${part('hour')}:${part('minute')}`;
       };
-      // ★ 수정된 부분: DB 컬럼명(user_id, receiver_name, customs_number)에 맞게 폴백 처리
       const fields = [
         ['회원가입 날짜', formatMemberCreatedAt(m.created_at)],
         ['아이디', display(m.user_id || m.username)], 
@@ -2239,8 +2256,8 @@
           phone: f.phone.value.trim(),
           grade: f.grade.value
         }).eq('id', m.id);
-        if (error) alert(' ' + error.message);
-        else { alert(' 수정 완료!'); modal.remove(); loadMembers(); }
+        if (error) alert(error.message);
+        else { alert('수정 완료!'); modal.remove(); loadMembers(); }
       };
     }
 
@@ -2263,7 +2280,7 @@
       const listEl = document.getElementById('coupon-list');
       listEl.innerHTML = '<div class="tab-loading">쿠폰 로딩 중...</div>';
       const { data, error } = await db.from('coupons').select('*').order('created_at', { ascending: false });
-      if (error) { listEl.innerHTML = '<p style="color:#dc2626;"> ' + error.message + '</p>'; return; }
+      if (error) { listEl.innerHTML = '<p style="color:#dc2626;">' + error.message + '</p>'; return; }
       
       allCoupons = data || [];
       renderCoupons();
@@ -2289,7 +2306,7 @@
               <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
                 <span class="row-strong">${esc(c.name || '이름없음')}</span>
                 ${isUsed}
-                <span style="font-size:12px; color:#1976d2; font-weight:600;"> ${targetName}</span>
+                <span style="font-size:12px; color:#1976d2; font-weight:600;">${targetName}</span>
               </div>
               <div style="font-size:12px; color:#6b7280; line-height:1.5;">
                 할인: ${typeLabel} | 코드: ${esc(c.code)}<br>
@@ -2308,7 +2325,7 @@
         btn.onclick = async () => {
           if (!confirm('쿠폰을 삭제할까요?')) return;
           const { error } = await db.from('coupons').delete().eq('id', btn.dataset.id);
-          if (error) alert(' ' + error.message);
+          if (error) alert(error.message);
           else loadCouponsAndMembers();
         };
       });
@@ -2342,9 +2359,9 @@
       });
 
       if (error) {
-        msg.className = 'msg error'; msg.textContent = ' ' + error.message;
+        msg.className = 'msg error'; msg.textContent = error.message;
       } else {
-        msg.className = 'msg success'; msg.textContent = ' 쿠폰이 발급되었습니다!';
+        msg.className = 'msg success'; msg.textContent = '쿠폰이 발급되었습니다!';
         document.getElementById('coupon-name-input').value = '';
         loadCouponsAndMembers();
       }
