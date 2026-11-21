@@ -9,7 +9,7 @@
   <style>
     main { max-width: none !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
     .mypage-wrap { max-width: 640px; width: 100%; margin-left: auto !important; margin-right: auto !important; margin-top: 40px; margin-bottom: 40px; padding: 0 16px; box-sizing: border-box; display: flex; flex-direction: column; }
-    .mypage-title-wrap { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding: 0 4px; width: 100%; }
+    .mypage-title-wrap { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding: 0 4px; width: 100%; flex-wrap: wrap; }
     .mypage-title { font-size: 22px; font-weight: 700; margin: 0; color: #222; }
     body.dark .mypage-title { color: #fff; }
     .title-grade-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 12px; }
@@ -19,6 +19,10 @@
     body.dark .title-grade-일반회원 { background: #1f2937; color: #d1d5db; }
     body.dark .title-grade-도매회원 { background: #1e3a8a; color: #bfdbfe; }
     body.dark .title-grade-VIP회원 { background: #831843; color: #fbcfe8; }
+    .status-banner { display: none; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; font-weight: 600; }
+    .status-banner.show { display: block; }
+    .status-banner.warn { background: #fef3c7; color: #92400e; border: 1px solid #f59e0b; }
+    .status-banner.danger { background: #fee2e2; color: #991b1b; border: 1px solid #dc2626; }
     .mypage-form { background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 32px; }
     body.dark .mypage-form { background: #151515; border: 1px solid #222; }
     .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 12px; }
@@ -49,11 +53,8 @@
     .address-group button { flex: 0 0 auto; padding: 0 16px; background: #e5e7eb; color: #111; font-weight: 600; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; white-space: nowrap; }
     body.dark .address-group button { background: #333; color: #fff; border-color: #444; }
 
-    /* ⭐ 추가: 수취인/개인통관고유부호 2열 나란히 */
     .form-grid-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; grid-column: 1 / -1; }
     @media (max-width: 560px) { .form-grid-pair { grid-template-columns: 1fr; } }
-
-    /* ⭐ 추가: 이메일을 상세주소와 동일 폭(전체 폭)으로 */
     .form-group.full { grid-column: 1 / -1; }
   </style>
 </head>
@@ -65,29 +66,29 @@
         <h2 class="mypage-title">내 정보</h2>
         <span id="title-grade-badge" class="title-grade-badge title-grade-일반회원">일반회원</span>
       </div>
+
+      <!-- 회원 상태 경고 배너 -->
+      <div id="status-banner" class="status-banner"></div>
+
       <form id="mypage-form" class="mypage-form" autocomplete="off">
         <div class="form-grid-2">
-          <!-- 아이디 / 비밀번호 -->
-          <div class="form-group"><label>아이디 (변경 불가)</label><input name="username" readonly tabindex="-1"></div>
+          <div class="form-group"><label>아이디 (변경 불가)</label><input name="user_id" readonly tabindex="-1"></div>
           <div class="form-group"><label>비밀번호 (변경 시 입력)</label><input name="password" type="password" placeholder="변경할 비밀번호" autocomplete="new-password"></div>
 
-          <!-- 이름 / 연락처 -->
           <div class="form-group"><label>이름</label><input name="name" required autocomplete="name"></div>
           <div class="form-group"><label>연락처</label><input name="phone" type="tel" inputmode="numeric" required autocomplete="tel"></div>
 
-          <!-- ⭐ 수취인 / 개인통관고유부호 (나란히 2열) -->
           <div class="form-grid-pair">
             <div class="form-group">
               <label>수취인</label>
-              <input name="recipient_name" placeholder="수취인 이름">
+              <input name="receiver_name" placeholder="수취인 이름">
             </div>
             <div class="form-group">
               <label>개인통관고유부호</label>
-              <input name="customs_code" placeholder="P000000000000">
+              <input name="customs_number" placeholder="P000000000000">
             </div>
           </div>
 
-          <!-- 주소 -->
           <div class="form-group full">
             <label>주소</label>
             <div class="address-group">
@@ -102,7 +103,6 @@
             <input name="address_detail" id="address_detail" placeholder="상세 주소">
           </div>
 
-          <!-- ⭐ 이메일 (상세주소와 동일 폭 = 전체 폭) -->
           <div class="form-group full">
             <label>이메일</label>
             <input name="email" type="email" placeholder="example@email.com" autocomplete="email">
@@ -129,6 +129,7 @@
     const form = document.getElementById('mypage-form');
     const msg = document.getElementById('msg');
     const titleGradeBadge = document.getElementById('title-grade-badge');
+    const statusBanner = document.getElementById('status-banner');
     const couponListEl = document.getElementById('coupon-list');
     const couponCountEl = document.getElementById('coupon-count');
 
@@ -180,12 +181,39 @@
       titleGradeBadge.className = 'title-grade-badge title-grade-' + g;
     }
 
+    function renderStatusBanner(status) {
+      const s = status || '정상';
+      statusBanner.classList.remove('show', 'warn', 'danger');
+      if (s === '정지') {
+        statusBanner.classList.add('show', 'warn');
+        statusBanner.textContent = '⚠️ 현재 회원 상태가 "정지"입니다. 관리자에게 문의하세요.';
+      } else if (s === '탈퇴') {
+        statusBanner.classList.add('show', 'danger');
+        statusBanner.textContent = '⚠️ 탈퇴 처리된 계정입니다. 관리자에게 문의하세요.';
+      }
+    }
+
+    // 여러 별칭 중 첫 번째로 값이 있는 것을 반환
+    function pickFirst(obj, keys) {
+      for (const k of keys) {
+        const v = obj[k];
+        if (v !== null && v !== undefined && v !== '') return v;
+      }
+      return '';
+    }
+
     async function loadFromServer() {
+      // 가능한 모든 별칭 컬럼을 select (없는 컬럼이 있으면 select 자체가 실패하므로, 기본 컬럼만 select)
       const { data, error } = await db.from('members')
-        .select('id, username, name, phone, email, postcode, address, address_detail, recipient_name, customs_code, grade, status')
+        .select('*')
         .eq('id', member.id)
         .maybeSingle();
-      if (error) { console.error(error); return; }
+      if (error) {
+        console.error(error);
+        msg.style.color = '#ef4444';
+        msg.textContent = '❌ 회원 정보를 불러오지 못했습니다: ' + error.message;
+        return;
+      }
       if (!data) {
         alert('회원 정보를 찾을 수 없습니다. 다시 로그인해주세요.');
         localStorage.removeItem('member');
@@ -195,16 +223,20 @@
       member = { ...member, ...data };
       localStorage.setItem('member', JSON.stringify(member));
 
-      form.username.value = data.username || '';
+      // 필드 별칭 폴백 (admin.html과 호환)
+      form.user_id.value = pickFirst(data, ['user_id', 'username', 'email']) || '';
       form.name.value = data.name || '';
       form.phone.value = data.phone || '';
-      form.recipient_name.value = data.recipient_name || '';
-      form.customs_code.value = data.customs_code || '';
+      form.receiver_name.value = pickFirst(data, ['receiver_name', 'recipient_name']) || '';
+      form.customs_number.value = pickFirst(data, ['customs_number', 'customs_code', 'personal_customs_code']) || '';
       form.postcode.value = data.postcode || '';
       form.address.value = data.address || '';
       form.address_detail.value = data.address_detail || '';
       form.email.value = data.email || '';
+
       renderTitleGradeBadge(data.grade);
+      renderStatusBanner(data.status);
+
       await loadCoupons();
     }
 
@@ -238,33 +270,61 @@
       msg.textContent = '저장 중...';
       msg.style.color = '#888';
 
-      const updates = {
+      // ★ 표준 필드명(customs_number, receiver_name, user_id)으로 저장하되,
+      //   기존 별칭(customs_code, recipient_name, username)도 함께 업데이트 시도.
+      //   DB에 없는 컬럼은 무시되고 있는 컬럼만 반영됨.
+      const baseUpdates = {
         name: form.name.value.trim() || null,
         phone: form.phone.value.trim() || null,
-        recipient_name: form.recipient_name.value.trim() || null,
-        customs_code: form.customs_code.value.trim() || null,
-        email: form.email.value.trim() || null,
         postcode: form.postcode.value.trim() || null,
         address: form.address.value.trim() || null,
         address_detail: form.address_detail.value.trim() || null,
+        email: form.email.value.trim() || null,
       };
 
-      // ⭐ 비밀번호 변경 (입력한 경우에만)
+      const receiverVal = form.receiver_name.value.trim();
+      const customsVal = form.customs_number.value.trim();
+
+      // 두 별칭 모두 시도: 먼저 표준, 실패하면 별칭으로 재시도
+      const candidateUpdatesList = [
+        // 1차: 표준 필드명 (admin.html이 읽는 이름)
+        { ...baseUpdates, receiver_name: receiverVal || null, customs_number: customsVal || null },
+        // 2차: 레거시 필드명 (혹시 DB에 이것만 있을 경우)
+        { ...baseUpdates, recipient_name: receiverVal || null, customs_code: customsVal || null },
+      ];
+
+      // 비밀번호 처리
       if (form.password.value) {
         if (form.password.value.length < 6) {
           msg.style.color = '#ef4444'; msg.textContent = '❌ 비밀번호는 6자 이상이어야 합니다.'; return;
         }
         try {
-          updates.password = await sha256(form.password.value);
+          baseUpdates.password = await sha256(form.password.value);
+          candidateUpdatesList.forEach(u => u.password = baseUpdates.password);
         } catch {
           msg.style.color = '#ef4444'; msg.textContent = '❌ 비밀번호 처리 오류'; return;
         }
       }
 
-      const { error } = await db.from('members').update(updates).eq('id', member.id);
-      if (error) { msg.style.color = '#ef4444'; msg.textContent = '❌ ' + error.message; return; }
+      let lastError = null;
+      let successUpdates = null;
+      for (const updates of candidateUpdatesList) {
+        const { error } = await db.from('members').update(updates).eq('id', member.id);
+        if (!error) { successUpdates = updates; lastError = null; break; }
+        lastError = error;
+        // 컬럼 없음 에러(PGRST204 등)만 다음 후보로 넘어가고, 그 외는 즉시 실패
+        const msgLower = String(error.message || '').toLowerCase();
+        const isMissingColumn = /column .* does not exist|pgrst204|could not find the .* column/i.test(msgLower);
+        if (!isMissingColumn) break;
+      }
 
-      const updated = { ...member, ...updates };
+      if (!successUpdates) {
+        msg.style.color = '#ef4444';
+        msg.textContent = '❌ ' + (lastError?.message || '저장 실패');
+        return;
+      }
+
+      const updated = { ...member, ...successUpdates };
       delete updated.password;
       localStorage.setItem('member', JSON.stringify(updated));
       member = updated;
