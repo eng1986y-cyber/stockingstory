@@ -1894,20 +1894,16 @@
           </div>
         </div>`;
 
-      // ===== 주문 상품: 2열 그리드 =====
+            // ===== 주문 상품: 2열 그리드 =====
       const productsHtml = items.map((it, i) => {
-        const optField = (label, val) => val ? `<div class="opt-field"><span>${label}</span><b>${esc(val)}</b></div>` : '';
-        const optLeftHtml =
+        const optField = (label, val) => (val !== undefined && val !== null && val !== '')
+          ? `<div class="opt-field"><span>${label}</span><b>${esc(val)}</b></div>`
+          : '';
+        const leftColContent =
           optField('색상', it.selected_color) +
           optField('사이즈', it.selected_size) +
           optField('선택 밑단', it.selected_hem) +
-          optField('추가 옵션', it.selected_other) +
-          (optLeftHtml === '' ? '' : ''); // placeholder
-        const leftColContent =
-          (it.selected_color ? optField('색상', it.selected_color) : '') +
-          (it.selected_size ? optField('사이즈', it.selected_size) : '') +
-          (it.selected_hem ? optField('선택 밑단', it.selected_hem) : '') +
-          (it.selected_other ? optField('추가 옵션', it.selected_other) : '') ||
+          optField('추가 옵션', it.selected_other) ||
           '<div class="opt-field"><span>옵션</span><b>-</b></div>';
 
         return `
