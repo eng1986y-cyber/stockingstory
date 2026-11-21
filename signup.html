@@ -163,18 +163,18 @@
         msg.style.color = '#ef4444'; msg.textContent = '❌ 비밀번호 처리 중 오류가 발생했습니다.'; return;
       }
 
-      // ⭐ 아이디/비밀번호/연락처만 필수, 나머지는 null
+      // ⭐ 수정: NOT NULL 컬럼(name)은 빈 문자열로, 나머지는 빈 문자열로 전송
       const payload = {
         username,
         password: hashedPassword,
         phone,
-        name: null,
-        postcode: null,
-        address: null,
-        address_detail: null,
-        email: null,
-        recipient_name: null,
-        customs_code: null,
+        name: '',
+        postcode: '',
+        address: '',
+        address_detail: '',
+        email: '',
+        recipient_name: '',
+        customs_code: '',
         grade: '일반회원',
       };
 
