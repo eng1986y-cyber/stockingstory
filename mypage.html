@@ -44,12 +44,17 @@
     .coupon-card .c-badge { background: #dc2626; color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; white-space: nowrap; }
     .coupon-card.used .c-badge { background: #9ca3af; }
     .empty-coupons { text-align: center; color: #9ca3af; font-size: 13px; padding: 20px; }
-    
-    /* ⭐ 주소 검색 레이아웃 추가 */
     .address-group { display: flex; gap: 8px; }
     .address-group input { flex: 1; }
     .address-group button { flex: 0 0 auto; padding: 0 16px; background: #e5e7eb; color: #111; font-weight: 600; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; white-space: nowrap; }
     body.dark .address-group button { background: #333; color: #fff; border-color: #444; }
+
+    /* ⭐ 추가: 수취인/개인통관고유부호 2열 나란히 */
+    .form-grid-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; grid-column: 1 / -1; }
+    @media (max-width: 560px) { .form-grid-pair { grid-template-columns: 1fr; } }
+
+    /* ⭐ 추가: 이메일을 상세주소와 동일 폭(전체 폭)으로 */
+    .form-group.full { grid-column: 1 / -1; }
   </style>
 </head>
 <body>
@@ -62,27 +67,46 @@
       </div>
       <form id="mypage-form" class="mypage-form" autocomplete="off">
         <div class="form-grid-2">
+          <!-- 아이디 / 비밀번호 -->
           <div class="form-group"><label>아이디 (변경 불가)</label><input name="username" readonly tabindex="-1"></div>
-          <div class="form-group"><label>비밀번호</label><input name="password" type="password" placeholder="변경 시 입력" autocomplete="new-password"></div>
+          <div class="form-group"><label>비밀번호 (변경 시 입력)</label><input name="password" type="password" placeholder="변경할 비밀번호" autocomplete="new-password"></div>
+
+          <!-- 이름 / 연락처 -->
           <div class="form-group"><label>이름</label><input name="name" required autocomplete="name"></div>
           <div class="form-group"><label>연락처</label><input name="phone" type="tel" inputmode="numeric" required autocomplete="tel"></div>
-          <div class="form-group"><label>이메일</label><input name="email" type="email" autocomplete="email"></div>
-          
-          <!-- ⭐ 주소 폼 수정 -->
-          <div class="form-group" style="grid-column: 1 / -1;">
+
+          <!-- ⭐ 수취인 / 개인통관고유부호 (나란히 2열) -->
+          <div class="form-grid-pair">
+            <div class="form-group">
+              <label>수취인</label>
+              <input name="recipient_name" placeholder="수취인 이름">
+            </div>
+            <div class="form-group">
+              <label>개인통관고유부호</label>
+              <input name="customs_code" placeholder="P000000000000">
+            </div>
+          </div>
+
+          <!-- 주소 -->
+          <div class="form-group full">
             <label>주소</label>
             <div class="address-group">
               <input name="postcode" id="postcode" placeholder="우편번호" readonly style="max-width: 150px;">
               <button type="button" onclick="openAddressSearch('#postcode', '#address', '#address_detail')">주소 검색</button>
             </div>
           </div>
-          <div class="form-group" style="grid-column: 1 / -1;">
+          <div class="form-group full">
             <input name="address" id="address" placeholder="기본 주소" readonly>
           </div>
-          <div class="form-group" style="grid-column: 1 / -1;">
+          <div class="form-group full">
             <input name="address_detail" id="address_detail" placeholder="상세 주소">
           </div>
-          
+
+          <!-- ⭐ 이메일 (상세주소와 동일 폭 = 전체 폭) -->
+          <div class="form-group full">
+            <label>이메일</label>
+            <input name="email" type="email" placeholder="example@email.com" autocomplete="email">
+          </div>
         </div>
         <button type="submit">저장</button>
       </form>
@@ -117,15 +141,12 @@
     (function preventAutoFocus() {
       const killFocus = () => {
         const ae = document.activeElement;
-        if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) {
-          ae.blur();
-        }
+        if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) ae.blur();
       };
       killFocus();
       setTimeout(killFocus, 0);
       setTimeout(killFocus, 100);
       setTimeout(killFocus, 300);
-
       const pw = form.querySelector('input[name="password"]');
       if (pw) pw.setAttribute('tabindex', '-1');
       form.querySelectorAll('input[readonly]').forEach(el => el.setAttribute('tabindex', '-1'));
@@ -161,7 +182,7 @@
 
     async function loadFromServer() {
       const { data, error } = await db.from('members')
-        .select('id, username, name, phone, email, postcode, address, address_detail, grade, status')
+        .select('id, username, name, phone, email, postcode, address, address_detail, recipient_name, customs_code, grade, status')
         .eq('id', member.id)
         .maybeSingle();
       if (error) { console.error(error); return; }
@@ -177,10 +198,12 @@
       form.username.value = data.username || '';
       form.name.value = data.name || '';
       form.phone.value = data.phone || '';
-      form.email.value = data.email || '';
+      form.recipient_name.value = data.recipient_name || '';
+      form.customs_code.value = data.customs_code || '';
       form.postcode.value = data.postcode || '';
       form.address.value = data.address || '';
       form.address_detail.value = data.address_detail || '';
+      form.email.value = data.email || '';
       renderTitleGradeBadge(data.grade);
       await loadCoupons();
     }
@@ -216,15 +239,21 @@
       msg.style.color = '#888';
 
       const updates = {
-        name: form.name.value.trim(),
-        phone: form.phone.value.trim(),
+        name: form.name.value.trim() || null,
+        phone: form.phone.value.trim() || null,
+        recipient_name: form.recipient_name.value.trim() || null,
+        customs_code: form.customs_code.value.trim() || null,
         email: form.email.value.trim() || null,
         postcode: form.postcode.value.trim() || null,
         address: form.address.value.trim() || null,
         address_detail: form.address_detail.value.trim() || null,
       };
 
+      // ⭐ 비밀번호 변경 (입력한 경우에만)
       if (form.password.value) {
+        if (form.password.value.length < 6) {
+          msg.style.color = '#ef4444'; msg.textContent = '❌ 비밀번호는 6자 이상이어야 합니다.'; return;
+        }
         try {
           updates.password = await sha256(form.password.value);
         } catch {
