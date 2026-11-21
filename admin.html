@@ -1858,7 +1858,7 @@
     document.getElementById('order-reset-btn').onclick = () => { document.getElementById('order-search').value=''; loadOrders(); };
 
     // [수정 2, 3번] 주문 상세 모달에서 배송비 별도 표시
-    function openOrderEditModal(groupOrOrder) {
+    async function openOrderEditModal(groupOrOrder) {
       if (!groupOrOrder) return;
       const items = Array.isArray(groupOrOrder.items) ? groupOrOrder.items : [groupOrOrder];
       const first = items[0] || {};
@@ -1880,14 +1880,21 @@
         (typeof v === 'object' ? JSON.stringify(v) : String(v));
       const sharedKeys = ['customer_name','customer_phone','customer_email','depositor_name','receiver_name','receiver_phone','postcode','address','address_detail','customs_number','created_at'];
       
-      // 주문 상품별 합계 및 배송비 계산
-      let totalProductPrice = 0;
-      let totalShippingFee = 0;
+      // 쿠폰은 개별 상품 가격에서 차감하지 않고 주문 전체 금액에서 별도로 계산합니다.
+      let totalProductPrice = 0, totalShippingFee = 0;
       items.forEach(it => {
-        totalProductPrice += (Number(it.total_price || 0) - Number(it.shipping_fee || 0));
+        totalProductPrice += Number(it.product_price || 0) * Number(it.quantity || 1);
         totalShippingFee += Number(it.shipping_fee || 0);
       });
-      const finalTotal = totalProductPrice + totalShippingFee;
+      let usedCoupon = null;
+      if (first.order_number) {
+        const couponRes = await db.from('coupons').select('*').eq('is_used', true).eq('used_order_number', first.order_number).maybeSingle();
+        usedCoupon = couponRes.data || null;
+      }
+      const couponDiscount = usedCoupon ? (usedCoupon.type === 'percent'
+        ? Math.round(totalProductPrice * Number(usedCoupon.discount_value || 0) / 100)
+        : Math.min(totalProductPrice, Number(usedCoupon.discount_value || 0))) : Number(first.coupon_discount || first.discount_amount || 0);
+      const finalTotal = Math.max(0, totalProductPrice + totalShippingFee - couponDiscount);
 
       const sharedHtml = sharedKeys.map(k => {
         if (first[k] === undefined && !items.some(x=>x[k] !== undefined)) return '';
@@ -1911,11 +1918,12 @@
                 <strong>${esc(it.product_name || '상품명 없음')}</strong>
                 <span>${esc(it.product_code || '')}</span>
               </div>
-              <b>${won(it.total_price)}</b>
+              <b>${won(Number(it.product_price || 0) * Number(it.quantity || 1))}</b>
             </div>
             <div class="nav-order-product-summary">
               <span>단가: ${won(it.product_price)}</span>
               <span>수량: ${Number(it.quantity || 1)}개</span>
+              <span>상품 소계: ${won(Number(it.product_price || 0) * Number(it.quantity || 1))}</span>
               <span>배송비: ${won(it.shipping_fee)}</span>
             </div>
             <div class="nav-order-extra">${extraHtml}</div>
@@ -1948,10 +1956,11 @@
             </div>
             <button type="button" class="nav-order-close" id="close-order-modal">×</button>
           </div>
-          <div class="nav-order-summary">
+          <div class="nav-order-summary" style="display:grid;gap:8px;">
             <div><span>총 상품 금액</span><b>${won(totalProductPrice)}</b></div>
-            <div><span>총 배송비</span><b>${won(totalShippingFee)}</b></div>
-            <div><span>최종 결제 금액</span><b style="color:#e53935;">${won(finalTotal)}</b></div>
+            <div><span>배송비</span><b>${won(totalShippingFee)}</b></div>
+            <div><span>쿠폰 할인${usedCoupon ? ` (${esc(usedCoupon.name || '쿠폰')})` : ''}</span><b style="color:#059669;">-${won(couponDiscount)}</b></div>
+            <div style="border-top:1px solid #e5e7eb;padding-top:8px;font-size:17px;font-weight:700;"><span>최종 결제 금액</span><b style="color:#e53935;">${won(finalTotal)}</b></div>
           </div>
           <div class="nav-order-section">
             <h3>주문자 / 배송지 정보</h3>
@@ -2278,6 +2287,36 @@
       }
     };
 
+
+    // ============ 공지/게시판 CRUD ============
+    let noticeTableName = 'notices', boardTableName = 'board_posts', editingNoticeId = null;
+    const noticeText = v => esc(v == null ? '' : String(v));
+    async function findReadableTable(candidates) {
+      for (const t of candidates) { const r=await db.from(t).select('*').order('created_at',{ascending:false}).limit(300); if(!r.error) return {table:t,data:r.data||[]}; }
+      return null;
+    }
+    async function loadNoticeAdminList() {
+      const el=document.getElementById('notice-admin-list'); if(!el)return; el.innerHTML='로딩중...';
+      const r=await findReadableTable(['notices','notice']);
+      if(!r){el.innerHTML='<p style="color:#dc2626">공지 테이블 조회 실패: notices/notice 테이블 또는 권한을 확인하세요.</p>';return;}
+      noticeTableName=r.table; const rows=r.data; const count=document.getElementById('notice-admin-count');if(count)count.textContent=`(${rows.length}건)`;
+      if(!rows.length){el.innerHTML='<p class="row-muted">등록된 공지가 없습니다.</p>';return;}
+      el.innerHTML=rows.map(n=>`<div class="row-item"><div style="flex:1;min-width:180px"><b>${noticeText(n.title||'제목 없음')}</b><div class="row-muted">${noticeText(n.created_at||'')}</div><div style="white-space:pre-wrap;margin-top:6px">${noticeText(n.content||n.body||'')}</div></div><div class="row-actions"><button class="btn btn-warning btn-sm notice-edit" data-id="${noticeText(n.id)}">수정</button><button class="btn btn-danger btn-sm notice-delete" data-id="${noticeText(n.id)}">삭제</button></div></div>`).join('');
+      el.querySelectorAll('.notice-edit').forEach(b=>b.onclick=()=>{const n=rows.find(x=>String(x.id)===b.dataset.id);if(!n)return;editingNoticeId=n.id;const f=document.getElementById('notice-form');f.elements.title.value=n.title||'';f.elements.content.value=n.content||n.body||'';f.querySelector('[type=submit]').textContent='공지 수정';});
+      el.querySelectorAll('.notice-delete').forEach(b=>b.onclick=async()=>{if(!confirm('공지사항을 삭제할까요?'))return;const {error}=await db.from(noticeTableName).delete().eq('id',b.dataset.id);if(error)alert('삭제 실패: '+error.message);else loadNoticeAdminList();});
+    }
+    async function loadBoardAdminList() {
+      const el=document.getElementById('board-admin-list');if(!el)return;el.innerHTML='게시글 불러오는 중...';
+      const r=await findReadableTable(['board_posts','boards','posts','member_board','inquiries']);
+      if(!r){el.innerHTML='<p style="color:#dc2626">게시판 테이블 조회 실패: 게시판 테이블명 또는 권한을 확인하세요.</p>';return;}
+      boardTableName=r.table;const rows=r.data;const count=document.getElementById('board-admin-count');if(count)count.textContent=`(${rows.length}건)`;
+      if(!rows.length){el.innerHTML='<p class="row-muted">게시글이 없습니다.</p>';return;}
+      el.innerHTML=rows.map(p=>{const title=p.title||p.subject||'제목 없음',body=p.content||p.body||p.message||'',author=p.name||p.member_name||p.user_name||p.author||p.member_id||'작성자 미상',secret=p.is_secret||p.secret;return `<div class="row-item"><div style="flex:1;min-width:180px"><b>${noticeText(title)}</b>${secret?'<span class="board-secret-badge">비밀글</span>':''}<div class="row-muted">작성자: ${noticeText(author)} | ${noticeText(p.created_at||'')}</div><div style="white-space:pre-wrap;margin-top:6px">${noticeText(body)}</div></div><div class="row-actions"><button class="btn btn-danger btn-sm board-delete" data-id="${noticeText(p.id)}">삭제</button></div></div>`;}).join('');
+      el.querySelectorAll('.board-delete').forEach(b=>b.onclick=async()=>{if(!confirm('게시글을 삭제할까요?'))return;const {error}=await db.from(boardTableName).delete().eq('id',b.dataset.id);if(error)alert('삭제 실패: '+error.message);else loadBoardAdminList();});
+    }
+    const noticeForm=document.getElementById('notice-form');
+    if(noticeForm)noticeForm.onsubmit=async e=>{e.preventDefault();const title=noticeForm.elements.title.value.trim(),content=noticeForm.elements.content.value.trim();if(!title||!content)return;const payload={title,content};const res=editingNoticeId?await db.from(noticeTableName).update(payload).eq('id',editingNoticeId):await db.from(noticeTableName).insert(payload);if(res.error){const msg=document.getElementById('notice-msg');msg.className='msg error';msg.textContent='저장 실패: '+res.error.message;return;}editingNoticeId=null;noticeForm.reset();noticeForm.querySelector('[type=submit]').textContent='공지 등록';const msg=document.getElementById('notice-msg');msg.className='msg success';msg.textContent='저장되었습니다.';loadNoticeAdminList();};
+    document.querySelectorAll('.notice-subtab-btn').forEach(btn=>btn.onclick=()=>{const board=btn.dataset.subtab==='board';document.getElementById('notice-subsection').style.display=board?'none':'block';document.getElementById('board-subsection').style.display=board?'block':'none';document.querySelectorAll('.notice-subtab-btn').forEach(x=>{x.classList.toggle('active',x===btn);x.style.background=x===btn?'#111827':'#fff';x.style.color=x===btn?'#fff':'#374151';});if(board)loadBoardAdminList();else loadNoticeAdminList();});
 
     // 초기 세션 체크 실행
     checkSession();

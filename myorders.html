@@ -270,16 +270,12 @@
         const displayNum = first.order_number || `(번호 없음)`;
         const fullAddress = `${first.postcode ? `[${first.postcode}] ` : ''}${first.address || ''} ${first.address_detail || ''}`.trim();
 
-        // [수정 4번] 상품 금액과 배송비 분리 계산
+        // 상품 단가×수량과 배송비를 합산한 뒤 쿠폰을 주문 전체에서 별도 차감
         let productTotal = 0, shippingTotal = 0;
-        items.forEach(o => {
-          const itemTotal = Number(o.total_price || 0);
-          const itemShipping = Number(o.shipping_fee || 0);
-          // total_price에는 배송비가 포함되어 있으므로, 상품 금액은 total_price - shipping_fee
-          productTotal += (itemTotal - itemShipping);
-          shippingTotal += itemShipping;
-        });
-        const totalAll = productTotal + shippingTotal; // 최종 결제 금액
+        items.forEach(o => { productTotal += Number(o.product_price || 0) * Number(o.quantity || 1); shippingTotal += Number(o.shipping_fee || 0); });
+        const usedCoupon = first.order_number ? usedCouponsByOrder[first.order_number] : null;
+        const couponDiscount = usedCoupon ? (usedCoupon.type === 'percent' ? Math.round(productTotal * Number(usedCoupon.discount_value || 0) / 100) : Math.min(productTotal, Number(usedCoupon.discount_value || 0))) : Number(first.coupon_discount || first.discount_amount || 0);
+        const totalAll = Math.max(0, productTotal + shippingTotal - couponDiscount);
         
         const isChecked = selectedKeys.has(key);
 
@@ -292,7 +288,6 @@
           ? `<div><span class="history-grade-badge">🏷️ ${gradeDiscount}% 할인 적용됨</span></div>`
           : '';
 
-        const usedCoupon = first.order_number ? usedCouponsByOrder[first.order_number] : null;
         const couponBox = usedCoupon ? `
           <div class="history-coupon-box">
             <div class="cc-title">🎟️ 사용한 쿠폰</div>
@@ -349,8 +344,8 @@
                   if (o.selected_hem) opts.push(`밑단: ${o.selected_hem}`);
                   if (o.selected_other) opts.push(`기타: ${o.selected_other}`);
                   const optStr = opts.length ? opts.join(' | ') : '기본 옵션';
-                  // [수정] 개별 아이템의 상품 금액도 total_price - shipping_fee 로 계산
-                  const itemPrice = Number(o.total_price) - Number(o.shipping_fee || 0);
+                  // 상품별 금액은 단가×수량, 쿠폰은 주문 전체에서 차감
+                  const itemPrice = Number(o.product_price || 0) * Number(o.quantity || 1);
                   return `
                     <div class="history-product-item">
                       <div class="history-item-main">
@@ -372,7 +367,8 @@
               <div class="history-price-summary">
                 <div class="price-row"><span>상품 금액</span><span>${won(productTotal)}</span></div>
                 <div class="price-row"><span>배송비</span><span>${shippingTotal > 0 ? won(shippingTotal) : '무료'}</span></div>
-                <div class="price-row total"><span>총 결제금액</span><span>${won(totalAll)}</span></div>
+                <div class="price-row"><span>쿠폰 할인</span><span style="color:#059669;">-${won(couponDiscount)}</span></div>
+                <div class="price-row total"><span>최종 결제금액</span><span>${won(totalAll)}</span></div>
               </div>
               <button type="button" class="btn-delete-single" data-key="${key}">이 주문 삭제</button>
             </div>
