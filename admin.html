@@ -44,10 +44,6 @@
     .settings-col > .card { margin-bottom: 0 !important; }
     @media (max-width: 1000px) { .settings-split { grid-template-columns: 1fr; gap: 12px; } }
 
-    #product-register-card > #product-form { display: grid; grid-template-columns: 0.9fr 1.2fr 0.55fr 2fr 0.9fr 0.9fr 1fr 0.9fr 0.5fr 2fr 1fr 0.9fr; gap: 8px; align-items: stretch; }
-    #product-register-card > #product-form input, #product-register-card > #product-form select, #product-register-card > #product-form button { width: 100%; min-height: 42px; padding: 8px 7px; font-size: 12px; }
-    #product-register-card > #product-form textarea { min-height: 42px; height: 42px; padding: 8px 7px; font-size: 12px; }
-
     #size-detail-section { grid-column: 1 / -1; border: 1px dashed #d1d5db; border-radius: 10px; padding: 12px; background: #f9fafb; margin-top: 4px; }
     #size-detail-section .sd-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
     #size-detail-section .sd-title { font-size: 13px; font-weight: 700; color: #111827; }
@@ -57,8 +53,6 @@
     .sd-row input { min-height: 36px; padding: 6px 8px; font-size: 12px; }
     .sd-row .sd-del-btn { width: 36px; height: 36px; padding: 0; background: #dc2626; color: #fff; border: 0; border-radius: 6px; cursor: pointer; font-size: 16px; }
     .sd-empty { padding: 14px; text-align: center; color: #9ca3af; font-size: 12px; background: #fff; border: 1px dashed #e5e7eb; border-radius: 6px; }
-
-    @media (max-width: 1000px) { #product-register-card > #product-form { grid-template-columns: repeat(2, minmax(0, 1fr)); } #product-register-card > #product-form input[name="detail_images"], #product-register-card > #product-form button { grid-column: 1 / -1; } }
 
     .form-row { display: flex; gap: 8px; flex-wrap: wrap; }
     .form-row > * { flex: 1; min-width: 150px; }
@@ -77,9 +71,11 @@
     .msg.error { color: #dc2626; }
 
     .product-layout { display: flex; flex-direction: column; gap: 16px; }
-    .list-controls { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; margin-bottom: 12px; gap: 10px; }
-    .list-search { display: flex; gap: 6px; width: 100%; max-width: 560px; grid-column: 2; justify-self: center; }
-    .bulk-actions { display: flex; align-items: center; gap: 8px; font-size: 13px; grid-column: 3; justify-self: end; }
+    .list-controls { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; margin-bottom: 12px; gap: 14px; }
+    .list-search { display: flex; gap: 6px; width: 100%; max-width: 760px; min-width: 0; grid-column: 1; justify-self: stretch; }
+    .list-search input { flex: 1 1 auto; min-width: 0; height: 42px; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; background: #fff; }
+    .list-search .btn { min-width: 76px; height: 42px; padding: 0 16px; flex: 0 0 auto; }
+    .bulk-actions { display: flex; align-items: center; gap: 8px; font-size: 13px; grid-column: 2; justify-self: end; }
     .bulk-actions label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600; color: #374151; }
     .bulk-actions input[type="checkbox"] { width: 18px; height: 18px; accent-color: #111827; }
     .btn-bulk-del { padding: 8px 12px; background: #dc2626; color: #fff; border: 0; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; opacity: 0.5; pointer-events: none; }
@@ -168,260 +164,72 @@
     .es-row { display: grid; grid-template-columns: 1fr 1fr 1fr 36px; gap: 6px; align-items: center; }
     .es-row .es-del-btn { width: 36px; height: 34px; padding: 0; background: #dc2626; color: #fff; border: 0; border-radius: 6px; cursor: pointer; }
 
-    #coupon-issue-card { background: #fef3c7 !important; border: 2px solid #f59e0b !important; padding: 24px !important; width: 100% !important; box-sizing: border-box !important; }
-    #coupon-issue-form { display: grid !important; grid-template-columns: 1.5fr 1fr 1fr 1fr 1.5fr auto !important; gap: 10px !important; align-items: end !important; width: 100% !important; margin: 0 !important; }
-    #coupon-issue-form > div { min-width: 0; }
-    #coupon-issue-form select, #coupon-issue-form input { height: 40px !important; padding: 8px 12px !important; font-size: 14px !important; }
-    #coupon-issue-form button { height: 40px !important; padding: 0 20px !important; font-size: 14px !important; }
-    @media (max-width: 1000px) { #coupon-issue-form { grid-template-columns: 1fr 1fr !important; } #coupon-issue-form button { grid-column: 1 / -1 !important; } }
+    #coupon-issue-card { background: #fef3c7 !important; border: 2px solid #f59e0b !important; padding: 22px !important; width: 100% !important; box-sizing: border-box !important; }
+    #coupon-issue-form { display: grid !important; grid-template-columns: repeat(3, minmax(0,1fr)) !important; gap: 10px !important; align-items: end !important; width: 100% !important; margin: 0 !important; }
+    #coupon-issue-form > div { min-width: 0; width: 100%; }
+    #coupon-issue-form select, #coupon-issue-form input { height: 40px !important; padding: 8px 12px !important; font-size: 14px !important; width: 100% !important; min-width: 0; }
+    #coupon-issue-form button { height: 40px !important; padding: 0 20px !important; font-size: 14px !important; width: 100% !important; }
+    @media (max-width: 1000px) { #coupon-issue-form { grid-template-columns: repeat(2, minmax(0,1fr)) !important; } #coupon-issue-form button { grid-column: 1 / -1 !important; } }
+    @media (max-width: 560px) { #coupon-issue-form { grid-template-columns: 1fr !important; } #coupon-issue-form button { grid-column: 1 !important; } }
 
-    #product-register-card { width:100%; min-width:0; }
-    #product-register-card > #product-form {
-      width:100%; min-width:0; display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
-      gap:12px; align-items:stretch;
-    }
-    #product-register-card > #product-form > * { min-width:0; max-width:100%; }
+    #product-register-card { width: 100%; min-width: 0; }
+    #product-register-card > #product-form { display: grid !important; width: 100% !important; max-width: none !important; min-width: 0 !important; margin: 0 !important; justify-self: stretch !important; grid-template-columns: repeat(12, minmax(0,1fr)) !important; gap: 10px !important; align-items: stretch; }
+    #product-register-card > #product-form > * { min-width: 0 !important; max-width: none !important; }
     #product-register-card > #product-form input,
-    #product-register-card > #product-form select,
-    #product-register-card > #product-form textarea {
-      width:100%; min-width:0; height:44px; min-height:44px;
-      padding:10px 12px; font-size:13px; box-sizing:border-box;
-    }
-    #product-register-card > #product-form input[name="main_image"] { grid-column:span 2; }
-    #product-register-card > #product-form input[name="detail_images"] { grid-column:span 2; }
-    #product-register-card > #product-form button[type="submit"] { width:100%; min-height:44px; grid-column:span 1; }
-    #size-detail-section { width:100%; min-width:0; grid-column:1 / -1; }
-
-    .list-controls { grid-template-columns:minmax(0,1fr) auto; gap:14px; }
-    .list-search { grid-column:1; justify-self:stretch; max-width:760px; width:100%; min-width:0; }
-    .list-search input { flex:1 1 auto; min-width:0; height:42px; padding:10px 14px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; background:#fff; }
-    .list-search .btn { min-width:76px; height:42px; padding:0 16px; flex:0 0 auto; }
-    .bulk-actions { grid-column:2; }
-
-    #coupon-issue-card { padding:22px !important; }
-    #coupon-issue-form { grid-template-columns:repeat(3,minmax(0,1fr)) !important; width:100% !important; }
-    #coupon-issue-form > div { width:100%; min-width:0; }
-    #coupon-issue-form select, #coupon-issue-form input { width:100% !important; min-width:0; }
-    #coupon-issue-form button { width:100% !important; }
-
-    #notice-subsection > .card #notice-form { width:100%; min-width:0; }
-    #notice-form input, #notice-form textarea { width:100%; min-width:0; display:block; box-sizing:border-box; }
-    #notice-form textarea { min-height:180px !important; resize:vertical; }
-    #notice-form button[type="submit"] { width:100%; justify-self:stretch !important; min-height:44px; }
-
-    .order-info-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
-    .order-info-cell { min-width:0; padding:9px 11px; border:1px solid #e5e7eb; border-radius:8px; background:#f9fafb; }
-    .order-info-cell .oi-label { display:block; margin-bottom:4px; color:#6b7280; font-size:11px; font-weight:700; }
-    .order-info-cell .oi-value { display:block; color:#111827; font-size:13px; line-height:1.5; white-space:pre-wrap; overflow-wrap:anywhere; }
-    .order-info-heading { margin:4px 0 9px; color:#111827; font-size:14px; font-weight:700; }
-    .order-edit-divider { border:0; border-top:1px solid #e5e7eb; margin:16px 0; }
-    @media (max-width:1000px) {
-      #product-register-card > #product-form { grid-template-columns:repeat(2,minmax(0,1fr)); }
-      #product-register-card > #product-form input[name="main_image"],
-      #product-register-card > #product-form input[name="detail_images"] { grid-column:1 / -1; }
-      .list-controls { grid-template-columns:1fr; }
-      .list-search { grid-column:1; max-width:none; }
-      .bulk-actions { grid-column:1; justify-self:start; }
-      #coupon-issue-form { grid-template-columns:repeat(2,minmax(0,1fr)) !important; }
-    }
-    @media (max-width:560px) {
-      #product-register-card > #product-form { grid-template-columns:1fr; }
-      #product-register-card > #product-form input[name="main_image"],
-      #product-register-card > #product-form input[name="detail_images"],
-      #product-register-card > #product-form button[type="submit"] { grid-column:1; }
-      #coupon-issue-form { grid-template-columns:1fr !important; }
-      #coupon-issue-form button { grid-column:1 !important; }
-      .list-search { display:grid; grid-template-columns:minmax(0,1fr) auto auto; }
-      .list-search .btn { min-width:56px; padding:0 10px; }
-      .order-info-grid { grid-template-columns:1fr; }
-    }
-
-    @media (max-width: 1000px) { .admin-header { padding: 0 16px; } .admin-tabbar { padding: 10px 16px; } .admin-layout { padding: 16px; height: calc(100vh - 65px - 120px); margin-top: calc(65px + 120px); } }
-
-    .tab-loading { padding: 20px; text-align: center; color: #9ca3af; font-size: 13px; }
-    .board-secret-badge { display: inline-block; font-size: 10px; background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-weight: 700; border: 1px solid #f59e0b; }
-  
-    #product-register-card > #product-form {
-      display:grid !important; width:100%; min-width:0;
-      grid-template-columns:repeat(12,minmax(0,1fr)); gap:10px;
-      align-items:stretch;
-    }
-    #product-register-card > #product-form > * { min-width:0; max-width:100%; }
-    #product-register-card > #product-form input,
-    #product-register-card > #product-form select { width:100%; height:44px; min-height:44px; padding:9px 11px; font-size:13px; }
-    #product-register-card > #product-form input[name="product_code"] { grid-column:span 2; grid-row:1; }
-    #product-register-card > #product-form input[name="name"] { grid-column:span 3; grid-row:1; }
-    #product-register-card > #product-form input[name="main_image"] { grid-column:span 3; grid-row:1; }
-    #product-register-card > #product-form input[name="detail_images"] { grid-column:span 4; grid-row:1; }
-    #product-register-card > #product-form input[name="colors"] { grid-column:span 2; grid-row:2; }
-    #product-register-card > #product-form input[name="sizes"] { grid-column:span 2; grid-row:2; }
-    #product-register-card > #product-form input[name="price"] { grid-column:span 2; grid-row:2; }
-    #product-register-card > #product-form input[name="hem_option"] { grid-column:span 2; grid-row:2; }
-    #product-register-card > #product-form input[name="other_option"] { grid-column:span 2; grid-row:2; }
-    #product-register-card > #product-form select[name="target_grade"] { grid-column:span 2; grid-row:2; }
-    #product-register-card > #product-form input[name="min_qty"] { display:none !important; }
-    #product-register-card > #product-form button[type="submit"] { grid-column:1/-1; grid-row:3; width:100%; min-height:42px; }
-    #product-register-card > #product-form #size-detail-section { grid-column:1/-1; grid-row:4; width:100%; }
+    #product-register-card > #product-form select { width: 100%; height: 44px; min-height: 44px; padding: 9px 11px; font-size: 13px; }
+    #product-register-card > #product-form input[name="product_code"] { grid-column: span 2; grid-row: 1; }
+    #product-register-card > #product-form input[name="name"] { grid-column: span 3; grid-row: 1; }
+    #product-register-card > #product-form input[name="main_image"] { grid-column: span 3; grid-row: 1; }
+    #product-register-card > #product-form input[name="detail_images"] { grid-column: span 4; grid-row: 1; }
+    #product-register-card > #product-form input[name="colors"] { grid-column: span 2; grid-row: 2; }
+    #product-register-card > #product-form input[name="sizes"] { grid-column: span 2; grid-row: 2; }
+    #product-register-card > #product-form input[name="price"] { grid-column: span 2; grid-row: 2; }
+    #product-register-card > #product-form input[name="hem_option"] { grid-column: span 2; grid-row: 2; }
+    #product-register-card > #product-form input[name="other_option"] { grid-column: span 2; grid-row: 2; }
+    #product-register-card > #product-form select[name="target_grade"] { grid-column: span 2; grid-row: 2; }
+    #product-register-card > #product-form input[name="min_qty"] { display: none !important; }
+    #product-register-card > #product-form button[type="submit"] { grid-column: 1 / -1; grid-row: 3; width: 100%; min-height: 42px; }
+    #product-register-card > #product-form > #size-detail-section { grid-column: 1 / -1 !important; grid-row: 4; width: 100% !important; }
     @media(max-width:900px) {
-      #product-register-card > #product-form { grid-template-columns:repeat(6,minmax(0,1fr)); }
+      #product-register-card > #product-form { grid-template-columns: repeat(6, minmax(0,1fr)) !important; }
       #product-register-card > #product-form input[name="product_code"],
       #product-register-card > #product-form input[name="name"],
       #product-register-card > #product-form input[name="main_image"],
-      #product-register-card > #product-form input[name="detail_images"] { grid-column:span 3; grid-row:auto; }
+      #product-register-card > #product-form input[name="detail_images"] { grid-column: span 3; grid-row: auto; }
       #product-register-card > #product-form input[name="colors"],
       #product-register-card > #product-form input[name="sizes"],
       #product-register-card > #product-form input[name="price"],
       #product-register-card > #product-form input[name="hem_option"],
       #product-register-card > #product-form input[name="other_option"],
-      #product-register-card > #product-form select[name="target_grade"] { grid-column:span 2; grid-row:auto; }
+      #product-register-card > #product-form select[name="target_grade"] { grid-column: span 2; grid-row: auto; }
     }
     @media(max-width:560px) {
-      #product-register-card > #product-form { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      #product-register-card > #product-form { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
       #product-register-card > #product-form input[name="product_code"],
       #product-register-card > #product-form input[name="name"],
       #product-register-card > #product-form input[name="main_image"],
-      #product-register-card > #product-form input[name="detail_images"] { grid-column:1/-1; }
+      #product-register-card > #product-form input[name="detail_images"] { grid-column: 1 / -1; }
       #product-register-card > #product-form input[name="colors"],
       #product-register-card > #product-form input[name="sizes"],
       #product-register-card > #product-form input[name="price"],
       #product-register-card > #product-form input[name="hem_option"],
       #product-register-card > #product-form input[name="other_option"],
-      #product-register-card > #product-form select[name="target_grade"] { grid-column:span 1; }
-    }
-    .order-detail-backdrop { padding:18px; }
-    .nav-order-modal { max-width:980px !important; width:min(96vw,980px) !important; padding:0 !important; overflow:hidden auto; background:#f5f7fa; border-radius:3px !important; max-height:92vh !important; }
-    .nav-order-top { position:sticky; top:0; z-index:4; }
-    .nav-order-footer { position:sticky; bottom:0; z-index:3; }
-    .order-detail-backdrop { align-items:flex-start !important; }
-    .nav-order-top { display:flex; justify-content:space-between; align-items:center; padding:22px 26px 16px; background:#fff; border-bottom:1px solid #e5e7eb; }
-    .nav-order-top small { color:#03c75a; font-size:10px; font-weight:800; letter-spacing:1.2px; }
-    .nav-order-top h2 { margin:4px 0 5px !important; font-size:21px !important; }
-    .nav-order-top > div > b { color:#64748b; font-size:13px; }
-    .nav-order-close { border:0; background:transparent; font-size:30px; color:#64748b; cursor:pointer; line-height:1; }
-    .nav-order-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1px; background:#e5e7eb; border-bottom:1px solid #e5e7eb; }
-    .nav-order-summary > div { background:#fff; padding:14px 22px; display:flex; flex-direction:column; gap:5px; }
-    .nav-order-summary span,.nav-order-field span { color:#64748b; font-size:11px; }
-    .nav-order-summary b { color:#111827; font-size:14px; }
-    .order-total-card { margin:12px 16px !important; padding:0 !important; overflow:hidden; }
-    .order-total-grid { grid-template-columns:repeat(4,minmax(0,1fr)) !important; gap:0 !important; border:0 !important; }
-    .order-total-grid > div { padding:16px 18px !important; min-width:0; }
-    .order-total-grid > div + div { border-left:1px solid #e5e7eb; }
-    .order-total-grid .order-final-total { background:#f8fafc; }
-    .order-total-grid .order-final-total b { font-size:17px; }
-    @media(max-width:700px) { .order-total-card { margin:8px !important; } .order-total-grid { grid-template-columns:repeat(2,minmax(0,1fr)) !important; } .order-total-grid > div + div { border-left:0; } .order-total-grid > div:nth-child(even) { border-left:1px solid #e5e7eb; } .order-total-grid > div:nth-child(n+3) { border-top:1px solid #e5e7eb; } }
-    .nav-order-section { margin:12px 16px; padding:18px 20px; background:#fff; border:1px solid #e5e7eb; border-radius:10px; }
-    .nav-order-section h3 { margin:0 0 13px; font-size:14px; color:#111827; }
-    .nav-order-info-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
-    .nav-order-field { min-width:0; padding:9px 11px; border:1px solid #edf0f3; border-radius:7px; display:flex; flex-direction:column; gap:4px; }
-    .nav-order-field b { color:#1f2937; font-size:12px; line-height:1.5; overflow-wrap:anywhere; white-space:pre-wrap; font-weight:600; }
-    .nav-order-product { border:1px solid #e5e7eb; border-radius:9px; padding:14px; margin-top:10px; background:#fff; }
-    .nav-order-product-head { display:flex; justify-content:space-between; gap:12px; align-items:center; }
-    .nav-order-product-head > div { display:flex; align-items:center; gap:9px; min-width:0; flex-wrap:wrap; }
-    .nav-order-product-head small { color:#03a94d; font-weight:700; }
-    .nav-order-product-head strong { color:#111827; font-size:13px; }
-    .nav-order-product-head span { color:#94a3b8; font-size:11px; }
-    .nav-order-product-head > b { color:#e53935; white-space:nowrap; }
-    .nav-order-product-summary { display:flex; gap:14px; flex-wrap:wrap; padding:10px 0; color:#64748b; font-size:11px; border-bottom:1px solid #f1f5f9; }
-    .nav-order-extra { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; padding:9px 0; }
-    .nav-order-edit-grid { display:grid; grid-template-columns:1fr 1fr 1.4fr; gap:9px; padding-top:11px; }
-    .nav-order-edit-grid label { display:flex; flex-direction:column; gap:5px; color:#475569; font-size:11px; font-weight:700; min-width:0; }
-    .nav-order-edit-grid input,.nav-order-edit-grid select,.nav-order-edit-grid textarea { width:100%; min-width:0; border:1px solid #dce2e8; border-radius:6px; padding:9px 10px; color:#1f2937; background:#fff; font:inherit; font-size:12px; box-sizing:border-box; }
-    .nav-order-edit-grid .tracking-field { grid-column:3; }
-    .nav-order-edit-grid .memo-field { grid-column:1/-1; }
-    .nav-order-edit-grid textarea { resize:vertical; min-height:54px; }
-    .nav-order-recipient-edit-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:8px; }
-    .nav-order-recipient-edit-grid label { display:flex; flex-direction:column; gap:5px; min-width:0; color:#475569; font-size:11px; font-weight:700; }
-    .nav-order-recipient-edit-grid input { width:100%; min-width:0; border:1px solid #dce2e8; border-radius:6px; padding:9px 8px; color:#1f2937; background:#fff; font:inherit; font-size:12px; box-sizing:border-box; }
-    .member-readonly-value { background:#f3f4f6 !important; color:#64748b !important; }
-    @media(max-width:900px) { .nav-order-recipient-edit-grid { grid-template-columns:repeat(4,minmax(0,1fr)); } }
-    @media(max-width:560px) { .nav-order-recipient-edit-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
-    .nav-order-footer { display:flex; justify-content:flex-end; gap:8px; padding:14px 20px; background:#fff; border-top:1px solid #e5e7eb; }
-    .nav-order-footer button { min-width:120px; }
-    @media(max-width:700px) {
-      .order-detail-backdrop { padding:5px; }
-      .nav-order-top { padding:16px; }
-      .nav-order-summary { grid-template-columns:1fr; }
-      .nav-order-summary > div { padding:10px 16px; }
-      .nav-order-section { margin:8px; padding:13px; }
-      .nav-order-info-grid,.nav-order-extra { grid-template-columns:repeat(2,minmax(0,1fr)); }
-      .nav-order-edit-grid { grid-template-columns:1fr 1fr; }
-      .nav-order-edit-grid .tracking-field { grid-column:1/-1; }
-      .nav-order-edit-grid .memo-field { grid-column:1/-1; }
-      .nav-order-footer { padding:12px; }
-      .nav-order-footer button { flex:1; min-width:0; }
+      #product-register-card > #product-form select[name="target_grade"] { grid-column: span 1; }
     }
 
-    #product-register-card { width:100% !important; min-width:0 !important; }
-    #product-register-card > #product-form {
-      display:grid !important;
-      width:100% !important;
-      max-width:none !important;
-      min-width:0 !important;
-      margin:0 !important;
-      justify-self:stretch !important;
-      grid-template-columns:repeat(12,minmax(0,1fr)) !important;
-      gap:10px !important;
-    }
-    #product-register-card > #product-form > input,
-    #product-register-card > #product-form > select,
-    #product-register-card > #product-form > button,
-    #product-register-card > #product-form > #size-detail-section {
-      min-width:0 !important; max-width:none !important;
-    }
-    #product-register-card > #product-form > #size-detail-section {
-      width:100% !important; grid-column:1 / -1 !important;
-    }
-    @media(max-width:900px) {
-      #product-register-card > #product-form { grid-template-columns:repeat(6,minmax(0,1fr)) !important; }
-    }
-    @media(max-width:560px) {
-      #product-register-card > #product-form { grid-template-columns:repeat(2,minmax(0,1fr)) !important; }
-    }
+    #notice-subsection > .card #notice-form { width: 100%; min-width: 0; }
+    #notice-form input, #notice-form textarea { width: 100%; min-width: 0; display: block; box-sizing: border-box; }
+    #notice-form textarea { min-height: 180px !important; resize: vertical; }
+    #notice-form button[type="submit"] { width: 100%; justify-self: stretch !important; min-height: 44px; }
 
     @media (max-width: 560px) {
-      #admin-list-wrap {
-        overflow-x: auto !important;
-        overflow-y: hidden;
-        -webkit-overflow-scrolling: touch;
-        scroll-snap-type: x mandatory;
-        scrollbar-width: thin;
-        padding: 10px 8px;
-      }
-      #admin-list {
-        flex-direction: row !important;
-        min-height: 0 !important;
-        gap: 10px;
-        padding-bottom: 8px;
-        min-width: max-content;
-      }
-      .product-row {
-        min-width: 82vw !important;
-        max-width: 82vw !important;
-        scroll-snap-align: start;
-        grid-template-columns: 22px 60px 1fr !important;
-        grid-template-rows: auto auto auto auto;
-        align-items: start;
-        padding: 12px !important;
-        gap: 10px;
-        box-shadow: 0 1px 4px rgba(0,0,0,.05);
-      }
+      #admin-list-wrap { overflow-x: auto !important; overflow-y: hidden; -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory; scrollbar-width: thin; padding: 10px 8px; }
+      #admin-list { flex-direction: row !important; min-height: 0 !important; gap: 10px; padding-bottom: 8px; min-width: max-content; }
+      .product-row { min-width: 82vw !important; max-width: 82vw !important; scroll-snap-align: start; grid-template-columns: 22px 60px 1fr !important; grid-template-rows: auto auto auto auto; align-items: start; padding: 12px !important; gap: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.05); }
       .product-row img { width: 60px; height: 60px; grid-row: span 2; }
       .prod-info { grid-column: 3; }
-      .prod-price {
-        grid-column: 1 / -1;
-        text-align: left !important;
-        padding: 6px 0 0 !important;
-        font-size: 15px !important;
-        border-top: 1px dashed #f1f5f9;
-        margin-top: 4px;
-      }
-      .prod-actions {
-        grid-column: 1 / -1;
-        flex-wrap: wrap;
-        gap: 6px !important;
-        padding-top: 6px;
-      }
+      .prod-price { grid-column: 1 / -1; text-align: left !important; padding: 6px 0 0 !important; font-size: 15px !important; border-top: 1px dashed #f1f5f9; margin-top: 4px; }
+      .prod-actions { grid-column: 1 / -1; flex-wrap: wrap; gap: 6px !important; padding-top: 6px; }
       .prod-actions .btn { flex: 1 1 auto; min-width: 60px; }
     }
 
@@ -432,17 +240,90 @@
     .stat-card .stat-value.blue { color: #2563eb; }
     .stat-card .stat-value.green { color: #059669; }
     .stat-card .stat-value.purple { color: #7c3aed; }
-  
-    .nav-order-top .order-title-meta { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
-    .nav-order-top .order-created-inline { font-size:12px; color:#64748b; background:#f8fafc; border:1px solid #e5e7eb; border-radius:6px; padding:6px 9px; }
-    .nav-order-info-grid.order-recipient-grid { grid-template-columns:repeat(6,minmax(0,1fr)); }
-    .nav-order-product .nav-order-extra.order-option-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
-    .member-detail-card { margin:14px 0; padding:16px; border:1px solid #e5e7eb; border-radius:10px; background:#fff; }
-    .member-detail-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:9px; }
-    .member-detail-grid .nav-order-field { min-width:0; }
-    .member-detail-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
-    @media(max-width:900px){ .nav-order-info-grid.order-recipient-grid {grid-template-columns:repeat(3,minmax(0,1fr));} .nav-order-product .nav-order-extra.order-option-grid {grid-template-columns:repeat(2,minmax(0,1fr));} .member-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr));} }
-    @media(max-width:560px){ .nav-order-info-grid.order-recipient-grid {grid-template-columns:repeat(2,minmax(0,1fr));} .member-detail-grid{grid-template-columns:1fr;} }
+
+    .tab-loading { padding: 20px; text-align: center; color: #9ca3af; font-size: 13px; }
+    .board-secret-badge { display: inline-block; font-size: 10px; background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-weight: 700; border: 1px solid #f59e0b; }
+
+    .order-detail-backdrop { padding: 18px; align-items: flex-start !important; }
+    .nav-order-modal { max-width: 980px !important; width: min(96vw, 980px) !important; padding: 0 !important; overflow: hidden auto; background: #f5f7fa; border-radius: 3px !important; max-height: 92vh !important; }
+    .nav-order-top { position: sticky; top: 0; z-index: 4; display: flex; justify-content: space-between; align-items: center; padding: 22px 26px 16px; background: #fff; border-bottom: 1px solid #e5e7eb; }
+    .nav-order-top small { color: #03c75a; font-size: 10px; font-weight: 800; letter-spacing: 1.2px; }
+    .nav-order-top h2 { margin: 4px 0 5px !important; font-size: 21px !important; }
+    .nav-order-top > div > b { color: #64748b; font-size: 13px; }
+    .nav-order-close { border: 0; background: transparent; font-size: 30px; color: #64748b; cursor: pointer; line-height: 1; }
+    .nav-order-summary { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1px; background: #e5e7eb; border-bottom: 1px solid #e5e7eb; }
+    .nav-order-summary > div { background: #fff; padding: 14px 22px; display: flex; flex-direction: column; gap: 5px; }
+    .nav-order-summary span, .nav-order-field span { color: #64748b; font-size: 11px; }
+    .nav-order-summary b { color: #111827; font-size: 14px; }
+    .order-total-card { margin: 12px 16px !important; padding: 0 !important; overflow: hidden; }
+    .order-total-grid { grid-template-columns: repeat(4, minmax(0,1fr)) !important; gap: 0 !important; border: 0 !important; }
+    .order-total-grid > div { padding: 16px 18px !important; min-width: 0; }
+    .order-total-grid > div + div { border-left: 1px solid #e5e7eb; }
+    .order-total-grid .order-final-total { background: #f8fafc; }
+    .order-total-grid .order-final-total b { font-size: 17px; }
+    @media(max-width:700px) { .order-total-card { margin: 8px !important; } .order-total-grid { grid-template-columns: repeat(2, minmax(0,1fr)) !important; } .order-total-grid > div + div { border-left: 0; } .order-total-grid > div:nth-child(even) { border-left: 1px solid #e5e7eb; } .order-total-grid > div:nth-child(n+3) { border-top: 1px solid #e5e7eb; } }
+    .nav-order-section { margin: 12px 16px; padding: 18px 20px; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; }
+    .nav-order-section h3 { margin: 0 0 13px; font-size: 14px; color: #111827; }
+    .nav-order-info-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 9px; }
+    .nav-order-field { min-width: 0; padding: 9px 11px; border: 1px solid #edf0f3; border-radius: 7px; display: flex; flex-direction: column; gap: 4px; }
+    .nav-order-field b { color: #1f2937; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; white-space: pre-wrap; font-weight: 600; }
+    .nav-order-product { border: 1px solid #e5e7eb; border-radius: 9px; padding: 14px; margin-top: 10px; background: #fff; }
+    .nav-order-product-head { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+    .nav-order-product-head > div { display: flex; align-items: center; gap: 9px; min-width: 0; flex-wrap: wrap; }
+    .nav-order-product-head small { color: #03a94d; font-weight: 700; }
+    .nav-order-product-head strong { color: #111827; font-size: 13px; }
+    .nav-order-product-head span { color: #94a3b8; font-size: 11px; }
+    .nav-order-product-head > b { color: #e53935; white-space: nowrap; }
+    .nav-order-product-summary { display: flex; gap: 14px; flex-wrap: wrap; padding: 10px 0; color: #64748b; font-size: 11px; border-bottom: 1px solid #f1f5f9; }
+    .nav-order-extra { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 7px; padding: 9px 0; }
+    .nav-order-edit-grid { display: grid; grid-template-columns: 1fr 1fr 1.4fr; gap: 9px; padding-top: 11px; }
+    .nav-order-edit-grid label { display: flex; flex-direction: column; gap: 5px; color: #475569; font-size: 11px; font-weight: 700; min-width: 0; }
+    .nav-order-edit-grid input, .nav-order-edit-grid select, .nav-order-edit-grid textarea { width: 100%; min-width: 0; border: 1px solid #dce2e8; border-radius: 6px; padding: 9px 10px; color: #1f2937; background: #fff; font: inherit; font-size: 12px; box-sizing: border-box; }
+    .nav-order-edit-grid .tracking-field { grid-column: 3; }
+    .nav-order-edit-grid .memo-field { grid-column: 1 / -1; }
+    .nav-order-edit-grid textarea { resize: vertical; min-height: 54px; }
+    .nav-order-recipient-edit-grid { display: grid; grid-template-columns: repeat(7, minmax(0,1fr)); gap: 8px; }
+    .nav-order-recipient-edit-grid label { display: flex; flex-direction: column; gap: 5px; min-width: 0; color: #475569; font-size: 11px; font-weight: 700; }
+    .nav-order-recipient-edit-grid input { width: 100%; min-width: 0; border: 1px solid #dce2e8; border-radius: 6px; padding: 9px 8px; color: #1f2937; background: #fff; font: inherit; font-size: 12px; box-sizing: border-box; }
+    .nav-order-recipient-edit-grid input.customs-input { letter-spacing: 0.5px; font-family: 'Courier New', monospace; }
+    @media(max-width:900px) { .nav-order-recipient-edit-grid { grid-template-columns: repeat(4, minmax(0,1fr)); } }
+    @media(max-width:560px) { .nav-order-recipient-edit-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+    .nav-order-footer { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 20px; background: #fff; border-top: 1px solid #e5e7eb; position: sticky; bottom: 0; z-index: 3; }
+    .nav-order-footer button { min-width: 120px; }
+    @media(max-width:700px) {
+      .order-detail-backdrop { padding: 5px; }
+      .nav-order-top { padding: 16px; }
+      .nav-order-summary { grid-template-columns: 1fr; }
+      .nav-order-summary > div { padding: 10px 16px; }
+      .nav-order-section { margin: 8px; padding: 13px; }
+      .nav-order-info-grid, .nav-order-extra { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .nav-order-edit-grid { grid-template-columns: 1fr 1fr; }
+      .nav-order-edit-grid .tracking-field { grid-column: 1 / -1; }
+      .nav-order-edit-grid .memo-field { grid-column: 1 / -1; }
+      .nav-order-footer { padding: 12px; }
+      .nav-order-footer button { flex: 1; min-width: 0; }
+    }
+
+    .member-detail-card { margin: 14px 0; padding: 16px; border: 1px solid #e5e7eb; border-radius: 10px; background: #fff; }
+    .member-detail-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 9px; }
+    .member-detail-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+    .member-detail-actions label { display: flex; flex-direction: column; gap: 5px; font-size: 11px; font-weight: 700; color: #475569; }
+    .member-detail-actions select, .member-detail-actions input { padding: 8px 10px; border: 1px solid #dce2e8; border-radius: 6px; font-size: 12px; color: #1f2937; background: #fff; }
+    @media(max-width:900px) { .member-detail-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+    @media(max-width:560px) { .member-detail-grid { grid-template-columns: 1fr; } }
+
+    @media (max-width: 1000px) {
+      .admin-header { padding: 0 16px; }
+      .admin-tabbar { padding: 10px 16px; }
+      .admin-layout { padding: 16px; height: calc(100vh - 65px - 120px); margin-top: calc(65px + 120px); }
+      .list-controls { grid-template-columns: 1fr; }
+      .list-search { grid-column: 1; max-width: none; }
+      .bulk-actions { grid-column: 1; justify-self: start; }
+    }
+    @media (max-width: 560px) {
+      .list-search { display: grid; grid-template-columns: minmax(0,1fr) auto auto; }
+      .list-search .btn { min-width: 56px; padding: 0 10px; }
+    }
   </style>
 </head>
 <body>
@@ -486,33 +367,21 @@
           <p class="page-subtitle">상품을 등록하고 목록을 관리합니다 (일반 / 도매전용 / VIP전용)</p>
 
           <div class="stats-grid">
-            <div class="stat-card">
-              <div class="stat-label">오늘 방문자</div>
-              <div class="stat-value blue" id="stat-today">-</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-label">어제 방문자</div>
-              <div class="stat-value green" id="stat-yesterday">-</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-label">전체 방문자</div>
-              <div class="stat-value purple" id="stat-total">-</div>
-            </div>
+            <div class="stat-card"><div class="stat-label">오늘 방문자</div><div class="stat-value blue" id="stat-today">-</div></div>
+            <div class="stat-card"><div class="stat-label">어제 방문자</div><div class="stat-value green" id="stat-yesterday">-</div></div>
+            <div class="stat-card"><div class="stat-label">전체 방문자</div><div class="stat-value purple" id="stat-total">-</div></div>
           </div>
 
           <div class="card" id="global-detail-images-card">
             <div class="card-title">전체 상품 상세 공통 이미지</div>
-            <p class="upload-help" style="margin:0 0 12px; font-size:12px; color:#6b7280;">모든 상품 상세페이지에 자동 적용됩니다.</p>
+            <p style="margin:0 0 12px; font-size:12px; color:#6b7280;">모든 상품 상세페이지에 자동 적용됩니다.</p>
             <div class="settings-split" style="margin-bottom:0;">
               <div class="settings-col">
                 <div>
-                  <label class="upload-label" for="detail-notice-file" style="display:block; font-size:12px; font-weight:700; color:#374151; margin-bottom:6px;">상세이미지 위 공지 이미지</label>
+                  <label style="display:block; font-size:12px; font-weight:700; color:#374151; margin-bottom:6px;">상세이미지 위 공지 이미지</label>
                   <input id="detail-notice-file" type="file" accept="image/*" style="padding:8px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:6px;">
                   <input id="detail-notice-url" placeholder="공지 이미지 URL" style="margin-top:8px;">
-                  <div id="detail-notice-preview" class="preview-box" style="display:none;">
-                    <div class="preview-label">미리보기</div>
-                    <img id="detail-notice-preview-img">
-                  </div>
+                  <div id="detail-notice-preview" class="preview-box" style="display:none;"><div class="preview-label">미리보기</div><img id="detail-notice-preview-img"></div>
                   <div class="form-row" style="margin-top:10px;">
                     <button type="button" id="detail-notice-save" class="btn btn-primary">저장</button>
                     <button type="button" id="detail-notice-delete" class="btn btn-danger">삭제</button>
@@ -522,13 +391,10 @@
               </div>
               <div class="settings-col">
                 <div>
-                  <label class="upload-label" for="detail-footer-file" style="display:block; font-size:12px; font-weight:700; color:#374151; margin-bottom:6px;">사용설명 / 배송안내 이미지</label>
+                  <label style="display:block; font-size:12px; font-weight:700; color:#374151; margin-bottom:6px;">사용설명 / 배송안내 이미지</label>
                   <input id="detail-footer-file" type="file" accept="image/*" style="padding:8px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:6px;">
                   <input id="detail-footer-url" placeholder="하단 이미지 URL" style="margin-top:8px;">
-                  <div id="detail-footer-preview" class="preview-box" style="display:none;">
-                    <div class="preview-label">미리보기</div>
-                    <img id="detail-footer-preview-img">
-                  </div>
+                  <div id="detail-footer-preview" class="preview-box" style="display:none;"><div class="preview-label">미리보기</div><img id="detail-footer-preview-img"></div>
                   <div class="form-row" style="margin-top:10px;">
                     <button type="button" id="detail-footer-save" class="btn btn-primary">저장</button>
                     <button type="button" id="detail-footer-delete" class="btn btn-danger">삭제</button>
@@ -638,33 +504,18 @@
           <div class="card" id="coupon-issue-card">
             <div class="card-title" style="color:#92400e;">새 쿠폰 발급</div>
             <form id="coupon-issue-form">
-              <div>
-                <label style="font-size:12px; font-weight:600; color:#92400e; display:block; margin-bottom:4px;">회원</label>
-                <select id="coupon-member-select" required><option value="">회원 선택...</option></select>
-              </div>
-              <div>
-                <label style="font-size:12px; font-weight:600; color:#92400e; display:block; margin-bottom:4px;">할인 유형</label>
-                <select id="coupon-type-select">
-                  <option value="percent">% 할인</option>
-                  <option value="fixed">원 할인</option>
-                </select>
-              </div>
-              <div>
-                <label style="font-size:12px; font-weight:600; color:#92400e; display:block; margin-bottom:4px;">할인값</label>
-                <input id="coupon-value-input" type="number" min="1" value="10" required>
-              </div>
-              <div>
-                <label style="font-size:12px; font-weight:600; color:#92400e; display:block; margin-bottom:4px;">유효기간(일)</label>
-                <input id="coupon-days-input" type="number" min="1" value="30" required>
-              </div>
-              <div>
-                <label style="font-size:12px; font-weight:600; color:#92400e; display:block; margin-bottom:4px;">쿠폰명</label>
-                <input id="coupon-name-input" placeholder="예: 감사 쿠폰">
-              </div>
-              <div>
-                <label style="font-size:12px; font-weight:600; color:#92400e; display:block; margin-bottom:4px;">&nbsp;</label>
-                <button type="submit" class="btn btn-success" style="width:100%;">발급하기</button>
-              </div>
+              <div><label style="font-size:12px;font-weight:600;color:#92400e;display:block;margin-bottom:4px;">회원</label>
+                <select id="coupon-member-select" required><option value="">회원 선택...</option></select></div>
+              <div><label style="font-size:12px;font-weight:600;color:#92400e;display:block;margin-bottom:4px;">할인 유형</label>
+                <select id="coupon-type-select"><option value="percent">% 할인</option><option value="fixed">원 할인</option></select></div>
+              <div><label style="font-size:12px;font-weight:600;color:#92400e;display:block;margin-bottom:4px;">할인값</label>
+                <input id="coupon-value-input" type="number" min="1" value="10" required></div>
+              <div><label style="font-size:12px;font-weight:600;color:#92400e;display:block;margin-bottom:4px;">유효기간(일)</label>
+                <input id="coupon-days-input" type="number" min="1" value="30" required></div>
+              <div><label style="font-size:12px;font-weight:600;color:#92400e;display:block;margin-bottom:4px;">쿠폰명</label>
+                <input id="coupon-name-input" placeholder="예: 감사 쿠폰"></div>
+              <div><label style="font-size:12px;font-weight:600;color:#92400e;display:block;margin-bottom:4px;">&nbsp;</label>
+                <button type="submit" class="btn btn-success" style="width:100%;">발급하기</button></div>
             </form>
             <p id="coupon-issue-msg" class="msg"></p>
           </div>
@@ -719,7 +570,7 @@
                 <div style="display:grid; gap:10px;">
                   <input id="logo-site-name" placeholder="사이트명">
                   <input id="logo-image-url" placeholder="로고 이미지 URL">
-                  <label class="upload-label" for="logo-image-file">또는 로고 업로드</label>
+                  <label for="logo-image-file">또는 로고 업로드</label>
                   <input id="logo-image-file" type="file" accept="image/*">
                   <div class="form-row">
                     <button id="logo-save-btn" class="btn btn-primary">등록/수정</button>
@@ -727,10 +578,7 @@
                   </div>
                 </div>
                 <p id="logo-msg" class="msg"></p>
-                <div id="logo-preview" class="preview-box" style="display:none;">
-                  <div class="preview-label">현재 로고</div>
-                  <img id="logo-preview-img">
-                </div>
+                <div id="logo-preview" class="preview-box" style="display:none;"><div class="preview-label">현재 로고</div><img id="logo-preview-img"></div>
               </div>
 
               <div class="card">
@@ -742,19 +590,15 @@
                     <button id="promo-video-delete-btn" class="btn btn-danger">삭제</button>
                   </div>
                 </div>
-                <p style="font-size:12px; color:#9ca3af; margin:6px 0 0;">다중 플랫폼 자동 지원</p>
                 <p id="promo-video-msg" class="msg"></p>
-                <div id="promo-video-preview" class="preview-box" style="display:none;">
-                  <div class="preview-label">현재 등록된 영상</div>
-                  <div id="promo-video-preview-inner"></div>
-                </div>
+                <div id="promo-video-preview" class="preview-box" style="display:none;"><div class="preview-label">현재 등록된 영상</div><div id="promo-video-preview-inner"></div></div>
               </div>
 
               <div class="card">
                 <div class="card-title">배너 이미지</div>
                 <div style="display:grid; gap:10px;">
                   <input id="banner-image-url" placeholder="배너 이미지 URL">
-                  <label class="upload-label" for="banner-image-file">또는 배너 업로드</label>
+                  <label for="banner-image-file">또는 배너 업로드</label>
                   <input id="banner-image-file" type="file" accept="image/*">
                   <input id="banner-link-url" placeholder="클릭 시 이동 링크 (선택)">
                   <button id="banner-save-btn" class="btn btn-primary">새 배너 추가</button>
@@ -770,7 +614,7 @@
                 <div class="card-title">배경 이미지 <span class="hint">(상단 고정 배경)</span></div>
                 <div style="display:grid; gap:10px;">
                   <input id="hero-bg-image-url" placeholder="배경 이미지 URL">
-                  <label class="upload-label" for="hero-bg-image-file">또는 배경 업로드</label>
+                  <label for="hero-bg-image-file">또는 배경 업로드</label>
                   <input id="hero-bg-image-file" type="file" accept="image/*">
                   <div class="form-row">
                     <button id="hero-bg-save-btn" class="btn btn-primary">등록/수정</button>
@@ -778,10 +622,7 @@
                   </div>
                 </div>
                 <p id="hero-bg-msg" class="msg"></p>
-                <div id="hero-bg-preview" class="preview-box" style="display:none;">
-                  <div class="preview-label">현재 배경 이미지</div>
-                  <img id="hero-bg-preview-img">
-                </div>
+                <div id="hero-bg-preview" class="preview-box" style="display:none;"><div class="preview-label">현재 배경 이미지</div><img id="hero-bg-preview-img"></div>
               </div>
             </div>
 
@@ -864,9 +705,7 @@
       "https://alpdhgcipjeekzrpxlbh.supabase.co",
       "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya"
     );
-  </script>
 
-  <script>
     // ============ 유틸 ============
     function formatKST(dateStr, opts = {}) {
       if (!dateStr) return '-';
@@ -952,7 +791,6 @@
         const { count: yesterdayCount, error: yesterdayErr } = await db.from('visitors').select('*', { count: 'exact', head: true }).gte('created_at', yesterdayStart.toISOString()).lt('created_at', todayStart.toISOString());
         const { count: totalCount, error: totalErr } = await db.from('visitors').select('*', { count: 'exact', head: true });
         if (todayErr || yesterdayErr || totalErr) throw todayErr || yesterdayErr || totalErr;
-
         document.getElementById('stat-today').textContent = (todayCount || 0).toLocaleString();
         document.getElementById('stat-yesterday').textContent = (yesterdayCount || 0).toLocaleString();
         document.getElementById('stat-total').textContent = (totalCount || 0).toLocaleString();
@@ -1019,8 +857,7 @@
     ['notice', 'footer'].forEach(type => {
       const prefix = type === 'notice' ? 'detail-notice' : 'detail-footer';
       document.getElementById(prefix + '-file').addEventListener('change', async e => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+        const file = e.target.files?.[0]; if (!file) return;
         const m = document.getElementById(prefix + '-msg');
         m.className = 'msg'; m.textContent = '업로드 중...';
         try {
@@ -1716,7 +1553,7 @@
     }
 
     // ============ 주문 관리 ============
-    const ORDER_COLS = ['order_number','product_code','product_name','product_price','quantity','total_price','customer_name','customer_phone','depositor_name','postcode','address','address_detail','selected_color','selected_size','selected_hem','selected_other','shipping_fee','grade_discount','status','courier','tracking_number','memo','created_at'];
+    const ORDER_COLS = ['order_number','product_code','product_name','product_price','quantity','total_price','customer_name','customer_phone','depositor_name','postcode','address','address_detail','customs_number','selected_color','selected_size','selected_hem','selected_other','shipping_fee','grade_discount','status','courier','tracking_number','memo','created_at'];
     const ORDER_STATUS_OPTIONS = ['주문접수','입금대기','결제완료','상품준비중','배송준비중','배송중','배송완료','취소요청','취소완료'];
     let orderGroups = [];
     let orderRows = [], selectedOrders = new Set();
@@ -1735,10 +1572,7 @@
       const groupsMap = new Map();
       orderRows.forEach(o => {
         const key = o.order_number || `single_${o.id}`;
-        if (!groupsMap.has(key)) groupsMap.set(key, {
-          orderNumber:key, first:o, items:[], ids:[], totalPrice:0, totalQty:0,
-          isDeleted:false
-        });
+        if (!groupsMap.has(key)) groupsMap.set(key, { orderNumber:key, first:o, items:[], ids:[], totalPrice:0, totalQty:0, isDeleted:false });
         const g = groupsMap.get(key);
         g.items.push(o); g.ids.push(o.id);
         g.totalPrice += Number(o.total_price || 0);
@@ -1859,13 +1693,13 @@
     document.getElementById('order-excel-selected-btn').onclick = () => {
       if (!selectedOrders.size) return alert('선택된 주문이 없습니다.');
       const rows = [ORDER_COLS];
-      selectedOrders.forEach(idx => { const g=orderGroups[idx]; if(g) g.items.forEach(o=>rows.push(ORDER_COLS.map(k=>o[k]??''))); });
+      selectedOrders.forEach(idx => { const g = orderGroups[idx]; if (g) g.items.forEach(o => rows.push(ORDER_COLS.map(k => o[k] ?? ''))); });
       downloadCSV(`orders_selected_${Date.now()}.csv`, rows);
     };
     document.getElementById('order-print-selected-btn').onclick = () => {
       if (!selectedOrders.size) return alert('선택된 주문이 없습니다.');
       const rows = [ORDER_COLS];
-      selectedOrders.forEach(idx => { const g=orderGroups[idx]; if(g) g.items.forEach(o=>rows.push(ORDER_COLS.map(k=>o[k]??''))); });
+      selectedOrders.forEach(idx => { const g = orderGroups[idx]; if (g) g.items.forEach(o => rows.push(ORDER_COLS.map(k => o[k] ?? ''))); });
       printHTML(`주문 목록 (${selectedOrders.size}건)`, rows);
     };
     document.getElementById('order-search-btn').onclick = () => {
@@ -1874,6 +1708,7 @@
     };
     document.getElementById('order-reset-btn').onclick = () => { document.getElementById('order-search').value=''; loadOrders(); };
 
+    // ⭐ 주문 상세 모달 — 개인통관부호 입력 + 안전한 저장 로직
     async function openOrderEditModal(groupOrOrder) {
       if (!groupOrOrder) return;
       const items = Array.isArray(groupOrOrder.items) ? groupOrOrder.items : [groupOrOrder];
@@ -1892,20 +1727,18 @@
         product_code:'상품번호', product_name:'상품명', product_price:'상품 단가',
         quantity:'수량', total_price:'상품 합계', price:'가격', request_content:'요청사항'
       };
-      const val = v => (v === null || v === undefined || v === '') ? '-' :
-        (typeof v === 'object' ? JSON.stringify(v) : String(v));
-      
-      // ⭐ 수취인/통관번호/연락처 폴백 처리 강화 (orders 테이블에 저장된 값 기준)
+      const val = v => (v === null || v === undefined || v === '') ? '-' : (typeof v === 'object' ? JSON.stringify(v) : String(v));
+
       const recipientInputMeta = [
-        ['depositor_name','입금자명'], 
+        ['depositor_name','입금자명'],
         ['customs_number','개인통관고유부호'],
-        ['receiver_name','수취인'], 
+        ['receiver_name','수취인'],
         ['receiver_phone','연락처'],
-        ['postcode','우편번호'], 
-        ['address','주소'], 
+        ['postcode','우편번호'],
+        ['address','주소'],
         ['address_detail','상세주소']
       ];
-      
+
       let totalProductPrice = 0, totalShippingFee = 0;
       items.forEach(it => {
         totalProductPrice += Number(it.product_price || 0) * Number(it.quantity || 1);
@@ -1921,7 +1754,7 @@
         : Math.min(totalProductPrice, Number(usedCoupon.discount_value || 0))) : Number(first.coupon_discount || first.discount_amount || 0);
       const finalTotal = Math.max(0, totalProductPrice + totalShippingFee - couponDiscount);
 
-      // 수취인, 통관번호 등이 주문 데이터에 없으면 회원 데이터에서 폴백
+      // 회원 폴백
       let memberData = null;
       if (first.member_id) {
         const { data: mData } = await db.from('members').select('*').eq('id', first.member_id).maybeSingle();
@@ -1929,17 +1762,31 @@
       }
 
       const sharedHtml = recipientInputMeta.map(([key,label]) => {
-        let v = items.map(x=>x[key]).find(x=>x !== undefined && x !== null && x !== '') ?? first[key] ?? '';
-        // orders 테이블에 없으면 members 테이블에서 폴백 (수취인, 통관번호)
+        let v = items.map(x => x[key]).find(x => x !== undefined && x !== null && x !== '') ?? first[key] ?? '';
+
         if (!v && memberData) {
-          if (key === 'receiver_name') v = memberData.receiver_name || memberData.recipient_name || '';
-          if (key === 'customs_number') v = memberData.customs_number || memberData.customs_code || '';
-          if (key === 'receiver_phone') v = memberData.phone || '';
+          if (key === 'receiver_name')  v = memberData.receiver_name || memberData.recipient_name || memberData.name || '';
+          if (key === 'receiver_phone') v = memberData.receiver_phone || memberData.phone || '';
+          if (key === 'customs_number') v = memberData.customs_number || memberData.customs_code || memberData.personal_customs_code || memberData.customs_id || '';
+          if (key === 'postcode')       v = memberData.postcode || memberData.zipcode || '';
+          if (key === 'address')        v = memberData.address || memberData.addr || '';
+          if (key === 'address_detail') v = memberData.address_detail || memberData.addr_detail || memberData.address2 || '';
+          if (key === 'depositor_name') v = memberData.depositor_name || memberData.depositor || '';
         }
-        if (!v && key === 'receiver_name') v = first.customer_name || '';
-        if (!v && key === 'receiver_phone') v = first.customer_phone || '';
-        
-        return `<label>${label}<input class="edit-recipient" data-key="${key}" value="${esc(v)}" placeholder="${label} 입력"></label>`;
+        if (!v && key === 'receiver_name')  v = first.customer_name || '';
+        if (!v && key === 'receiver_phone') v = first.customer_phone || first.phone || '';
+
+        if (key === 'customs_number' && v) v = String(v).replace(/[^0-9]/g, '');
+
+        const attrs = key === 'customs_number'
+          ? ` inputmode="numeric" maxlength="13" pattern="[0-9]{13}" oninput="this.value=this.value.replace(/[^0-9]/g,'')" placeholder="13자리 숫자 (P로 시작 시 P 제외)" class="customs-input"`
+          : ` placeholder="${label} 입력"`;
+
+        const wrapper = key === 'customs_number'
+          ? 'grid-column: span 3;'
+          : (key === 'address' ? 'grid-column: span 2;' : '');
+
+        return `<label style="${wrapper}">${label}<input class="edit-recipient" data-key="${key}" value="${esc(v)}"${attrs}></label>`;
       }).join('');
 
       const productsHtml = items.map((it, i) => {
@@ -1949,7 +1796,7 @@
           if (v === undefined || v === null || v === '') return '';
           return `<div class="nav-order-field"><span>${labelMap[k] || k}</span><b>${esc(val(v))}</b></div>`;
         }).join('');
-        
+
         return `
           <div class="nav-order-product">
             <div class="nav-order-product-head">
@@ -1966,7 +1813,7 @@
               <span>상품 소계: ${won(Number(it.product_price || 0) * Number(it.quantity || 1))}</span>
             </div>
             <div class="nav-order-extra order-option-grid">${extraHtml}</div>
-            ${it.request_content ? `<div class="nav-order-info-cell" style="margin-top:8px"><span class="oi-label">요청사항</span><span class="oi-value">${esc(it.request_content)}</span></div>` : ''}
+            ${it.request_content ? `<div class="nav-order-field" style="margin-top:8px"><span>요청사항</span><b>${esc(it.request_content)}</b></div>` : ''}
             <div class="nav-order-edit-grid">
               <label>배송상태
                 <select class="edit-status">
@@ -1975,7 +1822,7 @@
               </label>
               <label>택배사
                 <select class="edit-courier">
-                  ${['','CJ대한통운','롯데택배','한진택배','우체국택배','로젠택배','경동택배','대신택배','합동택배','천일택배','일양로지스','건영택배','EMS','기타'].filter((v,i,a)=>a.indexOf(v)===i).map(c=>`<option value="${esc(c)}" ${c === (it.courier || '') ? 'selected' : ''}>${c || '택배사 선택'}</option>`).join('')}
+                  ${['','CJ대한통운','롯데택배','한진택배','우체국택배','로젠택배','경동택배','대신택배','합동택배','천일택배','일양로지스','건영택배','EMS','기타'].map(c=>`<option value="${esc(c)}" ${c === (it.courier || '') ? 'selected' : ''}>${c || '택배사 선택'}</option>`).join('')}
                 </select>
               </label>
               <label class="tracking-field">운송장 번호
@@ -2031,34 +1878,142 @@
         if (error) alert('완전 삭제 실패: ' + error.message);
         else { alert('주문이 완전히 삭제되었습니다.'); modal.remove(); selectedOrders.clear(); loadOrders(); }
       };
+
+      // ⭐⭐ 핵심: 스키마 필터링 + 개별 저장 + 명확한 에러 표시
       modal.querySelector('#save-order-edit').onclick = async () => {
         const btn = modal.querySelector('#save-order-edit');
         btn.disabled = true; btn.textContent = '저장 중...';
-        const updates = [];
-        const recipientUpdates = {};
-        modal.querySelectorAll('.edit-recipient').forEach(input => { recipientUpdates[input.dataset.key] = input.value.trim(); });
-        const productCards = modal.querySelectorAll('.nav-order-product');
-        items.forEach((it, idx) => {
-          const card = productCards[idx];
-          if (!card) return;
-          updates.push({
-            id: it.id,
-            status: card.querySelector('.edit-status').value,
-            courier: card.querySelector('.edit-courier').value.trim(),
-            tracking_number: card.querySelector('.edit-tracking').value.trim(),
-            memo: card.querySelector('.edit-memo').value.trim(),
+
+        try {
+          // 1) 입력값 수집
+          const recipientValues = {};
+          modal.querySelectorAll('.edit-recipient').forEach(input => {
+            recipientValues[input.dataset.key] = input.value.trim();
           });
-        });
-        let hasError = false;
-        for (const upd of updates) {
-          const { error } = await db.from('orders').update({
-            ...recipientUpdates,
-            status: upd.status, courier: upd.courier, tracking_number: upd.tracking_number, memo: upd.memo
-          }).eq('id', upd.id);
-          if (error) { hasError = true; break; }
+
+          // 통관번호 검증
+          const customsRaw = recipientValues.customs_number || '';
+          if (customsRaw && !/^\d{13}$/.test(customsRaw)) {
+            alert('개인통관고유부호는 13자리 숫자여야 합니다. (현재 ' + customsRaw.length + '자리)');
+            btn.disabled = false; btn.textContent = '변경사항 저장';
+            return;
+          }
+
+          // 2) 각 상품별 편집값 수집
+          const productCards = modal.querySelectorAll('.nav-order-product');
+          const perItemUpdates = [];
+          items.forEach((it, idx) => {
+            const card = productCards[idx];
+            if (!card) return;
+            perItemUpdates.push({
+              id: it.id,
+              status: card.querySelector('.edit-status').value,
+              courier: card.querySelector('.edit-courier').value.trim(),
+              tracking_number: card.querySelector('.edit-tracking').value.trim(),
+              memo: card.querySelector('.edit-memo').value.trim(),
+            });
+          });
+
+          // 3) orders 테이블 실제 컬럼 조회 (샘플 1건)
+          let orderColumns = null;
+          try {
+            const { data: probe, error: probeErr } = await db.from('orders').select('*').limit(1);
+            if (!probeErr && probe && probe[0]) {
+              orderColumns = new Set(Object.keys(probe[0]));
+            } else {
+              // 데이터가 없을 때 화이트리스트
+              orderColumns = new Set([
+                'id','order_number','member_id','product_id',
+                'product_code','product_name','product_price','quantity','total_price',
+                'customer_name','customer_phone','customer_email',
+                'depositor_name','receiver_name','receiver_phone',
+                'postcode','address','address_detail','customs_number',
+                'selected_color','selected_size','selected_hem','selected_other',
+                'request_content','memo','shipping_fee','grade_discount',
+                'coupon_discount','discount_amount','status','courier','tracking_number',
+                'is_deleted','created_at','updated_at'
+              ]);
+            }
+          } catch (e) { console.warn('스키마 확인 실패:', e); }
+
+          const filterBySchema = (obj) => {
+            if (!orderColumns) return obj;
+            const out = {};
+            for (const k of Object.keys(obj)) {
+              if (orderColumns.has(k) && obj[k] !== undefined && obj[k] !== '') out[k] = obj[k];
+            }
+            return out;
+          };
+
+          const recipientForOrders = filterBySchema({
+            depositor_name: recipientValues.depositor_name,
+            receiver_name:  recipientValues.receiver_name,
+            receiver_phone: recipientValues.receiver_phone,
+            postcode:       recipientValues.postcode,
+            address:        recipientValues.address,
+            address_detail: recipientValues.address_detail,
+            customs_number: recipientValues.customs_number,
+          });
+
+          // 4) 각 주문 row 업데이트 (부분 성공 허용)
+          const errors = [];
+          const skipped = [];
+          for (const upd of perItemUpdates) {
+            const payload = {
+              ...recipientForOrders,
+              status: upd.status,
+              courier: upd.courier || null,
+              tracking_number: upd.tracking_number || null,
+              memo: upd.memo || null,
+            };
+            const { error } = await db.from('orders').update(payload).eq('id', upd.id);
+            if (error) errors.push(`[주문ID ${upd.id}] ${error.message}`);
+          }
+
+          // 5) members에도 통관번호 반영 (있으면)
+          let memberSaved = false;
+          let memberErrMsg = '';
+          if (first.member_id) {
+            const memberPayload = {};
+            if (recipientValues.customs_number) memberPayload.customs_number = recipientValues.customs_number;
+            if (recipientValues.receiver_name)  memberPayload.receiver_name = recipientValues.receiver_name;
+            if (recipientValues.receiver_phone) memberPayload.receiver_phone = recipientValues.receiver_phone;
+            if (recipientValues.postcode)       memberPayload.postcode = recipientValues.postcode;
+            if (recipientValues.address)        memberPayload.address = recipientValues.address;
+            if (recipientValues.address_detail) memberPayload.address_detail = recipientValues.address_detail;
+
+            if (Object.keys(memberPayload).length > 0) {
+              const { error: mErr } = await db.from('members').update(memberPayload).eq('id', first.member_id);
+              if (mErr) { memberErrMsg = mErr.message; }
+              else memberSaved = true;
+            }
+          }
+
+          btn.disabled = false;
+          btn.textContent = '변경사항 저장';
+
+          if (errors.length === perItemUpdates.length) {
+            // 전부 실패
+            alert('저장 실패:\n' + errors.join('\n'));
+          } else if (errors.length > 0) {
+            // 일부 실패
+            alert('일부 저장 실패 (성공 ' + (perItemUpdates.length - errors.length) + '/' + perItemUpdates.length + '):\n' + errors.join('\n'));
+            loadOrders();
+          } else {
+            // 전부 성공
+            let msg = '저장 완료!';
+            if (memberSaved) msg += '\n(회원 정보에도 반영됨)';
+            if (memberErrMsg) msg += '\n\n⚠ 회원 정보 저장은 실패: ' + memberErrMsg + '\n(members 테이블에 customs_number 컬럼이 없을 수 있습니다)';
+            alert(msg);
+            modal.remove();
+            loadOrders();
+          }
+        } catch (err) {
+          console.error(err);
+          alert('저장 중 예외 발생: ' + (err.message || err));
+          btn.disabled = false;
+          btn.textContent = '변경사항 저장';
         }
-        if (hasError) { alert('저장 실패'); btn.disabled = false; btn.textContent = '변경사항 저장'; }
-        else { alert('저장 완료!'); modal.remove(); loadOrders(); }
       };
     }
 
@@ -2108,7 +2063,8 @@
             </div>
             <div style="font-size:12px; color:#6b7280; line-height:1.5;">
               아이디: ${esc(m.user_id || m.username || '-')} | 이름: ${esc(m.name || '-')}<br>
-              연락처: ${esc(m.phone || '-')} | 이메일: ${esc(m.email || '-')}
+              연락처: ${esc(m.phone || '-')} | 이메일: ${esc(m.email || '-')}<br>
+              통관번호: ${esc(m.customs_number || m.customs_code || m.personal_customs_code || '-')}
             </div>
           </div>
           <div class="row-actions">
@@ -2133,7 +2089,7 @@
           else loadMembers();
         };
       });
-      
+
       renderMemberPagination(totalPages);
     }
 
@@ -2164,100 +2120,109 @@
       document.body.appendChild(modal);
       modal.querySelector('#close-member-coupon').onclick = () => modal.remove();
       modal.querySelector('#member-coupon-form').onsubmit = async e => {
-        e.preventDefault(); const f=e.target, msg=modal.querySelector('#member-coupon-msg');
-        const value=Number(f.value.value), days=Number(f.days.value);
-        if (!(value>0) || !(days>0)) { msg.className='msg error'; msg.textContent='할인값과 유효기간을 확인하세요.'; return; }
-        const code='CP-'+Math.random().toString(36).substring(2,8).toUpperCase(); const expiry=new Date(); expiry.setDate(expiry.getDate()+days);
-        msg.className='msg'; msg.textContent='발급 중...';
-        const {error}=await db.from('coupons').insert({member_id:member.id,code,name:f.name.value.trim()||'관리자 발급 쿠폰',type:f.type.value,discount_value:value,expires_at:expiry.toISOString(),is_used:false});
-        if(error){msg.className='msg error';msg.textContent='발급 실패: '+error.message;}
-        else {msg.className='msg success';msg.textContent='발급 완료! 쿠폰 코드: '+code; f.querySelector('button[type="submit"]').disabled=true; if(document.getElementById('tab-coupons').classList.contains('active')) loadCouponsAndMembers();}
+        e.preventDefault(); const f = e.target, msg = modal.querySelector('#member-coupon-msg');
+        const value = Number(f.value.value), days = Number(f.days.value);
+        if (!(value > 0) || !(days > 0)) { msg.className = 'msg error'; msg.textContent = '할인값과 유효기간을 확인하세요.'; return; }
+        const code = 'CP-' + Math.random().toString(36).substring(2, 8).toUpperCase(); const expiry = new Date(); expiry.setDate(expiry.getDate() + days);
+        msg.className = 'msg'; msg.textContent = '발급 중...';
+        const { error } = await db.from('coupons').insert({ member_id: member.id, code, name: f.name.value.trim() || '관리자 발급 쿠폰', type: f.type.value, discount_value: value, expires_at: expiry.toISOString(), is_used: false });
+        if (error) { msg.className = 'msg error'; msg.textContent = '발급 실패: ' + error.message; }
+        else { msg.className = 'msg success'; msg.textContent = '발급 완료! 쿠폰 코드: ' + code; f.querySelector('button[type="submit"]').disabled = true; if (document.getElementById('tab-coupons').classList.contains('active')) loadCouponsAndMembers(); }
       };
     }
 
+    // ⭐ 회원 상세 — 통관번호 수정 가능
     function openMemberDetailModal(memberId) {
-      const m=allMembers.find(x=>String(x.id)===String(memberId)); if(!m) return;
-      const modal=document.createElement('div'); modal.className='modal-backdrop';
-      const display = (v) => v===null || v===undefined || v==='' ? '-' : (typeof v==='object' ? JSON.stringify(v) : String(v));
+      const m = allMembers.find(x => String(x.id) === String(memberId)); if (!m) return;
+      const modal = document.createElement('div'); modal.className = 'modal-backdrop';
+      const display = (v) => v === null || v === undefined || v === '' ? '-' : (typeof v === 'object' ? JSON.stringify(v) : String(v));
       const formatMemberCreatedAt = (value) => {
         if (!value) return '-';
         const d = new Date(value);
         if (Number.isNaN(d.getTime())) return display(value);
-        const parts = new Intl.DateTimeFormat('ko-KR', { timeZone:'Asia/Seoul', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', hour12:false }).formatToParts(d);
+        const parts = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).formatToParts(d);
         const part = type => parts.find(x => x.type === type)?.value || '';
         return `${part('year')}/${part('month')}/${part('day')} ${part('hour')}:${part('minute')}`;
       };
       const fields = [
         ['회원가입 날짜', formatMemberCreatedAt(m.created_at)],
-        ['아이디', display(m.user_id || m.username)], 
-        ['비밀번호', '수정 불가'],
-        ['이름', m.name], 
-        ['수취인', display(m.receiver_name || m.recipient_name)], 
+        ['아이디', display(m.user_id || m.username)],
+        ['이름', m.name],
+        ['수취인', display(m.receiver_name || m.recipient_name)],
         ['연락처', m.phone || m.receiver_phone],
-        ['개인통관고유부호', display(m.customs_number || m.customs_code || m.personal_customs_code)], 
+        ['개인통관고유부호', display(m.customs_number || m.customs_code || m.personal_customs_code)],
         ['이메일', m.email],
         ['우편번호', m.postcode], ['주소', m.address], ['상세주소', m.address_detail]
       ];
-      const fieldsHtml=fields.map(([label,value])=>`<div class="nav-order-field"><span>${label}</span><b>${esc(display(value))}</b></div>`).join('');
+      const fieldsHtml = fields.map(([label, value]) => `<div class="nav-order-field"><span>${label}</span><b>${esc(display(value))}</b></div>`).join('');
       const status = m.status || '정상'; const grade = m.grade || '일반회원';
-      modal.innerHTML=`<div class="modal-box modal-lg" style="border-radius:4px;max-width:900px;">
+      const currentCustoms = m.customs_number || m.customs_code || m.personal_customs_code || '';
+
+      modal.innerHTML = `<div class="modal-box modal-lg" style="border-radius:4px;max-width:900px;">
         <h2>회원 상세 및 관리</h2>
-        <div class="member-detail-card"><div class="member-detail-grid">${fieldsHtml}</div>
+        <div class="member-detail-card">
+          <div class="member-detail-grid">${fieldsHtml}</div>
           <div class="member-detail-actions">
-            <label style="flex:1;min-width:150px">회원 상태<select id="member-status-select"><option value="정상" ${status==='정상'?'selected':''}>정상</option><option value="정지" ${status==='정지'?'selected':''}>정지</option><option value="탈퇴" ${status==='탈퇴'?'selected':''}>탈퇴</option></select></label>
-            <label style="flex:1;min-width:150px">회원 등급<select id="member-grade-select"><option value="일반회원" ${grade==='일반회원'?'selected':''}>일반회원</option><option value="도매회원" ${grade==='도매회원'?'selected':''}>도매회원</option><option value="VIP회원" ${grade==='VIP회원'?'selected':''}>VIP회원</option></select></label>
+            <label>회원 상태
+              <select id="member-status-select">
+                <option value="정상" ${status==='정상'?'selected':''}>정상</option>
+                <option value="정지" ${status==='정지'?'selected':''}>정지</option>
+                <option value="탈퇴" ${status==='탈퇴'?'selected':''}>탈퇴</option>
+              </select>
+            </label>
+            <label>회원 등급
+              <select id="member-grade-select">
+                <option value="일반회원" ${grade==='일반회원'?'selected':''}>일반회원</option>
+                <option value="도매회원" ${grade==='도매회원'?'selected':''}>도매회원</option>
+                <option value="VIP회원" ${grade==='VIP회원'?'selected':''}>VIP회원</option>
+              </select>
+            </label>
+            <label style="flex:1;min-width:200px;">개인통관고유부호
+              <input id="member-customs-input" type="text" inputmode="numeric" maxlength="13" pattern="[0-9]{13}"
+                value="${esc(currentCustoms)}" placeholder="13자리 숫자"
+                oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+            </label>
           </div>
         </div>
-        <div class="modal-actions"><button class="btn btn-primary" id="member-detail-save">관리 내용 저장</button><button class="btn btn-secondary" id="member-detail-close">닫기</button></div>
+        <div class="modal-actions">
+          <button class="btn btn-primary" id="member-detail-save">관리 내용 저장</button>
+          <button class="btn btn-secondary" id="member-detail-close">닫기</button>
+        </div>
       </div>`;
       document.body.appendChild(modal);
-      modal.querySelector('#member-detail-close').onclick=()=>modal.remove();
-      modal.querySelector('#member-detail-save').onclick=async()=>{
-        const statusValue=modal.querySelector('#member-status-select').value, gradeValue=modal.querySelector('#member-grade-select').value;
-        const {error}=await db.from('members').update({status:statusValue,grade:gradeValue}).eq('id',m.id);
-        if(error) alert('저장 실패: '+error.message); else { alert('회원 관리 정보가 저장되었습니다.'); modal.remove(); loadMembers(); }
-      };
-    }
+      modal.querySelector('#member-detail-close').onclick = () => modal.remove();
+      modal.querySelector('#member-detail-save').onclick = async () => {
+        const statusValue = modal.querySelector('#member-status-select').value;
+        const gradeValue = modal.querySelector('#member-grade-select').value;
+        const customsVal = (modal.querySelector('#member-customs-input')?.value || '').trim();
 
-    function openMemberEditModal(memberId) {
-      const m = allMembers.find(x => String(x.id) === String(memberId));
-      if (!m) return;
-      const modal = document.createElement('div');
-      modal.className = 'modal-backdrop';
-      modal.innerHTML = `
-        <div class="modal-box">
-          <h2>회원 정보 수정</h2>
-          <form id="member-edit-form" class="modal-form">
-            <label>이름</label>
-            <input name="name" value="${esc(m.name)}" required>
-            <label>이메일 (ID)</label>
-            <input name="email" value="${esc(m.email)}" readonly style="background:#f3f4f6;">
-            <label>연락처</label>
-            <input name="phone" value="${esc(m.phone || '')}">
-            <label>등급</label>
-            <select name="grade">
-              <option value="일반회원" ${m.grade === '일반회원' ? 'selected' : ''}>일반회원</option>
-              <option value="도매회원" ${m.grade === '도매회원' ? 'selected' : ''}>도매회원</option>
-              <option value="VIP회원" ${m.grade === 'VIP회원' ? 'selected' : ''}>VIP회원</option>
-            </select>
-            <div class="modal-actions">
-              <button type="submit" class="btn btn-primary">저장</button>
-              <button type="button" id="cancel-member-edit" class="btn btn-secondary">취소</button>
-            </div>
-          </form>
-        </div>`;
-      document.body.appendChild(modal);
-      modal.querySelector('#cancel-member-edit').onclick = () => modal.remove();
-      modal.querySelector('#member-edit-form').onsubmit = async e => {
-        e.preventDefault();
-        const f = e.target;
-        const { error } = await db.from('members').update({
-          name: f.name.value.trim(),
-          phone: f.phone.value.trim(),
-          grade: f.grade.value
-        }).eq('id', m.id);
-        if (error) alert(error.message);
-        else { alert('수정 완료!'); modal.remove(); loadMembers(); }
+        if (customsVal && !/^\d{13}$/.test(customsVal)) {
+          alert('개인통관고유부호는 13자리 숫자여야 합니다.');
+          return;
+        }
+
+        const payload = { status: statusValue, grade: gradeValue };
+        if (customsVal) payload.customs_number = customsVal;
+
+        const btn = modal.querySelector('#member-detail-save');
+        btn.disabled = true; btn.textContent = '저장 중...';
+
+        const { error } = await db.from('members').update(payload).eq('id', m.id);
+        btn.disabled = false; btn.textContent = '관리 내용 저장';
+
+        if (error) {
+          if (/customs_number|column/i.test(error.message) && customsVal) {
+            const { error: e2 } = await db.from('members').update({ status: statusValue, grade: gradeValue }).eq('id', m.id);
+            if (e2) { alert('저장 실패: ' + e2.message); return; }
+            alert('회원 상태/등급은 저장되었으나, 개인통관부호 컬럼이 members 테이블에 없습니다.\nSupabase에서 아래 SQL 실행 후 다시 시도하세요:\n\nALTER TABLE members ADD COLUMN IF NOT EXISTS customs_number text;');
+          } else {
+            alert('저장 실패: ' + error.message);
+          }
+        } else {
+          alert('회원 관리 정보가 저장되었습니다.');
+          modal.remove();
+          loadMembers();
+        }
       };
     }
 
@@ -2266,22 +2231,19 @@
     document.getElementById('member-search').addEventListener('keypress', e => { if (e.key === 'Enter') { e.preventDefault(); applyMemberSearch(e.target.value.trim()); } });
 
     // ============ 쿠폰 관리 ============
-    let allCoupons = [], filteredCoupons = [], couponPage = 1;
-    const COUPON_PER_PAGE = 10;
-
+    let allCoupons = [];
     async function loadCouponsAndMembers() {
       const { data: membersData } = await db.from('members').select('id, name, email').order('name');
       allMembers = membersData || [];
 
       const sel = document.getElementById('coupon-member-select');
-      sel.innerHTML = '<option value="">회원 선택...</option>' + 
+      sel.innerHTML = '<option value="">회원 선택...</option>' +
         allMembers.map(m => `<option value="${m.id}">${esc(m.name)} (${esc(m.email)})</option>`).join('');
 
       const listEl = document.getElementById('coupon-list');
       listEl.innerHTML = '<div class="tab-loading">쿠폰 로딩 중...</div>';
       const { data, error } = await db.from('coupons').select('*').order('created_at', { ascending: false });
       if (error) { listEl.innerHTML = '<p style="color:#dc2626;">' + error.message + '</p>'; return; }
-      
       allCoupons = data || [];
       renderCoupons();
     }
@@ -2291,15 +2253,12 @@
       if (allCoupons.length === 0) {
         listEl.innerHTML = '<p style="text-align:center;color:#9ca3af;padding:20px;">발급된 쿠폰이 없습니다.</p>'; return;
       }
-
       const memberMap = new Map(allMembers.map(m => [String(m.id), m]));
-
       listEl.innerHTML = allCoupons.map(c => {
         const target = memberMap.get(String(c.member_id));
         const targetName = target ? `${esc(target.name)} (${esc(target.email)})` : '알 수 없음';
         const typeLabel = c.type === 'percent' ? `${c.discount_value}% 할인` : `${Number(c.discount_value).toLocaleString()}원 할인`;
         const isUsed = c.is_used ? '<span class="badge" style="background:#6b7280;">사용됨</span>' : '<span class="badge" style="background:#059669;">사용가능</span>';
-        
         return `
           <div class="row-item">
             <div style="flex:1; min-width:200px;">
@@ -2341,61 +2300,65 @@
       const name = document.getElementById('coupon-name-input').value.trim();
 
       if (!memberId) { msg.className = 'msg error'; msg.textContent = '회원을 선택하세요.'; return; }
-
       msg.className = 'msg'; msg.textContent = '발급 중...';
-      
+
       const code = 'CP-' + Math.random().toString(36).substring(2, 8).toUpperCase();
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + days);
 
       const { error } = await db.from('coupons').insert({
-        member_id: memberId,
-        code: code,
-        name: name || '관리자 발급 쿠폰',
-        type: type,
-        discount_value: value,
-        expires_at: expiresAt.toISOString(),
-        is_used: false
+        member_id: memberId, code, name: name || '관리자 발급 쿠폰', type, discount_value: value, expires_at: expiresAt.toISOString(), is_used: false
       });
 
-      if (error) {
-        msg.className = 'msg error'; msg.textContent = error.message;
-      } else {
-        msg.className = 'msg success'; msg.textContent = '쿠폰이 발급되었습니다!';
-        document.getElementById('coupon-name-input').value = '';
-        loadCouponsAndMembers();
-      }
+      if (error) { msg.className = 'msg error'; msg.textContent = error.message; }
+      else { msg.className = 'msg success'; msg.textContent = '쿠폰이 발급되었습니다!'; document.getElementById('coupon-name-input').value = ''; loadCouponsAndMembers(); }
     };
 
-    // ============ 공지/게시판 CRUD ============
+    // ============ 공지/게시판 ============
     let noticeTableName = 'notices', boardTableName = 'board_posts', editingNoticeId = null;
     const noticeText = v => esc(v == null ? '' : String(v));
     async function findReadableTable(candidates) {
-      for (const t of candidates) { const r=await db.from(t).select('*').order('created_at',{ascending:false}).limit(300); if(!r.error) return {table:t,data:r.data||[]}; }
+      for (const t of candidates) { const r = await db.from(t).select('*').order('created_at', { ascending:false }).limit(300); if (!r.error) return { table:t, data:r.data||[] }; }
       return null;
     }
     async function loadNoticeAdminList() {
-      const el=document.getElementById('notice-admin-list'); if(!el)return; el.innerHTML='로딩중...';
-      const r=await findReadableTable(['notices','notice']);
-      if(!r){el.innerHTML='<p style="color:#dc2626">공지 테이블 조회 실패: notices/notice 테이블 또는 권한을 확인하세요.</p>';return;}
-      noticeTableName=r.table; const rows=r.data; const count=document.getElementById('notice-admin-count');if(count)count.textContent=`(${rows.length}건)`;
-      if(!rows.length){el.innerHTML='<p class="row-muted">등록된 공지가 없습니다.</p>';return;}
-      el.innerHTML=rows.map(n=>`<div class="row-item"><div style="flex:1;min-width:180px"><b>${noticeText(n.title||'제목 없음')}</b><div class="row-muted">${noticeText(n.created_at||'')}</div><div style="white-space:pre-wrap;margin-top:6px">${noticeText(n.content||n.body||'')}</div></div><div class="row-actions"><button class="btn btn-warning btn-sm notice-edit" data-id="${noticeText(n.id)}">수정</button><button class="btn btn-danger btn-sm notice-delete" data-id="${noticeText(n.id)}">삭제</button></div></div>`).join('');
-      el.querySelectorAll('.notice-edit').forEach(b=>b.onclick=()=>{const n=rows.find(x=>String(x.id)===b.dataset.id);if(!n)return;editingNoticeId=n.id;const f=document.getElementById('notice-form');f.elements.title.value=n.title||'';f.elements.content.value=n.content||n.body||'';f.querySelector('[type=submit]').textContent='공지 수정';});
-      el.querySelectorAll('.notice-delete').forEach(b=>b.onclick=async()=>{if(!confirm('공지사항을 삭제할까요?'))return;const {error}=await db.from(noticeTableName).delete().eq('id',b.dataset.id);if(error)alert('삭제 실패: '+error.message);else loadNoticeAdminList();});
+      const el = document.getElementById('notice-admin-list'); if (!el) return; el.innerHTML = '로딩중...';
+      const r = await findReadableTable(['notices','notice']);
+      if (!r) { el.innerHTML = '<p style="color:#dc2626">공지 테이블 조회 실패: notices/notice 테이블 또는 권한을 확인하세요.</p>'; return; }
+      noticeTableName = r.table; const rows = r.data; const count = document.getElementById('notice-admin-count'); if (count) count.textContent = `(${rows.length}건)`;
+      if (!rows.length) { el.innerHTML = '<p class="row-muted">등록된 공지가 없습니다.</p>'; return; }
+      el.innerHTML = rows.map(n => `<div class="row-item"><div style="flex:1;min-width:180px"><b>${noticeText(n.title||'제목 없음')}</b><div class="row-muted">${noticeText(n.created_at||'')}</div><div style="white-space:pre-wrap;margin-top:6px">${noticeText(n.content||n.body||'')}</div></div><div class="row-actions"><button class="btn btn-warning btn-sm notice-edit" data-id="${noticeText(n.id)}">수정</button><button class="btn btn-danger btn-sm notice-delete" data-id="${noticeText(n.id)}">삭제</button></div></div>`).join('');
+      el.querySelectorAll('.notice-edit').forEach(b => b.onclick = () => { const n = rows.find(x => String(x.id) === b.dataset.id); if (!n) return; editingNoticeId = n.id; const f = document.getElementById('notice-form'); f.elements.title.value = n.title||''; f.elements.content.value = n.content||n.body||''; f.querySelector('[type=submit]').textContent = '공지 수정'; });
+      el.querySelectorAll('.notice-delete').forEach(b => b.onclick = async () => { if (!confirm('공지사항을 삭제할까요?')) return; const { error } = await db.from(noticeTableName).delete().eq('id', b.dataset.id); if (error) alert('삭제 실패: ' + error.message); else loadNoticeAdminList(); });
     }
     async function loadBoardAdminList() {
-      const el=document.getElementById('board-admin-list');if(!el)return;el.innerHTML='게시글 불러오는 중...';
-      const r=await findReadableTable(['board_posts','boards','posts','member_board','inquiries']);
-      if(!r){el.innerHTML='<p style="color:#dc2626">게시판 테이블 조회 실패: 게시판 테이블명 또는 권한을 확인하세요.</p>';return;}
-      boardTableName=r.table;const rows=r.data;const count=document.getElementById('board-admin-count');if(count)count.textContent=`(${rows.length}건)`;
-      if(!rows.length){el.innerHTML='<p class="row-muted">게시글이 없습니다.</p>';return;}
-      el.innerHTML=rows.map(p=>{const title=p.title||p.subject||'제목 없음',body=p.content||p.body||p.message||'',author=p.name||p.member_name||p.user_name||p.author||p.member_id||'작성자 미상',secret=p.is_secret||p.secret;return `<div class="row-item"><div style="flex:1;min-width:180px"><b>${noticeText(title)}</b>${secret?'<span class="board-secret-badge">비밀글</span>':''}<div class="row-muted">작성자: ${noticeText(author)} | ${noticeText(p.created_at||'')}</div><div style="white-space:pre-wrap;margin-top:6px">${noticeText(body)}</div></div><div class="row-actions"><button class="btn btn-danger btn-sm board-delete" data-id="${noticeText(p.id)}">삭제</button></div></div>`;}).join('');
-      el.querySelectorAll('.board-delete').forEach(b=>b.onclick=async()=>{if(!confirm('게시글을 삭제할까요?'))return;const {error}=await db.from(boardTableName).delete().eq('id',b.dataset.id);if(error)alert('삭제 실패: '+error.message);else loadBoardAdminList();});
+      const el = document.getElementById('board-admin-list'); if (!el) return; el.innerHTML = '게시글 불러오는 중...';
+      const r = await findReadableTable(['board_posts','boards','posts','member_board','inquiries']);
+      if (!r) { el.innerHTML = '<p style="color:#dc2626">게시판 테이블 조회 실패: 게시판 테이블명 또는 권한을 확인하세요.</p>'; return; }
+      boardTableName = r.table; const rows = r.data; const count = document.getElementById('board-admin-count'); if (count) count.textContent = `(${rows.length}건)`;
+      if (!rows.length) { el.innerHTML = '<p class="row-muted">게시글이 없습니다.</p>'; return; }
+      el.innerHTML = rows.map(p => { const title = p.title||p.subject||'제목 없음', body = p.content||p.body||p.message||'', author = p.name||p.member_name||p.user_name||p.author||p.member_id||'작성자 미상', secret = p.is_secret||p.secret; return `<div class="row-item"><div style="flex:1;min-width:180px"><b>${noticeText(title)}</b>${secret?'<span class="board-secret-badge">비밀글</span>':''}<div class="row-muted">작성자: ${noticeText(author)} | ${noticeText(p.created_at||'')}</div><div style="white-space:pre-wrap;margin-top:6px">${noticeText(body)}</div></div><div class="row-actions"><button class="btn btn-danger btn-sm board-delete" data-id="${noticeText(p.id)}">삭제</button></div></div>`; }).join('');
+      el.querySelectorAll('.board-delete').forEach(b => b.onclick = async () => { if (!confirm('게시글을 삭제할까요?')) return; const { error } = await db.from(boardTableName).delete().eq('id', b.dataset.id); if (error) alert('삭제 실패: ' + error.message); else loadBoardAdminList(); });
     }
-    const noticeForm=document.getElementById('notice-form');
-    if(noticeForm)noticeForm.onsubmit=async e=>{e.preventDefault();const title=noticeForm.elements.title.value.trim(),content=noticeForm.elements.content.value.trim();if(!title||!content)return;const payload={title,content};const res=editingNoticeId?await db.from(noticeTableName).update(payload).eq('id',editingNoticeId):await db.from(noticeTableName).insert(payload);if(res.error){const msg=document.getElementById('notice-msg');msg.className='msg error';msg.textContent='저장 실패: '+res.error.message;return;}editingNoticeId=null;noticeForm.reset();noticeForm.querySelector('[type=submit]').textContent='공지 등록';const msg=document.getElementById('notice-msg');msg.className='msg success';msg.textContent='저장되었습니다.';loadNoticeAdminList();};
-    document.querySelectorAll('.notice-subtab-btn').forEach(btn=>btn.onclick=()=>{const board=btn.dataset.subtab==='board';document.getElementById('notice-subsection').style.display=board?'none':'block';document.getElementById('board-subsection').style.display=board?'block':'none';document.querySelectorAll('.notice-subtab-btn').forEach(x=>{x.classList.toggle('active',x===btn);x.style.background=x===btn?'#111827':'#fff';x.style.color=x===btn?'#fff':'#374151';});if(board)loadBoardAdminList();else loadNoticeAdminList();});
+    const noticeForm = document.getElementById('notice-form');
+    if (noticeForm) noticeForm.onsubmit = async e => {
+      e.preventDefault();
+      const title = noticeForm.elements.title.value.trim(), content = noticeForm.elements.content.value.trim();
+      if (!title || !content) return;
+      const payload = { title, content };
+      const res = editingNoticeId ? await db.from(noticeTableName).update(payload).eq('id', editingNoticeId) : await db.from(noticeTableName).insert(payload);
+      if (res.error) { const msg = document.getElementById('notice-msg'); msg.className = 'msg error'; msg.textContent = '저장 실패: ' + res.error.message; return; }
+      editingNoticeId = null; noticeForm.reset(); noticeForm.querySelector('[type=submit]').textContent = '공지 등록';
+      const msg = document.getElementById('notice-msg'); msg.className = 'msg success'; msg.textContent = '저장되었습니다.';
+      loadNoticeAdminList();
+    };
+    document.querySelectorAll('.notice-subtab-btn').forEach(btn => btn.onclick = () => {
+      const board = btn.dataset.subtab === 'board';
+      document.getElementById('notice-subsection').style.display = board ? 'none' : 'block';
+      document.getElementById('board-subsection').style.display = board ? 'block' : 'none';
+      document.querySelectorAll('.notice-subtab-btn').forEach(x => { x.classList.toggle('active', x === btn); x.style.background = x === btn ? '#111827' : '#fff'; x.style.color = x === btn ? '#fff' : '#374151'; });
+      if (board) loadBoardAdminList(); else loadNoticeAdminList();
+    });
 
     checkSession();
   </script>
