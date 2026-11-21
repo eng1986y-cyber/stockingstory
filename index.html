@@ -181,7 +181,6 @@
       #pagination, #popular-pagination { min-height:24px; margin-top:14px; margin-bottom:28px; }
     }
 
-    /* 메인 신규상품 / 베스트상품 카드: 호버 들뜸 효과 제거 및 라이트그레이 스타일 */
     #product-list .card,
     #popular-list .card {
       background: #f5f5f5 !important;
@@ -253,15 +252,15 @@
     <div class="board-grid">
       <div class="board-card">
         <div class="board-card-head">
-          <h3>📢 공지사항 <span class="board-count" id="notice-count"></span></h3>
+          <h3>공지사항 <span class="board-count" id="notice-count"></span></h3>
         </div>
         <div id="notice-list" class="board-list"><p class="board-empty">로딩중...</p></div>
         <div id="notice-pagination" class="board-pagination"></div>
       </div>
       <div class="board-card">
         <div class="board-card-head">
-          <h3>💬 상품문의 / 게시판 <span class="board-count" id="board-count"></span></h3>
-          <button type="button" id="board-write-btn" class="board-write-btn">✏️ 글쓰기</button>
+          <h3>상품문의 / 게시판 <span class="board-count" id="board-count"></span></h3>
+          <button type="button" id="board-write-btn" class="board-write-btn">글쓰기</button>
         </div>
         <div id="board-list" class="board-list"><p class="board-empty">로딩중...</p></div>
         <div id="board-pagination" class="board-pagination"></div>
@@ -435,7 +434,7 @@
         const tg = p.target_grade || 'all';
         const newBadge = isNew ? `<span class="new-badge">NEW</span>` : '';
         const gradeBadge = tg === 'wholesale' ? `<span class="grade-badge wholesale">도매</span>` : tg === 'vip' ? `<span class="grade-badge vip">VIP</span>` : '';
-        const priceHtml = hidePrice ? `<div class="price locked">🔒 로그인 후 가격 확인</div>` : `<div class="price">${won(p.price)}</div>`;
+        const priceHtml = hidePrice ? `<div class="price locked">로그인 후 가격 확인</div>` : `<div class="price">${won(p.price)}</div>`;
         return `
           <a class="card" href="product.html?id=${p.id}">
             <div class="thumb" style="background-image: ${bgUrl(p.main_image)};">${newBadge}${gradeBadge}</div>
@@ -486,7 +485,7 @@
       list.innerHTML = items.map((p, idx) => {
         const hidePrice = shouldHidePrice(p);
         const rankBadge = `<span class="rank-badge">BEST</span>`;
-        const priceHtml = hidePrice ? `<div class="price locked">🔒 로그인 후 가격 확인</div>` : `<div class="price">${won(p.price)}</div>`;
+        const priceHtml = hidePrice ? `<div class="price locked">로그인 후 가격 확인</div>` : `<div class="price">${won(p.price)}</div>`;
         return `
           <a class="card" href="product.html?id=${p.id}">
             <div class="thumb" style="background-image: ${bgUrl(p.main_image)};">${rankBadge}</div>
@@ -569,7 +568,7 @@
         if (!noticesCache.length) { listEl.innerHTML = '<p class="board-empty">등록된 공지사항이 없습니다.</p>'; document.getElementById('notice-pagination').innerHTML = ''; return; }
         listEl.innerHTML = noticesCache.map(n => `
           <div class="board-item" data-id="${n.id}" data-type="notice">
-            <div class="board-item-title-row"><span class="board-item-title">📌 ${escapeBoardHtml(n.title)}</span></div>
+            <div class="board-item-title-row"><span class="board-item-title">${escapeBoardHtml(n.title)}</span></div>
             <div class="board-item-meta"><span>${formatBoardDate(n.created_at)}</span></div>
           </div>`).join('');
         bindBoardItemEvents('notice');
@@ -591,7 +590,7 @@
         listEl.innerHTML = boardCache.map(b => {
           const isSecret = !!b.is_secret;
           const isMine = me && String(me.id) === String(b.member_id);
-          const titleText = isSecret && !isMine ? '🔒 비밀글입니다.' : escapeBoardHtml(b.title);
+          const titleText = isSecret && !isMine ? '비밀글입니다.' : escapeBoardHtml(b.title);
           return `
             <div class="board-item" data-id="${b.id}" data-type="board">
               <div class="board-item-title-row">
@@ -639,7 +638,7 @@
             if (b) {
               const me = getLoggedMemberForBoard();
               const isMine = me && String(me.id) === String(b.member_id);
-              if (b.is_secret && !isMine) { alert('🔒 비밀글입니다. 작성자만 열람할 수 있습니다.'); return; }
+              if (b.is_secret && !isMine) { alert('비밀글입니다. 작성자만 열람할 수 있습니다.'); return; }
               showBoardDetailModal('board', b);
             }
           }
@@ -649,8 +648,8 @@
         e.stopPropagation();
         if (!confirm('이 글을 삭제할까요?')) return;
         const { error } = await db.from('board_posts').delete().eq('id', btn.dataset.id);
-        if (error) { alert('❌ 삭제 실패: ' + error.message); return; }
-        alert('✅ 삭제되었습니다.');
+        if (error) { alert('삭제 실패: ' + error.message); return; }
+        alert('삭제되었습니다.');
         loadBoardPosts();
       });
     }
@@ -658,7 +657,7 @@
     function showBoardDetailModal(type, data) {
       const modal = document.createElement('div');
       modal.className = 'board-modal-backdrop';
-      const title = type === 'notice' ? '📢 공지사항' : '💬 문의글';
+      const title = type === 'notice' ? '공지사항' : '문의글';
       const author = type === 'board' ? (data.member_name || data.member_username || '회원') : '관리자';
       modal.innerHTML = `
         <div class="board-modal-box">
@@ -686,7 +685,7 @@
         const remain = last + BOARD_POST_COOLDOWN_MS - Date.now();
         if (remain > 0) {
           const sec = Math.ceil(remain / 1000);
-          alert(`⏱️ 도배 방지를 위해 잠시 후 다시 시도해주세요.\n(남은 시간: ${sec}초)`);
+          alert(`도배 방지를 위해 잠시 후 다시 시도해주세요.\n(남은 시간: ${sec}초)`);
           return false;
         }
       } catch {}
@@ -716,14 +715,14 @@
       modal.className = 'board-modal-backdrop';
       modal.innerHTML = `
         <div class="board-modal-box">
-          <h2>✏️ 문의글 작성</h2>
+          <h2>문의글 작성</h2>
           <form id="board-write-form" class="board-modal-form">
             <div><label>제목 *</label><input name="title" required maxlength="100"></div>
             <div><label>내용 *</label><textarea name="content" required></textarea></div>
-            <label class="board-secret-check"><input type="checkbox" name="is_secret"> 🔒 비밀글로 작성</label>
+            <label class="board-secret-check"><input type="checkbox" name="is_secret"> 비밀글로 작성</label>
 
             <div class="captcha-section">
-              <div class="captcha-title">🛡️ 자동등록방지 (스팸 방지)</div>
+              <div class="captcha-title">자동등록방지 (스팸 방지)</div>
               <div class="captcha-item">
                 <label>아래 글자를 입력하세요 (대소문자 무관)</label>
                 <div class="captcha-char-question">${charCap}</div>
@@ -745,7 +744,7 @@
         e.preventDefault();
         const f = e.target;
         const errEl = f.querySelector('#board-captcha-error');
-        const showErr = (msg) => { errEl.textContent = '❌ ' + msg; errEl.classList.add('show'); };
+        const showErr = (msg) => { errEl.textContent = msg; errEl.classList.add('show'); };
         errEl.classList.remove('show');
 
         const charAns = String(f.captcha_char.value || '').trim().toLowerCase();
@@ -765,13 +764,13 @@
           title: f.title.value.trim(), content: f.content.value.trim(), is_secret: f.is_secret.checked,
         });
         if (error) {
-          alert('❌ 등록 실패: ' + error.message);
+          alert('등록 실패: ' + error.message);
           btn.disabled = false; btn.textContent = '등록';
           return;
         }
 
         setBoardCooldown();
-        alert('✅ 등록되었습니다.');
+        alert('등록되었습니다.');
         modal.remove();
         boardPage = 1;
         loadBoardPosts();
