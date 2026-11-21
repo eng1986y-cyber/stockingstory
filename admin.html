@@ -436,6 +436,19 @@
     .stat-card .stat-value.blue { color: #2563eb; }
     .stat-card .stat-value.green { color: #059669; }
     .stat-card .stat-value.purple { color: #7c3aed; }
+  
+    /* 상세 주문/회원 UI 요청사항 */
+    .nav-order-top .order-title-meta { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+    .nav-order-top .order-created-inline { font-size:12px; color:#64748b; background:#f8fafc; border:1px solid #e5e7eb; border-radius:6px; padding:6px 9px; }
+    .nav-order-info-grid.order-recipient-grid { grid-template-columns:repeat(6,minmax(0,1fr)); }
+    .nav-order-product .nav-order-extra.order-option-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
+    .member-detail-card { margin:14px 0; padding:16px; border:1px solid #e5e7eb; border-radius:10px; background:#fff; }
+    .member-detail-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:9px; }
+    .member-detail-grid .nav-order-field { min-width:0; }
+    .member-detail-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+    @media(max-width:900px){ .nav-order-info-grid.order-recipient-grid {grid-template-columns:repeat(3,minmax(0,1fr));} .nav-order-product .nav-order-extra.order-option-grid {grid-template-columns:repeat(2,minmax(0,1fr));} .member-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr));} }
+    @media(max-width:560px){ .nav-order-info-grid.order-recipient-grid {grid-template-columns:repeat(2,minmax(0,1fr));} .member-detail-grid{grid-template-columns:1fr;} }
+
   </style>
 </head>
 <body>
@@ -606,11 +619,11 @@
 
         <section id="tab-members" class="admin-section">
           <h1 class="page-title">회원 관리</h1>
-          <p class="page-subtitle">회원 정보 확인 / 엑셀(개별·선택) / 인쇄(개별·선택) / 수정·삭제 (비밀번호 제외)</p>
+          <p class="page-subtitle">회원 상세 확인 및 상태·등급 관리 / 엑셀 / 인쇄 / 삭제</p>
           <div class="card">
             <div class="list-action-bar">
               <div class="search-group">
-                <input id="member-search" placeholder="아이디 / 이름 / 연락처 / 이메일" style="flex:1;">
+                <input id="member-search" placeholder="아이디 / 이름 / 연락처 / 이메일 / 주소" style="flex:1;">
                 <button id="member-search-btn" class="btn btn-primary">검색</button>
                 <button id="member-reset-btn" class="btn btn-secondary">전체</button>
               </div>
@@ -1895,7 +1908,7 @@
       };
       const val = v => (v === null || v === undefined || v === '') ? '-' :
         (typeof v === 'object' ? JSON.stringify(v) : String(v));
-      const sharedKeys = ['customer_name','customer_phone','customer_email','depositor_name','receiver_name','receiver_phone','postcode','address','address_detail','customs_number','created_at'];
+      const sharedKeys = ['depositor_name','receiver_name','receiver_phone','postcode','address','address_detail'];
       
       // 쿠폰은 개별 상품 가격에서 차감하지 않고 주문 전체 금액에서 별도로 계산합니다.
       let totalProductPrice = 0, totalShippingFee = 0;
@@ -1920,7 +1933,7 @@
       }).join('');
 
       const productsHtml = items.map((it, i) => {
-        const extraKeys = ['selected_color','selected_size','selected_hem','selected_other','request_content'];
+        const extraKeys = ['selected_color','selected_size','selected_hem','selected_other'];
         const extraHtml = extraKeys.map(k => {
           const v = it[k];
           if (v === undefined || v === null || v === '') return '';
@@ -1943,7 +1956,8 @@
               <span>상품 소계: ${won(Number(it.product_price || 0) * Number(it.quantity || 1))}</span>
               <span>배송비: ${won(it.shipping_fee)}</span>
             </div>
-            <div class="nav-order-extra">${extraHtml}</div>
+            <div class="nav-order-extra order-option-grid">${extraHtml}</div>
+            ${it.request_content ? `<div class="nav-order-info-cell" style="margin-top:8px"><span class="oi-label">요청사항</span><span class="oi-value">${esc(it.request_content)}</span></div>` : ''}
             <div class="nav-order-edit-grid">
               <label>배송상태
                 <select class="edit-status">
@@ -1983,7 +1997,7 @@
           </div>
           <div class="nav-order-section">
             <h3>주문자 / 배송지 정보</h3>
-            <div class="nav-order-info-grid">${sharedHtml}</div>
+            <div class="nav-order-info-grid order-recipient-grid">${sharedHtml}</div>
           </div>
           <div class="nav-order-section">
             <h3>주문 상품 (${items.length}건)</h3>
@@ -2052,7 +2066,7 @@
       const k = text.toLowerCase().trim();
       if (!k) filteredMembers = [...allMembers];
       else filteredMembers = allMembers.filter(m => {
-        return [m.name, m.email, m.phone, m.id].some(v => String(v || '').toLowerCase().includes(k));
+        return [m.name, m.email, m.phone, m.id, m.user_id, m.receiver_name, m.postcode, m.address, m.address_detail, m.customs_number, m.status, m.grade].some(v => String(v || '').toLowerCase().includes(k));
       });
       memberPage = 1;
       renderMembers();
@@ -2085,7 +2099,6 @@
           <div class="row-actions">
             <button class="btn btn-success btn-sm issue-coupon-btn" data-id="${m.id}"> 쿠폰 발급</button>
             <button class="btn btn-secondary btn-sm member-detail-btn" data-id="${m.id}">상세보기</button>
-            <button class="btn btn-secondary btn-sm edit-member-btn" data-id="${m.id}">수정</button>
             <button class="btn btn-danger btn-sm del-member-btn" data-id="${m.id}">삭제</button>
           </div>
         </div>
@@ -2097,9 +2110,6 @@
       });
       listEl.querySelectorAll('.member-detail-btn').forEach(btn => {
         btn.onclick = () => openMemberDetailModal(btn.dataset.id);
-      });
-      listEl.querySelectorAll('.edit-member-btn').forEach(btn => {
-        btn.onclick = () => openMemberEditModal(btn.dataset.id);
       });
       listEl.querySelectorAll('.del-member-btn').forEach(btn => {
         btn.onclick = async () => {
@@ -2155,10 +2165,34 @@
     function openMemberDetailModal(memberId) {
       const m=allMembers.find(x=>String(x.id)===String(memberId)); if(!m) return;
       const modal=document.createElement('div'); modal.className='modal-backdrop';
-      const entries=Object.entries(m).map(([key,value])=>`<div class="nav-order-field"><span>${esc(key)}</span><b>${esc(value===null||value===undefined||value===''?'-':typeof value==='object'?JSON.stringify(value):String(value))}</b></div>`).join('');
-      modal.innerHTML=`<div class="modal-box modal-lg" style="border-radius:4px;"><h2>회원 상세 정보</h2><div class="nav-order-info-grid">${entries}</div><div class="modal-actions"><button class="btn btn-secondary" id="member-detail-close">닫기</button></div></div>`;
-      document.body.appendChild(modal); modal.querySelector('#member-detail-close').onclick=()=>modal.remove();
+      const display = (v) => v===null || v===undefined || v==='' ? '-' : (typeof v==='object' ? JSON.stringify(v) : String(v));
+      const fields = [
+        ['회원가입 날짜 및 시간', m.created_at], ['아이디', m.user_id || m.email], ['비밀번호', m.password],
+        ['이름', m.name], ['수취인', m.receiver_name], ['연락처', m.phone || m.receiver_phone],
+        ['개인통관고유부호', m.customs_number || m.personal_customs_code], ['이메일', m.email],
+        ['우편번호', m.postcode], ['주소', m.address], ['상세주소', m.address_detail]
+      ];
+      const fieldsHtml=fields.map(([label,value])=>`<div class="nav-order-field"><span>${label}</span><b>${esc(display(value))}</b></div>`).join('');
+      const status = m.status || '정상'; const grade = m.grade || '일반회원';
+      modal.innerHTML=`<div class="modal-box modal-lg" style="border-radius:4px;max-width:900px;">
+        <h2>회원 상세 및 관리</h2>
+        <div class="member-detail-card"><div class="member-detail-grid">${fieldsHtml}</div>
+          <div class="member-detail-actions">
+            <label style="flex:1;min-width:150px">회원 상태<select id="member-status-select"><option value="정상" ${status==='정상'?'selected':''}>정상</option><option value="정지" ${status==='정지'?'selected':''}>정지</option><option value="탈퇴" ${status==='탈퇴'?'selected':''}>탈퇴</option></select></label>
+            <label style="flex:1;min-width:150px">회원 등급<select id="member-grade-select"><option value="일반회원" ${grade==='일반회원'?'selected':''}>일반회원</option><option value="도매회원" ${grade==='도매회원'?'selected':''}>도매회원</option><option value="VIP회원" ${grade==='VIP회원'?'selected':''}>VIP회원</option></select></label>
+          </div>
+        </div>
+        <div class="modal-actions"><button class="btn btn-primary" id="member-detail-save">관리 내용 저장</button><button class="btn btn-secondary" id="member-detail-close">닫기</button></div>
+      </div>`;
+      document.body.appendChild(modal);
+      modal.querySelector('#member-detail-close').onclick=()=>modal.remove();
+      modal.querySelector('#member-detail-save').onclick=async()=>{
+        const statusValue=modal.querySelector('#member-status-select').value, gradeValue=modal.querySelector('#member-grade-select').value;
+        const {error}=await db.from('members').update({status:statusValue,grade:gradeValue}).eq('id',m.id);
+        if(error) alert('저장 실패: '+error.message); else { alert('회원 관리 정보가 저장되었습니다.'); modal.remove(); loadMembers(); }
+      };
     }
+
 
     // 회원 수정 모달
     function openMemberEditModal(memberId) {
