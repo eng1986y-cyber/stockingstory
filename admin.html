@@ -6,6 +6,7 @@
   <title>관리자 - STK스토리 심플라이프</title>
   <link rel="stylesheet" href="style.css">
   <script src="common.js"></script>
+  <!-- 공지/게시판 CRUD 함수는 common.js에 의존합니다. 이 파일은 제공되지 않아 해당 로직은 원본 유지. -->
   <style>
     @import url('https://fonts.cdnfonts.com/css/bahnschrift');
     html, body { background: #f4f6f8 !important; color: #1f2937 !important; font-family: 'Bahnschrift Light', 'Bahnschrift', -apple-system, sans-serif; }
@@ -293,7 +294,10 @@
     }
     /* 네이버 주문상세처럼 간결한 정보/인라인 배송수정 */
     .order-detail-backdrop { padding:18px; }
-    .nav-order-modal { max-width:980px !important; padding:0 !important; overflow:hidden auto; background:#f5f7fa; }
+    .nav-order-modal { max-width:980px !important; width:min(96vw,980px) !important; padding:0 !important; overflow:hidden auto; background:#f5f7fa; border-radius:3px !important; max-height:92vh !important; }
+    .nav-order-top { position:sticky; top:0; z-index:4; }
+    .nav-order-footer { position:sticky; bottom:0; z-index:3; }
+    .order-detail-backdrop { align-items:flex-start !important; }
     .nav-order-top { display:flex; justify-content:space-between; align-items:center; padding:22px 26px 16px; background:#fff; border-bottom:1px solid #e5e7eb; }
     .nav-order-top small { color:#03c75a; font-size:10px; font-weight:800; letter-spacing:1.2px; }
     .nav-order-top h2 { margin:4px 0 5px !important; font-size:21px !important; }
@@ -455,7 +459,7 @@
         <button class="nav-item active" data-tab="products">📦 상품</button>
         <button class="nav-item" data-tab="orders">🧾 주문</button>
         <button class="nav-item" data-tab="members">👥 회원</button>
-        <button class="nav-item" data-tab="coupons">🎟️ 쿠폰</button>
+        <button class="nav-item" data-tab="coupons" style="display:none;">🎟️ 쿠폰</button>
         <button class="nav-item" data-tab="notices">📢 공지/게시판</button>
         <button class="nav-item" data-tab="settings">⚙️ 사이트 설정</button>
       </div>
@@ -614,7 +618,7 @@
           <div id="member-pagination" style="display:flex;justify-content:center;gap:6px;margin-top:14px;flex-wrap:wrap;"></div>
         </section>
 
-        <section id="tab-coupons" class="admin-section">
+        <section id="tab-coupons" class="admin-section" style="display:none;">
           <h1 class="page-title">쿠폰 관리</h1>
           <p class="page-subtitle">회원별 쿠폰 발급 및 관리</p>
           <div class="card" id="coupon-issue-card">
@@ -924,12 +928,18 @@
     // ============ 방문자 통계 (1번 추가) ============
     async function loadVisitorStats() {
       try {
-        const today = new Date().toISOString().split('T')[0];
-        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-        
-        const { count: todayCount } = await db.from('visitors').select('*', { count: 'exact', head: true }).gte('created_at', today);
-        const { count: yesterdayCount } = await db.from('visitors').select('*', { count: 'exact', head: true }).gte('created_at', yesterday).lt('created_at', today);
-        const { count: totalCount } = await db.from('visitors').select('*', { count: 'exact', head: true });
+        // Korea-local date bounds, converted to UTC for timestamp comparisons.
+        const parts = new Intl.DateTimeFormat('en-CA', { timeZone:'Asia/Seoul', year:'numeric', month:'2-digit', day:'2-digit' }).formatToParts(new Date());
+        const part = t => parts.find(x => x.type === t)?.value || '';
+        const todayKst = `${part('year')}-${part('month')}-${part('day')}`;
+        const todayStart = new Date(`${todayKst}T00:00:00+09:00`);
+        const yesterdayStart = new Date(todayStart.getTime() - 86400000);
+        const tomorrowStart = new Date(todayStart.getTime() + 86400000);
+        const { count: todayCount, error: todayErr } = await db.from('visitors').select('*', { count: 'exact', head: true }).gte('created_at', todayStart.toISOString()).lt('created_at', tomorrowStart.toISOString());
+        const { count: yesterdayCount, error: yesterdayErr } = await db.from('visitors').select('*', { count: 'exact', head: true }).gte('created_at', yesterdayStart.toISOString()).lt('created_at', todayStart.toISOString());
+        const { count: totalCount, error: totalErr } = await db.from('visitors').select('*', { count: 'exact', head: true });
+        if (todayErr || yesterdayErr || totalErr) throw todayErr || yesterdayErr || totalErr;
+
 
         document.getElementById('stat-today').textContent = (todayCount || 0).toLocaleString();
         document.getElementById('stat-yesterday').textContent = (yesterdayCount || 0).toLocaleString();
@@ -1730,6 +1740,9 @@
       listEl.innerHTML = orderGroups.map((g, idx) => {
         const f = g.first;
         const products = g.items.map(it => `${esc(it.product_name || '상품명 없음')} ×${Number(it.quantity || 1)}`).join(' / ');
+        const productCodes = [...new Set(g.items.map(it => it.product_code).filter(Boolean))].join(', ');
+        const detailOptions = g.items.map(it => [it.selected_color, it.selected_size, it.selected_hem, it.selected_other].filter(Boolean).join(' / ')).filter(Boolean);
+        const optionPreview = detailOptions.length ? detailOptions.slice(0, 1).join('') + (detailOptions.length > 1 ? ` 외 ${detailOptions.length - 1}건` : '') : '-';
         const colors = [...new Set(g.items.map(x => x.selected_color).filter(Boolean))].join(', ');
         const sizes = [...new Set(g.items.map(x => x.selected_size).filter(Boolean))].join(', ');
         const courier = [...new Set(g.items.map(x => x.courier).filter(Boolean))].join(', ');
@@ -1750,8 +1763,9 @@
                 <span class="row-muted">총 ${g.totalQty}개 · ${g.items.length}종</span>
               </div>
               <div style="font-size:12px;line-height:1.8;color:#4b5563;">
-                <div>📦 <b>상품</b> : ${products}</div>
-                <div>🎨 <b>색상/사이즈</b> : ${esc(colors || '-')} / ${esc(sizes || '-')}</div>
+                <div>📦 <b>상품</b> : ${g.items.length > 1 ? `${esc(g.items[0].product_name || '상품명 없음')} 외 ${g.items.length - 1}건` : products}</div>
+                <div>🔖 <b>제품번호</b> : ${esc(productCodes || '-')}</div>
+                <div>🎨 <b>상세옵션</b> : ${esc(optionPreview)}</div>
                 <div>🚚 <b>택배</b> : ${esc(courier || '-')}　<b>운송장</b> : ${esc(tracking || '-')}</div>
                 ${memo ? `<div>📝 <b>요청사항</b> : ${esc(memo)}</div>` : ''}
                 <div class="row-muted">주문일시 : ${esc(formatKST(f.created_at))}</div>
@@ -2029,12 +2043,12 @@
               <span class="badge grade-${m.grade || '일반회원'}">${m.grade || '일반회원'}</span>
             </div>
             <div style="font-size:12px; color:#6b7280; line-height:1.5;">
-              ID: ${esc(m.email)} | 연락처: ${esc(m.phone || '-')}<br>
-              가입일: ${formatKST(m.created_at, { dateOnly: true })}
+              아이디: ${esc(m.email || m.user_id || '-')} | 이름: ${esc(m.name || '-')}<br>연락처: ${esc(m.phone || '-')} | 이메일: ${esc(m.email || '-')}
             </div>
           </div>
           <div class="row-actions">
             <button class="btn btn-success btn-sm issue-coupon-btn" data-id="${m.id}">🎁 쿠폰 발급</button>
+            <button class="btn btn-secondary btn-sm member-detail-btn" data-id="${m.id}">상세보기</button>
             <button class="btn btn-secondary btn-sm edit-member-btn" data-id="${m.id}">수정</button>
             <button class="btn btn-danger btn-sm del-member-btn" data-id="${m.id}">삭제</button>
           </div>
@@ -2044,6 +2058,9 @@
       // 이벤트 바인딩
       listEl.querySelectorAll('.issue-coupon-btn').forEach(btn => {
         btn.onclick = () => openCouponIssueModal(btn.dataset.id);
+      });
+      listEl.querySelectorAll('.member-detail-btn').forEach(btn => {
+        btn.onclick = () => openMemberDetailModal(btn.dataset.id);
       });
       listEl.querySelectorAll('.edit-member-btn').forEach(btn => {
         btn.onclick = () => openMemberEditModal(btn.dataset.id);
@@ -2069,17 +2086,42 @@
       el.querySelectorAll('button').forEach(b => b.onclick = () => { memberPage = Number(b.dataset.page); renderMembers(); });
     }
 
-    // 쿠폰 발급 모달 (회원 목록에서 호출)
+    // 회원 목록에서 바로 쿠폰 발급 (쿠폰 관리 탭 이동 없이 처리)
     function openCouponIssueModal(memberId) {
-      // 쿠폰 탭으로 이동 후 해당 회원 선택
-      document.querySelector('.admin-tabbar .nav-item[data-tab="coupons"]').click();
-      setTimeout(() => {
-        const sel = document.getElementById('coupon-member-select');
-        if (sel) {
-          sel.value = memberId;
-          document.getElementById('coupon-name-input').focus();
-        }
-      }, 100);
+      const member = allMembers.find(x => String(x.id) === String(memberId));
+      if (!member) return alert('회원 정보를 찾을 수 없습니다. 목록을 새로고침해 주세요.');
+      const modal = document.createElement('div');
+      modal.className = 'modal-backdrop';
+      modal.innerHTML = `<div class="modal-box" style="max-width:520px;border-radius:4px;">
+        <h2>🎁 회원 쿠폰 발급</h2><p style="font-size:13px;color:#64748b;margin:-5px 0 12px;">${esc(member.name)} / ${esc(member.email)}</p>
+        <form id="member-coupon-form" class="modal-form">
+          <label>쿠폰명</label><input name="name" placeholder="예: 감사 쿠폰">
+          <label>할인 유형</label><select name="type"><option value="percent">퍼센트 할인</option><option value="amount">금액 할인</option></select>
+          <label>할인값</label><input name="value" type="number" min="1" value="10" required>
+          <label>유효기간 (일)</label><input name="days" type="number" min="1" value="30" required>
+          <div id="member-coupon-msg" class="msg"></div>
+          <div class="modal-actions"><button type="submit" class="btn btn-success">쿠폰 발급</button><button type="button" id="close-member-coupon" class="btn btn-secondary">닫기</button></div>
+        </form></div>`;
+      document.body.appendChild(modal);
+      modal.querySelector('#close-member-coupon').onclick = () => modal.remove();
+      modal.querySelector('#member-coupon-form').onsubmit = async e => {
+        e.preventDefault(); const f=e.target, msg=modal.querySelector('#member-coupon-msg');
+        const value=Number(f.value.value), days=Number(f.days.value);
+        if (!(value>0) || !(days>0)) { msg.className='msg error'; msg.textContent='할인값과 유효기간을 확인하세요.'; return; }
+        const code='CP-'+Math.random().toString(36).substring(2,8).toUpperCase(); const expiry=new Date(); expiry.setDate(expiry.getDate()+days);
+        msg.className='msg'; msg.textContent='발급 중...';
+        const {error}=await db.from('coupons').insert({member_id:member.id,code,name:f.name.value.trim()||'관리자 발급 쿠폰',type:f.type.value,discount_value:value,expires_at:expiry.toISOString(),is_used:false});
+        if(error){msg.className='msg error';msg.textContent='발급 실패: '+error.message;}
+        else {msg.className='msg success';msg.textContent='발급 완료! 쿠폰 코드: '+code; f.querySelector('button[type="submit"]').disabled=true; if(document.getElementById('tab-coupons').classList.contains('active')) loadCouponsAndMembers();}
+      };
+    }
+
+    function openMemberDetailModal(memberId) {
+      const m=allMembers.find(x=>String(x.id)===String(memberId)); if(!m) return;
+      const modal=document.createElement('div'); modal.className='modal-backdrop';
+      const entries=Object.entries(m).map(([key,value])=>`<div class="nav-order-field"><span>${esc(key)}</span><b>${esc(value===null||value===undefined||value===''?'-':typeof value==='object'?JSON.stringify(value):String(value))}</b></div>`).join('');
+      modal.innerHTML=`<div class="modal-box modal-lg" style="border-radius:4px;"><h2>회원 상세 정보</h2><div class="nav-order-info-grid">${entries}</div><div class="modal-actions"><button class="btn btn-secondary" id="member-detail-close">닫기</button></div></div>`;
+      document.body.appendChild(modal); modal.querySelector('#member-detail-close').onclick=()=>modal.remove();
     }
 
     // 회원 수정 모달
