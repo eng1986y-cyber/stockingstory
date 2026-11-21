@@ -52,7 +52,6 @@
     .address-group input { flex: 1; }
     .address-group button { flex: 0 0 auto; padding: 0 16px; background: #e5e7eb; color: #111; font-weight: 600; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; white-space: nowrap; }
     body.dark .address-group button { background: #333; color: #fff; border-color: #444; }
-
     .form-grid-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; grid-column: 1 / -1; }
     @media (max-width: 560px) { .form-grid-pair { grid-template-columns: 1fr; } }
     .form-group.full { grid-column: 1 / -1; }
@@ -66,29 +65,17 @@
         <h2 class="mypage-title">내 정보</h2>
         <span id="title-grade-badge" class="title-grade-badge title-grade-일반회원">일반회원</span>
       </div>
-
-      <!-- 회원 상태 경고 배너 -->
       <div id="status-banner" class="status-banner"></div>
-
       <form id="mypage-form" class="mypage-form" autocomplete="off">
         <div class="form-grid-2">
           <div class="form-group"><label>아이디 (변경 불가)</label><input name="user_id" readonly tabindex="-1"></div>
           <div class="form-group"><label>비밀번호 (변경 시 입력)</label><input name="password" type="password" placeholder="변경할 비밀번호" autocomplete="new-password"></div>
-
           <div class="form-group"><label>이름</label><input name="name" required autocomplete="name"></div>
           <div class="form-group"><label>연락처</label><input name="phone" type="tel" inputmode="numeric" required autocomplete="tel"></div>
-
           <div class="form-grid-pair">
-            <div class="form-group">
-              <label>수취인</label>
-              <input name="receiver_name" placeholder="수취인 이름">
-            </div>
-            <div class="form-group">
-              <label>개인통관고유부호</label>
-              <input name="customs_number" placeholder="P000000000000">
-            </div>
+            <div class="form-group"><label>수취인</label><input name="receiver_name" placeholder="수취인 이름"></div>
+            <div class="form-group"><label>개인통관고유부호</label><input name="customs_number" placeholder="P000000000000"></div>
           </div>
-
           <div class="form-group full">
             <label>주소</label>
             <div class="address-group">
@@ -96,17 +83,9 @@
               <button type="button" onclick="openAddressSearch('#postcode', '#address', '#address_detail')">주소 검색</button>
             </div>
           </div>
-          <div class="form-group full">
-            <input name="address" id="address" placeholder="기본 주소" readonly>
-          </div>
-          <div class="form-group full">
-            <input name="address_detail" id="address_detail" placeholder="상세 주소">
-          </div>
-
-          <div class="form-group full">
-            <label>이메일</label>
-            <input name="email" type="email" placeholder="example@email.com" autocomplete="email">
-          </div>
+          <div class="form-group full"><input name="address" id="address" placeholder="기본 주소" readonly></div>
+          <div class="form-group full"><input name="address_detail" id="address_detail" placeholder="상세 주소"></div>
+          <div class="form-group full"><label>이메일</label><input name="email" type="email" placeholder="example@email.com" autocomplete="email"></div>
         </div>
         <button type="submit">저장</button>
       </form>
@@ -134,29 +113,18 @@
     const couponCountEl = document.getElementById('coupon-count');
 
     let member = JSON.parse(localStorage.getItem('member') || 'null');
-    if (!member || !member.id) {
-      alert('로그인이 필요합니다.');
-      location.href = 'login.html';
-    }
+    if (!member || !member.id) { alert('로그인이 필요합니다.'); location.href = 'login.html'; }
 
     (function preventAutoFocus() {
-      const killFocus = () => {
-        const ae = document.activeElement;
-        if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) ae.blur();
-      };
-      killFocus();
-      setTimeout(killFocus, 0);
-      setTimeout(killFocus, 100);
-      setTimeout(killFocus, 300);
-      const pw = form.querySelector('input[name="password"]');
-      if (pw) pw.setAttribute('tabindex', '-1');
+      const killFocus = () => { const ae = document.activeElement; if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) ae.blur(); };
+      killFocus(); setTimeout(killFocus, 0); setTimeout(killFocus, 100); setTimeout(killFocus, 300);
+      const pw = form.querySelector('input[name="password"]'); if (pw) pw.setAttribute('tabindex', '-1');
       form.querySelectorAll('input[readonly]').forEach(el => el.setAttribute('tabindex', '-1'));
     })();
 
     async function sha256(text) {
       if (!window.crypto || !window.crypto.subtle) {
-        let h = 0;
-        for (let i = 0; i < text.length; i++) { h = ((h << 5) - h) + text.charCodeAt(i); h |= 0; }
+        let h = 0; for (let i = 0; i < text.length; i++) { h = ((h << 5) - h) + text.charCodeAt(i); h |= 0; }
         return 'weak_' + Math.abs(h).toString(16) + '_' + text.length;
       }
       const data = new TextEncoder().encode(text);
@@ -168,8 +136,7 @@
       if (!dateStr) return '-';
       let n = String(dateStr).trim();
       if (/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/.test(n) && !/(Z|[+-]\d{2}:?\d{2})$/i.test(n)) n = n.replace(' ', 'T') + 'Z';
-      const d = new Date(n);
-      if (isNaN(d.getTime())) return '-';
+      const d = new Date(n); if (isNaN(d.getTime())) return '-';
       const parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(d);
       const get = t => parts.find(p => p.type === t)?.value || '00';
       return `${get('year')}-${get('month')}-${get('day')}`;
@@ -177,53 +144,27 @@
 
     function renderTitleGradeBadge(grade) {
       const g = grade || '일반회원';
-      titleGradeBadge.textContent = g;
-      titleGradeBadge.className = 'title-grade-badge title-grade-' + g;
+      titleGradeBadge.textContent = g; titleGradeBadge.className = 'title-grade-badge title-grade-' + g;
     }
 
     function renderStatusBanner(status) {
-      const s = status || '정상';
-      statusBanner.classList.remove('show', 'warn', 'danger');
-      if (s === '정지') {
-        statusBanner.classList.add('show', 'warn');
-        statusBanner.textContent = '⚠️ 현재 회원 상태가 "정지"입니다. 관리자에게 문의하세요.';
-      } else if (s === '탈퇴') {
-        statusBanner.classList.add('show', 'danger');
-        statusBanner.textContent = '⚠️ 탈퇴 처리된 계정입니다. 관리자에게 문의하세요.';
-      }
+      const s = status || '정상'; statusBanner.classList.remove('show', 'warn', 'danger');
+      if (s === '정지') { statusBanner.classList.add('show', 'warn'); statusBanner.textContent = '⚠️ 현재 회원 상태가 "정지"입니다.'; }
+      else if (s === '탈퇴') { statusBanner.classList.add('show', 'danger'); statusBanner.textContent = '⚠️ 탈퇴 처리된 계정입니다.'; }
     }
 
-    // 여러 별칭 중 첫 번째로 값이 있는 것을 반환
     function pickFirst(obj, keys) {
-      for (const k of keys) {
-        const v = obj[k];
-        if (v !== null && v !== undefined && v !== '') return v;
-      }
-      return '';
+      for (const k of keys) { const v = obj[k]; if (v !== null && v !== undefined && v !== '') return v; } return '';
     }
 
     async function loadFromServer() {
-      // 가능한 모든 별칭 컬럼을 select (없는 컬럼이 있으면 select 자체가 실패하므로, 기본 컬럼만 select)
-      const { data, error } = await db.from('members')
-        .select('*')
-        .eq('id', member.id)
-        .maybeSingle();
-      if (error) {
-        console.error(error);
-        msg.style.color = '#ef4444';
-        msg.textContent = '❌ 회원 정보를 불러오지 못했습니다: ' + error.message;
-        return;
-      }
-      if (!data) {
-        alert('회원 정보를 찾을 수 없습니다. 다시 로그인해주세요.');
-        localStorage.removeItem('member');
-        location.href = 'login.html';
-        return;
-      }
+      const { data, error } = await db.from('members').select('*').eq('id', member.id).maybeSingle();
+      if (error) { msg.style.color = '#ef4444'; msg.textContent = '❌ 회원 정보 로드 실패: ' + error.message; return; }
+      if (!data) { alert('회원 정보를 찾을 수 없습니다.'); localStorage.removeItem('member'); location.href = 'login.html'; return; }
+      
       member = { ...member, ...data };
       localStorage.setItem('member', JSON.stringify(member));
 
-      // 필드 별칭 폴백 (admin.html과 호환)
       form.user_id.value = pickFirst(data, ['user_id', 'username', 'email']) || '';
       form.name.value = data.name || '';
       form.phone.value = data.phone || '';
@@ -234,9 +175,7 @@
       form.address_detail.value = data.address_detail || '';
       form.email.value = data.email || '';
 
-      renderTitleGradeBadge(data.grade);
-      renderStatusBanner(data.status);
-
+      renderTitleGradeBadge(data.grade); renderStatusBanner(data.status);
       await loadCoupons();
     }
 
@@ -248,89 +187,44 @@
       couponCountEl.textContent = `사용 가능 ${usable.length}장 / 전체 ${list.length}장`;
       if (list.length === 0) { couponListEl.innerHTML = '<p class="empty-coupons">보유한 쿠폰이 없습니다.</p>'; return; }
       couponListEl.innerHTML = list.map(c => {
-        const isUsed = !!c.is_used;
-        const isExpired = new Date(c.expires_at).getTime() < Date.now();
+        const isUsed = !!c.is_used; const isExpired = new Date(c.expires_at).getTime() < Date.now();
         const discountLabel = c.type === 'percent' ? `${c.discount_value}% 할인` : `${Number(c.discount_value).toLocaleString()}원 할인`;
         return `<div class="coupon-card ${isUsed || isExpired ? 'used' : ''}">
-          <div style="flex:1; min-width:0;">
-            <div class="c-title">🎁 ${c.name || '쿠폰'}</div>
-            <div class="c-meta"><b>${discountLabel}</b> · ${c.code || '-'}<br>
+          <div style="flex:1; min-width:0;"><div class="c-title">🎁 ${c.name || '쿠폰'}</div><div class="c-meta"><b>${discountLabel}</b> · ${c.code || '-'}<br>
               ${isUsed ? `사용완료 (${c.used_at ? formatKSTShort(c.used_at) : '-'})` : isExpired ? `만료됨 (${formatKSTShort(c.expires_at)}까지)` : `유효기간: ${formatKSTShort(c.expires_at)}까지`}
-            </div>
-          </div>
-          <div class="c-badge">${isUsed ? '사용완료' : isExpired ? '만료' : '사용가능'}</div>
-        </div>`;
+            </div></div><div class="c-badge">${isUsed ? '사용완료' : isExpired ? '만료' : '사용가능'}</div></div>`;
       }).join('');
     }
 
     loadFromServer();
 
     form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      msg.textContent = '저장 중...';
-      msg.style.color = '#888';
+      e.preventDefault(); msg.textContent = '저장 중...'; msg.style.color = '#888';
 
-      // ★ 표준 필드명(customs_number, receiver_name, user_id)으로 저장하되,
-      //   기존 별칭(customs_code, recipient_name, username)도 함께 업데이트 시도.
-      //   DB에 없는 컬럼은 무시되고 있는 컬럼만 반영됨.
-      const baseUpdates = {
+      // DB에 실제로 존재하는 컬럼만 업데이트 (없는 컬럼 에러 방지)
+      const updates = {
         name: form.name.value.trim() || null,
         phone: form.phone.value.trim() || null,
+        email: form.email.value.trim() || null,
+        user_id: form.user_id.value.trim() || null, // 추가된 컬럼
+        receiver_name: form.receiver_name.value.trim() || null, // 추가된 컬럼
+        customs_number: form.customs_number.value.trim() || null, // 추가된 컬럼
         postcode: form.postcode.value.trim() || null,
         address: form.address.value.trim() || null,
-        address_detail: form.address_detail.value.trim() || null,
-        email: form.email.value.trim() || null,
+        address_detail: form.address_detail.value.trim() || null
       };
 
-      const receiverVal = form.receiver_name.value.trim();
-      const customsVal = form.customs_number.value.trim();
-
-      // 두 별칭 모두 시도: 먼저 표준, 실패하면 별칭으로 재시도
-      const candidateUpdatesList = [
-        // 1차: 표준 필드명 (admin.html이 읽는 이름)
-        { ...baseUpdates, receiver_name: receiverVal || null, customs_number: customsVal || null },
-        // 2차: 레거시 필드명 (혹시 DB에 이것만 있을 경우)
-        { ...baseUpdates, recipient_name: receiverVal || null, customs_code: customsVal || null },
-      ];
-
-      // 비밀번호 처리
       if (form.password.value) {
-        if (form.password.value.length < 6) {
-          msg.style.color = '#ef4444'; msg.textContent = '❌ 비밀번호는 6자 이상이어야 합니다.'; return;
-        }
-        try {
-          baseUpdates.password = await sha256(form.password.value);
-          candidateUpdatesList.forEach(u => u.password = baseUpdates.password);
-        } catch {
-          msg.style.color = '#ef4444'; msg.textContent = '❌ 비밀번호 처리 오류'; return;
-        }
+        if (form.password.value.length < 6) { msg.style.color = '#ef4444'; msg.textContent = '❌ 비밀번호는 6자 이상이어야 합니다.'; return; }
+        try { updates.password = await sha256(form.password.value); } catch { msg.style.color = '#ef4444'; msg.textContent = '❌ 비밀번호 처리 오류'; return; }
       }
 
-      let lastError = null;
-      let successUpdates = null;
-      for (const updates of candidateUpdatesList) {
-        const { error } = await db.from('members').update(updates).eq('id', member.id);
-        if (!error) { successUpdates = updates; lastError = null; break; }
-        lastError = error;
-        // 컬럼 없음 에러(PGRST204 등)만 다음 후보로 넘어가고, 그 외는 즉시 실패
-        const msgLower = String(error.message || '').toLowerCase();
-        const isMissingColumn = /column .* does not exist|pgrst204|could not find the .* column/i.test(msgLower);
-        if (!isMissingColumn) break;
-      }
+      const { error } = await db.from('members').update(updates).eq('id', member.id);
+      if (error) { msg.style.color = '#ef4444'; msg.textContent = '❌ ' + error.message; return; }
 
-      if (!successUpdates) {
-        msg.style.color = '#ef4444';
-        msg.textContent = '❌ ' + (lastError?.message || '저장 실패');
-        return;
-      }
-
-      const updated = { ...member, ...successUpdates };
-      delete updated.password;
-      localStorage.setItem('member', JSON.stringify(updated));
-      member = updated;
-      form.password.value = '';
-      msg.style.color = '#10b981';
-      msg.textContent = '✅ 저장 완료!';
+      const updated = { ...member, ...updates }; delete updated.password;
+      localStorage.setItem('member', JSON.stringify(updated)); member = updated;
+      form.password.value = ''; msg.style.color = '#10b981'; msg.textContent = '✅ 저장 완료!';
       setTimeout(() => msg.textContent = '', 2000);
     });
   </script>

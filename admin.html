@@ -6,7 +6,6 @@
   <title>관리자 - STK스토리 심플라이프</title>
   <link rel="stylesheet" href="style.css">
   <script src="common.js"></script>
-  <!-- 공지/게시판 CRUD 함수는 common.js에 의존합니다. 이 파일은 제공되지 않아 해당 로직은 원본 유지. -->
   <style>
     @import url('https://fonts.cdnfonts.com/css/bahnschrift');
     html, body { background: #f4f6f8 !important; color: #1f2937 !important; font-family: 'Bahnschrift Light', 'Bahnschrift', -apple-system, sans-serif; }
@@ -176,7 +175,6 @@
     #coupon-issue-form button { height: 40px !important; padding: 0 20px !important; font-size: 14px !important; }
     @media (max-width: 1000px) { #coupon-issue-form { grid-template-columns: 1fr 1fr !important; } #coupon-issue-form button { grid-column: 1 / -1 !important; } }
 
-    /* ===== 관리자 입력 카드 폭/정렬 보정 ===== */
     #product-register-card { width:100%; min-width:0; }
     #product-register-card > #product-form {
       width:100%; min-width:0; display:grid;
@@ -244,7 +242,6 @@
     .tab-loading { padding: 20px; text-align: center; color: #9ca3af; font-size: 13px; }
     .board-secret-badge { display: inline-block; font-size: 10px; background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-weight: 700; border: 1px solid #f59e0b; }
   
-    /* 새 상품 등록: 요청한 3단 배치 */
     #product-register-card > #product-form {
       display:grid !important; width:100%; min-width:0;
       grid-template-columns:repeat(12,minmax(0,1fr)); gap:10px;
@@ -292,7 +289,6 @@
       #product-register-card > #product-form input[name="other_option"],
       #product-register-card > #product-form select[name="target_grade"] { grid-column:span 1; }
     }
-    /* 네이버 주문상세처럼 간결한 정보/인라인 배송수정 */
     .order-detail-backdrop { padding:18px; }
     .nav-order-modal { max-width:980px !important; width:min(96vw,980px) !important; padding:0 !important; overflow:hidden auto; background:#f5f7fa; border-radius:3px !important; max-height:92vh !important; }
     .nav-order-top { position:sticky; top:0; z-index:4; }
@@ -356,8 +352,6 @@
       .nav-order-footer button { flex:1; min-width:0; }
     }
 
-
-    /* 상품등록 폼이 전역 form max-width에 눌리지 않도록 카드 전체 폭 강제 */
     #product-register-card { width:100% !important; min-width:0 !important; }
     #product-register-card > #product-form {
       display:grid !important;
@@ -385,9 +379,6 @@
       #product-register-card > #product-form { grid-template-columns:repeat(2,minmax(0,1fr)) !important; }
     }
 
-    /* ============================================================
-       ⭐ 모바일 상품목록: 페이지당 4개 가로 스와이프(캐러셀)
-       ============================================================ */
     @media (max-width: 560px) {
       #admin-list-wrap {
         overflow-x: auto !important;
@@ -434,7 +425,6 @@
       .prod-actions .btn { flex: 1 1 auto; min-width: 60px; }
     }
 
-    /* 방문자 통계 카드 스타일 */
     .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
     .stat-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px; text-align: center; }
     .stat-card .stat-label { font-size: 12px; color: #6b7280; font-weight: 600; margin-bottom: 8px; }
@@ -443,7 +433,6 @@
     .stat-card .stat-value.green { color: #059669; }
     .stat-card .stat-value.purple { color: #7c3aed; }
   
-    /* 상세 주문/회원 UI 요청사항 */
     .nav-order-top .order-title-meta { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
     .nav-order-top .order-created-inline { font-size:12px; color:#64748b; background:#f8fafc; border:1px solid #e5e7eb; border-radius:6px; padding:6px 9px; }
     .nav-order-info-grid.order-recipient-grid { grid-template-columns:repeat(6,minmax(0,1fr)); }
@@ -454,7 +443,6 @@
     .member-detail-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
     @media(max-width:900px){ .nav-order-info-grid.order-recipient-grid {grid-template-columns:repeat(3,minmax(0,1fr));} .nav-order-product .nav-order-extra.order-option-grid {grid-template-columns:repeat(2,minmax(0,1fr));} .member-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr));} }
     @media(max-width:560px){ .nav-order-info-grid.order-recipient-grid {grid-template-columns:repeat(2,minmax(0,1fr));} .member-detail-grid{grid-template-columns:1fr;} }
-
   </style>
 </head>
 <body>
@@ -497,7 +485,6 @@
           <h1 class="page-title">상품 관리</h1>
           <p class="page-subtitle">상품을 등록하고 목록을 관리합니다 (일반 / 도매전용 / VIP전용)</p>
 
-          <!-- 방문자 통계 추가 (1번) -->
           <div class="stats-grid">
             <div class="stat-card">
               <div class="stat-label">오늘 방문자</div>
@@ -915,7 +902,7 @@
       adminScreen.style.display = 'block';
       loadAdminList();
       loadGlobalDetailImages();
-      loadVisitorStats(); // 방문자 통계 로드
+      loadVisitorStats();
     }
 
     document.querySelectorAll('.admin-tabbar .nav-item').forEach(btn => {
@@ -952,10 +939,9 @@
     });
     document.getElementById('logout-btn').addEventListener('click', async () => { await db.auth.signOut(); showLogin(); });
 
-    // ============ 방문자 통계 (1번 추가) ============
+    // ============ 방문자 통계 ============
     async function loadVisitorStats() {
       try {
-        // Korea-local date bounds, converted to UTC for timestamp comparisons.
         const parts = new Intl.DateTimeFormat('en-CA', { timeZone:'Asia/Seoul', year:'numeric', month:'2-digit', day:'2-digit' }).formatToParts(new Date());
         const part = t => parts.find(x => x.type === t)?.value || '';
         const todayKst = `${part('year')}-${part('month')}-${part('day')}`;
@@ -966,7 +952,6 @@
         const { count: yesterdayCount, error: yesterdayErr } = await db.from('visitors').select('*', { count: 'exact', head: true }).gte('created_at', yesterdayStart.toISOString()).lt('created_at', todayStart.toISOString());
         const { count: totalCount, error: totalErr } = await db.from('visitors').select('*', { count: 'exact', head: true });
         if (todayErr || yesterdayErr || totalErr) throw todayErr || yesterdayErr || totalErr;
-
 
         document.getElementById('stat-today').textContent = (todayCount || 0).toLocaleString();
         document.getElementById('stat-yesterday').textContent = (yesterdayCount || 0).toLocaleString();
@@ -1147,7 +1132,6 @@
 
     // ============ 상품 목록 ============
     let allProducts = [], filteredProducts = [], currentPage = 1;
-    // [수정 5번] 페이지당 상품 수를 10개로 변경
     const PER_PAGE_DESKTOP = 10, PER_PAGE_MOBILE = 4, MAX_PAGES = 10;
     const isAdminMobile = () => window.matchMedia('(max-width: 560px)').matches;
     const getPerPage = () => isAdminMobile() ? PER_PAGE_MOBILE : PER_PAGE_DESKTOP;
@@ -1386,7 +1370,6 @@
       el.querySelectorAll('button').forEach(b => b.onclick = () => { currentPage = Number(b.dataset.page); renderProducts(); });
     }
 
-    // 화면 크기 변경 시 페이지당 개수 재계산
     let __lastAdminMobile = isAdminMobile();
     window.addEventListener('resize', () => {
       const now = isAdminMobile();
@@ -1893,7 +1876,6 @@
     };
     document.getElementById('order-reset-btn').onclick = () => { document.getElementById('order-search').value=''; loadOrders(); };
 
-    // [수정 2, 3번] 주문 상세 모달에서 배송비 별도 표시
     async function openOrderEditModal(groupOrOrder) {
       if (!groupOrOrder) return;
       const items = Array.isArray(groupOrOrder.items) ? groupOrOrder.items : [groupOrOrder];
@@ -1921,7 +1903,6 @@
         ['postcode','우편번호'], ['address','주소'], ['address_detail','상세주소']
       ];
       
-      // 쿠폰은 개별 상품 가격에서 차감하지 않고 주문 전체 금액에서 별도로 계산합니다.
       let totalProductPrice = 0, totalShippingFee = 0;
       items.forEach(it => {
         totalProductPrice += Number(it.product_price || 0) * Number(it.quantity || 1);
@@ -1976,8 +1957,7 @@
               </label>
               <label>택배사
                 <select class="edit-courier">
-                  ${['','CJ대한통운','롯데택배','한진택배','우체국택배','로젠택배','로젠택배','경동택배','대신택배','합동택배','천일택배','일양로지스','건영택배','EMS','기타'].filter((v,i,a)=>a.indexOf(v)===i).map(c=>`<option value="${esc(c)}" ${c === (it.courier || '') ? 'selected' : ''}>${c || '택배사 선택'}</option>`).join('')}
-                  ${it.courier && !['CJ대한통운','롯데택배','한진택배','우체국택배','로젠택배','경동택배','대신택배','합동택배','천일택배','일양로지스','건영택배','EMS','기타'].includes(it.courier) ? `<option value="${esc(it.courier)}" selected>${esc(it.courier)}</option>` : ''}
+                  ${['','CJ대한통운','롯데택배','한진택배','우체국택배','로젠택배','경동택배','대신택배','합동택배','천일택배','일양로지스','건영택배','EMS','기타'].filter((v,i,a)=>a.indexOf(v)===i).map(c=>`<option value="${esc(c)}" ${c === (it.courier || '') ? 'selected' : ''}>${c || '택배사 선택'}</option>`).join('')}
                 </select>
               </label>
               <label class="tracking-field">운송장 번호
@@ -2064,7 +2044,7 @@
       };
     }
 
-    // ============ 회원 관리 (복구 및 추가) ============
+    // ============ 회원 관리 ============
     let allMembers = [], filteredMembers = [], memberPage = 1;
     const MEMBER_PER_PAGE = 10;
 
@@ -2082,7 +2062,7 @@
       const k = text.toLowerCase().trim();
       if (!k) filteredMembers = [...allMembers];
       else filteredMembers = allMembers.filter(m => {
-        return [m.name, m.email, m.phone, m.id, m.user_id, m.receiver_name, m.postcode, m.address, m.address_detail, m.customs_number, m.status, m.grade].some(v => String(v || '').toLowerCase().includes(k));
+        return [m.name, m.email, m.phone, m.id, m.user_id, m.username, m.receiver_name, m.recipient_name, m.postcode, m.address, m.address_detail, m.customs_number, m.customs_code, m.status, m.grade].some(v => String(v || '').toLowerCase().includes(k));
       });
       memberPage = 1;
       renderMembers();
@@ -2105,11 +2085,12 @@
           <input type="checkbox" class="row-check member-check" data-id="${m.id}">
           <div style="flex:1; min-width:200px;">
             <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-              <span class="row-strong">${esc(m.name)}</span>
+              <span class="row-strong">${esc(m.name || '이름없음')}</span>
               <span class="badge grade-${m.grade || '일반회원'}">${m.grade || '일반회원'}</span>
             </div>
             <div style="font-size:12px; color:#6b7280; line-height:1.5;">
-              아이디: ${esc(m.email || m.user_id || '-')} | 이름: ${esc(m.name || '-')}<br>연락처: ${esc(m.phone || '-')} | 이메일: ${esc(m.email || '-')}
+              아이디: ${esc(m.user_id || m.username || '-')} | 이름: ${esc(m.name || '-')}<br>
+              연락처: ${esc(m.phone || '-')} | 이메일: ${esc(m.email || '-')}
             </div>
           </div>
           <div class="row-actions">
@@ -2120,7 +2101,6 @@
         </div>
       `).join('');
 
-      // 이벤트 바인딩
       listEl.querySelectorAll('.issue-coupon-btn').forEach(btn => {
         btn.onclick = () => openCouponIssueModal(btn.dataset.id);
       });
@@ -2148,7 +2128,6 @@
       el.querySelectorAll('button').forEach(b => b.onclick = () => { memberPage = Number(b.dataset.page); renderMembers(); });
     }
 
-    // 회원 목록에서 바로 쿠폰 발급 (쿠폰 관리 탭 이동 없이 처리)
     function openCouponIssueModal(memberId) {
       const member = allMembers.find(x => String(x.id) === String(memberId));
       if (!member) return alert('회원 정보를 찾을 수 없습니다. 목록을 새로고침해 주세요.');
@@ -2190,11 +2169,16 @@
         const part = type => parts.find(x => x.type === type)?.value || '';
         return `${part('year')}/${part('month')}/${part('day')} ${part('hour')}:${part('minute')}`;
       };
+      // ★ 수정된 부분: DB 컬럼명(user_id, receiver_name, customs_number)에 맞게 폴백 처리
       const fields = [
         ['회원가입 날짜', formatMemberCreatedAt(m.created_at)],
-        ['아이디', display(m.user_id)], ['비밀번호', '수정 불가'],
-        ['이름', m.name], ['수취인', m.receiver_name], ['연락처', m.phone || m.receiver_phone],
-        ['개인통관고유부호', m.customs_number || m.personal_customs_code], ['이메일', m.email],
+        ['아이디', display(m.user_id || m.username)], 
+        ['비밀번호', '수정 불가'],
+        ['이름', m.name], 
+        ['수취인', display(m.receiver_name || m.recipient_name)], 
+        ['연락처', m.phone || m.receiver_phone],
+        ['개인통관고유부호', display(m.customs_number || m.customs_code || m.personal_customs_code)], 
+        ['이메일', m.email],
         ['우편번호', m.postcode], ['주소', m.address], ['상세주소', m.address_detail]
       ];
       const fieldsHtml=fields.map(([label,value])=>`<div class="nav-order-field"><span>${label}</span><b>${esc(display(value))}</b></div>`).join('');
@@ -2218,8 +2202,6 @@
       };
     }
 
-
-    // 회원 수정 모달
     function openMemberEditModal(memberId) {
       const m = allMembers.find(x => String(x.id) === String(memberId));
       if (!m) return;
@@ -2266,22 +2248,18 @@
     document.getElementById('member-reset-btn').onclick = () => { document.getElementById('member-search').value = ''; applyMemberSearch(''); };
     document.getElementById('member-search').addEventListener('keypress', e => { if (e.key === 'Enter') { e.preventDefault(); applyMemberSearch(e.target.value.trim()); } });
 
-
-    // ============ 쿠폰 관리 (수정: 발급 대상자 표시) ============
+    // ============ 쿠폰 관리 ============
     let allCoupons = [], filteredCoupons = [], couponPage = 1;
     const COUPON_PER_PAGE = 10;
 
     async function loadCouponsAndMembers() {
-      // 회원 목록 불러오기 (발급 대상자 표시용)
       const { data: membersData } = await db.from('members').select('id, name, email').order('name');
-      allMembers = membersData || []; // 전역 변수 업데이트
+      allMembers = membersData || [];
 
-      // 회원 선택 드롭다운 채우기
       const sel = document.getElementById('coupon-member-select');
       sel.innerHTML = '<option value="">회원 선택...</option>' + 
         allMembers.map(m => `<option value="${m.id}">${esc(m.name)} (${esc(m.email)})</option>`).join('');
 
-      // 쿠폰 목록 불러오기
       const listEl = document.getElementById('coupon-list');
       listEl.innerHTML = '<div class="tab-loading">쿠폰 로딩 중...</div>';
       const { data, error } = await db.from('coupons').select('*').order('created_at', { ascending: false });
@@ -2297,7 +2275,6 @@
         listEl.innerHTML = '<p style="text-align:center;color:#9ca3af;padding:20px;">발급된 쿠폰이 없습니다.</p>'; return;
       }
 
-      // [수정] 쿠폰 발급 대상자(회원 이름/이메일) 매핑
       const memberMap = new Map(allMembers.map(m => [String(m.id), m]));
 
       listEl.innerHTML = allCoupons.map(c => {
@@ -2369,10 +2346,9 @@
       } else {
         msg.className = 'msg success'; msg.textContent = ' 쿠폰이 발급되었습니다!';
         document.getElementById('coupon-name-input').value = '';
-        loadCouponsAndMembers(); // 목록 새로고침
+        loadCouponsAndMembers();
       }
     };
-
 
     // ============ 공지/게시판 CRUD ============
     let noticeTableName = 'notices', boardTableName = 'board_posts', editingNoticeId = null;
@@ -2404,7 +2380,6 @@
     if(noticeForm)noticeForm.onsubmit=async e=>{e.preventDefault();const title=noticeForm.elements.title.value.trim(),content=noticeForm.elements.content.value.trim();if(!title||!content)return;const payload={title,content};const res=editingNoticeId?await db.from(noticeTableName).update(payload).eq('id',editingNoticeId):await db.from(noticeTableName).insert(payload);if(res.error){const msg=document.getElementById('notice-msg');msg.className='msg error';msg.textContent='저장 실패: '+res.error.message;return;}editingNoticeId=null;noticeForm.reset();noticeForm.querySelector('[type=submit]').textContent='공지 등록';const msg=document.getElementById('notice-msg');msg.className='msg success';msg.textContent='저장되었습니다.';loadNoticeAdminList();};
     document.querySelectorAll('.notice-subtab-btn').forEach(btn=>btn.onclick=()=>{const board=btn.dataset.subtab==='board';document.getElementById('notice-subsection').style.display=board?'none':'block';document.getElementById('board-subsection').style.display=board?'block':'none';document.querySelectorAll('.notice-subtab-btn').forEach(x=>{x.classList.toggle('active',x===btn);x.style.background=x===btn?'#111827':'#fff';x.style.color=x===btn?'#fff':'#374151';});if(board)loadBoardAdminList();else loadNoticeAdminList();});
 
-    // 초기 세션 체크 실행
     checkSession();
   </script>
 </body>
