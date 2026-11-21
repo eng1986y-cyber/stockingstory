@@ -244,6 +244,7 @@
     .tab-loading { padding: 20px; text-align: center; color: #9ca3af; font-size: 13px; }
     .board-secret-badge { display: inline-block; font-size: 10px; background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-weight: 700; border: 1px solid #f59e0b; }
 
+    /* ===== 주문 상세 모달 ===== */
     .order-detail-backdrop { padding: 18px; align-items: flex-start !important; }
     .nav-order-modal { max-width: 980px !important; width: min(96vw, 980px) !important; padding: 0 !important; overflow: hidden auto; background: #f5f7fa; border-radius: 3px !important; max-height: 92vh !important; }
     .nav-order-top { position: sticky; top: 0; z-index: 4; display: flex; justify-content: space-between; align-items: center; padding: 22px 26px 16px; background: #fff; border-bottom: 1px solid #e5e7eb; }
@@ -275,19 +276,109 @@
     .nav-order-product-head span { color: #94a3b8; font-size: 11px; }
     .nav-order-product-head > b { color: #e53935; white-space: nowrap; }
     .nav-order-product-summary { display: flex; gap: 14px; flex-wrap: wrap; padding: 10px 0; color: #64748b; font-size: 11px; border-bottom: 1px solid #f1f5f9; }
-    .nav-order-extra { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 7px; padding: 9px 0; }
+    .nav-order-extra { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 7px; padding: 9px 0; }
     .nav-order-edit-grid { display: grid; grid-template-columns: 1fr 1fr 1.4fr; gap: 9px; padding-top: 11px; }
     .nav-order-edit-grid label { display: flex; flex-direction: column; gap: 5px; color: #475569; font-size: 11px; font-weight: 700; min-width: 0; }
     .nav-order-edit-grid input, .nav-order-edit-grid select, .nav-order-edit-grid textarea { width: 100%; min-width: 0; border: 1px solid #dce2e8; border-radius: 6px; padding: 9px 10px; color: #1f2937; background: #fff; font: inherit; font-size: 12px; box-sizing: border-box; }
     .nav-order-edit-grid .tracking-field { grid-column: 3; }
     .nav-order-edit-grid .memo-field { grid-column: 1 / -1; }
     .nav-order-edit-grid textarea { resize: vertical; min-height: 54px; }
-    .nav-order-recipient-edit-grid { display: grid; grid-template-columns: repeat(7, minmax(0,1fr)); gap: 8px; }
-    .nav-order-recipient-edit-grid label { display: flex; flex-direction: column; gap: 5px; min-width: 0; color: #475569; font-size: 11px; font-weight: 700; }
-    .nav-order-recipient-edit-grid input { width: 100%; min-width: 0; border: 1px solid #dce2e8; border-radius: 6px; padding: 9px 8px; color: #1f2937; background: #fff; font: inherit; font-size: 12px; box-sizing: border-box; }
-    .nav-order-recipient-edit-grid input.customs-input { letter-spacing: 0.5px; font-family: 'Courier New', monospace; }
-    @media(max-width:900px) { .nav-order-recipient-edit-grid { grid-template-columns: repeat(4, minmax(0,1fr)); } }
-    @media(max-width:560px) { .nav-order-recipient-edit-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+
+    /* ⭐ 주문자/배송지 3열 그리드 (신규) */
+    .nav-order-recipient-3col {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+    .nav-order-recipient-3col .rec-col {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 0;
+    }
+    .nav-order-recipient-3col label {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      min-width: 0;
+      color: #475569;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .nav-order-recipient-3col input,
+    .nav-order-recipient-3col textarea {
+      width: 100%;
+      min-width: 0;
+      border: 1px solid #dce2e8;
+      border-radius: 6px;
+      padding: 9px 10px;
+      color: #1f2937;
+      background: #fff;
+      font: inherit;
+      font-size: 12px;
+      box-sizing: border-box;
+    }
+    .nav-order-recipient-3col input.customs-input { letter-spacing: 0.5px; font-family: 'Courier New', monospace; }
+    .nav-order-recipient-3col .memo-col textarea { min-height: 130px; resize: vertical; }
+    @media(max-width:900px) {
+      .nav-order-recipient-3col { grid-template-columns: 1fr 1fr; }
+      .nav-order-recipient-3col .memo-col { grid-column: 1 / -1; }
+    }
+    @media(max-width:560px) {
+      .nav-order-recipient-3col { grid-template-columns: 1fr; }
+      .nav-order-recipient-3col .memo-col { grid-column: auto; }
+    }
+
+    /* ⭐ 주문상품 2열 그리드 (신규) */
+    .nav-order-product-options-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #f1f5f9;
+      margin-top: 10px;
+    }
+    .nav-order-product-options-2col .opt-col {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 0;
+    }
+    .nav-order-product-options-2col label {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      color: #475569;
+      font-size: 11px;
+      font-weight: 700;
+      min-width: 0;
+    }
+    .nav-order-product-options-2col input,
+    .nav-order-product-options-2col select {
+      width: 100%;
+      min-width: 0;
+      border: 1px solid #dce2e8;
+      border-radius: 6px;
+      padding: 9px 10px;
+      color: #1f2937;
+      background: #fff;
+      font: inherit;
+      font-size: 12px;
+      box-sizing: border-box;
+    }
+    .nav-order-product-options-2col .opt-field {
+      padding: 9px 11px;
+      border: 1px solid #edf0f3;
+      border-radius: 7px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: #fafbfc;
+    }
+    .nav-order-product-options-2col .opt-field span { color: #64748b; font-size: 11px; }
+    .nav-order-product-options-2col .opt-field b { color: #1f2937; font-size: 12px; font-weight: 600; overflow-wrap: anywhere; }
+    @media(max-width:700px) { .nav-order-product-options-2col { grid-template-columns: 1fr; } }
+
     .nav-order-footer { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 20px; background: #fff; border-top: 1px solid #e5e7eb; position: sticky; bottom: 0; z-index: 3; }
     .nav-order-footer button { min-width: 120px; }
     @media(max-width:700px) {
@@ -299,7 +390,6 @@
       .nav-order-info-grid, .nav-order-extra { grid-template-columns: repeat(2, minmax(0,1fr)); }
       .nav-order-edit-grid { grid-template-columns: 1fr 1fr; }
       .nav-order-edit-grid .tracking-field { grid-column: 1 / -1; }
-      .nav-order-edit-grid .memo-field { grid-column: 1 / -1; }
       .nav-order-footer { padding: 12px; }
       .nav-order-footer button { flex: 1; min-width: 0; }
     }
@@ -1708,7 +1798,12 @@
     };
     document.getElementById('order-reset-btn').onclick = () => { document.getElementById('order-search').value=''; loadOrders(); };
 
-    // ⭐ 주문 상세 모달 — 개인통관부호 입력 + 안전한 저장 로직
+    // ============================================================
+    // ⭐⭐⭐ 주문 상세 모달 (요청 반영)
+    // - 주문자/배송지: 3열 (1열:입금자명/통관번호/수취인/연락처, 2열:우편번호/주소/상세주소, 3열:관리자메모)
+    // - 주문상품: 2열 (1열:색상/사이즈/선택밑단/추가옵션, 2열:주문진행상태/택배사/운송장번호)
+    // - 상품별 메모 textarea 제거, 관리자메모는 상단에서 한 번만
+    // ============================================================
     async function openOrderEditModal(groupOrOrder) {
       if (!groupOrOrder) return;
       const items = Array.isArray(groupOrOrder.items) ? groupOrOrder.items : [groupOrOrder];
@@ -1716,29 +1811,9 @@
       const orderNo = groupOrOrder.orderNumber || first.order_number || '-';
       const modal = document.createElement('div');
       modal.className = 'modal-backdrop order-detail-backdrop';
-      const statusOptions = [...new Set([...ORDER_STATUS_OPTIONS, ...items.map(x=>x.status).filter(Boolean)])];
-      const labelMap = {
-        customer_name:'주문자', customer_phone:'주문자 연락처', customer_email:'이메일',
-        depositor_name:'입금자명', receiver_name:'받는 분', receiver_phone:'받는 분 연락처',
-        postcode:'우편번호', address:'주소', address_detail:'상세주소',
-        customs_number:'개인통관고유부호', created_at:'주문일시', updated_at:'수정일시',
-        selected_color:'선택 색상', selected_size:'선택 사이즈', selected_hem:'선택 밑단',
-        selected_other:'추가 옵션', shipping_fee:'배송비', grade_discount:'등급 할인',
-        product_code:'상품번호', product_name:'상품명', product_price:'상품 단가',
-        quantity:'수량', total_price:'상품 합계', price:'가격', request_content:'요청사항'
-      };
-      const val = v => (v === null || v === undefined || v === '') ? '-' : (typeof v === 'object' ? JSON.stringify(v) : String(v));
+      const statusOptions = [...new Set([...ORDER_STATUS_OPTIONS, ...items.map(x => x.status).filter(Boolean)])];
 
-      const recipientInputMeta = [
-        ['depositor_name','입금자명'],
-        ['customs_number','개인통관고유부호'],
-        ['receiver_name','수취인'],
-        ['receiver_phone','연락처'],
-        ['postcode','우편번호'],
-        ['address','주소'],
-        ['address_detail','상세주소']
-      ];
-
+      // 합계 계산
       let totalProductPrice = 0, totalShippingFee = 0;
       items.forEach(it => {
         totalProductPrice += Number(it.product_price || 0) * Number(it.quantity || 1);
@@ -1761,47 +1836,85 @@
         memberData = mData;
       }
 
-      const sharedHtml = recipientInputMeta.map(([key,label]) => {
+      // 값 폴백 헬퍼
+      function pickValue(key, fallbackFromMember) {
         let v = items.map(x => x[key]).find(x => x !== undefined && x !== null && x !== '') ?? first[key] ?? '';
-
-        if (!v && memberData) {
-          if (key === 'receiver_name')  v = memberData.receiver_name || memberData.recipient_name || memberData.name || '';
-          if (key === 'receiver_phone') v = memberData.receiver_phone || memberData.phone || '';
-          if (key === 'customs_number') v = memberData.customs_number || memberData.customs_code || memberData.personal_customs_code || memberData.customs_id || '';
-          if (key === 'postcode')       v = memberData.postcode || memberData.zipcode || '';
-          if (key === 'address')        v = memberData.address || memberData.addr || '';
-          if (key === 'address_detail') v = memberData.address_detail || memberData.addr_detail || memberData.address2 || '';
-          if (key === 'depositor_name') v = memberData.depositor_name || memberData.depositor || '';
+        if (!v && memberData && fallbackFromMember) {
+          for (const f of fallbackFromMember) { if (memberData[f]) { v = memberData[f]; break; } }
         }
-        if (!v && key === 'receiver_name')  v = first.customer_name || '';
-        if (!v && key === 'receiver_phone') v = first.customer_phone || first.phone || '';
+        return v;
+      }
 
-        if (key === 'customs_number' && v) v = String(v).replace(/[^0-9]/g, '');
+      const depositorName = pickValue('depositor_name', ['depositor_name','depositor']) || '';
+      let customsNumber = pickValue('customs_number', ['customs_number','customs_code','personal_customs_code','customs_id']) || '';
+      if (customsNumber) customsNumber = String(customsNumber).replace(/[^0-9]/g, '');
+      const receiverName = pickValue('receiver_name', ['receiver_name','recipient_name','name']) || first.customer_name || '';
+      const receiverPhone = pickValue('receiver_phone', ['receiver_phone','phone']) || first.customer_phone || '';
+      const postcode = pickValue('postcode', ['postcode','zipcode']) || '';
+      const address = pickValue('address', ['address','addr']) || '';
+      const addressDetail = pickValue('address_detail', ['address_detail','addr_detail','address2']) || '';
+      // 관리자 메모: 그룹 내 첫 값 사용
+      const adminMemo = first.memo || '';
 
-        const attrs = key === 'customs_number'
-          ? ` inputmode="numeric" maxlength="13" pattern="[0-9]{13}" oninput="this.value=this.value.replace(/[^0-9]/g,'')" placeholder="13자리 숫자 (P로 시작 시 P 제외)" class="customs-input"`
-          : ` placeholder="${label} 입력"`;
+      // ===== 주문자/배송지 정보 3열 그리드 =====
+      const recipientHtml = `
+        <div class="nav-order-recipient-3col">
+          <div class="rec-col">
+            <label>입금자명
+              <input class="edit-recipient" data-key="depositor_name" value="${esc(depositorName)}" placeholder="입금자명 입력">
+            </label>
+            <label>개인통관고유부호
+              <input class="edit-recipient customs-input" data-key="customs_number"
+                inputmode="numeric" maxlength="13" pattern="[0-9]{13}"
+                oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+                value="${esc(customsNumber)}" placeholder="13자리 숫자">
+            </label>
+            <label>수취인
+              <input class="edit-recipient" data-key="receiver_name" value="${esc(receiverName)}" placeholder="수취인 입력">
+            </label>
+            <label>연락처
+              <input class="edit-recipient" data-key="receiver_phone" value="${esc(receiverPhone)}" placeholder="연락처 입력">
+            </label>
+          </div>
+          <div class="rec-col">
+            <label>우편번호
+              <input class="edit-recipient" data-key="postcode" value="${esc(postcode)}" placeholder="우편번호">
+            </label>
+            <label>주소
+              <input class="edit-recipient" data-key="address" value="${esc(address)}" placeholder="주소">
+            </label>
+            <label>상세주소
+              <input class="edit-recipient" data-key="address_detail" value="${esc(addressDetail)}" placeholder="상세주소">
+            </label>
+          </div>
+          <div class="rec-col memo-col">
+            <label>관리자 메모
+              <textarea class="edit-admin-memo" placeholder="내부 메모 (모든 상품에 동일하게 저장됩니다)">${esc(adminMemo)}</textarea>
+            </label>
+          </div>
+        </div>`;
 
-        const wrapper = key === 'customs_number'
-          ? 'grid-column: span 3;'
-          : (key === 'address' ? 'grid-column: span 2;' : '');
-
-        return `<label style="${wrapper}">${label}<input class="edit-recipient" data-key="${key}" value="${esc(v)}"${attrs}></label>`;
-      }).join('');
-
+      // ===== 주문 상품: 2열 그리드 =====
       const productsHtml = items.map((it, i) => {
-        const extraKeys = ['selected_color','selected_size','selected_hem','selected_other'];
-        const extraHtml = extraKeys.map(k => {
-          const v = it[k];
-          if (v === undefined || v === null || v === '') return '';
-          return `<div class="nav-order-field"><span>${labelMap[k] || k}</span><b>${esc(val(v))}</b></div>`;
-        }).join('');
+        const optField = (label, val) => val ? `<div class="opt-field"><span>${label}</span><b>${esc(val)}</b></div>` : '';
+        const optLeftHtml =
+          optField('색상', it.selected_color) +
+          optField('사이즈', it.selected_size) +
+          optField('선택 밑단', it.selected_hem) +
+          optField('추가 옵션', it.selected_other) +
+          (optLeftHtml === '' ? '' : ''); // placeholder
+        const leftColContent =
+          (it.selected_color ? optField('색상', it.selected_color) : '') +
+          (it.selected_size ? optField('사이즈', it.selected_size) : '') +
+          (it.selected_hem ? optField('선택 밑단', it.selected_hem) : '') +
+          (it.selected_other ? optField('추가 옵션', it.selected_other) : '') ||
+          '<div class="opt-field"><span>옵션</span><b>-</b></div>';
 
         return `
           <div class="nav-order-product">
             <div class="nav-order-product-head">
               <div>
-                <small>${i+1}</small>
+                <small>${i + 1}</small>
                 <strong>${esc(it.product_name || '상품명 없음')}</strong>
                 <span>${esc(it.product_code || '')}</span>
               </div>
@@ -1812,25 +1925,26 @@
               <span>수량: ${Number(it.quantity || 1)}개</span>
               <span>상품 소계: ${won(Number(it.product_price || 0) * Number(it.quantity || 1))}</span>
             </div>
-            <div class="nav-order-extra order-option-grid">${extraHtml}</div>
-            ${it.request_content ? `<div class="nav-order-field" style="margin-top:8px"><span>요청사항</span><b>${esc(it.request_content)}</b></div>` : ''}
-            <div class="nav-order-edit-grid">
-              <label>배송상태
-                <select class="edit-status">
-                  ${statusOptions.map(s => `<option value="${s}" ${s === (it.status||'주문접수') ? 'selected' : ''}>${s}</option>`).join('')}
-                </select>
-              </label>
-              <label>택배사
-                <select class="edit-courier">
-                  ${['','CJ대한통운','롯데택배','한진택배','우체국택배','로젠택배','경동택배','대신택배','합동택배','천일택배','일양로지스','건영택배','EMS','기타'].map(c=>`<option value="${esc(c)}" ${c === (it.courier || '') ? 'selected' : ''}>${c || '택배사 선택'}</option>`).join('')}
-                </select>
-              </label>
-              <label class="tracking-field">운송장 번호
-                <input type="text" class="edit-tracking" value="${esc(it.tracking_number || '')}" placeholder="숫자만 입력">
-              </label>
-              <label class="memo-field">관리자 메모
-                <textarea class="edit-memo" placeholder="내부 메모">${esc(it.memo || '')}</textarea>
-              </label>
+            ${it.request_content ? `<div class="opt-field" style="margin-top:8px;"><span>고객 요청사항</span><b>${esc(it.request_content)}</b></div>` : ''}
+            <div class="nav-order-product-options-2col">
+              <div class="opt-col">
+                ${leftColContent}
+              </div>
+              <div class="opt-col">
+                <label>주문진행상태
+                  <select class="edit-status">
+                    ${statusOptions.map(s => `<option value="${s}" ${s === (it.status || '주문접수') ? 'selected' : ''}>${s}</option>`).join('')}
+                  </select>
+                </label>
+                <label>택배사
+                  <select class="edit-courier">
+                    ${['','CJ대한통운','롯데택배','한진택배','우체국택배','로젠택배','경동택배','대신택배','합동택배','천일택배','일양로지스','건영택배','EMS','기타'].map(c => `<option value="${esc(c)}" ${c === (it.courier || '') ? 'selected' : ''}>${c || '택배사 선택'}</option>`).join('')}
+                  </select>
+                </label>
+                <label>운송장 번호
+                  <input type="text" class="edit-tracking" value="${esc(it.tracking_number || '')}" placeholder="숫자만 입력">
+                </label>
+              </div>
             </div>
           </div>`;
       }).join('');
@@ -1855,7 +1969,7 @@
           </div>
           <div class="nav-order-section">
             <h3>주문자 / 배송지 정보</h3>
-            <div class="nav-order-recipient-edit-grid">${sharedHtml}</div>
+            ${recipientHtml}
           </div>
           <div class="nav-order-section">
             <h3>주문 상품 (${items.length}건)</h3>
@@ -1879,17 +1993,18 @@
         else { alert('주문이 완전히 삭제되었습니다.'); modal.remove(); selectedOrders.clear(); loadOrders(); }
       };
 
-      // ⭐⭐ 핵심: 스키마 필터링 + 개별 저장 + 명확한 에러 표시
       modal.querySelector('#save-order-edit').onclick = async () => {
         const btn = modal.querySelector('#save-order-edit');
         btn.disabled = true; btn.textContent = '저장 중...';
 
         try {
-          // 1) 입력값 수집
+          // 1) 수취인 입력 수집
           const recipientValues = {};
           modal.querySelectorAll('.edit-recipient').forEach(input => {
             recipientValues[input.dataset.key] = input.value.trim();
           });
+          // 관리자 메모 (상단 1개)
+          const adminMemoVal = (modal.querySelector('.edit-admin-memo')?.value || '').trim();
 
           // 통관번호 검증
           const customsRaw = recipientValues.customs_number || '';
@@ -1899,7 +2014,7 @@
             return;
           }
 
-          // 2) 각 상품별 편집값 수집
+          // 2) 상품별 편집값
           const productCards = modal.querySelectorAll('.nav-order-product');
           const perItemUpdates = [];
           items.forEach((it, idx) => {
@@ -1910,18 +2025,16 @@
               status: card.querySelector('.edit-status').value,
               courier: card.querySelector('.edit-courier').value.trim(),
               tracking_number: card.querySelector('.edit-tracking').value.trim(),
-              memo: card.querySelector('.edit-memo').value.trim(),
             });
           });
 
-          // 3) orders 테이블 실제 컬럼 조회 (샘플 1건)
+          // 3) orders 스키마 확인 (없는 컬럼 자동 스킵)
           let orderColumns = null;
           try {
             const { data: probe, error: probeErr } = await db.from('orders').select('*').limit(1);
             if (!probeErr && probe && probe[0]) {
               orderColumns = new Set(Object.keys(probe[0]));
             } else {
-              // 데이터가 없을 때 화이트리스트
               orderColumns = new Set([
                 'id','order_number','member_id','product_id',
                 'product_code','product_name','product_price','quantity','total_price',
@@ -1955,24 +2068,22 @@
             customs_number: recipientValues.customs_number,
           });
 
-          // 4) 각 주문 row 업데이트 (부분 성공 허용)
+          // 4) 주문 row별 개별 저장 (관리자 메모는 모든 row에 동일하게)
           const errors = [];
-          const skipped = [];
           for (const upd of perItemUpdates) {
             const payload = {
               ...recipientForOrders,
               status: upd.status,
               courier: upd.courier || null,
               tracking_number: upd.tracking_number || null,
-              memo: upd.memo || null,
+              memo: adminMemoVal || null,
             };
             const { error } = await db.from('orders').update(payload).eq('id', upd.id);
             if (error) errors.push(`[주문ID ${upd.id}] ${error.message}`);
           }
 
-          // 5) members에도 통관번호 반영 (있으면)
-          let memberSaved = false;
-          let memberErrMsg = '';
+          // 5) members에도 통관번호 저장(있으면)
+          let memberSaved = false, memberErrMsg = '';
           if (first.member_id) {
             const memberPayload = {};
             if (recipientValues.customs_number) memberPayload.customs_number = recipientValues.customs_number;
@@ -1984,8 +2095,7 @@
 
             if (Object.keys(memberPayload).length > 0) {
               const { error: mErr } = await db.from('members').update(memberPayload).eq('id', first.member_id);
-              if (mErr) { memberErrMsg = mErr.message; }
-              else memberSaved = true;
+              if (mErr) memberErrMsg = mErr.message; else memberSaved = true;
             }
           }
 
@@ -1993,17 +2103,14 @@
           btn.textContent = '변경사항 저장';
 
           if (errors.length === perItemUpdates.length) {
-            // 전부 실패
             alert('저장 실패:\n' + errors.join('\n'));
           } else if (errors.length > 0) {
-            // 일부 실패
             alert('일부 저장 실패 (성공 ' + (perItemUpdates.length - errors.length) + '/' + perItemUpdates.length + '):\n' + errors.join('\n'));
             loadOrders();
           } else {
-            // 전부 성공
             let msg = '저장 완료!';
             if (memberSaved) msg += '\n(회원 정보에도 반영됨)';
-            if (memberErrMsg) msg += '\n\n⚠ 회원 정보 저장은 실패: ' + memberErrMsg + '\n(members 테이블에 customs_number 컬럼이 없을 수 있습니다)';
+            if (memberErrMsg) msg += '\n\n⚠ 회원 정보 저장 실패: ' + memberErrMsg;
             alert(msg);
             modal.remove();
             loadOrders();
@@ -2131,7 +2238,6 @@
       };
     }
 
-    // ⭐ 회원 상세 — 통관번호 수정 가능
     function openMemberDetailModal(memberId) {
       const m = allMembers.find(x => String(x.id) === String(memberId)); if (!m) return;
       const modal = document.createElement('div'); modal.className = 'modal-backdrop';
