@@ -334,6 +334,12 @@
     .nav-order-edit-grid .tracking-field { grid-column:3; }
     .nav-order-edit-grid .memo-field { grid-column:1/-1; }
     .nav-order-edit-grid textarea { resize:vertical; min-height:54px; }
+    .nav-order-recipient-edit-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:8px; }
+    .nav-order-recipient-edit-grid label { display:flex; flex-direction:column; gap:5px; min-width:0; color:#475569; font-size:11px; font-weight:700; }
+    .nav-order-recipient-edit-grid input { width:100%; min-width:0; border:1px solid #dce2e8; border-radius:6px; padding:9px 8px; color:#1f2937; background:#fff; font:inherit; font-size:12px; box-sizing:border-box; }
+    .member-readonly-value { background:#f3f4f6 !important; color:#64748b !important; }
+    @media(max-width:900px) { .nav-order-recipient-edit-grid { grid-template-columns:repeat(4,minmax(0,1fr)); } }
+    @media(max-width:560px) { .nav-order-recipient-edit-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
     .nav-order-footer { display:flex; justify-content:flex-end; gap:8px; padding:14px 20px; background:#fff; border-top:1px solid #e5e7eb; }
     .nav-order-footer button { min-width:120px; }
     @media(max-width:700px) {
@@ -1908,7 +1914,12 @@
       };
       const val = v => (v === null || v === undefined || v === '') ? '-' :
         (typeof v === 'object' ? JSON.stringify(v) : String(v));
-      const sharedKeys = ['depositor_name','receiver_name','receiver_phone','postcode','address','address_detail'];
+      const sharedKeys = ['depositor_name','customs_number','receiver_name','receiver_phone','postcode','address','address_detail'];
+      const recipientInputMeta = [
+        ['depositor_name','입금자명'], ['customs_number','개인통관고유부호'],
+        ['receiver_name','수취인'], ['receiver_phone','연락처'],
+        ['postcode','우편번호'], ['address','주소'], ['address_detail','상세주소']
+      ];
       
       // 쿠폰은 개별 상품 가격에서 차감하지 않고 주문 전체 금액에서 별도로 계산합니다.
       let totalProductPrice = 0, totalShippingFee = 0;
@@ -1926,10 +1937,9 @@
         : Math.min(totalProductPrice, Number(usedCoupon.discount_value || 0))) : Number(first.coupon_discount || first.discount_amount || 0);
       const finalTotal = Math.max(0, totalProductPrice + totalShippingFee - couponDiscount);
 
-      const sharedHtml = sharedKeys.map(k => {
-        if (first[k] === undefined && !items.some(x=>x[k] !== undefined)) return '';
-        const v = items.map(x=>x[k]).find(x=>x !== undefined && x !== null && x !== '') ?? first[k];
-        return `<div class="nav-order-field"><span>${labelMap[k] || k}</span><b>${esc(val(v))}</b></div>`;
+      const sharedHtml = recipientInputMeta.map(([key,label]) => {
+        const v = items.map(x=>x[key]).find(x=>x !== undefined && x !== null && x !== '') ?? first[key] ?? '';
+        return `<label>${label}<input class="edit-recipient" data-key="${key}" value="${esc(v)}" placeholder="${label} 입력"></label>`;
       }).join('');
 
       const productsHtml = items.map((it, i) => {
@@ -1965,7 +1975,10 @@
                 </select>
               </label>
               <label>택배사
-                <input type="text" class="edit-courier" value="${esc(it.courier || '')}" placeholder="예: CJ대한통운">
+                <select class="edit-courier">
+                  ${['','CJ대한통운','롯데택배','한진택배','우체국택배','로젠택배','로젠택배','경동택배','대신택배','합동택배','천일택배','일양로지스','건영택배','EMS','기타'].filter((v,i,a)=>a.indexOf(v)===i).map(c=>`<option value="${esc(c)}" ${c === (it.courier || '') ? 'selected' : ''}>${c || '택배사 선택'}</option>`).join('')}
+                  ${it.courier && !['CJ대한통운','롯데택배','한진택배','우체국택배','로젠택배','경동택배','대신택배','합동택배','천일택배','일양로지스','건영택배','EMS','기타'].includes(it.courier) ? `<option value="${esc(it.courier)}" selected>${esc(it.courier)}</option>` : ''}
+                </select>
               </label>
               <label class="tracking-field">운송장 번호
                 <input type="text" class="edit-tracking" value="${esc(it.tracking_number || '')}" placeholder="숫자만 입력">
@@ -1997,7 +2010,7 @@
           </div>
           <div class="nav-order-section">
             <h3>주문자 / 배송지 정보</h3>
-            <div class="nav-order-info-grid order-recipient-grid">${sharedHtml}</div>
+            <div class="nav-order-recipient-edit-grid">${sharedHtml}</div>
           </div>
           <div class="nav-order-section">
             <h3>주문 상품 (${items.length}건)</h3>
@@ -2024,6 +2037,8 @@
         const btn = modal.querySelector('#save-order-edit');
         btn.disabled = true; btn.textContent = '저장 중...';
         const updates = [];
+        const recipientUpdates = {};
+        modal.querySelectorAll('.edit-recipient').forEach(input => { recipientUpdates[input.dataset.key] = input.value.trim(); });
         const productCards = modal.querySelectorAll('.nav-order-product');
         items.forEach((it, idx) => {
           const card = productCards[idx];
@@ -2039,6 +2054,7 @@
         let hasError = false;
         for (const upd of updates) {
           const { error } = await db.from('orders').update({
+            ...recipientUpdates,
             status: upd.status, courier: upd.courier, tracking_number: upd.tracking_number, memo: upd.memo
           }).eq('id', upd.id);
           if (error) { hasError = true; break; }
@@ -2166,8 +2182,17 @@
       const m=allMembers.find(x=>String(x.id)===String(memberId)); if(!m) return;
       const modal=document.createElement('div'); modal.className='modal-backdrop';
       const display = (v) => v===null || v===undefined || v==='' ? '-' : (typeof v==='object' ? JSON.stringify(v) : String(v));
+      const formatMemberCreatedAt = (value) => {
+        if (!value) return '-';
+        const d = new Date(value);
+        if (Number.isNaN(d.getTime())) return display(value);
+        const parts = new Intl.DateTimeFormat('ko-KR', { timeZone:'Asia/Seoul', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', hour12:false }).formatToParts(d);
+        const part = type => parts.find(x => x.type === type)?.value || '';
+        return `${part('year')}/${part('month')}/${part('day')} ${part('hour')}:${part('minute')}`;
+      };
       const fields = [
-        ['회원가입 날짜 및 시간', m.created_at], ['아이디', m.user_id || m.email], ['비밀번호', m.password],
+        ['회원가입 날짜', formatMemberCreatedAt(m.created_at)],
+        ['아이디', display(m.user_id)], ['비밀번호', '수정 불가'],
         ['이름', m.name], ['수취인', m.receiver_name], ['연락처', m.phone || m.receiver_phone],
         ['개인통관고유부호', m.customs_number || m.personal_customs_code], ['이메일', m.email],
         ['우편번호', m.postcode], ['주소', m.address], ['상세주소', m.address_detail]
