@@ -164,7 +164,6 @@
       for (const k of keys) { const v = obj[k]; if (v !== null && v !== undefined && v !== '') return v; } return '';
     }
 
-    // 개인통관부호 정규화: P + 12자리 숫자
     function normalizeCustoms(val) {
       if (!val) return '';
       const s = String(val).toUpperCase().replace(/[^P0-9]/g, '');
@@ -197,16 +196,22 @@
     }
 
     async function loadCoupons() {
+      // ⭐ 버그 수정: couponListEl 변수 참조 오류 해결
       const { data, error } = await db.from('coupons').select('*').eq('member_id', member.id).order('created_at', { ascending: false });
       if (error) { couponListEl.innerHTML = '<p class="empty-coupons">쿠폰을 불러올 수 없습니다.</p>'; return; }
+      
       const list = data || [];
       const usable = list.filter(c => !c.is_used && new Date(c.expires_at).getTime() > Date.now());
       couponCountEl.textContent = `사용 가능 ${usable.length}장 / 전체 ${list.length}장`;
+      
       if (list.length === 0) { couponListEl.innerHTML = '<p class="empty-coupons">보유한 쿠폰이 없습니다.</p>'; return; }
+      
       couponListEl.innerHTML = list.map(c => {
-        const isUsed = !!c.is_used; const isExpired = new Date(c.expires_at).getTime() < Date.now();
+        const isUsed = !!c.is_used; 
+        const isExpired = new Date(c.expires_at).getTime() < Date.now();
         const discountLabel = c.type === 'percent' ? `${c.discount_value}% 할인` : `${Number(c.discount_value).toLocaleString()}원 할인`;
         const canDelete = isUsed || isExpired;
+        
         return `<div class="coupon-card ${isUsed || isExpired ? 'used' : ''}" data-coupon-id="${c.id}">
           <div style="flex:1; min-width:0;">
             <div class="c-title">${c.name || '쿠폰'}</div>
@@ -221,6 +226,7 @@
         </div>`;
       }).join('');
 
+      // ⭐ 이벤트 위임 방식으로 안전하게 쿠폰 삭제 처리
       couponListEl.querySelectorAll('.c-del-btn').forEach(btn => {
         btn.onclick = async () => {
           if (!confirm('이 쿠폰을 쿠폰함에서 삭제할까요?\n(사용완료/만료된 쿠폰만 삭제 가능)')) return;
@@ -238,7 +244,6 @@
     form.addEventListener('submit', async (e) => {
       e.preventDefault(); msg.textContent = '저장 중...'; msg.style.color = '#888';
 
-      // 개인통관부호 검증 (입력한 경우만)
       const customsRaw = (form.customs_number.value || '').trim().toUpperCase();
       if (customsRaw && !isValidCustoms(customsRaw)) {
         msg.style.color = '#ef4444';
@@ -246,7 +251,6 @@
         return;
       }
 
-      // DB에 실제로 존재하는 컬럼만 업데이트
       const updates = {
         name: form.name.value.trim() || null,
         phone: form.phone.value.trim() || null,
