@@ -193,11 +193,6 @@ async function openOrderEditModal(groupOrOrder) {
       modal.querySelectorAll('.edit-recipient').forEach(input => recipientValues[input.dataset.key] = input.value.trim());
       recipientValues.customs_number = (recipientValues.customs_number || '').toUpperCase();
       const adminMemoVal = (modal.querySelector('.edit-admin-memo')?.value || '').trim();
-      const customsRaw = recipientValues.customs_number || '';
-      if (customsRaw && !/^P\\d{12}$/.test(customsRaw)) {
-        alert('개인통관고유부호는 영문 P로 시작하는 총 13자리여야 합니다. (예: P123456789012)');
-        btn.disabled = false; btn.textContent = '변경사항 저장'; modal.querySelector('.customs-input')?.focus(); return;
-      }
       const sharedShipping = {
         status: modal.querySelector('.edit-status')?.value || first.status || '주문접수',
         courier: modal.querySelector('.edit-courier')?.value.trim() || null,
