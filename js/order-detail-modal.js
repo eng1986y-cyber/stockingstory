@@ -31,15 +31,74 @@ async function openOrderEditModal(groupOrOrder) {
       .product-options-grid {
         display:grid;
         grid-template-columns:repeat(4,minmax(0,1fr));
-        gap:8px;
+        gap:10px;
         align-content:start;
       }
-      .product-options-grid .opt-field { min-width:0; }
+      .product-options-grid .opt-field {
+        min-width:0;
+        background:#f7f8fa;
+        border:1px solid #e4e7ec;
+        border-radius:10px;
+        padding:10px 12px;
+        display:flex;
+        flex-direction:column;
+        gap:5px;
+      }
+      .product-options-grid .opt-field span {
+        font-size:11px;
+        color:#667085;
+        font-weight:600;
+      }
+      .product-options-grid .opt-field b {
+        font-size:14px;
+        color:#20242b;
+        font-weight:700;
+        line-height:1.4;
+        overflow-wrap:anywhere;
+      }
+      .order-shipping-editor {
+        border:1px solid #e5e7eb;
+        border-radius:12px;
+        background:#fafafa;
+        padding:12px;
+        display:grid;
+        gap:10px;
+      }
+      .order-shipping-editor h4 {
+        margin:0;
+        font-size:14px;
+        font-weight:700;
+      }
+      .order-shipping-item {
+        background:#fff;
+        border:1px solid #e6e8ec;
+        border-radius:10px;
+        padding:10px;
+      }
+      .order-shipping-item-title {
+        font-size:13px;
+        font-weight:700;
+        color:#374151;
+        margin-bottom:8px;
+        overflow-wrap:anywhere;
+      }
       .product-shipping-row {
         display:grid;
         grid-template-columns:repeat(3,minmax(0,1fr));
         gap:8px;
         align-content:start;
+      }
+      .product-shipping-row label {
+        font-size:12px;
+        font-weight:600;
+        color:#4b5563;
+      }
+      .product-shipping-row input,.product-shipping-row select {
+        min-height:38px;
+        border:1px solid #d1d5db;
+        border-radius:8px;
+        padding:7px 9px;
+        background:#fff;
       }
       @media(max-width:700px) {
         .recipient-row-4 { grid-template-columns:repeat(2,minmax(0,1fr)); }
@@ -159,6 +218,34 @@ async function openOrderEditModal(groupOrOrder) {
             value="${esc(addressDetail)}" placeholder="상세주소">
         </label>
       </div>
+      <div class="order-shipping-editor">
+        <h4>주문 진행 / 배송 정보</h4>
+        ${items.map((it, idx) => `
+          <div class="order-shipping-item">
+            <div class="order-shipping-item-title">${esc(it.product_name || `상품 ${idx + 1}`)}</div>
+            <div class="product-shipping-row">
+              <label>주문 진행 상태
+                <select class="edit-status">
+                  ${statusOptions.map(status =>
+                    `<option value="${esc(status)}" ${status === (it.status || '주문접수') ? 'selected' : ''}>${esc(status)}</option>`
+                  ).join('')}
+                </select>
+              </label>
+              <label>택배사
+                <select class="edit-courier">
+                  ${['','CJ대한통운','롯데택배','한진택배','우체국택배','로젠택배','경동택배','대신택배','합동택배','천일택배','일양로지스','건영택배','EMS','기타'].map(courier =>
+                    `<option value="${esc(courier)}" ${courier === (it.courier || '') ? 'selected' : ''}>${courier || '택배사 선택'}</option>`
+                  ).join('')}
+                </select>
+              </label>
+              <label>운송장 번호
+                <input type="text" class="edit-tracking"
+                  value="${esc(it.tracking_number || '')}" placeholder="운송장 번호 입력">
+              </label>
+            </div>
+          </div>
+        `).join('')}
+      </div>
       <div class="recipient-memo-row">
         <label>관리자 메모
           <textarea class="edit-admin-memo"
@@ -199,26 +286,6 @@ async function openOrderEditModal(groupOrOrder) {
         <div class="product-options-row">
           <div class="product-options-grid">
             ${optionsHtml}
-          </div>
-          <div class="product-shipping-row">
-            <label>주문 진행 상태
-              <select class="edit-status">
-                ${statusOptions.map(status =>
-                  `<option value="${esc(status)}" ${status === (it.status || '주문접수') ? 'selected' : ''}>${esc(status)}</option>`
-                ).join('')}
-              </select>
-            </label>
-            <label>택배사
-              <select class="edit-courier">
-                ${['','CJ대한통운','롯데택배','한진택배','우체국택배','로젠택배','경동택배','대신택배','합동택배','천일택배','일양로지스','건영택배','EMS','기타'].map(courier =>
-                  `<option value="${esc(courier)}" ${courier === (it.courier || '') ? 'selected' : ''}>${courier || '택배사 선택'}</option>`
-                ).join('')}
-              </select>
-            </label>
-            <label>운송장 번호
-              <input type="text" class="edit-tracking"
-                value="${esc(it.tracking_number || '')}" placeholder="운송장 번호 입력">
-            </label>
           </div>
         </div>
       </div>`;
@@ -304,10 +371,10 @@ async function openOrderEditModal(groupOrOrder) {
       }
 
       // 2) 상품별 편집값
-      const productCards = modal.querySelectorAll('.nav-order-product');
+      const shippingCards = modal.querySelectorAll('.order-shipping-item');
       const perItemUpdates = [];
       items.forEach((item, idx) => {
-        const card = productCards[idx];
+        const card = shippingCards[idx];
         if (!card) return;
         perItemUpdates.push({
           id: item.id,
