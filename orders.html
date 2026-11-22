@@ -82,30 +82,20 @@
       return Number(n || 0).toLocaleString('ko-KR') + '원';
     }
 
-    // ★ 한 줄(order row)의 "제품 금액(단가×수량)"을 정확히 계산
+    // 주문 row의 제품 금액. 이미 저장된 금액을 우선하며 단가 필드는 수량을 곱함.
     function calcLineProduct(o) {
       const qty = Number(o.quantity || 1);
+      if (o.line_total != null) return Number(o.line_total);
+      if (o.subtotal != null) return Number(o.subtotal);
+      if (o.total_price != null) return Number(o.total_price) - Number(o.shipping_fee || 0);
 
-      // 1) 이미 총액으로 저장된 필드가 있으면 그대로 사용 (단가×수량 금지)
-      if (o.line_total != null)     return Number(o.line_total);
-      if (o.subtotal != null)       return Number(o.subtotal);
-      // total_price가 "제품 총액"인 경우: 배송비가 별도면 total_price - shipping_fee
-      // (배송비가 total_price에 포함되어 저장되는 스키마라 이렇게 처리)
-      if (o.total_price != null) {
-        return Number(o.total_price) - Number(o.shipping_fee || 0);
-      }
-
-      // 2) 단가 필드는 반드시 × 수량
       const unitCandidates = [o.unit_price, o.product_price, o.price, o.item_price];
       for (const c of unitCandidates) {
-        if (c != null && c !== '') {
-          return Number(c) * qty;
-        }
+        if (c != null && c !== '') return Number(c) * qty;
       }
       return 0;
     }
 
-    // ★ 한 줄의 단가(표시용)
     function calcLineUnitPrice(o) {
       const qty = Number(o.quantity || 1);
       const lineProduct = calcLineProduct(o);
@@ -113,7 +103,6 @@
       for (const c of unitCandidates) {
         if (c != null && c !== '') return Number(c);
       }
-      // 단가 필드가 없으면 총액/수량으로 역산
       return qty > 0 ? Math.round(lineProduct / qty) : lineProduct;
     }
 
@@ -129,49 +118,35 @@
       }
       const first = data[0];
 
-      // ── 금액 계산 ──
+      // 금액: 주문 시 저장된 상품가격(회원등급 가격 포함)을 그대로 사용. 주문조회에서 등급할인을 재계산/차감하지 않음.
       let productTotal = 0;
       let totalShippingFee = 0;
-      let gradeDiscount = 0;
-      let gradeDiscountAmount = 0;
       let couponDiscountAmount = 0;
       const couponNames = new Set();
 
       data.forEach(o => {
         productTotal += calcLineProduct(o);
         totalShippingFee += Number(o.shipping_fee || 0);
-
-        const gd = Number(o.grade_discount || 0);
-        if (gd > gradeDiscount) gradeDiscount = gd;
-        gradeDiscountAmount += Number(o.grade_discount_amount || 0);
-
         couponDiscountAmount += Number(
           o.coupon_discount_amount != null ? o.coupon_discount_amount :
           o.coupon_discount != null ? o.coupon_discount :
           o.discount_amount != null ? o.discount_amount : 0
         );
-
         const cname = o.coupon_name || o.coupon_code || o.used_coupon;
         if (cname) couponNames.add(String(cname));
       });
 
-      if (gradeDiscountAmount === 0 && gradeDiscount > 0) {
-        gradeDiscountAmount = Math.round(productTotal * gradeDiscount / 100);
-      }
+      // 도매/VIP 회원 할인은 주문 저장 가격에 이미 반영된 것으로 처리합니다.
+      // 따라서 grade_discount 및 grade_discount_amount를 주문조회에서 읽거나 차감하지 않습니다.
+      const finalTotal = productTotal + totalShippingFee - couponDiscountAmount;
 
-      const finalTotal = productTotal + totalShippingFee - gradeDiscountAmount - couponDiscountAmount;
-
-      // ── 계좌 정보 ──
+      // 계좌 정보
       let acc = { bank: '', number: '', holder: '' };
       try {
         const { data: accData } = await db.from('settings').select('key, value').in('key', ['account_bank', 'account_number', 'account_holder']);
         const map = {};
         (accData || []).forEach(row => { map[row.key] = row.value || ''; });
-        acc = {
-          bank: map.account_bank || '',
-          number: map.account_number || '',
-          holder: map.account_holder || ''
-        };
+        acc = { bank: map.account_bank || '', number: map.account_number || '', holder: map.account_holder || '' };
       } catch (e) { console.warn('계좌 정보 로드 실패:', e); }
 
       const trackingHtml = (first.courier || first.tracking_number) ? `
@@ -181,13 +156,6 @@
             택배사: <b style="color:#fff;">${first.courier || '정보 없음'}</b><br>
             운송장 번호: <b style="color:#fff; letter-spacing:0.5px;">${first.tracking_number || '정보 없음'}</b>
           </div>
-        </div>
-      ` : '';
-
-      const gradeDiscountHtml = gradeDiscount > 0 ? `
-        <div style="margin-top:12px; padding:12px; background:#1e3a8a; border:1px solid #3b82f6; border-radius:8px; font-size:13px;">
-          <div style="font-weight:700; color:#bfdbfe; margin-bottom:4px;">등급 할인</div>
-          <div style="color:#e0e7ff;">등급 할인 <b>${gradeDiscount}%</b> 적용 (${fmtWon(gradeDiscountAmount)})</div>
         </div>
       ` : '';
 
@@ -220,7 +188,7 @@
         </div>
       ` : '';
 
-      // ── 제품 목록 (단가 × 수량 = 금액 명시) ──
+      // 제품 목록
       const itemsHtml = data.map(o => {
         const qty = Number(o.quantity || 1);
         const unit = calcLineUnitPrice(o);
@@ -240,7 +208,7 @@
         `;
       }).join('');
 
-      // ── 금액 명세서 ──
+      // 금액 명세
       const priceRows = [];
       priceRows.push(`<div style="display:flex; justify-content:space-between; padding:4px 0; color:#ccc;">
         <span>제품 금액</span><span style="color:#e5e7eb;">${fmtWon(productTotal)}</span>
@@ -248,11 +216,6 @@
       priceRows.push(`<div style="display:flex; justify-content:space-between; padding:4px 0; color:#ccc;">
         <span>배송비</span><span style="color:#e5e7eb;">${totalShippingFee > 0 ? fmtWon(totalShippingFee) : '무료'}</span>
       </div>`);
-      if (gradeDiscountAmount > 0) {
-        priceRows.push(`<div style="display:flex; justify-content:space-between; padding:4px 0; color:#93c5fd;">
-          <span>등급 할인 (${gradeDiscount}%)</span><span>-${fmtWon(gradeDiscountAmount)}</span>
-        </div>`);
-      }
       if (couponDiscountAmount > 0) {
         priceRows.push(`<div style="display:flex; justify-content:space-between; padding:4px 0; color:#c4b5fd;">
           <span>쿠폰 할인${couponNames.size > 0 ? ` (${Array.from(couponNames).join(', ')})` : ''}</span><span>-${fmtWon(couponDiscountAmount)}</span>
@@ -276,7 +239,6 @@
             ${first.memo ? `<br>요청: ${first.memo}` : ''}
           </div>
           ${trackingHtml}
-          ${gradeDiscountHtml}
           ${couponHtml}
           ${accountHtml}
           <hr style="border:0; border-top:1px solid #222; margin:12px 0;">
