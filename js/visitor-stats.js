@@ -1,40 +1,24 @@
-// ============================================================
-// visitor-stats.js — 방문자 통계
-// ============================================================
-
+// visitor-stats.js — 관리자 방문자 통계 (KST)
 async function loadVisitorStats() {
+  const ids = ['stat-today', 'stat-yesterday', 'stat-total'];
   try {
-    const parts = new Intl.DateTimeFormat('en-CA', {
-      timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit'
-    }).formatToParts(new Date());
-    const part = t => parts.find(x => x.type === t)?.value || '';
-    const todayKst = `${part('year')}-${part('month')}-${part('day')}`;
-    const todayStart = new Date(`${todayKst}T00:00:00+09:00`);
-    const yesterdayStart = new Date(todayStart.getTime() - 86400000);
-    const tomorrowStart = new Date(todayStart.getTime() + 86400000);
+    const { data, error } = await db.rpc('get_visitor_stats');
+    if (error) throw error;
 
-    const { count: todayCount, error: todayErr } = await db.from('visitors')
-      .select('*', { count: 'exact', head: true })
-      .gte('created_at', todayStart.toISOString())
-      .lt('created_at', tomorrowStart.toISOString());
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row) throw new Error('통계 결과가 비어 있습니다.');
 
-    const { count: yesterdayCount, error: yesterdayErr } = await db.from('visitors')
-      .select('*', { count: 'exact', head: true })
-      .gte('created_at', yesterdayStart.toISOString())
-      .lt('created_at', todayStart.toISOString());
-
-    const { count: totalCount, error: totalErr } = await db.from('visitors')
-      .select('*', { count: 'exact', head: true });
-
-    if (todayErr || yesterdayErr || totalErr) throw todayErr || yesterdayErr || totalErr;
-
-    document.getElementById('stat-today').textContent = (todayCount || 0).toLocaleString();
-    document.getElementById('stat-yesterday').textContent = (yesterdayCount || 0).toLocaleString();
-    document.getElementById('stat-total').textContent = (totalCount || 0).toLocaleString();
+    document.getElementById('stat-today').textContent =
+      Number(row.today_count || 0).toLocaleString();
+    document.getElementById('stat-yesterday').textContent =
+      Number(row.yesterday_count || 0).toLocaleString();
+    document.getElementById('stat-total').textContent =
+      Number(row.total_count || 0).toLocaleString();
   } catch (err) {
     console.warn('방문자 통계 로드 실패:', err);
-    document.getElementById('stat-today').textContent = '-';
-    document.getElementById('stat-yesterday').textContent = '-';
-    document.getElementById('stat-total').textContent = '-';
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = '-';
+    });
   }
 }
