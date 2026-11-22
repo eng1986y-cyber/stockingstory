@@ -1,3 +1,4 @@
+```javascript
 // ============================================================
 // order-detail-modal.js — 주문 상세 모달
 // 의존: config.js (ORDER_STATUS_OPTIONS), utils.js (esc, won)
@@ -16,16 +17,14 @@ async function openOrderEditModal(groupOrOrder) {
   const modal = document.createElement('div');
   modal.className = 'modal-backdrop order-detail-backdrop';
 
-  const statusOptions = [
-    ...new Set([
-      ...ORDER_STATUS_OPTIONS,
-      ...items.map(x => x.status).filter(Boolean)
-    ])
-  ];
+  const statusOptions = [...new Set([
+    ...ORDER_STATUS_OPTIONS,
+    ...items.map(x => x.status).filter(Boolean)
+  ])];
 
-  // ------------------------------------------------------------
-  // 합계 계산
-  // ------------------------------------------------------------
+  // ============================================================
+  // 주문 금액 계산
+  // ============================================================
   let totalProductPrice = 0;
   let totalShippingFee = 0;
 
@@ -36,9 +35,9 @@ async function openOrderEditModal(groupOrOrder) {
     totalShippingFee += Number(it.shipping_fee || 0);
   });
 
-  // ------------------------------------------------------------
+  // ============================================================
   // 쿠폰 조회
-  // ------------------------------------------------------------
+  // ============================================================
   let usedCoupon = null;
 
   if (first.order_number) {
@@ -70,9 +69,9 @@ async function openOrderEditModal(groupOrOrder) {
     totalProductPrice + totalShippingFee - couponDiscount
   );
 
-  // ------------------------------------------------------------
+  // ============================================================
   // 회원 정보 조회
-  // ------------------------------------------------------------
+  // ============================================================
   let memberData = null;
 
   if (first.member_id) {
@@ -84,9 +83,9 @@ async function openOrderEditModal(groupOrOrder) {
     memberData = mData;
   }
 
-  // ------------------------------------------------------------
+  // ============================================================
   // 값 가져오기
-  // ------------------------------------------------------------
+  // ============================================================
   function pickValue(key, fallbackFromMember) {
     let v = items
       .map(x => x[key])
@@ -149,11 +148,12 @@ async function openOrderEditModal(groupOrOrder) {
 
   // 주문 전체 공통 관리자 메모
   const adminMemo =
-    items.map(x => x.memo).find(x => x !== undefined && x !== null && x !== '') || '';
+    items.map(x => x.memo)
+      .find(x => x !== undefined && x !== null && x !== '') || '';
 
-  // ------------------------------------------------------------
-  // 주문자 / 배송지 정보 HTML
-  // ------------------------------------------------------------
+  // ============================================================
+  // 주문자 / 배송지 HTML
+  // ============================================================
   const recipientHtml = `
     <div class="nav-order-recipient-layout">
 
@@ -241,7 +241,7 @@ async function openOrderEditModal(groupOrOrder) {
           관리자 메모
           <textarea
             class="edit-admin-memo"
-            placeholder="이 주문 전체에 적용되는 관리자 메모입니다.">${esc(adminMemo)}</textarea>
+            placeholder="관리자 전용 메모">${esc(adminMemo)}</textarea>
         </label>
 
       </div>
@@ -249,31 +249,24 @@ async function openOrderEditModal(groupOrOrder) {
     </div>
   `;
 
-  // ------------------------------------------------------------
+  // ============================================================
   // 주문 상품 HTML
-  // ------------------------------------------------------------
+  // ============================================================
   const productsHtml = items.map((it, i) => {
 
-    const optField = (label, val) => {
-      return (val !== undefined && val !== null && val !== '')
-        ? `
-          <div class="opt-field">
-            <span>${label}</span>
-            <b>${esc(val)}</b>
-          </div>
-        `
-        : `
-          <div class="opt-field">
-            <span>${label}</span>
-            <b>-</b>
-          </div>
-        `;
-    };
+    const optField = (label, val) => `
+      <div class="opt-field">
+        <span>${label}</span>
+        <b>${val !== undefined && val !== null && val !== ''
+          ? esc(val)
+          : '-'}</b>
+      </div>
+    `;
 
     return `
       <div class="nav-order-product">
 
-        <!-- 상품 제목 -->
+        <!-- 상품 정보 -->
         <div class="nav-order-product-head">
           <div>
             <small>${i + 1}</small>
@@ -289,7 +282,7 @@ async function openOrderEditModal(groupOrOrder) {
           </b>
         </div>
 
-        <!-- 상품 가격 -->
+        <!-- 가격 정보 -->
         <div class="nav-order-product-summary">
           <span>단가: ${won(it.product_price)}</span>
           <span>수량: ${Number(it.quantity || 1)}개</span>
@@ -306,7 +299,7 @@ async function openOrderEditModal(groupOrOrder) {
         ${
           it.request_content
             ? `
-              <div class="opt-field" style="margin-top:8px;">
+              <div class="opt-field customer-request-field">
                 <span>고객 요청사항</span>
                 <b>${esc(it.request_content)}</b>
               </div>
@@ -314,7 +307,7 @@ async function openOrderEditModal(groupOrOrder) {
             : ''
         }
 
-        <!-- 상품 옵션 : 4개 -->
+        <!-- 상품 옵션 : 4개 나란히 -->
         <div class="product-options-row">
 
           ${optField('색상', it.selected_color)}
@@ -324,7 +317,7 @@ async function openOrderEditModal(groupOrOrder) {
 
         </div>
 
-        <!-- 배송정보 : 3개 -->
+        <!-- 배송 정보 : 3개 나란히 -->
         <div class="product-shipping-row">
 
           <label>
@@ -385,9 +378,9 @@ async function openOrderEditModal(groupOrOrder) {
     `;
   }).join('');
 
-  // ------------------------------------------------------------
+  // ============================================================
   // 모달 HTML
-  // ------------------------------------------------------------
+  // ============================================================
   modal.innerHTML = `
     <div class="modal-box nav-order-modal">
 
@@ -482,15 +475,15 @@ async function openOrderEditModal(groupOrOrder) {
 
   document.body.appendChild(modal);
 
-  // ------------------------------------------------------------
+  // ============================================================
   // 모달 닫기
-  // ------------------------------------------------------------
+  // ============================================================
   modal.querySelector('#close-order-modal').onclick = () => modal.remove();
   modal.querySelector('#cancel-order-edit').onclick = () => modal.remove();
 
-  // ------------------------------------------------------------
+  // ============================================================
   // 주문 완전 삭제
-  // ------------------------------------------------------------
+  // ============================================================
   modal.querySelector('#hard-delete-order').onclick = async () => {
 
     if (!confirm(
@@ -515,9 +508,9 @@ async function openOrderEditModal(groupOrOrder) {
     }
   };
 
-  // ------------------------------------------------------------
-  // 저장
-  // ------------------------------------------------------------
+  // ============================================================
+  // 변경사항 저장
+  // ============================================================
   modal.querySelector('#save-order-edit').onclick = async () => {
 
     const btn = modal.querySelector('#save-order-edit');
@@ -527,17 +520,18 @@ async function openOrderEditModal(groupOrOrder) {
 
     try {
 
-      // 1. 주문자 / 배송지 입력 수집
+      // 1. 주문자 / 배송지 정보 수집
       const recipientValues = {};
 
       modal.querySelectorAll('.edit-recipient').forEach(input => {
         recipientValues[input.dataset.key] = input.value.trim();
       });
 
+      // 관리자 메모
       const adminMemoVal =
         (modal.querySelector('.edit-admin-memo')?.value || '').trim();
 
-      // 2. 통관번호 검증
+      // 2. 개인통관번호 확인
       const customsRaw = recipientValues.customs_number || '';
 
       if (customsRaw && !/^\d{13}$/.test(customsRaw)) {
@@ -552,7 +546,7 @@ async function openOrderEditModal(groupOrOrder) {
         return;
       }
 
-      // 3. 상품별 저장값 수집
+      // 3. 상품별 배송정보 수집
       const productCards = modal.querySelectorAll('.nav-order-product');
       const perItemUpdates = [];
 
@@ -569,7 +563,7 @@ async function openOrderEditModal(groupOrOrder) {
         });
       });
 
-      // 4. orders 테이블 스키마 확인
+      // 4. orders 테이블 컬럼 확인
       let orderColumns = null;
 
       try {
@@ -579,8 +573,11 @@ async function openOrderEditModal(groupOrOrder) {
           .limit(1);
 
         if (!probeErr && probe && probe[0]) {
+
           orderColumns = new Set(Object.keys(probe[0]));
+
         } else {
+
           orderColumns = new Set([
             'id',
             'order_number',
@@ -624,9 +621,7 @@ async function openOrderEditModal(groupOrOrder) {
         console.warn('스키마 확인 실패:', e);
       }
 
-      // ----------------------------------------------------------
       // 스키마에 존재하는 컬럼만 저장
-      // ----------------------------------------------------------
       const filterBySchema = (obj) => {
 
         if (!orderColumns) return obj;
@@ -646,9 +641,7 @@ async function openOrderEditModal(groupOrOrder) {
         return out;
       };
 
-      // ----------------------------------------------------------
-      // 주문자 / 배송지 공통 정보
-      // ----------------------------------------------------------
+      // 5. 주문자 / 배송지 공통 정보
       const recipientForOrders = filterBySchema({
         depositor_name: recipientValues.depositor_name,
         receiver_name: recipientValues.receiver_name,
@@ -659,10 +652,8 @@ async function openOrderEditModal(groupOrOrder) {
         customs_number: recipientValues.customs_number,
       });
 
-      // ----------------------------------------------------------
-      // 5. 주문 상품별 저장
-      // 관리자 메모는 주문 전체 공통으로 동일하게 저장
-      // ----------------------------------------------------------
+      // 6. 주문 상품별 저장
+      // 관리자 메모는 주문 전체 공통으로 저장
       const errors = [];
 
       for (const upd of perItemUpdates) {
@@ -684,9 +675,9 @@ async function openOrderEditModal(groupOrOrder) {
         }
       }
 
-      // ----------------------------------------------------------
-      // 6. 회원 정보 반영
-      // ----------------------------------------------------------
+      // ==========================================================
+      // 7. 회원 정보 업데이트
+      // ==========================================================
       let memberSaved = false;
       let memberErrMsg = '';
 
@@ -726,9 +717,9 @@ async function openOrderEditModal(groupOrOrder) {
         }
       }
 
-      // ----------------------------------------------------------
-      // 저장 결과
-      // ----------------------------------------------------------
+      // ==========================================================
+      // 8. 저장 결과
+      // ==========================================================
       btn.disabled = false;
       btn.textContent = '변경사항 저장';
 
@@ -741,7 +732,8 @@ async function openOrderEditModal(groupOrOrder) {
         alert(
           '일부 저장 실패 (성공 ' +
           (perItemUpdates.length - errors.length) +
-          '/' + perItemUpdates.length + '):\n' +
+          '/' + perItemUpdates.length +
+          '):\n' +
           errors.join('\n')
         );
 
@@ -768,6 +760,7 @@ async function openOrderEditModal(groupOrOrder) {
     } catch (err) {
 
       console.error(err);
+
       alert('저장 중 예외 발생: ' + (err.message || err));
 
       btn.disabled = false;
@@ -775,3 +768,4 @@ async function openOrderEditModal(groupOrOrder) {
     }
   };
 }
+```
