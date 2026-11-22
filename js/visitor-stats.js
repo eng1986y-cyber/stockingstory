@@ -1,46 +1,60 @@
-```javascript
 // ============================================================
-// visitor-stats.js — 관리자 방문자 통계
-// 한국시간 기준 오늘 / 어제 / 전체 방문자 조회
+// visitor-stats.js — 방문자 통계
 // ============================================================
 
 async function loadVisitorStats() {
-  const todayEl = document.getElementById('stat-today');
-  const yesterdayEl = document.getElementById('stat-yesterday');
-  const totalEl = document.getElementById('stat-total');
-
-  if (!todayEl || !yesterdayEl || !totalEl) return;
-
-  todayEl.textContent = '로딩중...';
-  yesterdayEl.textContent = '로딩중...';
-  totalEl.textContent = '로딩중...';
-
   try {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Seoul',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).formatToParts(new Date());
+
+    const part = t => parts.find(x => x.type === t)?.value || '';
+
+    const todayKst = `${part('year')}-${part('month')}-${part('day')}`;
+
+    const todayStart = new Date(`${todayKst}T00:00:00+09:00`);
+    const yesterdayStart = new Date(todayStart.getTime() - 86400000);
+    const tomorrowStart = new Date(todayStart.getTime() + 86400000);
+
     const client = window.db || db;
 
-    const { data, error } = await client.rpc('get_visitor_stats');
+    const { count: todayCount, error: todayErr } = await client
+      .from('visitors')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', todayStart.toISOString())
+      .lt('created_at', tomorrowStart.toISOString());
 
-    if (error) throw error;
+    const { count: yesterdayCount, error: yesterdayErr } = await client
+      .from('visitors')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', yesterdayStart.toISOString())
+      .lt('created_at', todayStart.toISOString());
 
-    const result = Array.isArray(data) ? data[0] : data;
+    const { count: totalCount, error: totalErr } = await client
+      .from('visitors')
+      .select('*', { count: 'exact', head: true });
 
-    if (!result) throw new Error('통계 결과가 없습니다.');
+    if (todayErr || yesterdayErr || totalErr) {
+      throw todayErr || yesterdayErr || totalErr;
+    }
 
-    todayEl.textContent =
-      Number(result.today_count || 0).toLocaleString('ko-KR');
+    document.getElementById('stat-today').textContent =
+      (todayCount || 0).toLocaleString();
 
-    yesterdayEl.textContent =
-      Number(result.yesterday_count || 0).toLocaleString('ko-KR');
+    document.getElementById('stat-yesterday').textContent =
+      (yesterdayCount || 0).toLocaleString();
 
-    totalEl.textContent =
-      Number(result.total_count || 0).toLocaleString('ko-KR');
+    document.getElementById('stat-total').textContent =
+      (totalCount || 0).toLocaleString();
 
-  } catch (error) {
-    console.error('방문자 통계 조회 실패:', error);
+  } catch (err) {
+    console.error('방문자 통계 로드 실패:', err);
 
-    todayEl.textContent = '-';
-    yesterdayEl.textContent = '-';
-    totalEl.textContent = '-';
+    document.getElementById('stat-today').textContent = '-';
+    document.getElementById('stat-yesterday').textContent = '-';
+    document.getElementById('stat-total').textContent = '-';
   }
 }
-```
