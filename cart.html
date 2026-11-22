@@ -83,6 +83,18 @@
     function getMember() { try { return JSON.parse(localStorage.getItem('member') || 'null'); } catch { return null; } }
     function isLoggedInMember() { const m = getMember(); return !!(m && m.id); }
 
+    // 주문 직전 서버의 최신 회원정보를 가져옵니다. 로컬 캐시의 오래된 통관번호를 사용하지 않습니다.
+    async function getFreshMemberInfo() {
+      const localMember = getMember();
+      if (!localMember?.id) return localMember || {};
+      const { data, error } = await db.from('members').select('*').eq('id', localMember.id).maybeSingle();
+      if (error) {
+        console.warn('회원 최신정보 조회 실패:', error.message);
+        throw new Error('최신 회원정보를 확인하지 못했습니다. 다시 시도해주세요.');
+      }
+      return data || localMember || {};
+    }
+
     async function loadShipping() {
       const { data } = await db.from('settings').select('value').eq('key', 'shipping_fee').maybeSingle();
       globalShipping = data ? Number(data.value) || 0 : 0;
@@ -362,12 +374,12 @@
           ${coupons.map(c => { const label = c.type === 'percent' ? `${c.discount_value}% 할인` : `${Number(c.discount_value).toLocaleString()}원 할인`; return `<option value="${c.id}" data-type="${c.type}" data-value="${c.discount_value}">${label} (${c.code})</option>`; }).join('')}
         </select></div>`;
       }
-      
+
       modal.innerHTML = `<div class="checkout-modal-box"><h2>주문 정보 입력</h2>
         <form id="checkout-form" class="checkout-form">
           <label style="${labelStyle}">주문자 이름 *</label><input name="customer_name" required value="${m?.name || ''}" style="${inputStyle}">
           <label style="${labelStyle}">연락처 *</label><input name="customer_phone" type="tel" required value="${m?.phone || ''}" style="${inputStyle}">
-          
+
           <label style="${labelStyle}">주소 *</label>
           <div class="address-group">
             <input name="postcode" id="checkout-postcode" value="${m?.postcode || ''}" placeholder="우편번호" required style="${inputStyle}">
@@ -375,7 +387,7 @@
           </div>
           <input name="address" id="checkout-address" required value="${m?.address || ''}" placeholder="기본 주소" style="${inputStyle}">
           <input name="address_detail" id="checkout-address_detail" value="${m?.address_detail || ''}" placeholder="상세주소" style="${inputStyle}">
-          
+
           <label style="${labelStyle}">입금자명 *</label><input name="depositor_name" required style="${inputStyle}">
           <label style="${labelStyle}">요청사항</label><textarea name="memo" style="${inputStyle} min-height:60px;"></textarea>
           ${couponSectionHtml}
@@ -415,8 +427,15 @@
       modal.querySelector('#checkout-form').onsubmit = async ev => {
         ev.preventDefault();
         const f = ev.target;
-        const mg = getMember()?.grade || '일반회원';
-        for (const it of cart) {
+        let freshMember;
+        try {
+          freshMember = await getFreshMemberInfo();
+        } catch (freshError) {
+          alert(freshError.message || '회원정보 조회에 실패했습니다.');
+          return;
+        }
+        const mg = freshMember?.grade || getMember()?.grade || '일반회원';
+        for (const it of cart.filter((_, cartIdx) => selectedIndexes.has(cartIdx))) {
           if (!canPurchase(mg, it.target_grade || 'all')) {
             alert(`현재 등급에서는 "${it.product_name}"을(를) 구매할 수 없습니다.`); return;
           }
@@ -430,7 +449,7 @@
         const finalTotal = Math.max(0, subTotal - discountAmount) + totalShippingFee;
         const orderNumber = generateOrderNumber();
         const groupShipFeeAssigned = {};
-        const rows = cart.map((it, idx) => {
+        const rows = cart.filter((_, cartIdx) => selectedIndexes.has(cartIdx)).map((it, idx) => {
           const tg = it.target_grade || 'all';
           const pricing = getItemPricing(it);
           let rowShipFee = 0;
@@ -446,8 +465,8 @@
             selected_color: it.selected_color, selected_size: it.selected_size, selected_hem: it.selected_hem, selected_other: it.selected_other,
             shipping_fee: rowShipFee, grade_discount: pricing.discountRate, status: '입금대기',
             // ⭐ 회원 정보에서 수취인, 통관번호 가져오기
-            receiver_name: m?.receiver_name || m?.recipient_name || f.customer_name.value.trim(),
-            customs_number: m?.customs_number || m?.customs_code || '',
+            receiver_name: freshMember?.receiver_name || freshMember?.recipient_name || f.customer_name.value.trim(),
+            customs_number: freshMember?.customs_number ?? '',
           };
         });
         const { error } = await db.from('orders').insert(rows);
