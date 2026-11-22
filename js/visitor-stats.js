@@ -1,24 +1,46 @@
-// visitor-stats.js — 관리자 방문자 통계 (KST)
+```javascript
+// ============================================================
+// visitor-stats.js — 관리자 방문자 통계
+// 한국시간 기준 오늘 / 어제 / 전체 방문자 조회
+// ============================================================
+
 async function loadVisitorStats() {
-  const ids = ['stat-today', 'stat-yesterday', 'stat-total'];
+  const todayEl = document.getElementById('stat-today');
+  const yesterdayEl = document.getElementById('stat-yesterday');
+  const totalEl = document.getElementById('stat-total');
+
+  if (!todayEl || !yesterdayEl || !totalEl) return;
+
+  todayEl.textContent = '로딩중...';
+  yesterdayEl.textContent = '로딩중...';
+  totalEl.textContent = '로딩중...';
+
   try {
-    const { data, error } = await db.rpc('get_visitor_stats');
+    const client = window.db || db;
+
+    const { data, error } = await client.rpc('get_visitor_stats');
+
     if (error) throw error;
 
-    const row = Array.isArray(data) ? data[0] : data;
-    if (!row) throw new Error('통계 결과가 비어 있습니다.');
+    const result = Array.isArray(data) ? data[0] : data;
 
-    document.getElementById('stat-today').textContent =
-      Number(row.today_count || 0).toLocaleString();
-    document.getElementById('stat-yesterday').textContent =
-      Number(row.yesterday_count || 0).toLocaleString();
-    document.getElementById('stat-total').textContent =
-      Number(row.total_count || 0).toLocaleString();
-  } catch (err) {
-    console.warn('방문자 통계 로드 실패:', err);
-    ids.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.textContent = '-';
-    });
+    if (!result) throw new Error('통계 결과가 없습니다.');
+
+    todayEl.textContent =
+      Number(result.today_count || 0).toLocaleString('ko-KR');
+
+    yesterdayEl.textContent =
+      Number(result.yesterday_count || 0).toLocaleString('ko-KR');
+
+    totalEl.textContent =
+      Number(result.total_count || 0).toLocaleString('ko-KR');
+
+  } catch (error) {
+    console.error('방문자 통계 조회 실패:', error);
+
+    todayEl.textContent = '-';
+    yesterdayEl.textContent = '-';
+    totalEl.textContent = '-';
   }
 }
+```
