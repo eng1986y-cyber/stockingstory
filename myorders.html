@@ -34,18 +34,61 @@
     .history-order-num { font-weight: 700; color: #1976d2; font-size: 15px; margin-bottom: 12px; display: block; word-break: break-all; font-family: 'Bahnschrift Light', sans-serif; }
     body.dark .history-order-num { color: #60a5fa; }
 
-    .history-product-item { padding: 10px 0; border-bottom: 1px dashed #eee; }
-    body.dark .history-product-item { border-bottom-color: #222; }
-    .history-product-item:last-child { border-bottom: none; }
-    .history-item-main { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 14px; gap: 8px; }
-    .history-item-main .name { font-weight: 600; word-break: break-all; font-family: 'Bahnschrift Light', sans-serif; }
-    .history-item-main .qty { color: #888; margin-left: 4px; font-weight: normal; font-size: 13px; }
-    .history-item-main .item-price { font-family: 'Bahnschrift Light', sans-serif; }
-    .history-item-detail { font-size: 13px; color: #6b7280; line-height: 1.5; word-break: break-all; }
-    body.dark .history-item-detail { color: #9ca3af; }
+    /* ⭐ 상품 상세 테이블 */
+    .history-items-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 4px;
+      font-size: 12px;
+      table-layout: auto;
+    }
+    .history-items-table thead th {
+      background: #f3f4f6;
+      color: #374151;
+      padding: 8px 6px;
+      text-align: left;
+      font-weight: 700;
+      border-bottom: 2px solid #e5e7eb;
+      white-space: nowrap;
+      font-size: 11px;
+    }
+    body.dark .history-items-table thead th { background: #1f2937; color: #e5e7eb; border-bottom-color: #333; }
+    .history-items-table tbody td {
+      padding: 8px 6px;
+      border-bottom: 1px dashed #eee;
+      color: #222;
+      vertical-align: top;
+      font-size: 12px;
+    }
+    body.dark .history-items-table tbody td { color: #e5e7eb; border-bottom-color: #222; }
+    .history-items-table .cell-strong { font-weight: 700; }
+    .history-items-table .cell-price { color: #e53935; font-weight: 700; white-space: nowrap; }
+    .history-items-table .cell-qty { color: #6b7280; white-space: nowrap; }
+    .history-items-table .cell-opt { color: #6b7280; font-size: 11px; line-height: 1.5; }
+    .history-items-table .cell-code { color: #374151; font-size: 11px; font-family: 'Courier New', monospace; white-space: nowrap; }
+    body.dark .history-items-table .cell-opt { color: #9ca3af; }
+    body.dark .history-items-table .cell-code { color: #d1d5db; }
 
     .history-info-box { margin-top: 16px; background: #f9fafb; padding: 12px; border-radius: 6px; font-size: 13px; color: #4b5563; line-height: 1.6; word-break: break-all; }
     body.dark .history-info-box { background: #0f0f0f; color: #9ca3af; }
+    .history-info-box .info-line { margin-bottom: 4px; }
+    .history-info-box .info-line:last-child { margin-bottom: 0; }
+
+    /* ⭐ 배송정보 강조 (노랑/오렌지) */
+    .shipping-info-highlight {
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: #fff7ed;
+      border: 2px solid #f59e0b;
+      border-radius: 8px;
+      color: #b45309;
+      font-weight: 700;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    body.dark .shipping-info-highlight { background: #2a1a00; border-color: #f59e0b; color: #fbbf24; }
+    .shipping-info-highlight .si-label { color: #92400e; font-weight: 800; margin-right: 4px; }
+    body.dark .shipping-info-highlight .si-label { color: #fde68a; }
 
     .history-price-summary { margin-top: 16px; padding-top: 16px; border-top: 1px solid #eee; font-size: 14px; color: #4b5563; font-family: 'Bahnschrift Light', sans-serif; }
     body.dark .history-price-summary { border-top-color: #222; color: #9ca3af; }
@@ -55,7 +98,7 @@
 
     .history-account-box { margin-top: 12px; padding: 12px 14px; background: #fef9e7; border: 1px dashed #f59e0b; border-radius: 8px; font-size: 13px; color: #78350f; line-height: 1.7; word-break: break-all; }
     body.dark .history-account-box { background: #1a1a1a; border-color: #f59e0b; color: #fcd34d; }
-    .history-account-box .ab-title { font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; color: #92400e; }
+    .history-account-box .ab-title { font-weight: 700; margin-bottom: 6px; color: #92400e; }
     body.dark .history-account-box .ab-title { color: #fbbf24; }
     .history-account-box .ab-row { display: flex; gap: 6px; font-size: 13px; margin-bottom: 2px; }
     .history-account-box .ab-row .ab-label { color: #92400e; font-weight: 600; flex: 0 0 60px; }
@@ -69,7 +112,7 @@
 
     .history-coupon-box { margin-top: 12px; padding: 12px 14px; background: #fef3c7; border: 1px dashed #f59e0b; border-radius: 8px; font-size: 13px; color: #92400e; line-height: 1.6; word-break: break-all; }
     body.dark .history-coupon-box { background: #1a1a1a; border-color: #f59e0b; color: #fcd34d; }
-    .history-coupon-box .cc-title { font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+    .history-coupon-box .cc-title { font-weight: 700; margin-bottom: 4px; }
     .history-coupon-box .cc-row { display: flex; gap: 8px; font-size: 12px; }
     .history-coupon-box .cc-row b { color: #78350f; }
     body.dark .history-coupon-box .cc-row b { color: #fde68a; }
@@ -84,6 +127,8 @@
     @media (max-width: 480px) {
       .myorders-header { flex-direction: column; align-items: stretch; }
       .bulk-actions { justify-content: flex-end; }
+      .history-items-table { font-size: 11px; }
+      .history-items-table thead th, .history-items-table tbody td { padding: 6px 4px; }
     }
   </style>
 </head>
@@ -114,7 +159,6 @@
   </script>
 
   <script>
-    // ⭐ 가격 표시: ₩ + Bahnschrift Light
     const won = n => '₩ ' + Number(n || 0).toLocaleString();
 
     function formatKST(dateStr, opts = {}) {
@@ -141,6 +185,8 @@
       if (opts.full) return `${y}-${mo}-${da} ${hh}:${mi}:${ss}`;
       return `${y}-${mo}-${da} ${hh}:${mi}`;
     }
+
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 
     const historyListEl = document.getElementById('order-history-list');
     const checkAllEl = document.getElementById('check-all-orders');
@@ -270,13 +316,12 @@
         const displayNum = first.order_number || `(번호 없음)`;
         const fullAddress = `${first.postcode ? `[${first.postcode}] ` : ''}${first.address || ''} ${first.address_detail || ''}`.trim();
 
-        // 상품 단가×수량과 배송비를 합산한 뒤 쿠폰을 주문 전체에서 별도 차감
         let productTotal = 0, shippingTotal = 0;
         items.forEach(o => { productTotal += Number(o.product_price || 0) * Number(o.quantity || 1); shippingTotal += Number(o.shipping_fee || 0); });
         const usedCoupon = first.order_number ? usedCouponsByOrder[first.order_number] : null;
         const couponDiscount = usedCoupon ? (usedCoupon.type === 'percent' ? Math.round(productTotal * Number(usedCoupon.discount_value || 0) / 100) : Math.min(productTotal, Number(usedCoupon.discount_value || 0))) : Number(first.coupon_discount || first.discount_amount || 0);
         const totalAll = Math.max(0, productTotal + shippingTotal - couponDiscount);
-        
+
         const isChecked = selectedKeys.has(key);
 
         let gradeDiscount = 0;
@@ -285,15 +330,15 @@
           if (d > gradeDiscount) gradeDiscount = d;
         });
         const gradeBadge = gradeDiscount > 0
-          ? `<div><span class="history-grade-badge">🏷️ ${gradeDiscount}% 할인 적용됨</span></div>`
+          ? `<div><span class="history-grade-badge">${gradeDiscount}% 할인 적용됨</span></div>`
           : '';
 
         const couponBox = usedCoupon ? `
           <div class="history-coupon-box">
-            <div class="cc-title">🎟️ 사용한 쿠폰</div>
-            <div class="cc-row"><span>쿠폰명:</span><b>${usedCoupon.name || '쿠폰'}</b></div>
+            <div class="cc-title">사용한 쿠폰</div>
+            <div class="cc-row"><span>쿠폰명:</span><b>${esc(usedCoupon.name || '쿠폰')}</b></div>
             <div class="cc-row"><span>할인:</span><b>${getCouponDiscountLabel(usedCoupon)}</b></div>
-            <div class="cc-row"><span>코드:</span><b>${usedCoupon.code || '-'}</b></div>
+            <div class="cc-row"><span>코드:</span><b>${esc(usedCoupon.code || '-')}</b></div>
             <div class="cc-row"><span>사용일:</span><b>${usedCoupon.used_at ? formatKST(usedCoupon.used_at, { dateOnly: true }) : '-'}</b></div>
           </div>
         ` : '';
@@ -304,16 +349,16 @@
         const hasAccount = acc.bank || acc.number || acc.holder;
         const accountBox = showAccount ? `
           <div class="history-account-box">
-            <div class="ab-title">💰 입금 계좌 안내</div>
+            <div class="ab-title">입금 계좌 안내</div>
             ${hasAccount ? `
-              ${acc.bank ? `<div class="ab-row"><span class="ab-label">은행</span><span class="ab-val">${acc.bank}</span></div>` : ''}
+              ${acc.bank ? `<div class="ab-row"><span class="ab-label">은행</span><span class="ab-val">${esc(acc.bank)}</span></div>` : ''}
               ${acc.number ? `<div class="ab-row">
                 <span class="ab-label">계좌번호</span>
-                <span class="ab-val">${acc.number}
-                  <button type="button" class="ab-copy" data-account="${acc.number}">복사</button>
+                <span class="ab-val">${esc(acc.number)}
+                  <button type="button" class="ab-copy" data-account="${esc(acc.number)}">복사</button>
                 </span>
               </div>` : ''}
-              ${acc.holder ? `<div class="ab-row"><span class="ab-label">예금주</span><span class="ab-val">${acc.holder}</span></div>` : ''}
+              ${acc.holder ? `<div class="ab-row"><span class="ab-label">예금주</span><span class="ab-val">${esc(acc.holder)}</span></div>` : ''}
               <div class="ab-row">
                 <span class="ab-label">입금액</span>
                 <span class="ab-val ab-total">${won(totalAll)}</span>
@@ -326,42 +371,68 @@
           </div>
         ` : '';
 
+        // ⭐ 상품 상세 테이블 (제품번호, 상품명, 옵션, 단가, 수량, 금액)
+        const itemsTableHtml = `
+          <table class="history-items-table">
+            <thead>
+              <tr>
+                <th>제품번호</th>
+                <th>상품명</th>
+                <th>옵션</th>
+                <th>단가</th>
+                <th>수량</th>
+                <th>금액</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${items.map(o => {
+                const opts = [];
+                if (o.selected_color) opts.push(`색상:${o.selected_color}`);
+                if (o.selected_size) opts.push(`사이즈:${o.selected_size}`);
+                if (o.selected_hem) opts.push(`밑단:${o.selected_hem}`);
+                if (o.selected_other) opts.push(`기타:${o.selected_other}`);
+                const optStr = opts.length ? opts.join(' / ') : '기본 옵션';
+                const unitPrice = Number(o.product_price || 0);
+                const qty = Number(o.quantity || 1);
+                const lineTotal = unitPrice * qty;
+                return `
+                  <tr>
+                    <td class="cell-code">${esc(o.product_code || '-')}</td>
+                    <td class="cell-strong">${esc(o.product_name || '상품명 없음')}</td>
+                    <td class="cell-opt">${esc(optStr)}</td>
+                    <td class="cell-price">${won(unitPrice)}</td>
+                    <td class="cell-qty">${qty}개</td>
+                    <td class="cell-price">${won(lineTotal)}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        `;
+
+        const shippingHtml = (first.courier || first.tracking_number) ? `
+          <div class="shipping-info-highlight">
+            <span class="si-label">배송정보</span>
+            택배사: ${esc(first.courier || '미정')} / 운송장: ${esc(first.tracking_number || '없음')}
+          </div>
+        ` : '';
+
         return `
           <div class="history-card-wrap">
-            <input type="checkbox" class="history-check" data-key="${key}" ${isChecked ? 'checked' : ''}>
+            <input type="checkbox" class="history-check" data-key="${esc(key)}" ${isChecked ? 'checked' : ''}>
             <div class="history-card">
               <div class="history-header">
                 <span class="history-date">${dateStr} ${timeStr}</span>
-                <span class="history-status" style="background:${statusColor(first.status)};">${first.status || '-'}</span>
+                <span class="history-status" style="background:${statusColor(first.status)};">${esc(first.status || '-')}</span>
               </div>
-              <span class="history-order-num">${displayNum}</span>
+              <span class="history-order-num">${esc(displayNum)}</span>
               ${gradeBadge}
-              <div>
-                ${items.map(o => {
-                  const opts = [];
-                  if (o.selected_color) opts.push(`색상: ${o.selected_color}`);
-                  if (o.selected_size) opts.push(`사이즈: ${o.selected_size}`);
-                  if (o.selected_hem) opts.push(`밑단: ${o.selected_hem}`);
-                  if (o.selected_other) opts.push(`기타: ${o.selected_other}`);
-                  const optStr = opts.length ? opts.join(' | ') : '기본 옵션';
-                  // 상품별 금액은 단가×수량, 쿠폰은 주문 전체에서 차감
-                  const itemPrice = Number(o.product_price || 0) * Number(o.quantity || 1);
-                  return `
-                    <div class="history-product-item">
-                      <div class="history-item-main">
-                        <span class="name">${o.product_name} <span class="qty">x ${o.quantity}</span></span>
-                        <span class="item-price">${won(itemPrice)}</span>
-                      </div>
-                      <div class="history-item-detail">${optStr}</div>
-                    </div>
-                  `;
-                }).join('')}
-              </div>
+              ${itemsTableHtml}
               <div class="history-info-box">
-                <div>📍 <b>배송지:</b> ${fullAddress || '주소 정보 없음'}</div>
-                ${first.memo ? `<div style="margin-top:4px;">📝 <b>요청사항:</b> ${first.memo}</div>` : ''}
-                ${(first.courier || first.tracking_number) ? `<div style="margin-top:8px; padding-top:8px; border-top:1px dashed #ddd; color:#1976d2;">🚚 <b>배송정보:</b> ${first.courier || '택배사 미정'} | ${first.tracking_number || '운송장 없음'}</div>` : ''}
+                <div class="info-line">배송지: ${esc(fullAddress || '주소 정보 없음')}</div>
+                ${first.memo ? `<div class="info-line">요청사항: ${esc(first.memo)}</div>` : ''}
               </div>
+              ${shippingHtml}
               ${accountBox}
               ${couponBox}
               <div class="history-price-summary">
@@ -370,7 +441,7 @@
                 <div class="price-row"><span>쿠폰 할인</span><span style="color:#059669;">-${won(couponDiscount)}</span></div>
                 <div class="price-row total"><span>최종 결제금액</span><span>${won(totalAll)}</span></div>
               </div>
-              <button type="button" class="btn-delete-single" data-key="${key}">이 주문 삭제</button>
+              <button type="button" class="btn-delete-single" data-key="${esc(key)}">이 주문 삭제</button>
             </div>
           </div>
         `;
@@ -438,11 +509,11 @@
           try {
             const deletedCount = await deleteOrderGroup(items);
             if (deletedCount === 0) throw new Error('삭제할 주문이 없거나 이미 삭제된 주문입니다.');
-            alert('✅ 주문이 삭제되었습니다.');
+            alert('주문이 삭제되었습니다.');
             loadOrderHistory();
           } catch (err) {
             console.error('삭제 실패:', err);
-            alert('❌ 삭제 실패: ' + (err.message || err));
+            alert('삭제 실패: ' + (err.message || err));
             btn.disabled = false;
             btn.textContent = originalText;
           }
@@ -502,9 +573,9 @@
 
       deleteSelectedBtn.disabled = false;
 
-      if (errorMsg) alert('❌ 일부 삭제 실패:\n' + errorMsg);
-      else if (successCount === 0) alert('⚠️ 삭제된 항목이 없습니다.');
-      else alert(`✅ ${successCount}건의 주문이 삭제되었습니다.`);
+      if (errorMsg) alert('일부 삭제 실패:\n' + errorMsg);
+      else if (successCount === 0) alert('삭제된 항목이 없습니다.');
+      else alert(`${successCount}건의 주문이 삭제되었습니다.`);
       loadOrderHistory();
     });
 

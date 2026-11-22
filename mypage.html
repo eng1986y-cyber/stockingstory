@@ -41,12 +41,13 @@
     body.dark .coupon-section h3 { color: #fff; }
     .coupon-count { font-size: 12px; color: #6b7280; font-weight: 500; }
     .coupon-list { display: flex; flex-direction: column; gap: 10px; }
-    .coupon-card { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 10px; padding: 14px 16px; border: 1px dashed #f59e0b; color: #78350f; }
+    .coupon-card { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 10px; padding: 14px 16px; border: 1px dashed #f59e0b; color: #78350f; gap: 8px; }
     .coupon-card.used { background: #f3f4f6; border-color: #d1d5db; color: #9ca3af; opacity: 0.7; }
     .coupon-card .c-title { font-weight: 700; font-size: 15px; margin-bottom: 2px; }
     .coupon-card .c-meta { font-size: 12px; line-height: 1.5; }
     .coupon-card .c-badge { background: #dc2626; color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; white-space: nowrap; }
     .coupon-card.used .c-badge { background: #9ca3af; }
+    .coupon-card .c-del-btn { padding: 4px 8px; background: #fff; color: #dc2626; border: 1px solid #dc2626; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer; font-family: inherit; }
     .empty-coupons { text-align: center; color: #9ca3af; font-size: 13px; padding: 20px; }
     .address-group { display: flex; gap: 8px; }
     .address-group input { flex: 1; }
@@ -55,6 +56,7 @@
     .form-grid-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; grid-column: 1 / -1; }
     @media (max-width: 560px) { .form-grid-pair { grid-template-columns: 1fr; } }
     .form-group.full { grid-column: 1 / -1; }
+    .input-hint { font-size: 11px; color: #9ca3af; margin-top: 2px; }
   </style>
 </head>
 <body>
@@ -74,7 +76,12 @@
           <div class="form-group"><label>연락처</label><input name="phone" type="tel" inputmode="numeric" required autocomplete="tel"></div>
           <div class="form-grid-pair">
             <div class="form-group"><label>수취인</label><input name="receiver_name" placeholder="수취인 이름"></div>
-            <div class="form-group"><label>개인통관고유부호</label><input name="customs_number" placeholder="P000000000000"></div>
+            <div class="form-group">
+              <label>개인통관고유부호 (13자리, P 포함)</label>
+              <input name="customs_number" inputmode="text" maxlength="13" placeholder="P123456789012"
+                     oninput="this.value=this.value.toUpperCase().replace(/[^P0-9]/g,'').slice(0,13)">
+              <div class="input-hint">맨 앞 P 포함 13자리 (예: P123456789012)</div>
+            </div>
           </div>
           <div class="form-group full">
             <label>주소</label>
@@ -91,7 +98,7 @@
       </form>
       <p id="msg"></p>
       <div class="coupon-section">
-        <h3>🎟️ 내 쿠폰함 <span class="coupon-count" id="coupon-count"></span></h3>
+        <h3>내 쿠폰함 <span class="coupon-count" id="coupon-count"></span></h3>
         <div class="coupon-list" id="coupon-list"><p class="empty-coupons">쿠폰을 불러오는 중...</p></div>
       </div>
     </div>
@@ -149,17 +156,27 @@
 
     function renderStatusBanner(status) {
       const s = status || '정상'; statusBanner.classList.remove('show', 'warn', 'danger');
-      if (s === '정지') { statusBanner.classList.add('show', 'warn'); statusBanner.textContent = '⚠️ 현재 회원 상태가 "정지"입니다.'; }
-      else if (s === '탈퇴') { statusBanner.classList.add('show', 'danger'); statusBanner.textContent = '⚠️ 탈퇴 처리된 계정입니다.'; }
+      if (s === '정지') { statusBanner.classList.add('show', 'warn'); statusBanner.textContent = '현재 회원 상태가 "정지"입니다.'; }
+      else if (s === '탈퇴') { statusBanner.classList.add('show', 'danger'); statusBanner.textContent = '탈퇴 처리된 계정입니다.'; }
     }
 
     function pickFirst(obj, keys) {
       for (const k of keys) { const v = obj[k]; if (v !== null && v !== undefined && v !== '') return v; } return '';
     }
 
+    // 개인통관부호 정규화: P + 12자리 숫자
+    function normalizeCustoms(val) {
+      if (!val) return '';
+      const s = String(val).toUpperCase().replace(/[^P0-9]/g, '');
+      return s.slice(0, 13);
+    }
+    function isValidCustoms(val) {
+      return /^P\d{12}$/.test(val);
+    }
+
     async function loadFromServer() {
       const { data, error } = await db.from('members').select('*').eq('id', member.id).maybeSingle();
-      if (error) { msg.style.color = '#ef4444'; msg.textContent = '❌ 회원 정보 로드 실패: ' + error.message; return; }
+      if (error) { msg.style.color = '#ef4444'; msg.textContent = '회원 정보 로드 실패: ' + error.message; return; }
       if (!data) { alert('회원 정보를 찾을 수 없습니다.'); localStorage.removeItem('member'); location.href = 'login.html'; return; }
       
       member = { ...member, ...data };
@@ -169,7 +186,7 @@
       form.name.value = data.name || '';
       form.phone.value = data.phone || '';
       form.receiver_name.value = pickFirst(data, ['receiver_name', 'recipient_name']) || '';
-      form.customs_number.value = pickFirst(data, ['customs_number', 'customs_code', 'personal_customs_code']) || '';
+      form.customs_number.value = normalizeCustoms(pickFirst(data, ['customs_number', 'customs_code', 'personal_customs_code']));
       form.postcode.value = data.postcode || '';
       form.address.value = data.address || '';
       form.address_detail.value = data.address_detail || '';
@@ -189,11 +206,31 @@
       couponListEl.innerHTML = list.map(c => {
         const isUsed = !!c.is_used; const isExpired = new Date(c.expires_at).getTime() < Date.now();
         const discountLabel = c.type === 'percent' ? `${c.discount_value}% 할인` : `${Number(c.discount_value).toLocaleString()}원 할인`;
-        return `<div class="coupon-card ${isUsed || isExpired ? 'used' : ''}">
-          <div style="flex:1; min-width:0;"><div class="c-title">🎁 ${c.name || '쿠폰'}</div><div class="c-meta"><b>${discountLabel}</b> · ${c.code || '-'}<br>
+        const canDelete = isUsed || isExpired;
+        return `<div class="coupon-card ${isUsed || isExpired ? 'used' : ''}" data-coupon-id="${c.id}">
+          <div style="flex:1; min-width:0;">
+            <div class="c-title">${c.name || '쿠폰'}</div>
+            <div class="c-meta"><b>${discountLabel}</b> / ${c.code || '-'}<br>
               ${isUsed ? `사용완료 (${c.used_at ? formatKSTShort(c.used_at) : '-'})` : isExpired ? `만료됨 (${formatKSTShort(c.expires_at)}까지)` : `유효기간: ${formatKSTShort(c.expires_at)}까지`}
-            </div></div><div class="c-badge">${isUsed ? '사용완료' : isExpired ? '만료' : '사용가능'}</div></div>`;
+            </div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
+            <div class="c-badge">${isUsed ? '사용완료' : isExpired ? '만료' : '사용가능'}</div>
+            ${canDelete ? `<button type="button" class="c-del-btn" data-coupon-id="${c.id}">삭제</button>` : ''}
+          </div>
+        </div>`;
       }).join('');
+
+      couponListEl.querySelectorAll('.c-del-btn').forEach(btn => {
+        btn.onclick = async () => {
+          if (!confirm('이 쿠폰을 쿠폰함에서 삭제할까요?\n(사용완료/만료된 쿠폰만 삭제 가능)')) return;
+          const cid = btn.dataset.couponId;
+          btn.disabled = true; btn.textContent = '삭제 중...';
+          const { error } = await db.from('coupons').delete().eq('id', cid).eq('member_id', member.id);
+          if (error) { alert('삭제 실패: ' + error.message); btn.disabled = false; btn.textContent = '삭제'; }
+          else { alert('쿠폰이 삭제되었습니다.'); loadCoupons(); }
+        };
+      });
     }
 
     loadFromServer();
@@ -201,30 +238,38 @@
     form.addEventListener('submit', async (e) => {
       e.preventDefault(); msg.textContent = '저장 중...'; msg.style.color = '#888';
 
-      // DB에 실제로 존재하는 컬럼만 업데이트 (없는 컬럼 에러 방지)
+      // 개인통관부호 검증 (입력한 경우만)
+      const customsRaw = (form.customs_number.value || '').trim().toUpperCase();
+      if (customsRaw && !isValidCustoms(customsRaw)) {
+        msg.style.color = '#ef4444';
+        msg.textContent = '개인통관고유부호는 P로 시작하는 13자리(P + 12자리 숫자)여야 합니다.';
+        return;
+      }
+
+      // DB에 실제로 존재하는 컬럼만 업데이트
       const updates = {
         name: form.name.value.trim() || null,
         phone: form.phone.value.trim() || null,
         email: form.email.value.trim() || null,
-        user_id: form.user_id.value.trim() || null, // 추가된 컬럼
-        receiver_name: form.receiver_name.value.trim() || null, // 추가된 컬럼
-        customs_number: form.customs_number.value.trim() || null, // 추가된 컬럼
+        user_id: form.user_id.value.trim() || null,
+        receiver_name: form.receiver_name.value.trim() || null,
+        customs_number: customsRaw || null,
         postcode: form.postcode.value.trim() || null,
         address: form.address.value.trim() || null,
         address_detail: form.address_detail.value.trim() || null
       };
 
       if (form.password.value) {
-        if (form.password.value.length < 6) { msg.style.color = '#ef4444'; msg.textContent = '❌ 비밀번호는 6자 이상이어야 합니다.'; return; }
-        try { updates.password = await sha256(form.password.value); } catch { msg.style.color = '#ef4444'; msg.textContent = '❌ 비밀번호 처리 오류'; return; }
+        if (form.password.value.length < 6) { msg.style.color = '#ef4444'; msg.textContent = '비밀번호는 6자 이상이어야 합니다.'; return; }
+        try { updates.password = await sha256(form.password.value); } catch { msg.style.color = '#ef4444'; msg.textContent = '비밀번호 처리 오류'; return; }
       }
 
       const { error } = await db.from('members').update(updates).eq('id', member.id);
-      if (error) { msg.style.color = '#ef4444'; msg.textContent = '❌ ' + error.message; return; }
+      if (error) { msg.style.color = '#ef4444'; msg.textContent = error.message; return; }
 
       const updated = { ...member, ...updates }; delete updated.password;
       localStorage.setItem('member', JSON.stringify(updated)); member = updated;
-      form.password.value = ''; msg.style.color = '#10b981'; msg.textContent = '✅ 저장 완료!';
+      form.password.value = ''; msg.style.color = '#10b981'; msg.textContent = '저장 완료!';
       setTimeout(() => msg.textContent = '', 2000);
     });
   </script>
