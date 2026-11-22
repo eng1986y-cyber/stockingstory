@@ -528,15 +528,23 @@ function renderFooter() {
   }
   _footerRenderCount = 0;
   wrap.style.display = 'block';
+  
+  // ⭐ 이모티콘 제거 및 텍스트로 변경
   const items = [];
-  if (phone) items.push(`<span class="footer-item">📞 ${phone}</span>`);
-  if (email) items.push(`<span class="footer-item">✉️ ${email}</span>`);
+  if (phone) items.push(`<span class="footer-item">연락처: ${phone}</span>`);
+  if (email) items.push(`<span class="footer-item">이메일: ${email}</span>`);
   if (business) items.push(`<span class="footer-item">사업자번호: ${business}</span>`);
+  
   const snsLinks = [];
-  if (instagram) snsLinks.push(`<a href="${instagram}" target="_blank" rel="noopener noreferrer" class="footer-sns-btn" aria-label="Instagram"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>`);
-  if (blog) snsLinks.push(`<a href="${blog}" target="_blank" rel="noopener noreferrer" class="footer-sns-btn" aria-label="Naver Blog"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"></circle><path d="M8 16V8l8 8V8"></path></svg></a>`);
-  if (band) snsLinks.push(`<a href="${band}" target="_blank" rel="noopener noreferrer" class="footer-sns-btn" aria-label="Naver Band"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></a>`);
-  snsLinks.push(`<button type="button" class="footer-channel-btn" aria-label="채널톡 문의" title="채널톡 문의" onclick="if(window.ChannelIO) window.ChannelIO('showMessenger')"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H5l-2 2v-9.5A7.5 7.5 0 0 1 10.5 4h2A7.5 7.5 0 0 1 20 11.5Z"></path><path d="M8 11h8M8 14h5"></path></svg></button>`);
+  // SNS 아이콘(SVG)은 기능상 필요한 링크이므로 유지하되, 텍스트로 변경하시려면 아래처럼 수정 가능합니다.
+  // 요청하신 "전부 글씨로"에 따라 SNS 버튼도 텍스트로 변경합니다.
+  if (instagram) snsLinks.push(`<a href="${instagram}" target="_blank" rel="noopener noreferrer" class="footer-sns-btn" style="width:auto; padding:0 12px; border-radius:20px; font-size:12px;">인스타그램</a>`);
+  if (blog) snsLinks.push(`<a href="${blog}" target="_blank" rel="noopener noreferrer" class="footer-sns-btn" style="width:auto; padding:0 12px; border-radius:20px; font-size:12px;">블로그</a>`);
+  if (band) snsLinks.push(`<a href="${band}" target="_blank" rel="noopener noreferrer" class="footer-sns-btn" style="width:auto; padding:0 12px; border-radius:20px; font-size:12px;">밴드</a>`);
+  
+  // 채널톡 버튼도 텍스트로 변경
+  snsLinks.push(`<button type="button" class="footer-channel-btn" style="width:auto; padding:0 12px; border-radius:20px; font-size:12px;" onclick="if(window.ChannelIO) window.ChannelIO('showMessenger')">채널톡 문의</button>`);
+
   wrap.innerHTML = `
     <div class="footer-inner">
       ${owner ? `<div class="footer-title">${owner}</div>` : ''}
