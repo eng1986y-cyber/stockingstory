@@ -67,22 +67,45 @@
         <h2 class="mypage-title">내 정보</h2>
         <span id="title-grade-badge" class="title-grade-badge title-grade-일반회원">일반회원</span>
       </div>
+
       <div id="status-banner" class="status-banner"></div>
+
       <form id="mypage-form" class="mypage-form" autocomplete="off">
         <div class="form-grid-2">
-          <div class="form-group"><label>아이디 (변경 불가)</label><input name="user_id" readonly tabindex="-1"></div>
-          <div class="form-group"><label>비밀번호 (변경 시 입력)</label><input name="password" type="password" placeholder="변경할 비밀번호" autocomplete="new-password"></div>
-          <div class="form-group"><label>이름</label><input name="name" required autocomplete="name"></div>
-          <div class="form-group"><label>연락처</label><input name="phone" type="tel" inputmode="numeric" required autocomplete="tel"></div>
+          <div class="form-group">
+            <label>아이디 (변경 불가)</label>
+            <input name="user_id" readonly tabindex="-1">
+          </div>
+
+          <div class="form-group">
+            <label>비밀번호 (변경 시 입력)</label>
+            <input name="password" type="password" placeholder="변경할 비밀번호" autocomplete="new-password">
+          </div>
+
+          <div class="form-group">
+            <label>이름</label>
+            <input name="name" required autocomplete="name">
+          </div>
+
+          <div class="form-group">
+            <label>연락처</label>
+            <input name="phone" type="tel" inputmode="numeric" required autocomplete="tel">
+          </div>
+
           <div class="form-grid-pair">
-            <div class="form-group"><label>수취인</label><input name="receiver_name" placeholder="수취인 이름"></div>
             <div class="form-group">
-              <label>개인통관고유부호 (13자리, P 포함)</label>
+              <label>수취인</label>
+              <input name="receiver_name" placeholder="수취인 이름">
+            </div>
+
+            <div class="form-group">
+              <label>개인통관고유부호 (선택사항)</label>
               <input name="customs_number" inputmode="text" maxlength="13" placeholder="P123456789012"
                      oninput="this.value=this.value.toUpperCase().replace(/[^P0-9]/g,'').slice(0,13)">
-              <div class="input-hint">맨 앞 P 포함 13자리 (예: P123456789012)</div>
+              <div class="input-hint">입력하지 않아도 저장할 수 있습니다.</div>
             </div>
           </div>
+
           <div class="form-group full">
             <label>주소</label>
             <div class="address-group">
@@ -90,16 +113,31 @@
               <button type="button" onclick="openAddressSearch('#postcode', '#address', '#address_detail')">주소 검색</button>
             </div>
           </div>
-          <div class="form-group full"><input name="address" id="address" placeholder="기본 주소" readonly></div>
-          <div class="form-group full"><input name="address_detail" id="address_detail" placeholder="상세 주소"></div>
-          <div class="form-group full"><label>이메일</label><input name="email" type="email" placeholder="example@email.com" autocomplete="email"></div>
+
+          <div class="form-group full">
+            <input name="address" id="address" placeholder="기본 주소" readonly>
+          </div>
+
+          <div class="form-group full">
+            <input name="address_detail" id="address_detail" placeholder="상세 주소">
+          </div>
+
+          <div class="form-group full">
+            <label>이메일</label>
+            <input name="email" type="email" placeholder="example@email.com" autocomplete="email">
+          </div>
         </div>
+
         <button type="submit">저장</button>
       </form>
+
       <p id="msg"></p>
+
       <div class="coupon-section">
         <h3>내 쿠폰함 <span class="coupon-count" id="coupon-count"></span></h3>
-        <div class="coupon-list" id="coupon-list"><p class="empty-coupons">쿠폰을 불러오는 중...</p></div>
+        <div class="coupon-list" id="coupon-list">
+          <p class="empty-coupons">쿠폰을 불러오는 중...</p>
+        </div>
       </div>
     </div>
   </main>
@@ -111,6 +149,7 @@
       "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya"
     );
   </script>
+
   <script>
     const form = document.getElementById('mypage-form');
     const msg = document.getElementById('msg');
@@ -120,20 +159,37 @@
     const couponCountEl = document.getElementById('coupon-count');
 
     let member = JSON.parse(localStorage.getItem('member') || 'null');
-    if (!member || !member.id) { alert('로그인이 필요합니다.'); location.href = 'login.html'; }
+    if (!member || !member.id) {
+      alert('로그인이 필요합니다.');
+      location.href = 'login.html';
+    }
 
     (function preventAutoFocus() {
-      const killFocus = () => { const ae = document.activeElement; if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) ae.blur(); };
-      killFocus(); setTimeout(killFocus, 0); setTimeout(killFocus, 100); setTimeout(killFocus, 300);
-      const pw = form.querySelector('input[name="password"]'); if (pw) pw.setAttribute('tabindex', '-1');
+      const killFocus = () => {
+        const ae = document.activeElement;
+        if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) ae.blur();
+      };
+      killFocus();
+      setTimeout(killFocus, 0);
+      setTimeout(killFocus, 100);
+      setTimeout(killFocus, 300);
+
+      const pw = form.querySelector('input[name="password"]');
+      if (pw) pw.setAttribute('tabindex', '-1');
+
       form.querySelectorAll('input[readonly]').forEach(el => el.setAttribute('tabindex', '-1'));
     })();
 
     async function sha256(text) {
       if (!window.crypto || !window.crypto.subtle) {
-        let h = 0; for (let i = 0; i < text.length; i++) { h = ((h << 5) - h) + text.charCodeAt(i); h |= 0; }
+        let h = 0;
+        for (let i = 0; i < text.length; i++) {
+          h = ((h << 5) - h) + text.charCodeAt(i);
+          h |= 0;
+        }
         return 'weak_' + Math.abs(h).toString(16) + '_' + text.length;
       }
+
       const data = new TextEncoder().encode(text);
       const buf = await crypto.subtle.digest('SHA-256', data);
       return 'sha256$' + Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
@@ -142,26 +198,50 @@
     function formatKSTShort(dateStr) {
       if (!dateStr) return '-';
       let n = String(dateStr).trim();
-      if (/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/.test(n) && !/(Z|[+-]\d{2}:?\d{2})$/i.test(n)) n = n.replace(' ', 'T') + 'Z';
-      const d = new Date(n); if (isNaN(d.getTime())) return '-';
-      const parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(d);
+
+      if (/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/.test(n) && !/(Z|[+-]\d{2}:?\d{2})$/i.test(n)) {
+        n = n.replace(' ', 'T') + 'Z';
+      }
+
+      const d = new Date(n);
+      if (isNaN(d.getTime())) return '-';
+
+      const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Seoul',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).formatToParts(d);
+
       const get = t => parts.find(p => p.type === t)?.value || '00';
       return `${get('year')}-${get('month')}-${get('day')}`;
     }
 
     function renderTitleGradeBadge(grade) {
       const g = grade || '일반회원';
-      titleGradeBadge.textContent = g; titleGradeBadge.className = 'title-grade-badge title-grade-' + g;
+      titleGradeBadge.textContent = g;
+      titleGradeBadge.className = 'title-grade-badge title-grade-' + g;
     }
 
     function renderStatusBanner(status) {
-      const s = status || '정상'; statusBanner.classList.remove('show', 'warn', 'danger');
-      if (s === '정지') { statusBanner.classList.add('show', 'warn'); statusBanner.textContent = '현재 회원 상태가 "정지"입니다.'; }
-      else if (s === '탈퇴') { statusBanner.classList.add('show', 'danger'); statusBanner.textContent = '탈퇴 처리된 계정입니다.'; }
+      const s = status || '정상';
+      statusBanner.classList.remove('show', 'warn', 'danger');
+
+      if (s === '정지') {
+        statusBanner.classList.add('show', 'warn');
+        statusBanner.textContent = '현재 회원 상태가 "정지"입니다.';
+      } else if (s === '탈퇴') {
+        statusBanner.classList.add('show', 'danger');
+        statusBanner.textContent = '탈퇴 처리된 계정입니다.';
+      }
     }
 
     function pickFirst(obj, keys) {
-      for (const k of keys) { const v = obj[k]; if (v !== null && v !== undefined && v !== '') return v; } return '';
+      for (const k of keys) {
+        const v = obj[k];
+        if (v !== null && v !== undefined && v !== '') return v;
+      }
+      return '';
     }
 
     function normalizeCustoms(val) {
@@ -169,15 +249,23 @@
       const s = String(val).toUpperCase().replace(/[^P0-9]/g, '');
       return s.slice(0, 13);
     }
-    function isValidCustoms(val) {
-      return /^P\d{12}$/.test(val);
-    }
 
     async function loadFromServer() {
       const { data, error } = await db.from('members').select('*').eq('id', member.id).maybeSingle();
-      if (error) { msg.style.color = '#ef4444'; msg.textContent = '회원 정보 로드 실패: ' + error.message; return; }
-      if (!data) { alert('회원 정보를 찾을 수 없습니다.'); localStorage.removeItem('member'); location.href = 'login.html'; return; }
-      
+
+      if (error) {
+        msg.style.color = '#ef4444';
+        msg.textContent = '회원 정보 로드 실패: ' + error.message;
+        return;
+      }
+
+      if (!data) {
+        alert('회원 정보를 찾을 수 없습니다.');
+        localStorage.removeItem('member');
+        location.href = 'login.html';
+        return;
+      }
+
       member = { ...member, ...data };
       localStorage.setItem('member', JSON.stringify(member));
 
@@ -185,38 +273,58 @@
       form.name.value = data.name || '';
       form.phone.value = data.phone || '';
       form.receiver_name.value = pickFirst(data, ['receiver_name', 'recipient_name']) || '';
-      form.customs_number.value = normalizeCustoms(pickFirst(data, ['customs_number', 'customs_code', 'personal_customs_code']));
+      form.customs_number.value = normalizeCustoms(
+        pickFirst(data, ['customs_number', 'customs_code', 'personal_customs_code'])
+      );
       form.postcode.value = data.postcode || '';
       form.address.value = data.address || '';
       form.address_detail.value = data.address_detail || '';
       form.email.value = data.email || '';
 
-      renderTitleGradeBadge(data.grade); renderStatusBanner(data.status);
+      renderTitleGradeBadge(data.grade);
+      renderStatusBanner(data.status);
+
       await loadCoupons();
     }
 
     async function loadCoupons() {
-      // ⭐ 버그 수정: couponListEl 변수 참조 오류 해결
-      const { data, error } = await db.from('coupons').select('*').eq('member_id', member.id).order('created_at', { ascending: false });
-      if (error) { couponListEl.innerHTML = '<p class="empty-coupons">쿠폰을 불러올 수 없습니다.</p>'; return; }
-      
+      const { data, error } = await db
+        .from('coupons')
+        .select('*')
+        .eq('member_id', member.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        couponListEl.innerHTML = '<p class="empty-coupons">쿠폰을 불러올 수 없습니다.</p>';
+        return;
+      }
+
       const list = data || [];
       const usable = list.filter(c => !c.is_used && new Date(c.expires_at).getTime() > Date.now());
       couponCountEl.textContent = `사용 가능 ${usable.length}장 / 전체 ${list.length}장`;
-      
-      if (list.length === 0) { couponListEl.innerHTML = '<p class="empty-coupons">보유한 쿠폰이 없습니다.</p>'; return; }
-      
+
+      if (list.length === 0) {
+        couponListEl.innerHTML = '<p class="empty-coupons">보유한 쿠폰이 없습니다.</p>';
+        return;
+      }
+
       couponListEl.innerHTML = list.map(c => {
-        const isUsed = !!c.is_used; 
+        const isUsed = !!c.is_used;
         const isExpired = new Date(c.expires_at).getTime() < Date.now();
-        const discountLabel = c.type === 'percent' ? `${c.discount_value}% 할인` : `${Number(c.discount_value).toLocaleString()}원 할인`;
+        const discountLabel = c.type === 'percent'
+          ? `${c.discount_value}% 할인`
+          : `${Number(c.discount_value).toLocaleString()}원 할인`;
         const canDelete = isUsed || isExpired;
-        
+
         return `<div class="coupon-card ${isUsed || isExpired ? 'used' : ''}" data-coupon-id="${c.id}">
           <div style="flex:1; min-width:0;">
             <div class="c-title">${c.name || '쿠폰'}</div>
             <div class="c-meta"><b>${discountLabel}</b> / ${c.code || '-'}<br>
-              ${isUsed ? `사용완료 (${c.used_at ? formatKSTShort(c.used_at) : '-'})` : isExpired ? `만료됨 (${formatKSTShort(c.expires_at)}까지)` : `유효기간: ${formatKSTShort(c.expires_at)}까지`}
+              ${isUsed
+                ? `사용완료 (${c.used_at ? formatKSTShort(c.used_at) : '-'})`
+                : isExpired
+                  ? `만료됨 (${formatKSTShort(c.expires_at)}까지)`
+                  : `유효기간: ${formatKSTShort(c.expires_at)}까지`}
             </div>
           </div>
           <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
@@ -226,15 +334,24 @@
         </div>`;
       }).join('');
 
-      // ⭐ 이벤트 위임 방식으로 안전하게 쿠폰 삭제 처리
       couponListEl.querySelectorAll('.c-del-btn').forEach(btn => {
         btn.onclick = async () => {
           if (!confirm('이 쿠폰을 쿠폰함에서 삭제할까요?\n(사용완료/만료된 쿠폰만 삭제 가능)')) return;
+
           const cid = btn.dataset.couponId;
-          btn.disabled = true; btn.textContent = '삭제 중...';
+          btn.disabled = true;
+          btn.textContent = '삭제 중...';
+
           const { error } = await db.from('coupons').delete().eq('id', cid).eq('member_id', member.id);
-          if (error) { alert('삭제 실패: ' + error.message); btn.disabled = false; btn.textContent = '삭제'; }
-          else { alert('쿠폰이 삭제되었습니다.'); loadCoupons(); }
+
+          if (error) {
+            alert('삭제 실패: ' + error.message);
+            btn.disabled = false;
+            btn.textContent = '삭제';
+          } else {
+            alert('쿠폰이 삭제되었습니다.');
+            loadCoupons();
+          }
         };
       });
     }
@@ -242,14 +359,12 @@
     loadFromServer();
 
     form.addEventListener('submit', async (e) => {
-      e.preventDefault(); msg.textContent = '저장 중...'; msg.style.color = '#888';
+      e.preventDefault();
+      msg.textContent = '저장 중...';
+      msg.style.color = '#888';
 
+      // 개인통관고유부호는 선택사항: 입력값이 없으면 null, 있으면 그대로 저장
       const customsRaw = (form.customs_number.value || '').trim().toUpperCase();
-      if (customsRaw && !isValidCustoms(customsRaw)) {
-        msg.style.color = '#ef4444';
-        msg.textContent = '개인통관고유부호는 P로 시작하는 13자리(P + 12자리 숫자)여야 합니다.';
-        return;
-      }
 
       const updates = {
         name: form.name.value.trim() || null,
@@ -264,16 +379,37 @@
       };
 
       if (form.password.value) {
-        if (form.password.value.length < 6) { msg.style.color = '#ef4444'; msg.textContent = '비밀번호는 6자 이상이어야 합니다.'; return; }
-        try { updates.password = await sha256(form.password.value); } catch { msg.style.color = '#ef4444'; msg.textContent = '비밀번호 처리 오류'; return; }
+        if (form.password.value.length < 6) {
+          msg.style.color = '#ef4444';
+          msg.textContent = '비밀번호는 6자 이상이어야 합니다.';
+          return;
+        }
+
+        try {
+          updates.password = await sha256(form.password.value);
+        } catch {
+          msg.style.color = '#ef4444';
+          msg.textContent = '비밀번호 처리 오류';
+          return;
+        }
       }
 
       const { error } = await db.from('members').update(updates).eq('id', member.id);
-      if (error) { msg.style.color = '#ef4444'; msg.textContent = error.message; return; }
 
-      const updated = { ...member, ...updates }; delete updated.password;
-      localStorage.setItem('member', JSON.stringify(updated)); member = updated;
-      form.password.value = ''; msg.style.color = '#10b981'; msg.textContent = '저장 완료!';
+      if (error) {
+        msg.style.color = '#ef4444';
+        msg.textContent = error.message;
+        return;
+      }
+
+      const updated = { ...member, ...updates };
+      delete updated.password;
+      localStorage.setItem('member', JSON.stringify(updated));
+      member = updated;
+
+      form.password.value = '';
+      msg.style.color = '#10b981';
+      msg.textContent = '저장 완료!';
       setTimeout(() => msg.textContent = '', 2000);
     });
   </script>
