@@ -1,12 +1,10 @@
 // ============================================================
 // visitor-tracker.js — 방문자 기록
-// 한국시간 기준 하루 1회 기록 (visitors 테이블 사용)
 // ============================================================
 
 (async function () {
   'use strict';
 
-  // common.js의 getSupabaseClient나 window.db를 사용
   const client = window.db || (typeof getSupabaseClient === 'function' ? getSupabaseClient() : null);
 
   if (!client) {
@@ -40,9 +38,8 @@
   }
 
   try {
-    // ⭐ 테이블명을 visitors 로 변경하고, 필요한 컬럼만 추가
     const { error } = await client
-      .from('visitors')
+      .from('visitors') // ⭐ 테이블명 visitors 로 변경
       .insert({
         created_at: new Date().toISOString()
       });

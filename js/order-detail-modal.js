@@ -1,6 +1,5 @@
 // ============================================================
 // order-detail-modal.js — 주문 상세 모달
-// 의존: config.js (ORDER_STATUS_OPTIONS), utils.js (esc, won)
 // ============================================================
 
 async function openOrderEditModal(groupOrOrder) {
@@ -15,32 +14,18 @@ async function openOrderEditModal(groupOrOrder) {
       .recipient-row-4 label,.recipient-row-3 label,.recipient-memo-row label,
       .product-shipping-row label { display:flex; flex-direction:column; gap:6px; min-width:0; }
       .recipient-row-4 input,.recipient-row-3 input,.recipient-memo-row textarea,
-      .product-shipping-row input,.product-shipping-row select {
-        width:100%; min-width:0; box-sizing:border-box;
-      }
+      .product-shipping-row input,.product-shipping-row select { width:100%; min-width:0; box-sizing:border-box; }
       .recipient-memo-row textarea { min-height:70px; resize:vertical; }
-
       .product-options-row { display:grid; grid-template-columns:minmax(0,1fr); gap:12px; margin-top:12px; }
       .product-options-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; align-content:start; }
-      .product-options-grid .opt-field {
-        min-width:0; background:#f7f8fa; border:1px solid #e4e7ec; border-radius:10px;
-        padding:10px 12px; display:flex; flex-direction:column; gap:5px;
-      }
+      .product-options-grid .opt-field { min-width:0; background:#f7f8fa; border:1px solid #e4e7ec; border-radius:10px; padding:10px 12px; display:flex; flex-direction:column; gap:5px; }
       .product-options-grid .opt-field span { font-size:11px; color:#667085; font-weight:600; }
       .product-options-grid .opt-field b { font-size:14px; color:#20242b; font-weight:700; line-height:1.4; overflow-wrap:anywhere; }
-
-      .order-shipping-editor {
-        border:1px solid #e5e7eb; border-radius:12px; background:#fafafa; padding:12px;
-        display:grid; gap:10px;
-      }
+      .order-shipping-editor { border:1px solid #e5e7eb; border-radius:12px; background:#fafafa; padding:12px; display:grid; gap:10px; }
       .order-shipping-editor h4 { margin:0; font-size:14px; font-weight:700; }
-      .product-shipping-row {
-        display:grid; grid-template-columns:1fr 1fr 1.5fr; gap:8px; align-items:end;
-      }
+      .product-shipping-row { display:grid; grid-template-columns:1fr 1fr 1.5fr; gap:8px; align-items:end; }
       .product-shipping-row label { font-size:12px; font-weight:600; color:#4b5563; }
-      .product-shipping-row input,.product-shipping-row select {
-        min-height:38px; border:1px solid #d1d5db; border-radius:8px; padding:7px 9px; background:#fff;
-      }
+      .product-shipping-row input,.product-shipping-row select { min-height:38px; border:1px solid #d1d5db; border-radius:8px; padding:7px 9px; background:#fff; }
       @media(max-width:700px) {
         .recipient-row-4 { grid-template-columns:repeat(2,minmax(0,1fr)); }
         .recipient-row-3 { grid-template-columns:1fr; }
@@ -224,7 +209,7 @@ async function openOrderEditModal(groupOrOrder) {
         if (error) errors.push(`[주문ID ${item.id}] ${error.message}`);
       }
       
-      // ⭐ 통관번호 연동: members 테이블도 업데이트 (회원 정보 수정 시)
+      // ⭐ 통관번호 연동: members 테이블도 업데이트
       let memberSaved = false, memberErrMsg = '';
       if (first.member_id) {
         const memberPayload = { 
@@ -235,7 +220,6 @@ async function openOrderEditModal(groupOrOrder) {
           address: recipientValues.address || null,
           address_detail: recipientValues.address_detail || null
         };
-        // 빈 문자열은 null로 처리
         Object.keys(memberPayload).forEach(k => { if (memberPayload[k] === '') memberPayload[k] = null; });
 
         const { error: memberError } = await db.from('members').update(memberPayload).eq('id', first.member_id);
