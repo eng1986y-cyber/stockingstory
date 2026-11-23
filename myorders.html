@@ -34,7 +34,7 @@
     .history-order-num { font-weight: 700; color: #1976d2; font-size: 15px; margin-bottom: 12px; display: block; word-break: break-all; font-family: 'Bahnschrift Light', sans-serif; }
     body.dark .history-order-num { color: #60a5fa; }
 
-    /* ⭐ 상품 상세 테이블 */
+    /* ⭐ 상품 상세 테이블 (데스크톱) */
     .history-items-table {
       width: 100%;
       border-collapse: collapse;
@@ -69,12 +69,35 @@
     body.dark .history-items-table .cell-opt { color: #9ca3af; }
     body.dark .history-items-table .cell-code { color: #d1d5db; }
 
+    /* ⭐ 모바일: 테이블을 카드형으로 변환 */
+    @media (max-width: 768px) {
+      .history-items-table { display: block; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 12px; overflow: hidden; }
+      body.dark .history-items-table { border-color: #333; }
+      .history-items-table thead { display: none; }
+      .history-items-table tbody { display: block; }
+      .history-items-table tr { display: block; padding: 12px; border-bottom: 1px solid #eee; }
+      body.dark .history-items-table tr { border-bottom-color: #333; }
+      .history-items-table tr:last-child { border-bottom: 0; }
+      .history-items-table td { display: flex; justify-content: space-between; align-items: flex-start; padding: 4px 0; border: 0; font-size: 12px; gap: 12px; }
+      .history-items-table td::before { content: attr(data-label); font-weight: 700; color: #6b7280; flex: 0 0 70px; text-align: left; }
+      body.dark .history-items-table td::before { color: #9ca3af; }
+      .history-items-table td.cell-strong { font-weight: 700; color: #222; padding-bottom: 8px; border-bottom: 1px dashed #eee; margin-bottom: 4px; flex-direction: column; align-items: flex-start; }
+      body.dark .history-items-table td.cell-strong { color: #fff; border-bottom-color: #333; }
+      .history-items-table td.cell-strong::before { display: none; }
+      .history-items-table td.cell-code::before { content: "제품번호"; }
+      .history-items-table td.cell-opt::before { content: "옵션"; }
+      .history-items-table td.cell-price::before { content: "금액"; }
+      .history-items-table td.cell-qty::before { content: "수량"; }
+      .history-items-table td.cell-code, .history-items-table td.cell-opt, .history-items-table td.cell-price, .history-items-table td.cell-qty { text-align: right; justify-content: flex-end; }
+      .history-items-table td.cell-code { font-size: 11px; color: #6b7280; }
+      .history-items-table td.cell-opt { text-align: right; }
+    }
+
     .history-info-box { margin-top: 16px; background: #f9fafb; padding: 12px; border-radius: 6px; font-size: 13px; color: #4b5563; line-height: 1.6; word-break: break-all; }
     body.dark .history-info-box { background: #0f0f0f; color: #9ca3af; }
     .history-info-box .info-line { margin-bottom: 4px; }
     .history-info-box .info-line:last-child { margin-bottom: 0; }
 
-    /* ⭐ 배송정보 강조 (노랑/오렌지) */
     .shipping-info-highlight {
       margin-top: 10px;
       padding: 10px 12px;
@@ -127,8 +150,6 @@
     @media (max-width: 480px) {
       .myorders-header { flex-direction: column; align-items: stretch; }
       .bulk-actions { justify-content: flex-end; }
-      .history-items-table { font-size: 11px; }
-      .history-items-table thead th, .history-items-table tbody td { padding: 6px 4px; }
     }
   </style>
 </head>
@@ -232,11 +253,7 @@
         const { data } = await db.from('settings').select('key, value').in('key', ['account_bank', 'account_number', 'account_holder']);
         const map = {};
         (data || []).forEach(row => { map[row.key] = row.value || ''; });
-        cachedAccount = {
-          bank: map.account_bank || '',
-          number: map.account_number || '',
-          holder: map.account_holder || ''
-        };
+        cachedAccount = { bank: map.account_bank || '', number: map.account_number || '', holder: map.account_holder || '' };
       } catch {
         cachedAccount = { bank: '', number: '', holder: '' };
       }
@@ -371,7 +388,7 @@
           </div>
         ` : '';
 
-        // ⭐ 상품 상세 테이블 (제품번호, 상품명, 옵션, 단가, 수량, 금액)
+        // ⭐ 상품 상세 테이블 (모바일 최적화: data-label 속성 추가)
         const itemsTableHtml = `
           <table class="history-items-table">
             <thead>
@@ -397,12 +414,12 @@
                 const lineTotal = unitPrice * qty;
                 return `
                   <tr>
-                    <td class="cell-code">${esc(o.product_code || '-')}</td>
-                    <td class="cell-strong">${esc(o.product_name || '상품명 없음')}</td>
-                    <td class="cell-opt">${esc(optStr)}</td>
-                    <td class="cell-price">${won(unitPrice)}</td>
-                    <td class="cell-qty">${qty}개</td>
-                    <td class="cell-price">${won(lineTotal)}</td>
+                    <td class="cell-code" data-label="제품번호">${esc(o.product_code || '-')}</td>
+                    <td class="cell-strong" data-label="상품명">${esc(o.product_name || '상품명 없음')}</td>
+                    <td class="cell-opt" data-label="옵션">${esc(optStr)}</td>
+                    <td class="cell-price" data-label="단가">${won(unitPrice)}</td>
+                    <td class="cell-qty" data-label="수량">${qty}개</td>
+                    <td class="cell-price" data-label="금액">${won(lineTotal)}</td>
                   </tr>
                 `;
               }).join('')}
