@@ -1,5 +1,5 @@
 // ============================================================
-// order-detail-modal.js — 주문 상세 모달 (통관번호 연동 완벽 수정)
+// order-detail-modal.js — 주문 상세 모달 (통관번호 완벽 연동)
 // ============================================================
 
 async function openOrderEditModal(groupOrOrder) {
@@ -72,19 +72,24 @@ async function openOrderEditModal(groupOrOrder) {
     : Number(first.coupon_discount || first.discount_amount || 0);
   const finalTotal = Math.max(0, totalProductPrice + totalShippingFee - couponDiscount);
 
-  // ⭐ 회원 정보(members) 로드 (통관번호 연동용)
+  // ⭐ 회원 정보(members) 로드 (member_id가 없으면 이름+연락처로 대조)
   let memberData = null;
   if (first.member_id) {
     const { data: mData } = await db.from('members').select('*').eq('id', first.member_id).maybeSingle();
     memberData = mData;
+  } else if (first.customer_name && first.customer_phone) {
+    // member_id가 없을 경우 이름과 연락처로 회원 찾기
+    const { data: mData } = await db.from('members')
+      .select('*')
+      .eq('name', first.customer_name)
+      .eq('phone', first.customer_phone)
+      .maybeSingle();
+    memberData = mData;
   }
 
-  // ⭐ 값 가져오기 헬퍼 (orders에 없으면 members에서 가져옴)
+  // ⭐ 값 가져오기 헬퍼
   function pickValue(key, fallbackFromMember) {
-    // 1. 주문 데이터(orders)에 값이 있는지 확인
     let value = items.map(x => x[key]).find(x => x !== undefined && x !== null && x !== '') ?? first[key] ?? '';
-    
-    // 2. 주문 데이터에 없고, 회원 정보(members)에 있으면 가져옴
     if (!value && memberData && fallbackFromMember) {
       for (const field of fallbackFromMember) {
         if (memberData[field]) { value = memberData[field]; break; }
@@ -95,7 +100,7 @@ async function openOrderEditModal(groupOrOrder) {
 
   const depositorName = pickValue('depositor_name', ['depositor_name','depositor']) || '';
   
-  // ⭐ 통관번호: orders에 없으면 members에서 가져옴
+  // ⭐ 통관번호: orders에 없으면 members에서 무조건 가져옴
   let customsNumber = pickValue('customs_number', ['customs_number','customs_code','personal_customs_code','customs_id']) || '';
   customsNumber = String(customsNumber).trim().toUpperCase().replace(/[^P0-9]/g, '');
 
@@ -222,7 +227,9 @@ async function openOrderEditModal(groupOrOrder) {
       
       // ⭐ 저장할 때도 members 테이블에 통관번호 업데이트
       let memberSaved = false, memberErrMsg = '';
-      if (first.member_id) {
+      const targetMemberId = first.member_id || memberData?.id;
+      
+      if (targetMemberId) {
         const memberPayload = { 
           customs_number: recipientValues.customs_number || null,
           receiver_name: recipientValues.receiver_name || null,
@@ -233,7 +240,7 @@ async function openOrderEditModal(groupOrOrder) {
         };
         Object.keys(memberPayload).forEach(k => { if (memberPayload[k] === '') memberPayload[k] = null; });
 
-        const { error: memberError } = await db.from('members').update(memberPayload).eq('id', first.member_id);
+        const { error: memberError } = await db.from('members').update(memberPayload).eq('id', targetMemberId);
         if (memberError) memberErrMsg = memberError.message; 
         else memberSaved = true;
       }
