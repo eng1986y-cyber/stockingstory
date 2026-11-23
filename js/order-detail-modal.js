@@ -1,5 +1,5 @@
 // ============================================================
-// order-detail-modal.js — 주문 상세 모달
+// order-detail-modal.js — 주문 상세 모달 (통관번호 연동 완벽 수정)
 // ============================================================
 
 async function openOrderEditModal(groupOrOrder) {
@@ -72,22 +72,33 @@ async function openOrderEditModal(groupOrOrder) {
     : Number(first.coupon_discount || first.discount_amount || 0);
   const finalTotal = Math.max(0, totalProductPrice + totalShippingFee - couponDiscount);
 
+  // ⭐ 회원 정보(members) 로드 (통관번호 연동용)
   let memberData = null;
   if (first.member_id) {
     const { data: mData } = await db.from('members').select('*').eq('id', first.member_id).maybeSingle();
     memberData = mData;
   }
+
+  // ⭐ 값 가져오기 헬퍼 (orders에 없으면 members에서 가져옴)
   function pickValue(key, fallbackFromMember) {
+    // 1. 주문 데이터(orders)에 값이 있는지 확인
     let value = items.map(x => x[key]).find(x => x !== undefined && x !== null && x !== '') ?? first[key] ?? '';
+    
+    // 2. 주문 데이터에 없고, 회원 정보(members)에 있으면 가져옴
     if (!value && memberData && fallbackFromMember) {
-      for (const field of fallbackFromMember) if (memberData[field]) { value = memberData[field]; break; }
+      for (const field of fallbackFromMember) {
+        if (memberData[field]) { value = memberData[field]; break; }
+      }
     }
     return value;
   }
 
   const depositorName = pickValue('depositor_name', ['depositor_name','depositor']) || '';
+  
+  // ⭐ 통관번호: orders에 없으면 members에서 가져옴
   let customsNumber = pickValue('customs_number', ['customs_number','customs_code','personal_customs_code','customs_id']) || '';
   customsNumber = String(customsNumber).trim().toUpperCase().replace(/[^P0-9]/g, '');
+
   const receiverName = pickValue('receiver_name', ['receiver_name','recipient_name','name']) || first.customer_name || '';
   const receiverPhone = pickValue('receiver_phone', ['receiver_phone','phone']) || first.customer_phone || '';
   const postcode = pickValue('postcode', ['postcode','zipcode']) || '';
@@ -209,7 +220,7 @@ async function openOrderEditModal(groupOrOrder) {
         if (error) errors.push(`[주문ID ${item.id}] ${error.message}`);
       }
       
-      // ⭐ 통관번호 연동: members 테이블도 업데이트
+      // ⭐ 저장할 때도 members 테이블에 통관번호 업데이트
       let memberSaved = false, memberErrMsg = '';
       if (first.member_id) {
         const memberPayload = { 
