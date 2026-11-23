@@ -223,23 +223,35 @@ async function openOrderEditModal(groupOrOrder) {
         const { error } = await db.from('orders').update(filterBySchema(payload)).eq('id',item.id);
         if (error) errors.push(`[주문ID ${item.id}] ${error.message}`);
       }
+      
+      // ⭐ 통관번호 연동: members 테이블도 업데이트 (회원 정보 수정 시)
       let memberSaved = false, memberErrMsg = '';
       if (first.member_id) {
-        const memberPayload = { customs_number:recipientValues.customs_number, receiver_name:recipientValues.receiver_name,
-          receiver_phone:recipientValues.receiver_phone, postcode:recipientValues.postcode,
-          address:recipientValues.address, address_detail:recipientValues.address_detail };
-        const { error: memberError } = await db.from('members').update(memberPayload).eq('id',first.member_id);
-        if (memberError) memberErrMsg = memberError.message; else memberSaved = true;
+        const memberPayload = { 
+          customs_number: recipientValues.customs_number || null,
+          receiver_name: recipientValues.receiver_name || null,
+          receiver_phone: recipientValues.receiver_phone || null,
+          postcode: recipientValues.postcode || null,
+          address: recipientValues.address || null,
+          address_detail: recipientValues.address_detail || null
+        };
+        // 빈 문자열은 null로 처리
+        Object.keys(memberPayload).forEach(k => { if (memberPayload[k] === '') memberPayload[k] = null; });
+
+        const { error: memberError } = await db.from('members').update(memberPayload).eq('id', first.member_id);
+        if (memberError) memberErrMsg = memberError.message; 
+        else memberSaved = true;
       }
+      
       btn.disabled = false; btn.textContent = '변경사항 저장';
-      if (errors.length === items.length) alert('저장 실패:\\n' + errors.join('\\n'));
+      if (errors.length === items.length) alert('저장 실패:\n' + errors.join('\n'));
       else if (errors.length) {
-        alert('일부 저장 실패 (성공 ' + (items.length-errors.length) + '/' + items.length + '):\\n' + errors.join('\\n'));
+        alert('일부 저장 실패 (성공 ' + (items.length-errors.length) + '/' + items.length + '):\n' + errors.join('\n'));
         if (typeof loadOrders === 'function') loadOrders();
       } else {
         let message = '저장 완료!';
-        if (memberSaved) message += '\\n(회원 정보에도 반영됨)';
-        if (memberErrMsg) message += '\\n\\n⚠ 회원 정보 저장 실패: ' + memberErrMsg;
+        if (memberSaved) message += '\n(회원 정보에도 반영됨)';
+        if (memberErrMsg) message += '\n\n⚠ 회원 정보 저장 실패: ' + memberErrMsg;
         alert(message); modal.remove(); if (typeof loadOrders === 'function') loadOrders();
       }
     } catch (error) {
