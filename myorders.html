@@ -34,7 +34,7 @@
     .history-order-num { font-weight: 700; color: #1976d2; font-size: 15px; margin-bottom: 12px; display: block; word-break: break-all; font-family: 'Bahnschrift Light', sans-serif; }
     body.dark .history-order-num { color: #60a5fa; }
 
-    /* ⭐ 상품 상세 테이블 (데스크톱) */
+    /* ⭐ 상품 상세 테이블 (데스크톱 기본) */
     .history-items-table {
       width: 100%;
       border-collapse: collapse;
@@ -69,28 +69,85 @@
     body.dark .history-items-table .cell-opt { color: #9ca3af; }
     body.dark .history-items-table .cell-code { color: #d1d5db; }
 
-    /* ⭐ 모바일: 테이블을 카드형으로 변환 */
+    /* ⭐ 모바일: 테이블을 카드형으로 변환 및 커스텀 */
     @media (max-width: 768px) {
       .history-items-table { display: block; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 12px; overflow: hidden; }
       body.dark .history-items-table { border-color: #333; }
       .history-items-table thead { display: none; }
       .history-items-table tbody { display: block; }
-      .history-items-table tr { display: block; padding: 12px; border-bottom: 1px solid #eee; }
+      .history-items-table tr { display: flex; flex-direction: column; padding: 12px; border-bottom: 1px solid #eee; gap: 6px; }
       body.dark .history-items-table tr { border-bottom-color: #333; }
       .history-items-table tr:last-child { border-bottom: 0; }
-      .history-items-table td { display: flex; justify-content: space-between; align-items: flex-start; padding: 4px 0; border: 0; font-size: 12px; gap: 12px; }
-      .history-items-table td::before { content: attr(data-label); font-weight: 700; color: #6b7280; flex: 0 0 70px; text-align: left; }
-      body.dark .history-items-table td::before { color: #9ca3af; }
-      .history-items-table td.cell-strong { font-weight: 700; color: #222; padding-bottom: 8px; border-bottom: 1px dashed #eee; margin-bottom: 4px; flex-direction: column; align-items: flex-start; }
-      body.dark .history-items-table td.cell-strong { color: #fff; border-bottom-color: #333; }
-      .history-items-table td.cell-strong::before { display: none; }
-      .history-items-table td.cell-code::before { content: "제품번호"; }
-      .history-items-table td.cell-opt::before { content: "옵션"; }
-      .history-items-table td.cell-price::before { content: "금액"; }
-      .history-items-table td.cell-qty::before { content: "수량"; }
-      .history-items-table td.cell-code, .history-items-table td.cell-opt, .history-items-table td.cell-price, .history-items-table td.cell-qty { text-align: right; justify-content: flex-end; }
-      .history-items-table td.cell-code { font-size: 11px; color: #6b7280; }
-      .history-items-table td.cell-opt { text-align: right; }
+      
+      /* 모바일에서 상품명 숨김 */
+      .history-items-table td.cell-strong { display: none; } 
+      
+      /* 제품번호 - 상단에 배치 */
+      .history-items-table td.cell-code { 
+        display: block; 
+        padding: 0 0 6px 0; 
+        border-bottom: 1px dashed #eee; 
+        margin-bottom: 2px;
+        font-weight: 700;
+        color: #1976d2;
+        font-size: 13px;
+      }
+      body.dark .history-items-table td.cell-code { color: #60a5fa; border-bottom-color: #333; }
+      .history-items-table td.cell-code::before { content: "제품번호: "; font-weight: 700; color: #6b7280; }
+      body.dark .history-items-table td.cell-code::before { color: #9ca3af; }
+
+      /* 옵션 - 바로 밑에 배치 */
+      .history-items-table td.cell-opt { 
+        display: block; 
+        padding: 0 0 10px 0; 
+        color: #4b5563; 
+        font-size: 12px;
+      }
+      .history-items-table td.cell-opt::before { display: none; } /* 옵션 라벨 숨김 */
+      body.dark .history-items-table td.cell-opt { color: #9ca3af; }
+
+      /* 단가 / 수량 / 금액 - 가로 나란히 배치 */
+      .history-items-table td.cell-price:not(:last-child), /* 단가 */
+      .history-items-table td.cell-qty, /* 수량 */
+      .history-items-table td.cell-price:last-child { /* 금액 */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        padding: 8px 0;
+        background: #f9fafb;
+        border-radius: 6px;
+        font-size: 13px;
+      }
+      body.dark .history-items-table td.cell-price:not(:last-child),
+      body.dark .history-items-table td.cell-qty,
+      body.dark .history-items-table td.cell-price:last-child {
+        background: #1f2937;
+      }
+      
+      /* 단가/수량/금액 라벨 (data-label) */
+      .history-items-table td.cell-price:not(:last-child)::before { content: "단가"; font-size: 11px; color: #6b7280; margin-bottom: 4px; }
+      .history-items-table td.cell-qty::before { content: "수량"; font-size: 11px; color: #6b7280; margin-bottom: 4px; }
+      .history-items-table td.cell-price:last-child::before { content: "금액"; font-size: 11px; color: #6b7280; margin-bottom: 4px; }
+      
+      /* 3개를 하나의 행으로 묶기 위한 래퍼 역할 (tr flex 설정 활용) */
+      .history-items-table tr {
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+      .history-items-table td.cell-code,
+      .history-items-table td.cell-opt {
+        width: 100%;
+      }
+      .history-items-table td.cell-price:not(:last-child),
+      .history-items-table td.cell-qty,
+      .history-items-table td.cell-price:last-child {
+        width: calc(33.333% - 4px);
+        margin-right: 6px;
+        box-sizing: border-box;
+      }
+      .history-items-table td.cell-price:last-child { margin-right: 0; }
     }
 
     .history-info-box { margin-top: 16px; background: #f9fafb; padding: 12px; border-radius: 6px; font-size: 13px; color: #4b5563; line-height: 1.6; word-break: break-all; }
@@ -388,7 +445,7 @@
           </div>
         ` : '';
 
-        // ⭐ 상품 상세 테이블 (모바일 최적화: data-label 속성 추가)
+        // ⭐ 상품 상세 테이블 (옵션 가공 로직 수정)
         const itemsTableHtml = `
           <table class="history-items-table">
             <thead>
@@ -404,11 +461,13 @@
             <tbody>
               ${items.map(o => {
                 const opts = [];
-                if (o.selected_color) opts.push(`색상:${o.selected_color}`);
-                if (o.selected_size) opts.push(`사이즈:${o.selected_size}`);
-                if (o.selected_hem) opts.push(`밑단:${o.selected_hem}`);
-                if (o.selected_other) opts.push(`기타:${o.selected_other}`);
-                const optStr = opts.length ? opts.join(' / ') : '기본 옵션';
+                // 옵션 가공: 라벨 없이 값만 슬래시로 연결
+                if (o.selected_color) opts.push(o.selected_color);
+                if (o.selected_size) opts.push(o.selected_size);
+                if (o.selected_hem) opts.push(o.selected_hem);
+                if (o.selected_other) opts.push(o.selected_other);
+                const optStr = opts.length ? opts.join('/') : '기본 옵션';
+                
                 const unitPrice = Number(o.product_price || 0);
                 const qty = Number(o.quantity || 1);
                 const lineTotal = unitPrice * qty;
