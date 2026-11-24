@@ -65,7 +65,8 @@
     .history-items-table .cell-price { color: #e53935; font-weight: 700; white-space: nowrap; }
     .history-items-table .cell-qty { color: #6b7280; white-space: nowrap; }
     .history-items-table .cell-opt { color: #6b7280; font-size: 11px; line-height: 1.5; }
-    .history-items-table .cell-code { color: #374151; font-size: 11px; font-family: 'Courier New', monospace; white-space: nowrap; }
+    /* ⬇️ 폰트 패밀리 수정 (Courier New 제거) */
+    .history-items-table .cell-code { color: #374151; font-size: 11px; font-family: inherit; white-space: nowrap; }
     body.dark .history-items-table .cell-opt { color: #9ca3af; }
     body.dark .history-items-table .cell-code { color: #d1d5db; }
 
@@ -82,7 +83,7 @@
       /* 모바일에서 상품명 숨김 */
       .history-items-table td.cell-strong { display: none; } 
       
-      /* 제품번호 - 상단에 배치 */
+      /* 제품번호 - 상단에 배치 (폰트 상속) */
       .history-items-table td.cell-code { 
         display: block; 
         padding: 0 0 6px 0; 
@@ -91,6 +92,7 @@
         font-weight: 700;
         color: #1976d2;
         font-size: 13px;
+        font-family: inherit; /* ⬅️ 본문 폰트 상속 */
       }
       body.dark .history-items-table td.cell-code { color: #60a5fa; border-bottom-color: #333; }
       .history-items-table td.cell-code::before { content: "제품번호: "; font-weight: 700; color: #6b7280; }
