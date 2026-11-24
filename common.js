@@ -305,23 +305,8 @@ function getOrCreateSessionId() {
     return sid;
   } catch { return 'sid_anon_' + Math.random().toString(36).slice(2, 10); }
 }
-async function recordVisit() {
-  const client = getSupabaseClient();
-  if (!client) return;
-  try {
-    const key = 'last_visit_' + _pathName;
-    const now = Date.now();
-    const last = Number(localStorage.getItem(key) || 0);
-    if (now - last < 5 * 60 * 1000) return;
-    localStorage.setItem(key, String(now));
-    await client.from('visits').insert({
-      path: _pathName || 'index',
-      session_id: getOrCreateSessionId(),
-      user_agent: navigator.userAgent ? navigator.userAgent.slice(0, 500) : null,
-      referrer: document.referrer ? document.referrer.slice(0, 500) : null
-    });
-  } catch {}
-}
+
+// ⭐ [수정] 방문자 기록 함수(recordVisit)는 visitor-tracker.js 로 이관되었으므로 삭제합니다.
 
 // ============================================================
 // ⭐ 스타일 (모바일 채널톡 노출 포함)
@@ -529,20 +514,16 @@ function renderFooter() {
   _footerRenderCount = 0;
   wrap.style.display = 'block';
   
-  // ⭐ 이모티콘 제거 및 텍스트로 변경
   const items = [];
   if (phone) items.push(`<span class="footer-item">연락처: ${phone}</span>`);
   if (email) items.push(`<span class="footer-item">이메일: ${email}</span>`);
   if (business) items.push(`<span class="footer-item">사업자번호: ${business}</span>`);
   
   const snsLinks = [];
-  // SNS 아이콘(SVG)은 기능상 필요한 링크이므로 유지하되, 텍스트로 변경하시려면 아래처럼 수정 가능합니다.
-  // 요청하신 "전부 글씨로"에 따라 SNS 버튼도 텍스트로 변경합니다.
   if (instagram) snsLinks.push(`<a href="${instagram}" target="_blank" rel="noopener noreferrer" class="footer-sns-btn" style="width:auto; padding:0 12px; border-radius:20px; font-size:12px;">인스타그램</a>`);
   if (blog) snsLinks.push(`<a href="${blog}" target="_blank" rel="noopener noreferrer" class="footer-sns-btn" style="width:auto; padding:0 12px; border-radius:20px; font-size:12px;">블로그</a>`);
   if (band) snsLinks.push(`<a href="${band}" target="_blank" rel="noopener noreferrer" class="footer-sns-btn" style="width:auto; padding:0 12px; border-radius:20px; font-size:12px;">밴드</a>`);
   
-  // 채널톡 버튼도 텍스트로 변경
   snsLinks.push(`<button type="button" class="footer-channel-btn" style="width:auto; padding:0 12px; border-radius:20px; font-size:12px;" onclick="if(window.ChannelIO) window.ChannelIO('showMessenger')">채널톡 문의</button>`);
 
   wrap.innerHTML = `
@@ -840,8 +821,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   createScrollButtons();
 
   const tasks = [
-    refreshFooterCache().then(() => renderFooter()),
-    recordVisit()
+    refreshFooterCache().then(() => renderFooter())
   ];
   if (isLoggedInMember()) tasks.push(syncCartFromServer().catch(()=>{}));
   await Promise.allSettled(tasks);
