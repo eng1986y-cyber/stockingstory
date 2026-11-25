@@ -2,10 +2,16 @@
 // config.js — Supabase 클라이언트 & 전역 상수
 // ============================================================
 
+// Supabase 클라이언트 생성
 const db = supabase.createClient(
   "https://alpdhgcipjeekzrpxlbh.supabase.co",
   "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya"
 );
+
+// ⭐ 전역 노출 (다른 파일에서 window.supabaseClient / window.db / window.sb 로 접근 가능)
+window.supabaseClient = db;
+window.db = db;
+window.sb = db;
 
 const SITE_ASSET_BUCKET = 'site-assets';
 
