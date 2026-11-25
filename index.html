@@ -269,16 +269,34 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- ⭐ 수정: Supabase 클라이언트를 window.supabaseClient, window.db 둘 다 노출 -->
   <script>
-    window.db = supabase.createClient(
-      "https://alpdhgcipjeekzrpxlbh.supabase.co",
-      "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya"
-    );
-    const db = window.db;
+    (function () {
+      const _client = supabase.createClient(
+        "https://alpdhgcipjeekzrpxlbh.supabase.co",
+        "sb_publishable_OVbjUaCErU6bscQ3XSLDgA_p7MtTWya"
+      );
+      window.supabaseClient = _client;
+      window.db = _client;
+      window.sb = _client;
+    })();
+    const db = window.supabaseClient;
   </script>
 
-  <!-- ⭐ 방문자 기록 스크립트 추가 -->
-  <script src="visitor-tracker.js"></script>
+  <!-- ⭐ 수정: visitor-tracker.js → js/visitor-stats.js -->
+  <script src="js/visitor-stats.js"></script>
+
+  <!-- ⭐ 수정: 방문 기록 명시적 호출 -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      if (typeof window.recordVisit === 'function') {
+        window.recordVisit();
+      } else {
+        console.warn('[index] recordVisit() not available');
+      }
+    });
+  </script>
 
   <script>
     const isPC = () => window.innerWidth >= 769;
